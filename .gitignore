@@ -1,8 +1,8 @@
 # ── 生成物：可由 toolchain 重建，不进版本控制 ─────────────────────────────
 #
-# 生图原始 PNG（296MB）。过大，且最终产物是 icons-final/ 下的 WebP。
-# 需要重新压缩或调参时，重跑：python -X utf8 toolchain/gen_icons.py --all（约 5.5 分钟）
-assets/icons-gen/
+# 生图原始 PNG（296MB）：原计划忽略，Boss 决定**保留入库**作为原始素材存档
+#   —— AI 生成有随机性，重跑不会得到同一批图，故原图必须留档
+# assets/icons-gen/    ← 故意不忽略
 
 # App 侧图标副本：由 build.py 从 assets/icons-final/ 增量同步而来
 app/src/static/icons/
