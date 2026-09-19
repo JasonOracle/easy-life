@@ -1,0 +1,173 @@
+/**
+ * [变更日志]
+ * 修改时间：2026-09-19
+ * AI模型：CodeBuddy (DeepSeek-V4.1-Flash)
+ * 修改内容：[1. 设置页完整结构（ScreenSpecs §8 + VisualLanguage §9.5.5）；
+ *            2. 排障：v-for 循环变量用 `r` 时插值全空、行数错乱（静态对照实验定位），
+ *               改名 `item` 后验证 —— 嫌疑为模板编译层变量名冲突，已记录踩坑。]
+ */
+
+<template>
+  <view class="page">
+    <view class="hero">
+      <view class="status-bar" />
+      <view class="hero-row">
+        <view class="back-btn"><text class="back-icon">‹</text></view>
+        <text class="hero-title">设置</text>
+      </view>
+      <view class="wave w1" />
+      <view class="wave w2" />
+      <view class="bubble b1" />
+      <view class="bubble b2" />
+    </view>
+
+    <view class="content">
+      <view class="group">
+        <text class="group-title">偏好</text>
+        <view class="card">
+          <view v-for="item in preferenceRows" :key="item.name" class="row">
+            <view class="icon-base base-normal"><view class="glyph" /></view>
+            <view class="row-text">
+              <text class="row-name">{{ item.name }}</text>
+              <text v-if="item.sub !== ''" class="row-sub">{{ item.sub }}</text>
+            </view>
+            <view v-if="item.kind === 'toggle-on'" class="toggle on"><view class="knob k-right" /></view>
+            <view v-if="item.kind === 'toggle-off'" class="toggle off"><view class="knob k-left" /></view>
+            <view v-if="item.kind === 'toggle-disabled'" class="toggle off td"><view class="knob k-left" /></view>
+          </view>
+        </view>
+      </view>
+
+      <view class="group">
+        <text class="group-title">目标管理</text>
+        <view class="card">
+          <view v-for="item in goalRows" :key="item.name" class="row">
+            <view class="icon-base base-normal"><view class="glyph" /></view>
+            <view class="row-text">
+              <text class="row-name">{{ item.name }}</text>
+              <text v-if="item.sub !== ''" class="row-sub">{{ item.sub }}</text>
+            </view>
+            <text class="arrow">›</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="group">
+        <text class="group-title">数据管理</text>
+        <view class="card">
+          <view v-for="item in dataRows" :key="item.name" class="row">
+            <view class="icon-base base-normal"><view class="glyph" /></view>
+            <view class="row-text">
+              <text class="row-name">{{ item.name }}</text>
+              <text v-if="item.sub !== ''" class="row-sub">{{ item.sub }}</text>
+            </view>
+            <text class="arrow">›</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="group">
+        <view class="card danger">
+          <view class="row">
+            <view class="icon-base base-danger"><view class="glyph g-danger" /></view>
+            <view class="row-text"><text class="row-name t-danger">清空所有数据</text></view>
+            <text class="arrow a-danger">›</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="footer">
+        <text class="footer-text">CalTrack v1.0.0</text>
+        <text class="footer-sub">所有数据仅保存在本机</text>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+// 副标题只写非显而易见的信息（VisualLanguage §9.5.5）；开关状态为静态演示，待接 settings store
+// ⚠️ 踩坑：v-for 循环变量勿用单字母 `r`（模板编译层疑似冲突致插值全空），用 `item`
+type Row = { name: string, sub: string, kind: string }
+const preferenceRows: Row[] = [
+  { name: '深色模式', sub: '', kind: 'toggle-disabled' },
+  { name: '用餐提醒', sub: '早中晚各提醒一次', kind: 'toggle-on' },
+]
+const goalRows: Row[] = [
+  { name: '每日热量目标', sub: '当前 1800 kcal', kind: 'arrow' },
+  { name: '目标测算', sub: 'Mifflin-St Jeor', kind: 'arrow' },
+  { name: '餐次管理', sub: '', kind: 'arrow' },
+]
+const dataRows: Row[] = [
+  { name: '备份数据', sub: '', kind: 'arrow' },
+  { name: '恢复数据', sub: '', kind: 'arrow' },
+]
+</script>
+
+<style>
+.page { flex: 1; background-color: #F2FAF5; }
+.status-bar { height: 62px; }
+
+.hero {
+  height: 128px; padding: 0 18px;
+  background-image: linear-gradient(180deg, #7DEBC7, #1FBF8F);
+  position: relative; overflow: hidden;
+}
+.hero-row { flex-direction: row; align-items: center; gap: 10px; }
+.back-btn {
+  width: 34px; height: 34px; border-radius: 17px;
+  background-color: #FFFFFF; border: 1px solid #FFFFFF;
+  align-items: center; justify-content: center;
+}
+.back-icon { font-size: 20px; color: #0A4F3D; }
+.hero-title { font-size: 17px; font-weight: 600; color: #FFFFFF; }
+.wave { position: absolute; border-radius: 50%; background-color: #F2FAF5; }
+.w1 { width: 240px; height: 60px; left: -60px; bottom: -36px; }
+.w2 { width: 280px; height: 70px; right: -80px; bottom: -44px; }
+.bubble { position: absolute; border-radius: 20px; background-color: rgba(255,255,255,0.6); }
+.b1 { width: 7px; height: 7px; left: 104px; top: 42px; }
+.b2 { width: 5px; height: 5px; left: 295px; top: 45px; }
+
+.content { flex: 1; padding: 8px 18px 18px; gap: 14px; }
+
+.group { gap: 8px; }
+.group-title { font-size: 12px; font-weight: 600; color: rgba(15,79,61,0.6); letter-spacing: 0.5px; }
+.card {
+  border-radius: 20px;
+  background-color: rgba(255,255,255,0.74);
+  border: 1px solid rgba(255,255,255,0.6);
+  box-shadow: 0 4px 14px rgba(13,120,90,0.08);
+}
+.card.danger {
+  background-color: #FFFFFF;
+  border: 1px solid #F5D5C8;
+  box-shadow: 0 4px 14px rgba(224,99,60,0.08);
+}
+
+.row { flex-direction: row; align-items: center; gap: 13px; padding: 14px 16px; }
+.icon-base { width: 28px; height: 28px; border-radius: 14px; align-items: center; justify-content: center; }
+.base-normal { background-color: rgba(31,191,143,0.11); }
+.base-danger { background-color: rgba(255,158,125,0.17); }
+.glyph { width: 10px; height: 10px; border-radius: 5px; background-color: #0A7A5C; }
+.g-danger { background-color: #E0633C; }
+.row-text { flex: 1; gap: 2px; }
+.row-name { font-size: 14px; font-weight: 500; color: #0A4F3D; }
+.t-danger { color: #E0633C; }
+.row-sub { font-size: 11.5px; color: rgba(15,79,61,0.34); }
+.arrow { font-size: 16px; color: rgba(15,79,61,0.34); }
+.a-danger { color: #E0633C; }
+
+.toggle { width: 46px; height: 28px; border-radius: 14px; position: relative; }
+.toggle.on { background-image: linear-gradient(180deg, #7DEBC7, #1FBF8F); }
+.toggle.off { background-color: rgba(120,140,130,0.25); }
+.toggle.td { opacity: 0.45; }
+.knob {
+  width: 24px; height: 24px; border-radius: 12px; background-color: #FFFFFF;
+  position: absolute; top: 2px;
+}
+.k-right { right: 2px; }
+.k-left { left: 2px; }
+
+.footer { gap: 3px; padding-top: 4px; }
+.footer-text { font-size: 11px; font-weight: 500; color: #A9BAB3; }
+.footer-sub { font-size: 10.5px; color: #C2D4CC; }
+</style>

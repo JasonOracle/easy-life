@@ -1,0 +1,388 @@
+﻿/**
+ * [变更日志]
+ * 修改时间：2026-09-20
+ * AI模型：CodeBuddy
+ * 修改内容：[1. 顶部改「轻律生活」程序名 + 动态日期副标题（Boss 拍板；原写死
+ *           「9月19日 · 周五」跨天失真），并移除右上的「✎」编辑图标（改款为加号入口）。
+ *           2. 餐次明细行由纯文本 string 改为结构化 FoodLine：28×28 圆角 8 缩略图
+ *           （薄荷渐变底衬兜底）+ 名称 + 份量 + 该条自身时分秒 + 右对齐热量；
+ *           Boss 拍板「同食物可重复添加」，靠各自时分秒区分（store hhmmss）。]
+ */
+
+/**
+ * [变更日志]
+ * 修改时间：2026-09-19
+ * AI模型：CodeBuddy (DeepSeek-V4.1-Flash)
+ * 修改内容：[1. 首页从占位升级为真实结构（Header/Bottle/NumberArea/NutrientCard）；
+ *            2. 新增餐次时间轴：Ardot 节点 3:78~3:127 实测还原——4 餐次行（图标42+
+ *               名称行40+可选明细）+ 时间轴竖线 1.5×164@(20.25,42) #CBD9D3；
+ *            3. 接入 Bottle / MealIcon 组件。
+ *           演示数据来自设计稿本身（早餐420+午餐560+晚餐290=1270，与「已摄入1270」自洽），
+ *           属设计稿演示场景值、非编造的食物库数据；待接 goal/food store 后替换。
+ *           追记：showSheet/showPicker 由 const 改 ref + 具名回调——const + 模板内联赋值
+ *           会生成对 const 的赋值，devtools 编译报错丢弃整个 Home.js（白屏根因，见 progress.md）。
+ *           追记2：接数据层——demoPct/demoMeals 等演示数据全部删除，改为
+ *           useFoodStore（totalCal/mealRows）+ useGoalStore 派生；弹窗闭环
+ *           ＋→FoodPickerSheet→AddSheet(带 foodId)→confirm→store→首页自动刷新。
+ *           营养素卡接 food store 真实数据（totalProtein/totalCarbs/totalFat，由 entries 派生）。
+ *           追记3：status-bar 改为按微信胶囊实际位置动态撑高（真机上胶囊底 ~80px，
+ *           写死 62px 导致右上「＋」被胶囊压住，真机截图实测）。
+ *           追记4：接入 TabBar 组件（active=home，加号触发 openPicker）；
+ *           content 底部 padding 96px 防列表尾行被 Tabbar 盖住。
+ *           追记5：Boss 拍板改用原生 tabBar（pages.json 配置，中间加号去除，
+ *           添加入口保留头部「＋」）→ 移除自绘 TabBar 引用与底部预留 padding。
+ *           追记6（UI 还原度评审 Round1）：H-1 餐次行补时间（早餐 · 07:30 格式，
+ *           store mealRows 新增 time）；H-2 明细行补份量（store FoodEntry 增
+ *           amount/unit，明细改「燕麦片 40g · 150 kcal」格式）；H-4「＋」触控
+ *           热区扩到 44×44（视觉 30 不变，命中 AC-2 红线）。]
+ */
+
+<template>
+  <view class="page">
+    <!-- ⚠️ status-bar 用胶囊实际位置动态撑开：真机上胶囊底 ~80px > 设计稿 62px，
+         写死 62 会让右侧「＋」被微信胶囊压住（真机实测 2026-09-19） -->
+    <view class="status-bar" :style="{ height: statusBarHeight + 'px' }" />
+    <view class="content">
+      <!-- Header：程序名（Boss 拍板：顶部 navbar 显示「轻律生活」）+ 日期 + 添加入口 -->
+      <view class="header">
+        <view class="header-left">
+          <text class="app-name">轻律生活</text>
+          <text class="date">{{ dateText }}</text>
+        </view>
+        <!-- 触控热区 44×44（视觉圆钮 30 不变），命中 AC-2 触控红线 -->
+        <view class="add-entry" @click="openPicker">
+          <view class="add-entry-btn"><text class="add-entry-text">＋</text></view>
+        </view>
+      </view>
+
+      <!-- 瓶子 -->
+      <view class="bottle-wrap">
+        <Bottle :pct="pct" :over="over" />
+      </view>
+
+      <!-- 数字区：在瓶子下方，不在瓶内（VisualLanguage §4.3） -->
+      <view class="number-area">
+        <text class="num-label">还能吃</text>
+        <view class="num-row">
+          <text class="num-value">{{ remainText }}</text>
+          <text class="num-edit">✎</text>
+        </view>
+        <text class="num-sub">已摄入 {{ eatenText }} / {{ goalText }} kcal</text>
+      </view>
+
+      <!-- 营养素玻璃卡（真实数据：food store 派生） -->
+      <view class="nutrient-card">
+        <view class="n-item">
+          <text class="n-value">{{ foodStore.totalProtein }}g</text>
+          <text class="n-name">蛋白质</text>
+        </view>
+        <view class="n-divider" />
+        <view class="n-item">
+          <text class="n-value">{{ foodStore.totalCarbs }}g</text>
+          <text class="n-name">碳水</text>
+        </view>
+        <view class="n-divider" />
+        <view class="n-item">
+          <text class="n-value">{{ foodStore.totalFat }}g</text>
+          <text class="n-name">脂肪</text>
+        </view>
+      </view>
+
+      <!-- 今日餐次：时间轴（设计稿 3:78 实测还原） -->
+      <view class="meal-section">
+        <text class="meal-title">今日餐次</text>
+        <view class="meal-list">
+          <view class="timeline-line" />
+          <view v-for="m in mealRows" :key="m.key" class="meal-row">
+            <MealIcon :type="m.key" :active="m.active" />
+            <view class="meal-info">
+              <view class="meal-name-row">
+                <text class="meal-name">{{ m.name }}{{ m.time === '' ? '' : ' · ' + m.time }}</text>
+                <text v-if="m.active" class="meal-cal">{{ m.cal }}</text>
+                <text v-else class="meal-cal-idle">{{ m.cal }}</text>
+              </view>
+              <!-- 明细：每条食物自带缩略图 + 自身时分秒（多次添加同一食物靠时间区分） -->
+              <view v-if="m.details.length > 0" class="meal-detail">
+                <view v-for="d in m.details" :key="d.key" class="food-row">
+                  <view class="food-thumb">
+                    <image v-if="d.img !== ''" class="food-thumb-img" :src="'/static/icons/' + d.img" />
+                  </view>
+                  <text class="food-name">{{ d.name }}</text>
+                  <text class="food-amount">{{ d.amountText }}</text>
+                  <text class="food-time">{{ d.time }}</text>
+                  <text class="food-kcal">{{ d.kcal }} kcal</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- tabBar 已改原生（pages.json），加号入口保留在头部 -->
+    <AddSheet :show="showSheet" :food-id="selectedFoodId" @close="closeSheet" @confirm="onAdded" />
+    <FoodPickerSheet :show="showPicker" @close="closePicker" @pick="onPickFood" />
+  </view>
+</template>
+
+<script setup lang="uts">
+import Bottle from '../../components/Bottle.uvue'
+import MealIcon from '../../components/MealIcon.uvue'
+import AddSheet from '../../components/AddSheet.uvue'
+import FoodPickerSheet from '../../components/FoodPickerSheet.uvue'
+import { useFoodStore, type MealRow } from '../../stores/food_store.ts'
+import { useGoalStore } from '../../stores/goal.uts'
+import { ref, computed } from 'vue'
+
+const foodStore = useFoodStore()
+const goalStore = useGoalStore()
+
+// 顶部占位：默认设计稿 62px；真机上取微信胶囊底 + 8 间距（仅微信小程序生效）
+const statusBarHeight = ref(62)
+// #ifdef MP-WEIXIN
+const capsule = uni.getMenuButtonBoundingClientRect()
+if (capsule.bottom > 0) {
+  statusBarHeight.value = Math.max(62, capsule.bottom + 8)
+}
+// #endif
+
+// 初始化：从 food_library.json 加载 347 条食物库
+foodStore.initLibrary()
+
+// 顶部日期副标题（原为写死的「9月19日 · 周五」，跨天就失真）
+const WEEKDAY_CN: string[] = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+const dateText = computed((): string => {
+  const d = new Date()
+  return `${d.getMonth() + 1}月${d.getDate()}日 · ${WEEKDAY_CN[d.getDay()]}`
+})
+
+// ── 摄入 / 目标（真实数据流：AddSheet 确认 → foodStore → 这里自动刷新）──
+const pct = computed((): number => {
+  const g = goalStore.calorieGoal
+  return g > 0 ? foodStore.totalCal / g : 0
+})
+const over = computed((): boolean => foodStore.totalCal > goalStore.calorieGoal)
+const remainText = computed((): string => {
+  const r = goalStore.calorieGoal - foodStore.totalCal
+  return (r > 0 ? r : 0).toString()
+})
+const eatenText = computed((): string => foodStore.totalCal.toString())
+const goalText = computed((): string => goalStore.calorieGoal.toString())
+
+// 今日餐次时间轴（store 派生：名称带首条记录时间 / 合计 / 明细）
+const mealRows = computed((): MealRow[] => foodStore.mealRows)
+
+// ── 弹窗联动：picker 选中 → AddSheet（带 foodId）→ 确认写入 store ──
+// ⚠️ 开关必须用 ref（const + 内联赋值会致 devtools 丢弃整个 Home.js → 白屏，
+//    见 progress.md 2026-09-19 排障实录）
+const showSheet = ref(false)
+const showPicker = ref(false)
+const selectedFoodId = ref('')
+function closeSheet() { showSheet.value = false }
+function closePicker() { showPicker.value = false }
+function openPicker() { showPicker.value = true }
+function onPickFood(id: string) {
+  selectedFoodId.value = id
+  showPicker.value = false
+  showSheet.value = true
+}
+function onAdded() {
+  // 条目已由 AddSheet 写入 store；这里只关窗（后续可加轻反馈）
+  showSheet.value = false
+}
+</script>
+
+<style>
+.page {
+  flex: 1;
+  background-color: #F2FAF5;
+}
+.status-bar {
+  height: 62px;
+}
+.content {
+  flex: 1;
+  /* 原生 tabBar 不占页面高度，无需预留底部 padding */
+  padding: 0 18px 8px;
+  gap: 9px;
+}
+.header {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.header-left { gap: 1px; }
+/* 程序名：Boss 拍板写死「轻律生活」作为顶部标识 */
+.app-name { font-size: 17px; font-weight: 600; color: #0A4F3D; letter-spacing: -0.2px; }
+.date { font-size: 12.5px; color: rgba(15, 79, 61, 0.6); }
+.add-entry {
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+.add-entry-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+  background-color: #1FBF8F;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(13,120,90,0.30);
+}
+.add-entry-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+.bottle-wrap {
+  align-items: center;
+  padding: 6px 0;
+}
+.number-area {
+  align-items: center;
+  gap: 2px;
+}
+.num-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0A7A5C;
+}
+.num-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+.num-value {
+  font-size: 46px;
+  font-weight: 700;
+  color: #0A4F3D;
+  letter-spacing: -1.6px;
+  font-variant-numeric: tabular-nums;
+}
+.num-edit {
+  font-size: 15px;
+  color: rgba(15, 79, 61, 0.6);
+}
+.num-sub {
+  font-size: 13.5px;
+  color: rgba(15, 79, 61, 0.6);
+  font-variant-numeric: tabular-nums;
+}
+.nutrient-card {
+  flex-direction: row;
+  align-items: center;
+  padding: 14px;
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 6px 18px rgba(13, 120, 90, 0.10);
+}
+.n-item {
+  flex: 1;
+  align-items: center;
+  gap: 3px;
+}
+.n-value {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0A4F3D;
+  font-variant-numeric: tabular-nums;
+}
+.n-name {
+  font-size: 11px;
+  color: rgba(15, 79, 61, 0.6);
+}
+.n-divider {
+  width: 1px;
+  height: 32px;
+  background-color: #E3F0EA;
+}
+.meal-section {
+  gap: 8px;
+}
+.meal-list {
+  position: relative;
+  gap: 8px;
+}
+/* 时间轴竖线：设计稿 3:94 实测（1.5×164 @x20.25 y42），演示布局写死，接真实数据后改动态计算 */
+.timeline-line {
+  position: absolute;
+  left: 20.25px;
+  top: 42px;
+  width: 1.5px;
+  height: 164px;
+  background-color: #CBD9D3;
+}
+.meal-row {
+  flex-direction: row;
+  gap: 12px;
+}
+.meal-info {
+  flex: 1;
+}
+.meal-name-row {
+  height: 40px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.meal-name {
+  font-size: 15.5px;
+  font-weight: 600;
+  color: #0A4F3D;
+}
+.meal-cal {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0A7A5C;
+  font-variant-numeric: tabular-nums;
+}
+.meal-cal-idle {
+  font-size: 12.5px;
+  color: #A9BAB3;
+}
+.meal-detail {
+  gap: 6px;
+  padding: 2px 0 0 2px;
+}
+/* 单条食物行：缩略图 + 名称 + 份量 + 自身时分秒 + 热量 */
+.food-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+/* 28×28 圆角 8 底衬：图片缺失时是一块柔和的薄荷色，不会塌成灰方块 */
+.food-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background-image: linear-gradient(160deg, #E8F7F1, #D8EFE6);
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.food-thumb-img { width: 28px; height: 28px; }
+.food-name {
+  font-size: 13px;
+  color: #0A4F3D;
+  max-width: 96px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  lines: 1;
+}
+.food-amount { font-size: 11.5px; color: #A9BAB3; }
+.food-time {
+  flex: 1;
+  text-align: right;
+  font-size: 11px;
+  color: #A9BAB3;
+  font-variant-numeric: tabular-nums;
+}
+.food-kcal {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #0A7A5C;
+  font-variant-numeric: tabular-nums;
+}
+</style>

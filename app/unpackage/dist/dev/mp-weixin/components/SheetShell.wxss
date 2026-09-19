@@ -1,0 +1,2 @@
+:host{display:flex;flex-direction:column}
+.shell{position:absolute;left:0;top:0;right:0;bottom:0}.mask{position:absolute;left:0;top:0;right:0;bottom:0;background-color:rgba(11,79,60,.55)}.panel{position:absolute;left:0;right:0;bottom:0;background-color:#fbfefc;border-top-left-radius:34px;border-top-right-radius:34px;box-shadow:0 -8px 32px rgba(10,79,61,.18);padding:10px 18px 18px}.handle{width:36px;height:4px;border-radius:2px;background-color:#0a4f3d;align-self:center;margin-top:8px}

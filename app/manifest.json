@@ -1,0 +1,59 @@
+{
+	"name": "CalTrack",
+	"appid": "__UNI__F70225F",
+	"description": "轻量级卡路里追踪 App",
+	"versionName": "1.0.0",
+	"versionCode": 100,
+	"uni-app-x": {
+		"flex-direction": "column"
+	},
+	"app": {
+		"defaultAppTheme": "light",
+		"distribute": {
+			"android": {
+				"minSdkVersion": 21,
+				"targetSdkVersion": 32,
+				"abiFilters": [
+					"arm64-v8a"
+				]
+			},
+			"ios": {
+				"devices": "auto"
+			}
+		}
+	},
+	"web": {
+		"title": "CalTrack",
+		"router": {
+			"mode": "hash",
+			"base": "/"
+		}
+	},
+	"app-android": {
+		"defaultAppTheme": "light",
+		"distribute": {
+			"minSdkVersion": 21,
+			"targetSdkVersion": 32,
+			"abiFilters": [
+				"arm64-v8a"
+			],
+			"modules": {},
+			"icons": {},
+			"splashScreens": {
+				"default": {}
+			}
+		}
+	},
+	"app-ios": {
+		"defaultAppTheme": "light",
+		"distribute": {
+			"devices": "auto",
+			"modules": {},
+			"icons": {},
+			"splashScreens": {}
+		}
+	},
+	"mp-weixin": {
+		"appid": "wx2ca7eecc03bd5d09"
+	}
+}

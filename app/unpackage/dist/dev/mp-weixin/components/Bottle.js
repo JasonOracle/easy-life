@@ -1,0 +1,2 @@
+"use strict";const e=require("../common/vendor.js"),a=e.defineComponent({__name:"Bottle",props:{pct:{type:Number,default:0},over:{type:Boolean,default:!1}},setup(n){const o=n,r=e.computed(()=>"transform: translateY("+((1-Math.min(Math.max(o.pct,0),1))*132).toFixed(2)+"px);");return(t,s)=>{"raw js";return{a:n.over?1:"",b:e.s(r.value),c:e.sei(e.gei(t,""),"view"),d:`${t.u_s_b_h}px`,e:`${t.u_s_a_i_b}px`,f:e.pvhc(t.$scope.data.virtualHostClass)}}}});wx.createComponent(a);
+//# sourceMappingURL=../../.sourcemap/mp-weixin/components/Bottle.js.map

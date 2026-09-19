@@ -1,0 +1,2 @@
+"use strict";Object.defineProperty(exports,Symbol.toStringTag,{value:"Module"});const e=require("./common/vendor.js"),o=require("./stores/device.js"),p=e.defineComponent({__name:"App",setup(t){return e.onLaunch(()=>{o.useDeviceStore()}),()=>{}}});function n(){const t=e.createSSRApp(p);return t.use(e.createPinia()),{app:t}}n().app.mount("#app");exports.createApp=n;
+//# sourceMappingURL=../.sourcemap/mp-weixin/app.js.map

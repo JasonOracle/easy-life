@@ -1,0 +1,337 @@
+﻿/**
+ * [变更日志]
+ * 修改时间：2026-09-20
+ * AI模型：CodeBuddy
+ * 修改内容：[v5：修复「选项段对所有食物都渲染且内部为空」的 P0 bug——原先
+ *           sweetOptsOf() 恒返回 []，而模板判 sweets !== null（[] !== null 恒真）；
+ *           改按 optGroupsOf(food) 真实取组，且用 g.items.length 判空。
+ *           同时：选项真正计入热量（甜度/加料/糖包/糖浆），不再选了没反应；
+ *           by_capacity 组（sweet, 基准 500ml）按容量线性缩放走 optDeltaOf；
+ *           计数单位（个/片/串）走 gramsOf 折算，文案显示「已按 1 个（约 75g）计算」，
+ *           缺 pieceWeight 时如实提示而不静默按 1g 算。
+ *           按 Boss 拍板：不做数量步进器，同一食物可重复添加（首页靠自身时分秒区分）。]
+ */
+
+/**
+ * [变更日志]
+ * 修改时间：2026-09-19
+ * AI模型：CodeBuddy
+ * 修改内容：[v2 动态化：接收 foodId 从 store 取真实食物，分量/甜度/餐次全部
+ *           可选（⚠️ 用 ref，遵守「模板内联赋值只许赋 ref」纪律），热量实时计算
+ *           （vessel 分量档 + 甜度 by_capacity 缩放，模型见 stores/food_store.ts），
+ *           确认写入 useFoodStore。设计稿三段式保留：分量/甜度/餐次；
+ *           topping 等其余 opts 不渲染（设计稿即如此，待扩展）。
+ *           餐次默认按时段智能推断。]
+ *           v3：适配 food.ts 新 API（vesselSizesOf 接 vesselKey 字符串，
+ *           computeEntry 接数值 amount 而非 key）。
+ *           v4：修复 mealLabels——MEAL_LABELS 是 Record 对象，数字索引得 undefined
+ *           （确认按钮显示「添加到undefined」）；改为 MEAL_KEYS.map 数组化。
+ */
+
+<template>
+  <SheetShell :show="show" @close="emit('close')">
+    <view class="body">
+      <view class="cal-area">
+        <view class="cal-row">
+          <text class="cal-value">{{ calText }}</text>
+          <text class="cal-unit">kcal</text>
+        </view>
+        <text class="cal-sub">{{ specText }}</text>
+      </view>
+
+      <view class="food-row">
+        <view class="food-icon-wrap">
+          <image v-if="foodImg !== ''" class="food-icon" :src="'/static/icons/' + foodImg" />
+        </view>
+        <view class="food-col">
+          <text class="food-name">{{ foodName }}</text>
+          <text class="food-spec">{{ foodSpec }}</text>
+        </view>
+      </view>
+
+      <!-- 分量：来自 vessel 模板；只有 1 档时也渲染（明确告知，不给用户瞎猜） -->
+      <view v-if="sizes.length > 0" class="sec">
+        <text class="sec-label">分量</text>
+        <view class="seg-row">
+          <view v-for="(p, i) in sizes" :key="p.k" class="pill" :class="i === portionIdx ? 'sel' : 'idle'" @click="portionIdx = i">
+            <text class="pill-text" :class="i === portionIdx ? 't-sel' : 't-idle'">{{ sizeLabel(p) }}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 选项段：按 food.opts 真实取模板组；组为空则不渲染整段（修复前对所有食物都显示空壳） -->
+      <view v-for="g in optGroups" :key="g.key" class="sec">
+        <text class="sec-label">{{ optLabel(g) }}</text>
+        <view class="seg-row" :class="g.type === 'multi' ? 'wrap-row' : ''">
+          <view
+            v-for="it in g.items"
+            :key="g.key + '_' + it.k"
+            class="pill"
+            :class="isOptOn(g, it) ? 'sel' : 'idle'"
+            @click="toggleOpt(g, it)"
+          >
+            <view v-if="g.key === 'sweet' && it.deltaKcal === 0" class="sugar-none" />
+            <view v-else-if="g.key === 'sweet'" class="sugar">
+              <view v-for="n in sugarDots(it.deltaKcal)" :key="n" class="s-dot" />
+            </view>
+            <text class="pill-text" :class="isOptOn(g, it) ? 't-sel' : 't-idle'">{{ it.name }}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="sec">
+        <text class="sec-label">餐次</text>
+        <view class="seg-row">
+          <view v-for="(m, i) in mealLabels" :key="m" class="pill" :class="i === mealIdx ? 'sel' : 'idle'" @click="mealIdx = i">
+            <text class="pill-text" :class="i === mealIdx ? 't-sel' : 't-idle'">{{ m }}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="confirm" @click="onConfirm">
+        <text class="confirm-text">{{ confirmText }}</text>
+      </view>
+    </view>
+  </SheetShell>
+</template>
+
+<script setup lang="uts">
+import SheetShell from './SheetShell.uvue'
+import {
+  useFoodStore, getFoodById, vesselSizesOf, optGroupsOf, optDeltaOf,
+  computeEntry, gramsOf, COUNT_UNITS,
+  MEAL_LABELS, MEAL_KEYS,
+  type FoodBase, type VesselTplEntry, type OptGroup, type OptItem,
+} from '../stores/food_store.ts'
+import { watch, ref, computed } from 'vue'
+
+const props = defineProps({
+  show: { type: Boolean, default: false },
+  foodId: { type: String, default: '' },
+})
+const emit = defineEmits(['close', 'confirm'])
+
+const foodStore = useFoodStore()
+
+// ── 选中食物 ──
+const curFood = computed((): FoodBase | null => getFoodById(props.foodId) ?? null)
+const foodName = computed((): string => curFood.value?.name ?? '')
+const foodImg = computed((): string => curFood.value?.img ?? '')
+const foodSpec = computed((): string => {
+  const f = curFood.value
+  if (f == null) return ''
+  return `每100${f.unit} ${f.kcal} kcal`
+})
+
+// ── 选中态（⚠️ 全部 ref——此前 const + 内联赋值曾导致整页白屏）──
+const portionIdx = ref(0)
+// 单选组：groupKey → 选中的 opt key（不用 index，避免越界）
+const optSingle = ref<Record<string, string>>({})
+// 多选组：`<groupKey>_<optKey>` → 是否选中（扁平化，规避 UTS 嵌套泛型风险）
+const optMulti = ref<Record<string, boolean>>({})
+const mealIdx = ref(0)
+
+const sizes = computed((): VesselTplEntry[] => {
+  const f = curFood.value
+  return f == null ? [] : vesselSizesOf(f.vessel ?? '')
+})
+const optGroups = computed((): OptGroup[] => optGroupsOf(curFood.value))
+// MEAL_LABELS 是 Record 对象；confirmText 用数字索引，必须数组化（对象[0] → undefined）
+const mealLabels: string[] = MEAL_KEYS.map((k) => MEAL_LABELS[k] ?? k)
+
+// 食物切换时重置选中态：分量取中档，选项取模板默认值，餐次按时段
+watch((): string => props.foodId, (id: string) => {
+  const f = getFoodById(id)
+  if (f == null) return
+  const ss = vesselSizesOf(f.vessel ?? '')
+  portionIdx.value = ss.length > 2 ? Math.floor(ss.length / 2) : 0
+
+  optSingle.value = {}
+  optMulti.value = {}
+  for (const g of optGroupsOf(f)) {
+    if (g.type === 'multi') continue // def 是空数组 → 默认全不选
+    optSingle.value[g.key] = defKeyOf(g)
+  }
+  mealIdx.value = guessMealIdx()
+})
+
+/** 单选组默认项：取模板 def；def 缺失或不在列表里则退化为第一项 */
+function defKeyOf(g: OptGroup): string {
+  if (g.def === '') return g.items.length > 0 ? firstKey(g) : ''
+  const hit = g.items.find((it): boolean => it.k === g.def)
+  return hit == null ? firstKey(g) : g.def
+}
+function firstKey(g: OptGroup): string {
+  return g.items.length > 0 ? g.items[0].k : ''
+}
+
+function guessMealIdx(): number {
+  const h = new Date().getHours()
+  if (h >= 5 && h < 10) return 0
+  if (h >= 10 && h < 14) return 1
+  if (h >= 17 && h < 21) return 2
+  return 3
+}
+
+function sizeLabel(s: VesselTplEntry): string {
+  // 计数单位的名字自带数量（「1个」「1片」），再拼一遍会读成「1个 1个」
+  return isCount(s.unit) ? s.name : `${s.name} ${s.amount}${s.unit}`
+}
+function isCount(unit: string): boolean {
+  return COUNT_UNITS.some((u): boolean => u === unit)
+}
+
+// 糖粒数 0/2/3/4/5 ← delta_kcal（VisualLanguage §9.5.9：颗粒数=糖量档位）
+function sugarDots(delta: number): number {
+  if (delta <= 0) return 0
+  if (delta >= 110) return 5
+  if (delta >= 80) return 4
+  if (delta >= 55) return 3
+  return 2
+}
+
+/** 组标题：量级估算的组如实标注（数据来自 opts_tpl.yaml 的 estimate 标记） */
+function optLabel(g: OptGroup): string {
+  return g.estimate ? `${g.label} · 估算` : g.label
+}
+
+function isOptOn(g: OptGroup, it: OptItem): boolean {
+  if (g.type === 'multi') return optMulti.value[g.key + '_' + it.k] === true
+  const cur = optSingle.value[g.key] ?? ''
+  // 未初始化时按模板默认值算选中（foodId watch 已初始化，这里是兜底）
+  return cur === it.k || (cur === '' && defKeyOf(g) === it.k)
+}
+
+function toggleOpt(g: OptGroup, it: OptItem): void {
+  if (g.type === 'multi') {
+    const k = g.key + '_' + it.k
+    const on = optMulti.value[k] === true
+    optMulti.value[k] = !on
+    return
+  }
+  optSingle.value[g.key] = it.k
+}
+
+// ── 份量与热量 ──
+const curAmount = computed((): number => sizes.value[portionIdx.value]?.amount ?? 100)
+const curUnit = computed((): string => sizes.value[portionIdx.value]?.unit ?? (curFood.value?.unit ?? 'g'))
+const curGrams = computed((): number => {
+  const f = curFood.value
+  if (f == null) return 0
+  return gramsOf(f, curAmount.value, curUnit.value)
+})
+
+/** 选项附加热量合计（此前完全没算：选全糖热量纹丝不动） */
+const optExtra = computed((): number => {
+  const f = curFood.value
+  if (f == null) return 0
+  const grams = curGrams.value
+  let extra = 0
+  for (const g of optGroups.value) {
+    for (const it of g.items) {
+      if (isOptOn(g, it)) extra += optDeltaOf(g, it, grams)
+    }
+  }
+  return extra
+})
+
+const calText = computed((): string => {
+  const f = curFood.value
+  if (f == null) return '0'
+  const e = computeEntry(f, curAmount.value, curUnit.value, 'snack', optExtra.value)
+  return e.kcal.toString()
+})
+
+/**
+ * 计算口径文案。计数单位要显示折算克重，否则用户不知道「1 个」到底算了多少：
+ *   有 pieceWeight → 「已按 1 个（约 75g）计算」
+ *   无 pieceWeight → 如实提示（这类数据尚未补全单件克重，详见 progress.md 遗留项）
+ */
+const specText = computed((): string => {
+  const f = curFood.value
+  if (f == null) return ''
+  const n = curAmount.value
+  const u = curUnit.value
+  if (isCount(u)) {
+    if (f.pieceWeight != null) {
+      return '已按 ' + n.toString() + ' ' + u + '（约 ' + Math.round(curGrams.value).toString() + 'g）计算'
+    }
+    return `已按 ${n} ${u} 计算 · 暂无单件克重，热量偏低`
+  }
+  return `已按 ${n}${u} 计算`
+})
+
+const confirmText = computed((): string => {
+  const f = curFood.value
+  if (f == null) return '添加'
+  const e = computeEntry(f, curAmount.value, curUnit.value, 'snack', optExtra.value)
+  return `添加到${mealLabels[mealIdx.value]} · ${e.kcal} kcal`
+})
+
+function onConfirm(): void {
+  const f = curFood.value
+  if (f == null) return
+  // Boss 拍板：不做数量步进器；同一食物多次添加 → 靠 ts 落在各自的餐次与时间点上
+  const e = computeEntry(f, curAmount.value, curUnit.value, MEAL_KEYS[mealIdx.value], optExtra.value)
+  foodStore.addEntry(e)
+  emit('confirm')
+}
+</script>
+
+<style>
+.body { gap: 13px; }
+.cal-area { gap: 4px; padding-top: 10px; align-items: center; }
+.cal-row { flex-direction: row; align-items: center; gap: 8px; }
+.cal-value { font-size: 28px; font-weight: 700; color: #0A4F3D; font-variant-numeric: tabular-nums; }
+.cal-unit { font-size: 13.5px; color: rgba(15,79,61,0.6); }
+.cal-sub { font-size: 12px; color: #7A8F88; }
+
+.food-row {
+  flex-direction: row; align-items: center; gap: 10px; padding: 10px 12px;
+  border-radius: 20px; background-color: #FFFFFF; border: 1px solid #DCEDE6;
+}
+/* 食物图：28 圆角 8 的底衬，图缺失时也不塌成一条灰线 */
+.food-icon-wrap {
+  width: 40px; height: 40px; border-radius: 12px;
+  background-image: linear-gradient(160deg, #EAF7F1, #DCF1E8);
+  align-items: center; justify-content: center; overflow: hidden;
+}
+.food-icon { width: 40px; height: 40px; }
+.food-col { gap: 2px; flex: 1; }
+.food-name { font-size: 15px; font-weight: 600; color: #0A4F3D; }
+.food-spec { font-size: 12.5px; color: #7A8F88; }
+
+.sec { gap: 8px; }
+.sec-label { font-size: 13.5px; font-weight: 500; color: #7A8F88; }
+.seg-row { flex-direction: row; gap: 6px; }
+.wrap-row { flex-wrap: wrap; }
+
+/* 分段 pill（VisualLanguage §9.5.8） */
+.pill {
+  flex: 1; align-items: center; justify-content: center; gap: 3px;
+  padding: 8px 6px; border-radius: 11px;
+}
+.pill.sel {
+  background-color: rgba(31,191,143,0.15);
+  border: 1px solid rgba(31,191,143,0.4);
+}
+.pill.idle { background-color: rgba(120,140,130,0.09); }
+.pill-text { font-size: 12.5px; font-weight: 500; }
+.t-sel { font-weight: 600; color: #0A7A5C; }
+.t-idle { color: rgba(15,79,61,0.6); }
+
+/* 糖粒图标（§9.5.9：颗粒数=糖量；无糖=虚线空心圈） */
+.sugar { flex-direction: row; gap: 2px; }
+.s-dot { width: 5px; height: 5px; border-radius: 3px; background-color: #0E9C74; }
+.sugar-none {
+  width: 9px; height: 9px; border-radius: 5px;
+  border: 1px dashed rgba(120,140,130,0.45);
+}
+
+.confirm {
+  height: 52px; border-radius: 26px; align-items: center; justify-content: center;
+  background-image: linear-gradient(160deg, #7DEBC7, #1FBF8F);
+  box-shadow: 0 8px 18px rgba(13,120,90,0.34);
+}
+.confirm-text { font-size: 15.5px; font-weight: 600; color: #FFFFFF; }
+</style>

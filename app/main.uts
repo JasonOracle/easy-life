@@ -1,0 +1,21 @@
+/**
+ * [变更日志]
+ * 修改时间：2026-09-19
+ * AI模型：CodeBuddy (DeepSeek-V4.1-Flash)
+ * 修改内容：[新建：uni-app x 启动入口；挂载 Pinia（设备能力 / 食物记录 / 目标 / 设置 /
+ *           食物库 / 器具模板 / 选项模板 / 用户，共 8 个 store）]
+ *
+ * ⚠️ 未验证声明（遵守 AGENTS.md 防幻觉约束）：
+ *   - DCloud 官方 manifest.json 文档**未给出 main.uts 的写法**，本文件按 uni-app Vue3 入口
+ *     的通用形式编写，**未经本地构建验证**；如构建报错，以 hello uni-app x 仓库为准。
+ */
+
+import App from './App.uvue'
+import { createSSRApp } from 'vue'
+import { createPinia } from 'pinia'
+
+export function createApp() {
+  const app = createSSRApp(App)
+  app.use(createPinia())
+  return { app }
+}

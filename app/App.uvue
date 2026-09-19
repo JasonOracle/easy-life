@@ -1,0 +1,28 @@
+/**
+ * [变更日志]
+ * 修改时间：2026-09-19
+ * AI模型：CodeBuddy (DeepSeek-V4.1-Flash)
+ * 修改内容：[1. 新建：uni-app x 应用根组件骨架；onLaunch 触发设备能力检测并写入 Pinia
+ *              （对应 AGENTS.md「设备能力分档」：启动检测一次，所有模块读 useDeviceStore）；
+ *            2. 配合「方案 B」目录重整，import 路径去掉 src 前缀]
+ *
+ * 项目结构：HBuilderX 项目根 = app/
+ *   manifest.json / pages.json / App.uvue / main.uts 与
+ *   pages/ components/ stores/ composables/ data/ static/ styles/ 同级
+ */
+
+<script setup lang="uts">
+import { onLaunch } from '@dcloudio/uni-app'
+import { useDeviceStore } from './stores/device'
+
+onLaunch(() => {
+  // 触发 device store 初始化。
+  // 注意：device store 的 state() 内部本身就会调 detectDeviceCapability()，
+  // 没有单独的 detect() 方法（只有 refresh()）。这里只是让它尽早执行。
+  useDeviceStore()
+})
+</script>
+
+<style>
+/* 全局样式入口见 app/styles/tokens.css —— 色值唯一来源是 design/DesignTokens.md */
+</style>

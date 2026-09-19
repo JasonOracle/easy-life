@@ -1,6 +1,6 @@
 {
   "v": "1.0.0",
-  "generated": "2026-09-19T09:22:46.449936+00:00",
+  "generated": "2026-09-19T14:13:06.912351+00:00",
   "fingerprint": {
     "version": "1.0.0",
     "sources": [
@@ -11,7 +11,7 @@
       "opts_tpl.yaml"
     ],
     "count": 347,
-    "generatedAt": "2026-09-19T09:22:46.449936+00:00"
+    "generatedAt": "2026-09-19T14:13:06.912351+00:00"
   },
   "vesselTpl": {
     "cup": {
@@ -451,7 +451,10 @@
       "base": {
         "cal": 116,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.6,
+        "carb": 25.9,
+        "fat": 0.3
       },
       "pieceWeight": null,
       "vessel": "bowl_rice",
@@ -468,7 +471,10 @@
       "base": {
         "cal": 165,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 4.2,
+        "carb": 22.5,
+        "fat": 6.8
       },
       "pieceWeight": null,
       "vessel": "bowl_rice",
@@ -485,7 +491,10 @@
       "base": {
         "cal": 172,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 5.1,
+        "carb": 21.8,
+        "fat": 7.5
       },
       "pieceWeight": null,
       "vessel": "bowl_rice",
@@ -502,7 +511,10 @@
       "base": {
         "cal": 148,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 4.8,
+        "carb": 20.5,
+        "fat": 5.2
       },
       "pieceWeight": null,
       "vessel": "bowl_rice",
@@ -519,7 +531,10 @@
       "base": {
         "cal": 142,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 5.5,
+        "carb": 19.8,
+        "fat": 4.8
       },
       "pieceWeight": null,
       "vessel": "bowl_rice",
@@ -536,7 +551,10 @@
       "base": {
         "cal": 155,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 5.8,
+        "carb": 21.2,
+        "fat": 5.5
       },
       "pieceWeight": null,
       "vessel": "bowl_rice",
@@ -553,7 +571,10 @@
       "base": {
         "cal": 178,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6.5,
+        "carb": 22.8,
+        "fat": 7.8
       },
       "pieceWeight": null,
       "vessel": "bowl_rice",
@@ -570,7 +591,10 @@
       "base": {
         "cal": 162,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 7.2,
+        "carb": 18.5,
+        "fat": 7.5
       },
       "pieceWeight": null,
       "vessel": "bowl_rice",
@@ -587,7 +611,10 @@
       "base": {
         "cal": 168,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 5.8,
+        "carb": 22.5,
+        "fat": 6.2
       },
       "pieceWeight": null,
       "vessel": "bowl_rice",
@@ -604,7 +631,10 @@
       "base": {
         "cal": 145,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 5.5,
+        "carb": 22.8,
+        "fat": 4.2
       },
       "pieceWeight": null,
       "vessel": "bowl_rice",
@@ -621,7 +651,10 @@
       "base": {
         "cal": 38,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.9,
+        "carb": 8.2,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "bowl_rice",
@@ -638,7 +671,10 @@
       "base": {
         "cal": 58,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 3.2,
+        "carb": 9.5,
+        "fat": 1.5
       },
       "pieceWeight": null,
       "vessel": "bowl_rice",
@@ -655,7 +691,10 @@
       "base": {
         "cal": 42,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.2,
+        "carb": 9.0,
+        "fat": 0.5
       },
       "pieceWeight": null,
       "vessel": "bowl_rice",
@@ -672,7 +711,10 @@
       "base": {
         "cal": 68,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.5,
+        "carb": 14.2,
+        "fat": 0.8
       },
       "pieceWeight": null,
       "vessel": "bowl_rice",
@@ -689,7 +731,10 @@
       "base": {
         "cal": 45,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.0,
+        "carb": 9.8,
+        "fat": 0.4
       },
       "pieceWeight": null,
       "vessel": "bowl_rice",
@@ -706,7 +751,10 @@
       "base": {
         "cal": 52,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.8,
+        "carb": 10.5,
+        "fat": 0.6
       },
       "pieceWeight": null,
       "vessel": "bowl_rice",
@@ -723,7 +771,10 @@
       "base": {
         "cal": 223,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 7.0,
+        "carb": 47.0,
+        "fat": 1.0
       },
       "pieceWeight": 75,
       "vessel": "piece",
@@ -740,7 +791,10 @@
       "base": {
         "cal": 218,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6.5,
+        "carb": 45.5,
+        "fat": 2.5
       },
       "pieceWeight": 70,
       "vessel": "piece",
@@ -757,7 +811,10 @@
       "base": {
         "cal": 205,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 7.8,
+        "carb": 28.5,
+        "fat": 6.5
       },
       "pieceWeight": 80,
       "vessel": "piece",
@@ -774,7 +831,10 @@
       "base": {
         "cal": 135,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 3.8,
+        "carb": 25.5,
+        "fat": 1.8
       },
       "pieceWeight": 75,
       "vessel": "piece",
@@ -791,7 +851,10 @@
       "base": {
         "cal": 185,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6.5,
+        "carb": 20.5,
+        "fat": 7.8
       },
       "pieceWeight": 35,
       "vessel": "piece",
@@ -808,7 +871,10 @@
       "base": {
         "cal": 215,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 7.2,
+        "carb": 22.8,
+        "fat": 9.5
       },
       "pieceWeight": 65,
       "vessel": "piece",
@@ -825,7 +891,10 @@
       "base": {
         "cal": 178,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6.8,
+        "carb": 22.5,
+        "fat": 7.2
       },
       "pieceWeight": 50,
       "vessel": "piece",
@@ -842,7 +911,10 @@
       "base": {
         "cal": 185,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 7.5,
+        "carb": 24.8,
+        "fat": 6.8
       },
       "pieceWeight": 25,
       "vessel": "piece",
@@ -859,7 +931,10 @@
       "base": {
         "cal": 168,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6.2,
+        "carb": 23.5,
+        "fat": 5.5
       },
       "pieceWeight": 24,
       "vessel": "piece",
@@ -876,7 +951,10 @@
       "base": {
         "cal": 110,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6,
+        "carb": 15,
+        "fat": 3
       },
       "pieceWeight": 40,
       "vessel": "bowl_soup",
@@ -893,7 +971,10 @@
       "base": {
         "cal": 210,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 3,
+        "carb": 35,
+        "fat": 6
       },
       "pieceWeight": 30,
       "vessel": "bowl_soup",
@@ -910,7 +991,10 @@
       "base": {
         "cal": 170,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 5,
+        "carb": 28,
+        "fat": 4
       },
       "pieceWeight": 150,
       "vessel": "piece",
@@ -927,7 +1011,10 @@
       "base": {
         "cal": 95,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 3,
+        "carb": 20,
+        "fat": 1
       },
       "pieceWeight": null,
       "vessel": "bowl_noodle",
@@ -944,7 +1031,10 @@
       "base": {
         "cal": 125,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 8,
+        "carb": 18,
+        "fat": 3
       },
       "pieceWeight": null,
       "vessel": "bowl_noodle",
@@ -961,7 +1051,10 @@
       "base": {
         "cal": 105,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 4,
+        "carb": 22,
+        "fat": 1
       },
       "pieceWeight": null,
       "vessel": "bowl_noodle",
@@ -978,7 +1071,10 @@
       "base": {
         "cal": 155,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 7,
+        "carb": 22,
+        "fat": 5
       },
       "pieceWeight": null,
       "vessel": "bowl_noodle",
@@ -995,7 +1091,10 @@
       "base": {
         "cal": 145,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 5,
+        "carb": 24,
+        "fat": 4
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1012,7 +1111,10 @@
       "base": {
         "cal": 140,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6,
+        "carb": 20,
+        "fat": 4
       },
       "pieceWeight": null,
       "vessel": "bowl_noodle",
@@ -1029,7 +1131,10 @@
       "base": {
         "cal": 110,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 4,
+        "carb": 23,
+        "fat": 1
       },
       "pieceWeight": null,
       "vessel": "bowl_noodle",
@@ -1046,7 +1151,10 @@
       "base": {
         "cal": 155,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 4,
+        "carb": 24,
+        "fat": 6
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1063,7 +1171,10 @@
       "base": {
         "cal": 120,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 5,
+        "carb": 20,
+        "fat": 3
       },
       "pieceWeight": null,
       "vessel": "bowl_noodle",
@@ -1080,7 +1191,10 @@
       "base": {
         "cal": 105,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 4,
+        "carb": 21,
+        "fat": 1
       },
       "pieceWeight": null,
       "vessel": "bowl_noodle",
@@ -1097,7 +1211,10 @@
       "base": {
         "cal": 95,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6,
+        "carb": 16,
+        "fat": 1
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1114,7 +1231,10 @@
       "base": {
         "cal": 115,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 3,
+        "carb": 24,
+        "fat": 1
       },
       "pieceWeight": null,
       "vessel": "bowl_noodle",
@@ -1131,7 +1251,10 @@
       "base": {
         "cal": 100,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 3,
+        "carb": 20,
+        "fat": 1
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1148,7 +1271,10 @@
       "base": {
         "cal": 95,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 4,
+        "carb": 17,
+        "fat": 1
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1165,7 +1291,10 @@
       "base": {
         "cal": 135,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 5,
+        "carb": 22,
+        "fat": 4
       },
       "pieceWeight": null,
       "vessel": "bowl_noodle",
@@ -1182,7 +1311,10 @@
       "base": {
         "cal": 390,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 7,
+        "carb": 38,
+        "fat": 22
       },
       "pieceWeight": 80,
       "vessel": "piece",
@@ -1199,7 +1331,10 @@
       "base": {
         "cal": 145,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6,
+        "carb": 20,
+        "fat": 5
       },
       "pieceWeight": 120,
       "vessel": "piece",
@@ -1216,7 +1351,10 @@
       "base": {
         "cal": 250,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 5,
+        "carb": 28,
+        "fat": 13
       },
       "pieceWeight": 100,
       "vessel": "piece",
@@ -1233,7 +1371,10 @@
       "base": {
         "cal": 220,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 7,
+        "carb": 26,
+        "fat": 10
       },
       "pieceWeight": 110,
       "vessel": "piece",
@@ -1250,7 +1391,10 @@
       "base": {
         "cal": 260,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6,
+        "carb": 30,
+        "fat": 12
       },
       "pieceWeight": 80,
       "vessel": "piece",
@@ -1267,7 +1411,10 @@
       "base": {
         "cal": 270,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 8,
+        "carb": 42,
+        "fat": 7
       },
       "pieceWeight": 70,
       "vessel": "piece",
@@ -1284,7 +1431,10 @@
       "base": {
         "cal": 130,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 5,
+        "carb": 27,
+        "fat": 1
       },
       "pieceWeight": null,
       "vessel": "bowl_noodle",
@@ -1301,7 +1451,10 @@
       "base": {
         "cal": 266,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 11,
+        "carb": 33,
+        "fat": 10
       },
       "pieceWeight": null,
       "vessel": "slice",
@@ -1318,7 +1471,10 @@
       "base": {
         "cal": 295,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 14,
+        "carb": 30,
+        "fat": 14
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -1335,7 +1491,10 @@
       "base": {
         "cal": 180,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 9,
+        "carb": 24,
+        "fat": 6
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -1352,7 +1511,10 @@
       "base": {
         "cal": 265,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 9,
+        "carb": 49,
+        "fat": 3
       },
       "pieceWeight": 35,
       "vessel": "slice",
@@ -1369,7 +1531,10 @@
       "base": {
         "cal": 406,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 8,
+        "carb": 45,
+        "fat": 21
       },
       "pieceWeight": 45,
       "vessel": "piece",
@@ -1386,7 +1551,10 @@
       "base": {
         "cal": 112,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 4,
+        "carb": 23,
+        "fat": 1.5
       },
       "pieceWeight": 150,
       "vessel": "piece",
@@ -1403,7 +1571,10 @@
       "base": {
         "cal": 90,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.6,
+        "carb": 20,
+        "fat": 0.3
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -1420,7 +1591,10 @@
       "base": {
         "cal": 86,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.5,
+        "carb": 20,
+        "fat": 0.2
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -1437,7 +1611,10 @@
       "base": {
         "cal": 64,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.3,
+        "carb": 14,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -1454,7 +1631,10 @@
       "base": {
         "cal": 95,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2,
+        "carb": 15,
+        "fat": 3
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1471,7 +1651,10 @@
       "base": {
         "cal": 140,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.5,
+        "carb": 30,
+        "fat": 0.5
       },
       "pieceWeight": 30,
       "vessel": "piece",
@@ -1488,7 +1671,10 @@
       "base": {
         "cal": 85,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6,
+        "carb": 4,
+        "fat": 5.5
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1505,7 +1691,10 @@
       "base": {
         "cal": 115,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 12,
+        "carb": 4,
+        "fat": 6
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1522,7 +1711,10 @@
       "base": {
         "cal": 125,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 11,
+        "carb": 8,
+        "fat": 6.5
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1539,7 +1731,10 @@
       "base": {
         "cal": 145,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 14,
+        "carb": 6,
+        "fat": 8
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1556,7 +1751,10 @@
       "base": {
         "cal": 95,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 8,
+        "carb": 3,
+        "fat": 6
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1573,7 +1771,10 @@
       "base": {
         "cal": 220,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 16,
+        "carb": 3,
+        "fat": 16
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1590,7 +1791,10 @@
       "base": {
         "cal": 185,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 15,
+        "carb": 4,
+        "fat": 12
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1607,7 +1811,10 @@
       "base": {
         "cal": 350,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 14,
+        "carb": 6,
+        "fat": 32
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1624,7 +1831,10 @@
       "base": {
         "cal": 260,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 16,
+        "carb": 14,
+        "fat": 16
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1641,7 +1851,10 @@
       "base": {
         "cal": 195,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 15,
+        "carb": 10,
+        "fat": 11
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1658,7 +1871,10 @@
       "base": {
         "cal": 180,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 18,
+        "carb": 4,
+        "fat": 10
       },
       "pieceWeight": 180,
       "vessel": "plate",
@@ -1675,7 +1891,10 @@
       "base": {
         "cal": 130,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 12,
+        "carb": 8,
+        "fat": 6
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1692,7 +1911,10 @@
       "base": {
         "cal": 110,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 9,
+        "carb": 6,
+        "fat": 6
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1709,7 +1931,10 @@
       "base": {
         "cal": 140,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 14,
+        "carb": 4,
+        "fat": 8
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1726,7 +1951,10 @@
       "base": {
         "cal": 230,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 15,
+        "carb": 4,
+        "fat": 20
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1743,7 +1971,10 @@
       "base": {
         "cal": 170,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 14,
+        "carb": 7,
+        "fat": 11
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1760,7 +1991,10 @@
       "base": {
         "cal": 180,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 11,
+        "carb": 5,
+        "fat": 14
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1777,7 +2011,10 @@
       "base": {
         "cal": 280,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 16,
+        "carb": 6,
+        "fat": 22
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1794,7 +2031,10 @@
       "base": {
         "cal": 110,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 20,
+        "carb": 1,
+        "fat": 3
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1811,7 +2051,10 @@
       "base": {
         "cal": 160,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 18,
+        "carb": 6,
+        "fat": 8
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1828,7 +2071,10 @@
       "base": {
         "cal": 280,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 14,
+        "carb": 24,
+        "fat": 16
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1845,7 +2091,10 @@
       "base": {
         "cal": 130,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 4,
+        "carb": 7,
+        "fat": 11
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1862,7 +2111,10 @@
       "base": {
         "cal": 140,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 5,
+        "carb": 6,
+        "fat": 12
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1879,7 +2131,10 @@
       "base": {
         "cal": 150,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 3,
+        "carb": 13,
+        "fat": 10
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1896,7 +2151,10 @@
       "base": {
         "cal": 85,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2,
+        "carb": 13,
+        "fat": 3
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1913,7 +2171,10 @@
       "base": {
         "cal": 55,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2,
+        "carb": 7,
+        "fat": 3
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1930,7 +2191,10 @@
       "base": {
         "cal": 70,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2,
+        "carb": 8,
+        "fat": 4
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1947,7 +2211,10 @@
       "base": {
         "cal": 65,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 3,
+        "carb": 7,
+        "fat": 3
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1964,7 +2231,10 @@
       "base": {
         "cal": 60,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2,
+        "carb": 6,
+        "fat": 3
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1981,7 +2251,10 @@
       "base": {
         "cal": 90,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 5,
+        "carb": 7,
+        "fat": 5
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -1998,7 +2271,10 @@
       "base": {
         "cal": 90,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 20,
+        "carb": 1,
+        "fat": 1
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -2015,7 +2291,10 @@
       "base": {
         "cal": 150,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 17,
+        "carb": 4,
+        "fat": 8
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -2032,7 +2311,10 @@
       "base": {
         "cal": 180,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 15,
+        "carb": 5,
+        "fat": 13
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -2049,7 +2331,10 @@
       "base": {
         "cal": 25,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1,
+        "carb": 4,
+        "fat": 1
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -2066,7 +2351,10 @@
       "base": {
         "cal": 30,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1,
+        "carb": 5,
+        "fat": 1
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -2083,7 +2371,10 @@
       "base": {
         "cal": 160,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 13,
+        "carb": 3,
+        "fat": 12
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -2100,7 +2391,10 @@
       "base": {
         "cal": 180,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 12,
+        "carb": 4,
+        "fat": 14
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -2117,7 +2411,10 @@
       "base": {
         "cal": 120,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 18,
+        "carb": 1,
+        "fat": 4
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -2134,7 +2431,10 @@
       "base": {
         "cal": 130,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 18,
+        "carb": 1,
+        "fat": 5
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -2151,7 +2451,10 @@
       "base": {
         "cal": 400,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 18,
+        "carb": 5,
+        "fat": 35
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -2168,7 +2471,10 @@
       "base": {
         "cal": 420,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 16,
+        "carb": 12,
+        "fat": 36
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -2185,7 +2491,10 @@
       "base": {
         "cal": 450,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 15,
+        "carb": 3,
+        "fat": 40
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -2202,7 +2511,10 @@
       "base": {
         "cal": 120,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 8,
+        "carb": 12,
+        "fat": 5
       },
       "pieceWeight": null,
       "vessel": "pot",
@@ -2219,7 +2531,10 @@
       "base": {
         "cal": 150,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 10,
+        "carb": 8,
+        "fat": 9
       },
       "pieceWeight": null,
       "vessel": "pot",
@@ -2236,7 +2551,10 @@
       "base": {
         "cal": 130,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 8,
+        "carb": 10,
+        "fat": 7
       },
       "pieceWeight": null,
       "vessel": "pot",
@@ -2253,7 +2571,10 @@
       "base": {
         "cal": 180,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 10,
+        "carb": 6,
+        "fat": 13
       },
       "pieceWeight": null,
       "vessel": "skewer",
@@ -2270,7 +2591,10 @@
       "base": {
         "cal": 160,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 12,
+        "carb": 10,
+        "fat": 9
       },
       "pieceWeight": null,
       "vessel": "pot",
@@ -2287,7 +2611,10 @@
       "base": {
         "cal": 140,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 14,
+        "carb": 15,
+        "fat": 5
       },
       "pieceWeight": null,
       "vessel": "pot",
@@ -2304,7 +2631,10 @@
       "base": {
         "cal": 150,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 14,
+        "carb": 18,
+        "fat": 6
       },
       "pieceWeight": null,
       "vessel": "pot",
@@ -2321,7 +2651,10 @@
       "base": {
         "cal": 160,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 15,
+        "carb": 8,
+        "fat": 9
       },
       "pieceWeight": null,
       "vessel": "pot",
@@ -2338,7 +2671,10 @@
       "base": {
         "cal": 35,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 5,
+        "carb": 3,
+        "fat": 1
       },
       "pieceWeight": null,
       "vessel": "bowl_soup",
@@ -2355,7 +2691,10 @@
       "base": {
         "cal": 40,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 4,
+        "carb": 5,
+        "fat": 1.5
       },
       "pieceWeight": null,
       "vessel": "bowl_soup",
@@ -2372,7 +2711,10 @@
       "base": {
         "cal": 80,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 8,
+        "carb": 4,
+        "fat": 4
       },
       "pieceWeight": null,
       "vessel": "bowl_soup",
@@ -2389,7 +2731,10 @@
       "base": {
         "cal": 90,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 9,
+        "carb": 8,
+        "fat": 4.5
       },
       "pieceWeight": null,
       "vessel": "bowl_soup",
@@ -2406,7 +2751,10 @@
       "base": {
         "cal": 70,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 7,
+        "carb": 2,
+        "fat": 4
       },
       "pieceWeight": null,
       "vessel": "bowl_soup",
@@ -2423,7 +2771,10 @@
       "base": {
         "cal": 60,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2,
+        "carb": 6,
+        "fat": 4
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -2440,7 +2791,10 @@
       "base": {
         "cal": 280,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 20,
+        "carb": 1,
+        "fat": 21
       },
       "pieceWeight": 50,
       "vessel": "skewer",
@@ -2457,7 +2811,10 @@
       "base": {
         "cal": 250,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 22,
+        "carb": 2,
+        "fat": 16
       },
       "pieceWeight": 45,
       "vessel": "piece",
@@ -2474,7 +2831,10 @@
       "base": {
         "cal": 143,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 20.3,
+        "carb": 0,
+        "fat": 6.2
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2491,7 +2851,10 @@
       "base": {
         "cal": 395,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 14.2,
+        "carb": 0,
+        "fat": 37.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2508,7 +2871,10 @@
       "base": {
         "cal": 155,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 20.5,
+        "carb": 0,
+        "fat": 7.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2525,7 +2891,10 @@
       "base": {
         "cal": 278,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 13.6,
+        "carb": 0,
+        "fat": 24.4
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2542,7 +2911,10 @@
       "base": {
         "cal": 260,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 17.1,
+        "carb": 0,
+        "fat": 22.5
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2559,7 +2931,10 @@
       "base": {
         "cal": 129,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 19.3,
+        "carb": 3.1,
+        "fat": 3.9
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2576,7 +2951,10 @@
       "base": {
         "cal": 55,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 12.2,
+        "carb": 0.9,
+        "fat": 0.3
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2593,7 +2971,10 @@
       "base": {
         "cal": 125,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 22,
+        "carb": 0,
+        "fat": 2.6
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2610,7 +2991,10 @@
       "base": {
         "cal": 350,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 17,
+        "carb": 0,
+        "fat": 32
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2627,7 +3011,10 @@
       "base": {
         "cal": 200,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 22,
+        "carb": 0,
+        "fat": 11
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2644,7 +3031,10 @@
       "base": {
         "cal": 270,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 20,
+        "carb": 0,
+        "fat": 20
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2661,7 +3051,10 @@
       "base": {
         "cal": 450,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 15,
+        "carb": 0,
+        "fat": 42
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2678,7 +3071,10 @@
       "base": {
         "cal": 285,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 20,
+        "carb": 0,
+        "fat": 22
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2695,7 +3091,10 @@
       "base": {
         "cal": 350,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 15,
+        "carb": 0,
+        "fat": 32
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2712,7 +3111,10 @@
       "base": {
         "cal": 133,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 24,
+        "carb": 0,
+        "fat": 2.5
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2729,7 +3131,10 @@
       "base": {
         "cal": 181,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 17,
+        "carb": 0,
+        "fat": 12
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2746,7 +3151,10 @@
       "base": {
         "cal": 200,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 18,
+        "carb": 0,
+        "fat": 14
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2763,7 +3171,10 @@
       "base": {
         "cal": 254,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 23.9,
+        "carb": 2.7,
+        "fat": 16.4
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2780,7 +3191,10 @@
       "base": {
         "cal": 167,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 19,
+        "carb": 0,
+        "fat": 11
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2797,7 +3211,10 @@
       "base": {
         "cal": 93,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 18,
+        "carb": 0,
+        "fat": 2.5
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2814,7 +3231,10 @@
       "base": {
         "cal": 420,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 15,
+        "carb": 0,
+        "fat": 40
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2831,7 +3251,10 @@
       "base": {
         "cal": 190,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 17,
+        "carb": 0,
+        "fat": 12
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2848,7 +3271,10 @@
       "base": {
         "cal": 80,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 15,
+        "carb": 1,
+        "fat": 1.5
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2865,7 +3291,10 @@
       "base": {
         "cal": 144,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 13,
+        "carb": 1.3,
+        "fat": 9
       },
       "pieceWeight": 50,
       "vessel": "piece",
@@ -2882,7 +3311,10 @@
       "base": {
         "cal": 180,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 12,
+        "carb": 0.5,
+        "fat": 13
       },
       "pieceWeight": 60,
       "vessel": "piece",
@@ -2899,7 +3331,10 @@
       "base": {
         "cal": 160,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 12,
+        "carb": 0.5,
+        "fat": 11
       },
       "pieceWeight": 55,
       "vessel": "piece",
@@ -2916,7 +3351,10 @@
       "base": {
         "cal": 190,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 12,
+        "carb": 2.5,
+        "fat": 15
       },
       "pieceWeight": 65,
       "vessel": "piece",
@@ -2933,7 +3371,10 @@
       "base": {
         "cal": 87,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 12,
+        "carb": 1.5,
+        "fat": 4
       },
       "pieceWeight": 90,
       "vessel": "piece",
@@ -2950,7 +3391,10 @@
       "base": {
         "cal": 113,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 17,
+        "carb": 0,
+        "fat": 4.5
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2967,7 +3411,10 @@
       "base": {
         "cal": 105,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 18,
+        "carb": 0,
+        "fat": 3.5
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -2984,7 +3431,10 @@
       "base": {
         "cal": 139,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 20,
+        "carb": 0,
+        "fat": 5.5
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3001,7 +3451,10 @@
       "base": {
         "cal": 127,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 18,
+        "carb": 0,
+        "fat": 6
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3018,7 +3471,10 @@
       "base": {
         "cal": 82,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 15.9,
+        "carb": 0,
+        "fat": 2.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3035,7 +3491,10 @@
       "base": {
         "cal": 109,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 22.8,
+        "carb": 0,
+        "fat": 2.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3052,7 +3511,10 @@
       "base": {
         "cal": 98,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 17.5,
+        "carb": 1.3,
+        "fat": 1.6
       },
       "pieceWeight": 15,
       "vessel": "piece",
@@ -3069,7 +3531,10 @@
       "base": {
         "cal": 78,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 12,
+        "carb": 1,
+        "fat": 2
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3086,7 +3551,10 @@
       "base": {
         "cal": 88,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 18.5,
+        "carb": 0.5,
+        "fat": 1.2
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3103,7 +3571,10 @@
       "base": {
         "cal": 95,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 14,
+        "carb": 0,
+        "fat": 3.5
       },
       "pieceWeight": 150,
       "vessel": "piece",
@@ -3120,7 +3591,10 @@
       "base": {
         "cal": 50,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 9.5,
+        "carb": 1.5,
+        "fat": 0.8
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3137,7 +3611,10 @@
       "base": {
         "cal": 60,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 9.1,
+        "carb": 3.5,
+        "fat": 1.3
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3154,7 +3631,10 @@
       "base": {
         "cal": 86,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 15.1,
+        "carb": 0.6,
+        "fat": 2
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3171,7 +3651,10 @@
       "base": {
         "cal": 443,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 16,
+        "carb": 0.3,
+        "fat": 42
       },
       "pieceWeight": null,
       "vessel": "slice",
@@ -3188,7 +3671,10 @@
       "base": {
         "cal": 187,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 22,
+        "carb": 0.9,
+        "fat": 10.7
       },
       "pieceWeight": null,
       "vessel": "slice",
@@ -3205,7 +3691,10 @@
       "base": {
         "cal": 470,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 16.6,
+        "carb": 3.5,
+        "fat": 44
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3222,7 +3711,10 @@
       "base": {
         "cal": 253,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 8.5,
+        "carb": 3.5,
+        "fat": 24
       },
       "pieceWeight": null,
       "vessel": "slice",
@@ -3239,7 +3731,10 @@
       "base": {
         "cal": 480,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 17,
+        "carb": 8,
+        "fat": 45
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3256,7 +3751,10 @@
       "base": {
         "cal": 81,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 8.1,
+        "carb": 2.1,
+        "fat": 4.8
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3273,7 +3771,10 @@
       "base": {
         "cal": 167,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 18.5,
+        "carb": 5.3,
+        "fat": 8.4
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3290,7 +3791,10 @@
       "base": {
         "cal": 426,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 44.7,
+        "carb": 24.5,
+        "fat": 22.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3307,7 +3811,10 @@
       "base": {
         "cal": 236,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 18.5,
+        "carb": 6.3,
+        "fat": 15.5
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3324,7 +3831,10 @@
       "base": {
         "cal": 185,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 24.2,
+        "carb": 5.6,
+        "fat": 9.3
       },
       "pieceWeight": null,
       "vessel": "slice",
@@ -3341,7 +3851,10 @@
       "base": {
         "cal": 15,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.3,
+        "carb": 2.0,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3358,7 +3871,10 @@
       "base": {
         "cal": 18,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.4,
+        "carb": 2.5,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3375,7 +3891,10 @@
       "base": {
         "cal": 16,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.5,
+        "carb": 2.0,
+        "fat": 0.2
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3392,7 +3911,10 @@
       "base": {
         "cal": 14,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.4,
+        "carb": 2.0,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3409,7 +3931,10 @@
       "base": {
         "cal": 24,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.6,
+        "carb": 3.0,
+        "fat": 0.3
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3426,7 +3951,10 @@
       "base": {
         "cal": 15,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.5,
+        "carb": 2.5,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3443,7 +3971,10 @@
       "base": {
         "cal": 20,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.7,
+        "carb": 2.5,
+        "fat": 0.3
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3460,7 +3991,10 @@
       "base": {
         "cal": 17,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.5,
+        "carb": 3.0,
+        "fat": 0.2
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3477,7 +4011,10 @@
       "base": {
         "cal": 20,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.8,
+        "carb": 3.5,
+        "fat": 0.2
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3494,7 +4031,10 @@
       "base": {
         "cal": 17,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.6,
+        "carb": 2.5,
+        "fat": 0.2
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3511,7 +4051,10 @@
       "base": {
         "cal": 20,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.9,
+        "carb": 2.5,
+        "fat": 0.3
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -3528,7 +4071,10 @@
       "base": {
         "cal": 14,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.6,
+        "carb": 2.2,
+        "fat": 0.2
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -3545,7 +4091,10 @@
       "base": {
         "cal": 26,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.4,
+        "carb": 3.5,
+        "fat": 0.5
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -3562,7 +4111,10 @@
       "base": {
         "cal": 35,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.0,
+        "carb": 4.0,
+        "fat": 0.5
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -3579,7 +4131,10 @@
       "base": {
         "cal": 30,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.8,
+        "carb": 5.5,
+        "fat": 0.3
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -3596,7 +4151,10 @@
       "base": {
         "cal": 36,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 3.3,
+        "carb": 5.0,
+        "fat": 0.3
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -3613,7 +4171,10 @@
       "base": {
         "cal": 25,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.8,
+        "carb": 4.0,
+        "fat": 0.2
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -3630,7 +4191,10 @@
       "base": {
         "cal": 77,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.0,
+        "carb": 16.5,
+        "fat": 0.1
       },
       "pieceWeight": 150,
       "vessel": "plate",
@@ -3647,7 +4211,10 @@
       "base": {
         "cal": 57,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.9,
+        "carb": 11.0,
+        "fat": 0.1
       },
       "pieceWeight": 100,
       "vessel": "plate",
@@ -3664,7 +4231,10 @@
       "base": {
         "cal": 73,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.9,
+        "carb": 15.0,
+        "fat": 0.1
       },
       "pieceWeight": 300,
       "vessel": "plate",
@@ -3681,7 +4251,10 @@
       "base": {
         "cal": 81,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.7,
+        "carb": 18.0,
+        "fat": 0.3
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -3698,7 +4271,10 @@
       "base": {
         "cal": 73,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.4,
+        "carb": 16.0,
+        "fat": 0.1
       },
       "pieceWeight": 20,
       "vessel": "plate",
@@ -3715,7 +4291,10 @@
       "base": {
         "cal": 16,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.8,
+        "carb": 3.2,
+        "fat": 0.1
       },
       "pieceWeight": 600,
       "vessel": "plate",
@@ -3732,7 +4311,10 @@
       "base": {
         "cal": 35,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.8,
+        "carb": 8.0,
+        "fat": 0.2
       },
       "pieceWeight": 80,
       "vessel": "plate",
@@ -3749,7 +4331,10 @@
       "base": {
         "cal": 18,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.8,
+        "carb": 3.5,
+        "fat": 0.1
       },
       "pieceWeight": 500,
       "vessel": "plate",
@@ -3766,7 +4351,10 @@
       "base": {
         "cal": 18,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.9,
+        "carb": 3.5,
+        "fat": 0.2
       },
       "pieceWeight": 120,
       "vessel": "plate",
@@ -3783,7 +4371,10 @@
       "base": {
         "cal": 15,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.8,
+        "carb": 2.5,
+        "fat": 0.1
       },
       "pieceWeight": 200,
       "vessel": "plate",
@@ -3800,7 +4391,10 @@
       "base": {
         "cal": 11,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.4,
+        "carb": 2.0,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -3817,7 +4411,10 @@
       "base": {
         "cal": 23,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.6,
+        "carb": 5.0,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "plate",
@@ -3834,7 +4431,10 @@
       "base": {
         "cal": 18,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.9,
+        "carb": 2.8,
+        "fat": 0.1
       },
       "pieceWeight": 200,
       "vessel": "plate",
@@ -3851,7 +4451,10 @@
       "base": {
         "cal": 19,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.4,
+        "carb": 3.6,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3868,7 +4471,10 @@
       "base": {
         "cal": 16,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.8,
+        "carb": 2.6,
+        "fat": 0.2
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3885,7 +4491,10 @@
       "base": {
         "cal": 24,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.1,
+        "carb": 4.5,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3902,7 +4511,10 @@
       "base": {
         "cal": 15,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.0,
+        "carb": 3.9,
+        "fat": 0.3
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3919,7 +4531,10 @@
       "base": {
         "cal": 27,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.8,
+        "carb": 6.0,
+        "fat": 0.2
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3936,7 +4551,10 @@
       "base": {
         "cal": 45,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.0,
+        "carb": 8.0,
+        "fat": 0.5
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3953,7 +4571,10 @@
       "base": {
         "cal": 28,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.0,
+        "carb": 5.0,
+        "fat": 0.2
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3970,7 +4591,10 @@
       "base": {
         "cal": 30,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.0,
+        "carb": 5.5,
+        "fat": 0.2
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -3987,7 +4611,10 @@
       "base": {
         "cal": 27,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.8,
+        "carb": 4.0,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -4004,7 +4631,10 @@
       "base": {
         "cal": 111,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 8.0,
+        "carb": 20.0,
+        "fat": 0.4
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -4021,7 +4651,10 @@
       "base": {
         "cal": 131,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 13.0,
+        "carb": 5.0,
+        "fat": 5.0
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -4038,7 +4671,10 @@
       "base": {
         "cal": 17,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.5,
+        "carb": 1.8,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -4055,7 +4691,10 @@
       "base": {
         "cal": 14,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.0,
+        "carb": 1.3,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -4072,7 +4711,10 @@
       "base": {
         "cal": 26,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.2,
+        "carb": 4.0,
+        "fat": 0.3
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -4089,7 +4731,10 @@
       "base": {
         "cal": 29,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.3,
+        "carb": 5.5,
+        "fat": 0.3
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -4106,7 +4751,10 @@
       "base": {
         "cal": 35,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.0,
+        "carb": 6.0,
+        "fat": 0.6
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -4123,7 +4771,10 @@
       "base": {
         "cal": 24,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.9,
+        "carb": 4.0,
+        "fat": 0.4
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -4140,7 +4791,10 @@
       "base": {
         "cal": 25,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.5,
+        "carb": 5.0,
+        "fat": 0.2
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -4157,7 +4811,10 @@
       "base": {
         "cal": 25,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.6,
+        "carb": 6.0,
+        "fat": 0.2
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -4174,7 +4831,10 @@
       "base": {
         "cal": 13,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.8,
+        "carb": 2.0,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -4191,7 +4851,10 @@
       "base": {
         "cal": 20,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.0,
+        "carb": 3.0,
+        "fat": 0.2
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -4208,7 +4871,10 @@
       "base": {
         "cal": 19,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.6,
+        "carb": 2.0,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -4225,7 +4891,10 @@
       "base": {
         "cal": 14,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.9,
+        "carb": 2.0,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -4242,7 +4911,10 @@
       "base": {
         "cal": 20,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.4,
+        "carb": 3.0,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -4259,7 +4931,10 @@
       "base": {
         "cal": 31,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.8,
+        "carb": 6.0,
+        "fat": 0.2
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -4276,7 +4951,10 @@
       "base": {
         "cal": 40,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.1,
+        "carb": 9.3,
+        "fat": 0.1
       },
       "pieceWeight": 150,
       "vessel": "piece",
@@ -4293,7 +4971,10 @@
       "base": {
         "cal": 130,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 4.4,
+        "carb": 29.9,
+        "fat": 0.2
       },
       "pieceWeight": 8,
       "vessel": "piece",
@@ -4310,7 +4991,10 @@
       "base": {
         "cal": 44,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.3,
+        "carb": 9.2,
+        "fat": 0.6
       },
       "pieceWeight": 20,
       "vessel": "piece",
@@ -4327,7 +5011,10 @@
       "base": {
         "cal": 27,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.3,
+        "carb": 5.7,
+        "fat": 0.3
       },
       "pieceWeight": 50,
       "vessel": "piece",
@@ -4344,7 +5031,10 @@
       "base": {
         "cal": 53,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.3,
+        "carb": 13.5,
+        "fat": 0.2
       },
       "pieceWeight": 180,
       "vessel": "piece",
@@ -4361,7 +5051,10 @@
       "base": {
         "cal": 93,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.5,
+        "carb": 22.0,
+        "fat": 0.2
       },
       "pieceWeight": 120,
       "vessel": "piece",
@@ -4378,7 +5071,10 @@
       "base": {
         "cal": 47,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.8,
+        "carb": 11.3,
+        "fat": 0.1
       },
       "pieceWeight": 150,
       "vessel": "piece",
@@ -4395,7 +5091,10 @@
       "base": {
         "cal": 44,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.9,
+        "carb": 11.2,
+        "fat": 0.1
       },
       "pieceWeight": 100,
       "vessel": "piece",
@@ -4412,7 +5111,10 @@
       "base": {
         "cal": 41,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.6,
+        "carb": 9.1,
+        "fat": 0.2
       },
       "pieceWeight": 200,
       "vessel": "piece",
@@ -4429,7 +5131,10 @@
       "base": {
         "cal": 29,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.9,
+        "carb": 9.5,
+        "fat": 0.1
       },
       "pieceWeight": 80,
       "vessel": "piece",
@@ -4446,7 +5151,10 @@
       "base": {
         "cal": 46,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.5,
+        "carb": 11.0,
+        "fat": 0.4
       },
       "pieceWeight": 12,
       "vessel": "piece",
@@ -4463,7 +5171,10 @@
       "base": {
         "cal": 55,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.7,
+        "carb": 13.8,
+        "fat": 0.4
       },
       "pieceWeight": 10,
       "vessel": "piece",
@@ -4480,7 +5191,10 @@
       "base": {
         "cal": 32,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.8,
+        "carb": 7.7,
+        "fat": 0.3
       },
       "pieceWeight": 20,
       "vessel": "piece",
@@ -4497,7 +5211,10 @@
       "base": {
         "cal": 57,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.7,
+        "carb": 13.2,
+        "fat": 0.3
       },
       "pieceWeight": 3,
       "vessel": "piece",
@@ -4514,7 +5231,10 @@
       "base": {
         "cal": 40,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.0,
+        "carb": 9.7,
+        "fat": 0.3
       },
       "pieceWeight": 5,
       "vessel": "piece",
@@ -4531,7 +5251,10 @@
       "base": {
         "cal": 31,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.6,
+        "carb": 6.2,
+        "fat": 0.1
       },
       "pieceWeight": 600,
       "vessel": "piece",
@@ -4548,7 +5271,10 @@
       "base": {
         "cal": 36,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.6,
+        "carb": 8.2,
+        "fat": 0.1
       },
       "pieceWeight": 400,
       "vessel": "piece",
@@ -4565,7 +5291,10 @@
       "base": {
         "cal": 26,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.4,
+        "carb": 6.3,
+        "fat": 0.1
       },
       "pieceWeight": 500,
       "vessel": "piece",
@@ -4582,7 +5311,10 @@
       "base": {
         "cal": 43,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.9,
+        "carb": 10.5,
+        "fat": 0.1
       },
       "pieceWeight": 150,
       "vessel": "piece",
@@ -4599,7 +5331,10 @@
       "base": {
         "cal": 49,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.9,
+        "carb": 11.8,
+        "fat": 0.2
       },
       "pieceWeight": 120,
       "vessel": "piece",
@@ -4616,7 +5351,10 @@
       "base": {
         "cal": 38,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.8,
+        "carb": 9.6,
+        "fat": 0.2
       },
       "pieceWeight": 30,
       "vessel": "piece",
@@ -4633,7 +5371,10 @@
       "base": {
         "cal": 39,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.9,
+        "carb": 9.2,
+        "fat": 0.2
       },
       "pieceWeight": 25,
       "vessel": "piece",
@@ -4650,7 +5391,10 @@
       "base": {
         "cal": 52,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.0,
+        "carb": 11.2,
+        "fat": 0.2
       },
       "pieceWeight": 8,
       "vessel": "piece",
@@ -4667,7 +5411,10 @@
       "base": {
         "cal": 63,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.0,
+        "carb": 15.0,
+        "fat": 0.2
       },
       "pieceWeight": 12,
       "vessel": "piece",
@@ -4684,7 +5431,10 @@
       "base": {
         "cal": 42,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.4,
+        "carb": 10.9,
+        "fat": 0.1
       },
       "pieceWeight": 250,
       "vessel": "piece",
@@ -4701,7 +5451,10 @@
       "base": {
         "cal": 42,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.4,
+        "carb": 10.0,
+        "fat": 0.2
       },
       "pieceWeight": 150,
       "vessel": "piece",
@@ -4718,7 +5471,10 @@
       "base": {
         "cal": 60,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.6,
+        "carb": 14.0,
+        "fat": 0.3
       },
       "pieceWeight": 200,
       "vessel": "piece",
@@ -4735,7 +5491,10 @@
       "base": {
         "cal": 44,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.5,
+        "carb": 10.5,
+        "fat": 0.1
       },
       "pieceWeight": 300,
       "vessel": "piece",
@@ -4752,7 +5511,10 @@
       "base": {
         "cal": 27,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.5,
+        "carb": 6.3,
+        "fat": 0.1
       },
       "pieceWeight": 500,
       "vessel": "piece",
@@ -4769,7 +5531,10 @@
       "base": {
         "cal": 50,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.1,
+        "carb": 11.0,
+        "fat": 0.3
       },
       "pieceWeight": 200,
       "vessel": "piece",
@@ -4786,7 +5551,10 @@
       "base": {
         "cal": 61,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.1,
+        "carb": 14.5,
+        "fat": 0.5
       },
       "pieceWeight": 80,
       "vessel": "piece",
@@ -4803,7 +5571,10 @@
       "base": {
         "cal": 42,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.4,
+        "carb": 9.5,
+        "fat": 0.6
       },
       "pieceWeight": 15,
       "vessel": "piece",
@@ -4820,7 +5591,10 @@
       "base": {
         "cal": 147,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.4,
+        "carb": 20.0,
+        "fat": 7.5
       },
       "pieceWeight": 150,
       "vessel": "piece",
@@ -4837,7 +5611,10 @@
       "base": {
         "cal": 68,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.4,
+        "carb": 16.0,
+        "fat": 0.3
       },
       "pieceWeight": 100,
       "vessel": "piece",
@@ -4854,7 +5631,10 @@
       "base": {
         "cal": 241,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 3.3,
+        "carb": 11.5,
+        "fat": 22.7
       },
       "pieceWeight": 500,
       "vessel": "piece",
@@ -4871,7 +5651,10 @@
       "base": {
         "cal": 70,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.8,
+        "carb": 16.5,
+        "fat": 0.3
       },
       "pieceWeight": 20,
       "vessel": "piece",
@@ -4888,7 +5671,10 @@
       "base": {
         "cal": 60,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.1,
+        "carb": 13.0,
+        "fat": 0.2
       },
       "pieceWeight": 15,
       "vessel": "piece",
@@ -4905,7 +5691,10 @@
       "base": {
         "cal": 37,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.6,
+        "carb": 8.7,
+        "fat": 0.1
       },
       "pieceWeight": 15,
       "vessel": "piece",
@@ -4922,7 +5711,10 @@
       "base": {
         "cal": 68,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.9,
+        "carb": 15.0,
+        "fat": 0.2
       },
       "pieceWeight": 250,
       "vessel": "piece",
@@ -4939,7 +5731,10 @@
       "base": {
         "cal": 65,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.7,
+        "carb": 15.0,
+        "fat": 0.1
       },
       "pieceWeight": 180,
       "vessel": "piece",
@@ -4956,7 +5751,10 @@
       "base": {
         "cal": 125,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.2,
+        "carb": 30.0,
+        "fat": 0.2
       },
       "pieceWeight": 15,
       "vessel": "piece",
@@ -4973,7 +5771,10 @@
       "base": {
         "cal": 161,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2.0,
+        "carb": 9.0,
+        "fat": 14.7
       },
       "pieceWeight": 150,
       "vessel": "piece",
@@ -4990,7 +5791,10 @@
       "base": {
         "cal": 55,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1.0,
+        "carb": 12.0,
+        "fat": 0.4
       },
       "pieceWeight": 50,
       "vessel": "piece",
@@ -5007,7 +5811,10 @@
       "base": {
         "cal": 30,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0.8,
+        "carb": 6.6,
+        "fat": 0.3
       },
       "pieceWeight": 5,
       "vessel": "piece",
@@ -5024,7 +5831,10 @@
       "base": {
         "cal": 43,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.5,
+        "carb": 4.4,
+        "fat": 2.8
       },
       "pieceWeight": null,
       "vessel": "cup",
@@ -5044,7 +5854,10 @@
       "base": {
         "cal": 85,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 1.1,
+        "carb": 5.6,
+        "fat": 6.8
       },
       "pieceWeight": null,
       "vessel": "cup",
@@ -5064,7 +5877,10 @@
       "base": {
         "cal": 45,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.5,
+        "carb": 11.0,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "cup",
@@ -5084,7 +5900,10 @@
       "base": {
         "cal": 35,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.2,
+        "carb": 9.0,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "cup",
@@ -5104,7 +5923,10 @@
       "base": {
         "cal": 110,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 2.0,
+        "carb": 18.0,
+        "fat": 3.5
       },
       "pieceWeight": null,
       "vessel": "cup",
@@ -5123,7 +5945,10 @@
       "base": {
         "cal": 85,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 1.5,
+        "carb": 16.0,
+        "fat": 1.0
       },
       "pieceWeight": null,
       "vessel": "cup",
@@ -5142,7 +5967,10 @@
       "base": {
         "cal": 5,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.1,
+        "carb": 0.1,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "cup_coffee",
@@ -5161,7 +5989,10 @@
       "base": {
         "cal": 48,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 2.5,
+        "carb": 3.8,
+        "fat": 1.6
       },
       "pieceWeight": null,
       "vessel": "cup_coffee",
@@ -5180,7 +6011,10 @@
       "base": {
         "cal": 42,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 2.2,
+        "carb": 3.4,
+        "fat": 1.4
       },
       "pieceWeight": null,
       "vessel": "cup_coffee",
@@ -5199,7 +6033,10 @@
       "base": {
         "cal": 72,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 2.4,
+        "carb": 10.5,
+        "fat": 1.8
       },
       "pieceWeight": null,
       "vessel": "cup_coffee",
@@ -5216,7 +6053,10 @@
       "base": {
         "cal": 18,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.2,
+        "carb": 4.0,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "cup_coffee",
@@ -5235,7 +6075,10 @@
       "base": {
         "cal": 42,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0,
+        "carb": 10.6,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "cup_soda",
@@ -5252,7 +6095,10 @@
       "base": {
         "cal": 40,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0,
+        "carb": 10.0,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "cup_soda",
@@ -5269,7 +6115,10 @@
       "base": {
         "cal": 0,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0,
+        "carb": 0,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "bottle",
@@ -5286,7 +6135,10 @@
       "base": {
         "cal": 65,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 3.0,
+        "carb": 4.7,
+        "fat": 3.2
       },
       "pieceWeight": null,
       "vessel": "mug",
@@ -5303,7 +6155,10 @@
       "base": {
         "cal": 72,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 3.0,
+        "carb": 9.5,
+        "fat": 1.8
       },
       "pieceWeight": null,
       "vessel": "glass",
@@ -5320,7 +6175,10 @@
       "base": {
         "cal": 32,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 1.8,
+        "carb": 1.5,
+        "fat": 1.6
       },
       "pieceWeight": null,
       "vessel": "mug",
@@ -5337,7 +6195,10 @@
       "base": {
         "cal": 35,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 2.0,
+        "carb": 2.0,
+        "fat": 1.5
       },
       "pieceWeight": null,
       "vessel": "mug",
@@ -5354,7 +6215,10 @@
       "base": {
         "cal": 60,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.6,
+        "carb": 8.5,
+        "fat": 2.5
       },
       "pieceWeight": null,
       "vessel": "mug",
@@ -5371,7 +6235,10 @@
       "base": {
         "cal": 45,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.5,
+        "carb": 10.4,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "glass",
@@ -5388,7 +6255,10 @@
       "base": {
         "cal": 46,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.1,
+        "carb": 11.3,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "glass",
@@ -5405,7 +6275,10 @@
       "base": {
         "cal": 25,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.4,
+        "carb": 6.0,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "glass",
@@ -5422,7 +6295,10 @@
       "base": {
         "cal": 19,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.4,
+        "carb": 3.7,
+        "fat": 0.1
       },
       "pieceWeight": null,
       "vessel": "glass",
@@ -5439,7 +6315,10 @@
       "base": {
         "cal": 2,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.1,
+        "carb": 0.3,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "mug",
@@ -5456,7 +6335,10 @@
       "base": {
         "cal": 2,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.1,
+        "carb": 0.3,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "mug",
@@ -5473,7 +6355,10 @@
       "base": {
         "cal": 2,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.1,
+        "carb": 0.3,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "mug",
@@ -5490,7 +6375,10 @@
       "base": {
         "cal": 2,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.1,
+        "carb": 0.3,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "mug",
@@ -5507,7 +6395,10 @@
       "base": {
         "cal": 2,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.1,
+        "carb": 0.3,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "mug",
@@ -5524,7 +6415,10 @@
       "base": {
         "cal": 43,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.4,
+        "carb": 3.6,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "bottle",
@@ -5541,7 +6435,10 @@
       "base": {
         "cal": 295,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0,
+        "carb": 0.1,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "shot",
@@ -5558,7 +6455,10 @@
       "base": {
         "cal": 80,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.1,
+        "carb": 0.4,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "glass_wine",
@@ -5575,7 +6475,10 @@
       "base": {
         "cal": 100,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0,
+        "carb": 8,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "shot",
@@ -5592,7 +6495,10 @@
       "base": {
         "cal": 45,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0,
+        "carb": 11,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "can",
@@ -5609,7 +6515,10 @@
       "base": {
         "cal": 28,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0,
+        "carb": 7,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "bottle",
@@ -5626,7 +6535,10 @@
       "base": {
         "cal": 22,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0,
+        "carb": 5.5,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "bottle",
@@ -5643,7 +6555,10 @@
       "base": {
         "cal": 38,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0,
+        "carb": 9.5,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "bottle",
@@ -5660,7 +6575,10 @@
       "base": {
         "cal": 95,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 3,
+        "carb": 13,
+        "fat": 3.5
       },
       "pieceWeight": null,
       "vessel": "mug",
@@ -5677,7 +6595,10 @@
       "base": {
         "cal": 55,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0.5,
+        "carb": 13,
+        "fat": 0.3
       },
       "pieceWeight": null,
       "vessel": "glass",
@@ -5694,7 +6615,10 @@
       "base": {
         "cal": 0,
         "per": 100,
-        "unit": "ml"
+        "unit": "ml",
+        "protein": 0,
+        "carb": 0,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "bottle",
@@ -5711,7 +6635,10 @@
       "base": {
         "cal": 536,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6,
+        "carb": 53,
+        "fat": 34
       },
       "pieceWeight": null,
       "vessel": "bag",
@@ -5728,7 +6655,10 @@
       "base": {
         "cal": 312,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 3.4,
+        "carb": 41,
+        "fat": 15
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -5745,7 +6675,10 @@
       "base": {
         "cal": 510,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6,
+        "carb": 55,
+        "fat": 26
       },
       "pieceWeight": null,
       "vessel": "bag",
@@ -5762,7 +6695,10 @@
       "base": {
         "cal": 470,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 5.5,
+        "carb": 48,
+        "fat": 26
       },
       "pieceWeight": null,
       "vessel": "bag",
@@ -5779,7 +6715,10 @@
       "base": {
         "cal": 390,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 4,
+        "carb": 80,
+        "fat": 5
       },
       "pieceWeight": null,
       "vessel": "bag",
@@ -5796,7 +6735,10 @@
       "base": {
         "cal": 450,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 7,
+        "carb": 70,
+        "fat": 15
       },
       "pieceWeight": null,
       "vessel": "bag",
@@ -5813,7 +6755,10 @@
       "base": {
         "cal": 500,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6,
+        "carb": 60,
+        "fat": 25
       },
       "pieceWeight": 12,
       "vessel": "bag",
@@ -5830,7 +6775,10 @@
       "base": {
         "cal": 480,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 5,
+        "carb": 62,
+        "fat": 22
       },
       "pieceWeight": 8,
       "vessel": "bag",
@@ -5847,7 +6795,10 @@
       "base": {
         "cal": 510,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6,
+        "carb": 56,
+        "fat": 27
       },
       "pieceWeight": 10,
       "vessel": "bag",
@@ -5864,7 +6815,10 @@
       "base": {
         "cal": 599,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 7,
+        "carb": 46,
+        "fat": 39
       },
       "pieceWeight": 10,
       "vessel": "piece",
@@ -5881,7 +6835,10 @@
       "base": {
         "cal": 535,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 7,
+        "carb": 59,
+        "fat": 30
       },
       "pieceWeight": 10,
       "vessel": "piece",
@@ -5898,7 +6855,10 @@
       "base": {
         "cal": 360,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6,
+        "carb": 42,
+        "fat": 18
       },
       "pieceWeight": 80,
       "vessel": "piece",
@@ -5915,7 +6875,10 @@
       "base": {
         "cal": 340,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6.5,
+        "carb": 25,
+        "fat": 24
       },
       "pieceWeight": 100,
       "vessel": "piece",
@@ -5932,7 +6895,10 @@
       "base": {
         "cal": 280,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 4,
+        "carb": 18,
+        "fat": 21
       },
       "pieceWeight": 100,
       "vessel": "piece",
@@ -5949,7 +6915,10 @@
       "base": {
         "cal": 452,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 5.5,
+        "carb": 51,
+        "fat": 25
       },
       "pieceWeight": 80,
       "vessel": "piece",
@@ -5966,7 +6935,10 @@
       "base": {
         "cal": 330,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6,
+        "carb": 28,
+        "fat": 20
       },
       "pieceWeight": 55,
       "vessel": "piece",
@@ -5983,7 +6955,10 @@
       "base": {
         "cal": 320,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 6,
+        "carb": 28,
+        "fat": 20
       },
       "pieceWeight": 60,
       "vessel": "piece",
@@ -6000,7 +6975,10 @@
       "base": {
         "cal": 200,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 3,
+        "carb": 25,
+        "fat": 11
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -6017,7 +6995,10 @@
       "base": {
         "cal": 140,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 2,
+        "carb": 22,
+        "fat": 5
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -6034,7 +7015,10 @@
       "base": {
         "cal": 80,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0,
+        "carb": 20,
+        "fat": 0
       },
       "pieceWeight": 80,
       "vessel": "piece",
@@ -6051,7 +7035,10 @@
       "base": {
         "cal": 600,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 15,
+        "carb": 18,
+        "fat": 53
       },
       "pieceWeight": null,
       "vessel": "bag",
@@ -6068,7 +7055,10 @@
       "base": {
         "cal": 600,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 18,
+        "carb": 15,
+        "fat": 53
       },
       "pieceWeight": null,
       "vessel": "bag",
@@ -6085,7 +7075,10 @@
       "base": {
         "cal": 570,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 25,
+        "carb": 16,
+        "fat": 49
       },
       "pieceWeight": null,
       "vessel": "bag",
@@ -6102,7 +7095,10 @@
       "base": {
         "cal": 560,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 20,
+        "carb": 22,
+        "fat": 44
       },
       "pieceWeight": null,
       "vessel": "bag",
@@ -6119,7 +7115,10 @@
       "base": {
         "cal": 550,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 14,
+        "carb": 30,
+        "fat": 43
       },
       "pieceWeight": null,
       "vessel": "bag",
@@ -6136,7 +7135,10 @@
       "base": {
         "cal": 650,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 15,
+        "carb": 10,
+        "fat": 63
       },
       "pieceWeight": null,
       "vessel": "bag",
@@ -6153,7 +7155,10 @@
       "base": {
         "cal": 60,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0,
+        "carb": 15,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -6170,7 +7175,10 @@
       "base": {
         "cal": 120,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 3,
+        "carb": 16,
+        "fat": 4
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -6187,7 +7195,10 @@
       "base": {
         "cal": 360,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 1,
+        "carb": 88,
+        "fat": 0
       },
       "pieceWeight": 15,
       "vessel": "bag",
@@ -6204,7 +7215,10 @@
       "base": {
         "cal": 380,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 8,
+        "carb": 42,
+        "fat": 20
       },
       "pieceWeight": null,
       "vessel": "bag",
@@ -6221,7 +7235,10 @@
       "base": {
         "cal": 300,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 35,
+        "carb": 20,
+        "fat": 12
       },
       "pieceWeight": null,
       "vessel": "bag",
@@ -6238,7 +7255,10 @@
       "base": {
         "cal": 280,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 25,
+        "carb": 30,
+        "fat": 10
       },
       "pieceWeight": null,
       "vessel": "bag",
@@ -6255,7 +7275,10 @@
       "base": {
         "cal": 150,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 8,
+        "carb": 10,
+        "fat": 8
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -6272,7 +7295,10 @@
       "base": {
         "cal": 400,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 7,
+        "carb": 50,
+        "fat": 20
       },
       "pieceWeight": 75,
       "vessel": "piece",
@@ -6289,7 +7315,10 @@
       "base": {
         "cal": 420,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 7,
+        "carb": 58,
+        "fat": 18
       },
       "pieceWeight": 30,
       "vessel": "piece",
@@ -6306,7 +7335,10 @@
       "base": {
         "cal": 450,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 8,
+        "carb": 52,
+        "fat": 24
       },
       "pieceWeight": null,
       "vessel": "piece",
@@ -6323,7 +7355,10 @@
       "base": {
         "cal": 300,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0,
+        "carb": 75,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "bag",
@@ -6340,7 +7375,10 @@
       "base": {
         "cal": 280,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0,
+        "carb": 70,
+        "fat": 0
       },
       "pieceWeight": null,
       "vessel": "bag",
@@ -6357,7 +7395,10 @@
       "base": {
         "cal": 280,
         "per": 100,
-        "unit": "g"
+        "unit": "g",
+        "protein": 0,
+        "carb": 75,
+        "fat": 5
       },
       "pieceWeight": 2,
       "vessel": "piece",
