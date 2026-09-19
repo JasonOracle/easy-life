@@ -1,0 +1,95 @@
+# 选项模板集（optTpl）—— 全局单一事实来源
+#
+# 用途：UI 靠它生成「选项」控件（分段 / 多选 chips）；食物条目用 `opts: [<key>, ...]` 引用。
+# 架构依据（FoodLibraryPlan 10.2.1）：甜度是奶茶的，但「选项随食物变化」是通用的 ——
+#   所以用「模板 + 引用」，不给任何单品硬编码字段。
+#
+# ⚠️ delta_kcal 说明：除奶茶 sweet 外均为「量级估算」（estimate: true），
+#    落地前必须以品牌官方营养标签或实测替换。本文件不含 base 热量。
+#
+# ⚠️ 与 milk_tea.yaml 的关系：milk_tea.yaml 内的 opt_templates 段将迁移至本文件，
+#    本文件为唯一事实来源；迁移前两处定义必须保持一致。
+
+version: "1.0"
+
+opt_templates:
+
+  # ── 奶茶：甜度 5 档 ───────────────────────────────────────────
+  sweet:
+    key: sweet
+    label: 甜度
+    def: full
+    type: single
+    scale: by_capacity          # delta 按实际容量线性缩放（基准 500ml）
+    base_amount: 500
+    base_unit: ml
+    hint: "甜度为估算值，各品牌糖量标准不同"
+    opts:
+      - { k: none,  name: 无糖, delta_kcal: 0,   estimate: false }
+      - { k: light, name: 三分, delta_kcal: 30,  estimate: true }
+      - { k: half,  name: 五分, delta_kcal: 55,  estimate: true }
+      - { k: less,  name: 七分, delta_kcal: 80,  estimate: true }
+      - { k: full,  name: 全糖, delta_kcal: 110, estimate: true }
+
+  # ── 奶茶：加料（多选）──────────────────────────────────────────
+  topping:
+    key: topping
+    label: 加料
+    def: []
+    type: multi
+    scale: none
+    hint: "加料热量为量级估算，各品牌分量差异大"
+    opts:
+      - { k: pearl,   name: 珍珠, delta_kcal: 120, estimate: true }
+      - { k: coconut, name: 椰果, delta_kcal: 60,  estimate: true }
+      - { k: taro,    name: 芋泥, delta_kcal: 150, estimate: true }
+      - { k: cheese,  name: 奶盖, delta_kcal: 180, estimate: true }
+      - { k: pudding, name: 布丁, delta_kcal: 100, estimate: true }
+
+  # ── 咖啡：加糖包 ──────────────────────────────────────────────
+  # 用于「本身无糖、甜度靠另加白砂糖」的咖啡：美式、速溶、冷萃
+  # 独立于 sweet 的理由：咖啡的甜度单位是「糖包」，不是「几分糖」；
+  # 且 1 包白砂糖 4g × 4 kcal/g = 16 kcal，与奶茶按容量缩放的糖浆模型不通用。
+  sugar_pack:
+    key: sugar_pack
+    label: 加糖
+    def: zero
+    type: single
+    scale: none
+    hint: "按白砂糖包计，1 包约 4g"
+    opts:
+      - { k: zero, name: 不加糖, delta_kcal: 0,  estimate: false }
+      - { k: one,  name: 1包,   delta_kcal: 16, estimate: true }
+      - { k: two,  name: 2包,   delta_kcal: 32, estimate: true }
+
+  # ── 咖啡：风味糖浆泵数 ────────────────────────────────────────
+  # 用于「奶咖 + 风味糖浆」：拿铁、卡布奇诺（香草/焦糖/榛果）
+  # 独立于 sugar_pack 的理由：糖浆按「泵」计，1 泵约 5ml，热量密度高于白砂糖
+  syrup_pump:
+    key: syrup_pump
+    label: 糖浆
+    def: zero
+    type: single
+    scale: none
+    hint: "风味糖浆按泵计，1 泵约 5ml"
+    opts:
+      - { k: zero, name: 不加, delta_kcal: 0,  estimate: false }
+      - { k: one,  name: 1泵,  delta_kcal: 20, estimate: true }
+      - { k: two,  name: 2泵,  delta_kcal: 40, estimate: true }
+      - { k: three, name: 3泵, delta_kcal: 60, estimate: true }
+
+# ── 咖啡各品类的选项归属（供食物条目引用）────────────────────────
+#
+# | 咖啡品类     | 用什么模板    | 理由                                    |
+# |--------------|--------------|-----------------------------------------|
+# | 美式咖啡      | sugar_pack   | 本身无糖，靠另加白砂糖                   |
+# | 速溶咖啡      | sugar_pack   | 同上（三合一速溶除外，见下）             |
+# | 拿铁          | syrup_pump   | 奶咖，甜度来自风味糖浆                   |
+# | 卡布奇诺      | syrup_pump   | 同上                                    |
+# | 摩卡          | （无选项）    | 配方自带巧克力酱，甜度固定，不由用户选   |
+#
+# ⚠️ 三合一速溶咖啡（含糖含奶精）应作为独立食物条目，不出甜度选项 ——
+#    否则「全糖速溶 + 2 包糖」会双重计糖。
+#
+# ⚠️ 无糖可乐同理：不是「可乐 + 无糖选项」，而应建成独立条目。
+#    凡是「配方固定差异」而非「用户可调」的，都拆成独立食物条目。

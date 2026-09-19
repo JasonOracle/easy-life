@@ -1,0 +1,47 @@
+# v1.0 食物库数据源 — 奶茶品类
+# 版本：1.0.0
+v: "1.0.0"
+# 所有热量值均为估算（conf=1），来源见各条目注释。
+# 基准：无糖奶茶 base=43kcal/100ml
+# 口径：按「市售常见奶茶」（植脂末 + 牛奶混合基底）推算，茶汤≈0，奶基底折合约 43kcal/100ml。
+# 交叉验证：43kcal/100ml → 中杯 500ml 无糖约 215kcal、全糖约 325kcal，
+#           与市售中杯全糖奶茶 250-350kcal 的现实吻合；
+#           若按纯鲜奶配方（茶 + 30% 全脂奶）则仅约 20kcal/100ml，会低估至 207kcal/杯，故不采用。
+# ⚠️ 若将来接入品牌官方数据，需按各家实际奶基底替换本值。
+#
+# 甜度 delta 以 500ml 为基准，实际按容量线性缩放：
+#   delta_actual = delta_kcal × (实际容量 / 500)
+# 参考：全糖≈27.5g 糖 × 4kcal/g = 110kcal（500ml），行业常见范围 25-30g
+
+vessels:
+  cup:
+    label: 杯
+    sizes:
+      - { k: "s", name: "小杯", amount: 350, unit: "ml" }
+      - { k: "m", name: "中杯", amount: 500, unit: "ml" }
+      - { k: "l", name: "大杯", amount: 700, unit: "ml" }
+
+opt_templates:
+  sweet:
+    key: sweet
+    label: 甜度
+    def: full
+    hint: "甜度为估算值，各品牌糖量标准不同"
+    # delta 以 500ml 为基准，实际按容量线性缩放
+    opts:
+      - { k: "none", name: "无糖", delta_kcal: 0,   estimate: false }
+      - { k: "light", name: "三分", delta_kcal: 30,  estimate: true }
+      - { k: "half", name: "五分", delta_kcal: 55,  estimate: true }
+      - { k: "less", name: "七分", delta_kcal: 80,  estimate: true }
+      - { k: "full", name: "全糖", delta_kcal: 110, estimate: true }
+
+foods:
+  - id: "mt-001"
+    name: "奶茶"
+    cat: "饮品"
+    base: { cal: 43, per: 100, unit: "ml" }
+    vessel: "cup"
+    opts: ["sweet"]
+    conf: 1
+    editable: true
+    source: "recipe_estimate"

@@ -1,0 +1,4522 @@
+# 营养数据初稿（每 100g 或 100ml 可食部）—— gen_nutrition.py 生成 + 人工修正
+#
+# 分层方法：
+#   composition_table  成分表标准值（基础食材）        conf=3
+#   recipe_estimate    配方推算（菜品/复合主食/现饮）  conf=2，波动大的降 1
+#   rough_estimate     粗略估算（麻辣烫/火锅等）       conf=1
+#
+# ⚠️ basis_detail / audit_note 用于可追溯，进 App 的 food_library.json 时需裁掉。
+# ⚠️ 酒精类（白酒/红酒）宏量配平天然对不上 —— 酒精 7kcal/g 不计入三大营养素，属正常。
+# ⚠️ 本轮已修正的错误：奶茶量纲、芝士奶盖茶量纲、椰奶口径、鸡爪偏低、猪血蛋白偏高。
+
+p001:
+  name: 米饭
+  cat: 主食
+  cal: 116
+  protein: 2.6
+  carb: 25.9
+  fat: 0.3
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "熟白米饭标准值（中国食物成分表）"
+
+p002:
+  name: 蛋炒饭
+  cat: 主食
+  cal: 165
+  protein: 4.2
+  carb: 22.5
+  fat: 6.8
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "米饭100g + 鸡蛋30g + 油8g，总约130g成品"
+
+p003:
+  name: 扬州炒饭
+  cat: 主食
+  cal: 172
+  protein: 5.1
+  carb: 21.8
+  fat: 7.5
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "米饭100g + 鸡蛋30g + 火腿20g + 虾仁15g + 油10g，总约165g成品"
+
+p004:
+  name: 咖喱饭
+  cat: 主食
+  cal: 148
+  protein: 4.8
+  carb: 20.5
+  fat: 5.2
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "米饭100g + 咖喱酱(含鸡肉土豆)60g + 油3g，总约160g成品"
+
+p005:
+  name: 盖浇饭
+  cat: 主食
+  cal: 142
+  protein: 5.5
+  carb: 19.8
+  fat: 4.8
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "米饭150g + 浇头(肉末蔬菜)50g + 油5g，总约210g成品"
+
+p006:
+  name: 煲仔饭
+  cat: 主食
+  cal: 155
+  protein: 5.8
+  carb: 21.2
+  fat: 5.5
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "米饭120g + 腊味30g + 鸡蛋1个 + 油5g，总约160g成品"
+
+p007:
+  name: 卤肉饭
+  cat: 主食
+  cal: 178
+  protein: 6.5
+  carb: 22.8
+  fat: 7.8
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "米饭150g + 卤肉(五花肉)40g + 卤汁20g，总约210g成品"
+
+p008:
+  name: 黄焖鸡米饭
+  cat: 主食
+  cal: 162
+  protein: 7.2
+  carb: 18.5
+  fat: 7.5
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: ""
+
+p009:
+  name: 手抓饭
+  cat: 主食
+  cal: 168
+  protein: 5.8
+  carb: 22.5
+  fat: 6.2
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "米饭100g + 羊肉40g + 胡萝卜30g + 羊油15g，总约185g成品"
+
+p010:
+  name: 石锅拌饭
+  cat: 主食
+  cal: 145
+  protein: 5.5
+  carb: 22.8
+  fat: 4.2
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "米饭150g + 蔬菜组合80g + 牛肉30g + 芝麻油5g + 辣酱15g，总约280g成品"
+
+p011:
+  name: 白粥
+  cat: 主食
+  cal: 38
+  protein: 0.9
+  carb: 8.2
+  fat: 0.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "大米:水=1:8熬制的稠白粥标准值"
+
+p012:
+  name: 皮蛋瘦肉粥
+  cat: 主食
+  cal: 58
+  protein: 3.2
+  carb: 9.5
+  fat: 1.5
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "大米50g + 瘦猪肉20g + 皮蛋半个 + 水400g，总约450g成品"
+
+p013:
+  name: 小米粥
+  cat: 主食
+  cal: 42
+  protein: 1.2
+  carb: 9.0
+  fat: 0.5
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "小米30g + 水300g，总约330g成品"
+
+p014:
+  name: 八宝粥
+  cat: 主食
+  cal: 68
+  protein: 2.5
+  carb: 14.2
+  fat: 0.8
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "大米20g + 红豆10g + 芸豆8g + 莲子8g + 红枣5g + 花生5g + 糖10g + 水300g，总约350g成品"
+
+p015:
+  name: 南瓜粥
+  cat: 主食
+  cal: 45
+  protein: 1.0
+  carb: 9.8
+  fat: 0.4
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "大米30g + 南瓜50g + 水300g，总约380g成品"
+
+p016:
+  name: 绿豆粥
+  cat: 主食
+  cal: 52
+  protein: 2.8
+  carb: 10.5
+  fat: 0.6
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "大米25g + 绿豆15g + 水300g，总约340g成品"
+
+p017:
+  name: 馒头
+  cat: 主食
+  cal: 223
+  protein: 7.0
+  carb: 47.0
+  fat: 1.0
+  unit: g
+  piece_weight: 75
+  basis: composition_table
+  confidence: 3
+  basis_detail: "标准白面馒头，单只约75g"
+
+p018:
+  name: 花卷
+  cat: 主食
+  cal: 218
+  protein: 6.5
+  carb: 45.5
+  fat: 2.5
+  unit: g
+  piece_weight: 70
+  basis: composition_table
+  confidence: 3
+  basis_detail: "标准花卷，含少量油和葱花，单只约70g"
+
+p019:
+  name: 肉包
+  cat: 主食
+  cal: 205
+  protein: 7.8
+  carb: 28.5
+  fat: 6.5
+  unit: g
+  piece_weight: 80
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面粉50g + 猪肉馅25g + 水25g，总约80g成品"
+
+p020:
+  name: 菜包
+  cat: 主食
+  cal: 135
+  protein: 3.8
+  carb: 25.5
+  fat: 1.8
+  unit: g
+  piece_weight: 75
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面粉45g + 白菜/韭菜馅30g + 油2g，总约75g成品"
+
+p021:
+  name: 小笼包
+  cat: 主食
+  cal: 185
+  protein: 6.5
+  carb: 20.5
+  fat: 7.8
+  unit: g
+  piece_weight: 35
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面粉15g + 猪肉馅18g + 皮冻5g，总约35g成品"
+
+p022:
+  name: 生煎包
+  cat: 主食
+  cal: 215
+  protein: 7.2
+  carb: 22.8
+  fat: 9.5
+  unit: g
+  piece_weight: 65
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面粉30g + 猪肉馅30g + 油8g，总约65g成品"
+
+p023:
+  name: 烧麦
+  cat: 主食
+  cal: 178
+  protein: 6.8
+  carb: 22.5
+  fat: 7.2
+  unit: g
+  piece_weight: 50
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面粉20g + 糯米25g + 猪肉馅10g，总约50g成品"
+
+p024:
+  name: 猪肉白菜饺子
+  cat: 主食
+  cal: 185
+  protein: 7.5
+  carb: 24.8
+  fat: 6.8
+  unit: g
+  piece_weight: 25
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面粉12g + 猪肉馅10g + 白菜5g，总约25g成品"
+
+p025:
+  name: 韭菜鸡蛋饺子
+  cat: 主食
+  cal: 168
+  protein: 6.2
+  carb: 23.5
+  fat: 5.5
+  unit: g
+  piece_weight: 24
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面粉12g + 韭菜5g + 鸡蛋8g，总约24g成品"
+
+p026:
+  name: 馄饨
+  cat: 主食
+  cal: 110
+  protein: 6
+  carb: 15
+  fat: 3
+  unit: g
+  piece_weight: 40
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "馄饨皮35g + 猪肉馅10g + 虾皮1g + 汤底100ml，约40g成品"
+
+p027:
+  name: 汤圆
+  cat: 主食
+  cal: 210
+  protein: 3
+  carb: 35
+  fat: 6
+  unit: g
+  piece_weight: 30
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "糯米粉25g + 猪油馅8g + 黑芝麻3g，约30g成品"
+
+p028:
+  name: 粽子
+  cat: 主食
+  cal: 170
+  protein: 5
+  carb: 28
+  fat: 4
+  unit: g
+  piece_weight: 150
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "糯米100g + 五花肉30g + 红枣10g + 粽叶5g，约150g成品（咸粽）"
+
+p029:
+  name: 清汤面
+  cat: 主食
+  cal: 95
+  protein: 3
+  carb: 20
+  fat: 1
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "挂面70g + 骨汤300ml + 青菜20g，约400g成品"
+
+p030:
+  name: 牛肉面
+  cat: 主食
+  cal: 125
+  protein: 8
+  carb: 18
+  fat: 3
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面条80g + 牛腩50g + 牛肉汤400ml + 萝卜50g，约580g成品"
+
+p031:
+  name: 拉面
+  cat: 主食
+  cal: 105
+  protein: 4
+  carb: 22
+  fat: 1
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "拉面80g + 清汤300ml + 香菜5g + 辣油5g，约390g成品"
+
+p032:
+  name: 炸酱面
+  cat: 主食
+  cal: 155
+  protein: 7
+  carb: 22
+  fat: 5
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面条80g + 肉酱30g（猪肉50g+黄酱15g+油10g）+ 黄瓜丝20g，约180g成品"
+
+p033:
+  name: 热干面
+  cat: 主食
+  cal: 145
+  protein: 5
+  carb: 24
+  fat: 4
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "碱水面100g + 芝麻酱20g + 香油8g + 酱油5g + 酸豆角10g，约145g成品"
+
+p034:
+  name: 担担面
+  cat: 主食
+  cal: 140
+  protein: 6
+  carb: 20
+  fat: 4
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面条80g + 肉末20g + 芽菜10g + 红油5g + 花生碎5g + 酱油3g，约125g成品"
+
+p035:
+  name: 刀削面
+  cat: 主食
+  cal: 110
+  protein: 4
+  carb: 23
+  fat: 1
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "刀削面80g + 番茄鸡蛋浇头30g + 汤200ml，约310g成品"
+
+p036:
+  name: 油泼面
+  cat: 主食
+  cal: 155
+  protein: 4
+  carb: 24
+  fat: 6
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "宽面80g + 辣椒油15g + 酱油5g + 蒜末5g + 青菜20g，约130g成品"
+
+p037:
+  name: 螺蛳粉
+  cat: 主食
+  cal: 120
+  protein: 5
+  carb: 20
+  fat: 3
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "米粉80g + 螺蛳汤300ml + 酸笋20g + 腐竹10g + 花生8g + 木耳5g，约425g成品"
+
+p038:
+  name: 桂林米粉
+  cat: 主食
+  cal: 105
+  protein: 4
+  carb: 21
+  fat: 1
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "米粉80g + 卤水汤200ml + 卤肉20g + 酸豆角5g + 炸花生5g，约310g成品"
+
+p039:
+  name: 过桥米线
+  cat: 主食
+  cal: 95
+  protein: 6
+  carb: 16
+  fat: 1
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "米线80g + 鸡汤300ml + 瘦肉片30g + 鸡肉片20g + 鸡蛋1个 + 蔬菜30g，约460g成品"
+
+p040:
+  name: 酸辣粉
+  cat: 主食
+  cal: 115
+  protein: 3
+  carb: 24
+  fat: 1
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "红薯粉80g + 酸辣汤底250ml + 花生碎8g + 榨菜5g + 香菜3g，约350g成品"
+
+p041:
+  name: 凉皮
+  cat: 主食
+  cal: 100
+  protein: 3
+  carb: 20
+  fat: 1
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "凉皮150g + 面筋20g + 黄瓜丝10g + 蒜水5g + 辣椒油5g + 醋3g，约195g成品"
+
+p042:
+  name: 肠粉
+  cat: 主食
+  cal: 95
+  protein: 4
+  carb: 17
+  fat: 1
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "米粉浆150g + 鸡蛋1个 + 肉末20g + 酱油10g + 油5g，约185g成品"
+
+p043:
+  name: 炒河粉
+  cat: 主食
+  cal: 135
+  protein: 5
+  carb: 22
+  fat: 4
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "河粉150g + 鸡蛋1个 + 豆芽30g + 酱油10g + 油10g，约200g成品"
+
+p044:
+  name: 油条
+  cat: 主食
+  cal: 390
+  protein: 7
+  carb: 38
+  fat: 22
+  unit: g
+  piece_weight: 80
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面粉50g + 油条膨松剂2g + 油30g（炸制吸油），约80g成品"
+
+p045:
+  name: 煎饼果子
+  cat: 主食
+  cal: 145
+  protein: 6
+  carb: 20
+  fat: 5
+  unit: g
+  piece_weight: 120
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面糊60g + 鸡蛋1个 + 薄脆15g + 酱料10g，约120g成品"
+
+p046:
+  name: 手抓饼
+  cat: 主食
+  cal: 250
+  protein: 5
+  carb: 28
+  fat: 13
+  unit: g
+  piece_weight: 100
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "手抓饼坯100g + 鸡蛋1个 + 生菜20g + 酱料5g，约130g成品"
+
+p047:
+  name: 鸡蛋灌饼
+  cat: 主食
+  cal: 220
+  protein: 7
+  carb: 26
+  fat: 10
+  unit: g
+  piece_weight: 110
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面饼80g + 鸡蛋2个 + 火腿15g + 酱料5g，约110g成品"
+
+p048:
+  name: 葱油饼
+  cat: 主食
+  cal: 260
+  protein: 6
+  carb: 30
+  fat: 12
+  unit: g
+  piece_weight: 80
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面粉50g + 葱10g + 油15g，约80g成品"
+
+p049:
+  name: 烧饼
+  cat: 主食
+  cal: 270
+  protein: 8
+  carb: 42
+  fat: 7
+  unit: g
+  piece_weight: 70
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面粉50g + 芝麻5g + 油8g，约70g成品"
+
+p050:
+  name: 意大利面
+  cat: 主食
+  cal: 130
+  protein: 5
+  carb: 27
+  fat: 1
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "意面80g + 番茄酱30g + 橄榄油5g，约115g成品"
+
+p051:
+  name: 披萨
+  cat: 主食
+  cal: 266
+  protein: 11
+  carb: 33
+  fat: 10
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "披萨皮100g + 马苏里拉芝士20g + 番茄酱15g + 配料（香肠/青椒等）30g + 油10g，总约175g成品"
+
+p052:
+  name: 汉堡
+  cat: 主食
+  cal: 295
+  protein: 14
+  carb: 30
+  fat: 14
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "汉堡胚80g + 牛肉饼80g + 生菜10g + 番茄15g + 芝士片15g + 酱料15g，总约215g成品"
+
+p053:
+  name: 三明治
+  cat: 主食
+  cal: 180
+  protein: 9
+  carb: 24
+  fat: 6
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "切片面包2片60g + 火腿30g + 芝士片15g + 生菜10g + 番茄15g + 沙拉酱10g，总约140g成品"
+
+p054:
+  name: 吐司面包
+  cat: 主食
+  cal: 265
+  protein: 9
+  carb: 49
+  fat: 3
+  unit: g
+  piece_weight: 35
+  basis: composition_table
+  confidence: 3
+  basis_detail: "白吐司标准配方烘焙，每100g可食部"
+
+p055:
+  name: 牛角包
+  cat: 主食
+  cal: 406
+  protein: 8
+  carb: 45
+  fat: 21
+  unit: g
+  piece_weight: 45
+  basis: composition_table
+  confidence: 3
+  basis_detail: "黄油起酥面团烘焙，每100g可食部"
+
+p056:
+  name: 煮玉米
+  cat: 主食
+  cal: 112
+  protein: 4
+  carb: 23
+  fat: 1.5
+  unit: g
+  piece_weight: 150
+  basis: composition_table
+  confidence: 3
+  basis_detail: "甜玉米煮熟，可食部约一根半穗，每100g"
+
+p057:
+  name: 蒸红薯
+  cat: 主食
+  cal: 90
+  protein: 1.6
+  carb: 20
+  fat: 0.3
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "红心甘薯蒸熟，每100g可食部"
+
+p058:
+  name: 紫薯
+  cat: 主食
+  cal: 86
+  protein: 1.5
+  carb: 20
+  fat: 0.2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "紫薯蒸熟，每100g可食部"
+
+p059:
+  name: 蒸山药
+  cat: 主食
+  cal: 64
+  protein: 1.3
+  carb: 14
+  fat: 0.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "铁棍山药蒸熟，每100g可食部"
+
+p060:
+  name: 土豆泥
+  cat: 主食
+  cal: 95
+  protein: 2
+  carb: 15
+  fat: 3
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "土豆200g蒸熟 + 牛奶20g + 黄油10g + 盐1g，总约230g成品"
+
+p061:
+  name: 年糕
+  cat: 主食
+  cal: 140
+  protein: 2.5
+  carb: 30
+  fat: 0.5
+  unit: g
+  piece_weight: 30
+  basis: composition_table
+  confidence: 3
+  basis_detail: "糯米制年糕蒸熟，每100g可食部"
+
+p062:
+  name: 番茄炒蛋
+  cat: 菜品
+  cal: 85
+  protein: 6
+  carb: 4
+  fat: 5.5
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "鸡蛋2个100g + 番茄200g + 油15g + 糖5g，总约320g成品"
+
+p063:
+  name: 青椒肉丝
+  cat: 菜品
+  cal: 115
+  protein: 12
+  carb: 4
+  fat: 6
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "猪里脊150g + 青椒100g + 油15g + 淀粉5g + 酱油10g，总约280g成品"
+
+p064:
+  name: 鱼香肉丝
+  cat: 菜品
+  cal: 125
+  protein: 11
+  carb: 8
+  fat: 6.5
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "猪里脊150g + 木耳30g + 胡萝卜50g + 青椒30g + 鱼香汁20g + 油15g，总约300g成品"
+
+p065:
+  name: 宫保鸡丁
+  cat: 菜品
+  cal: 145
+  protein: 14
+  carb: 6
+  fat: 8
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "鸡腿肉200g + 花生30g + 黄瓜50g + 干辣椒5g + 宫保汁15g + 油15g，总约320g成品"
+
+p066:
+  name: 麻婆豆腐
+  cat: 菜品
+  cal: 95
+  protein: 8
+  carb: 3
+  fat: 6
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "嫩豆腐300g + 猪肉末50g + 豆瓣酱15g + 花椒粉2g + 油10g，总约380g成品"
+
+p067:
+  name: 回锅肉
+  cat: 菜品
+  cal: 220
+  protein: 16
+  carb: 3
+  fat: 16
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "五花肉200g + 青蒜苗50g + 豆瓣酱15g + 甜面酱10g + 油10g，总约280g成品"
+
+p068:
+  name: 农家小炒肉
+  cat: 菜品
+  cal: 185
+  protein: 15
+  carb: 4
+  fat: 12
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "猪肉（五花/前腿）200g + 青椒100g + 红椒30g + 油15g + 酱油10g，总约350g成品"
+
+p069:
+  name: 红烧肉
+  cat: 菜品
+  cal: 350
+  protein: 14
+  carb: 6
+  fat: 32
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "五花肉400g + 白糖20g + 酱油20g + 料酒15g + 水适量，总约450g成品"
+
+p070:
+  name: 糖醋排骨
+  cat: 菜品
+  cal: 260
+  protein: 16
+  carb: 14
+  fat: 16
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "猪肋排400g + 白糖30g + 醋20g + 酱油15g + 油10g，总约480g成品"
+
+p071:
+  name: 可乐鸡翅
+  cat: 菜品
+  cal: 195
+  protein: 15
+  carb: 10
+  fat: 11
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "鸡翅中8个240g + 可乐100ml + 酱油15g + 料酒10g，总约320g成品"
+
+p072:
+  name: 红烧鸡腿
+  cat: 菜品
+  cal: 180
+  protein: 18
+  carb: 4
+  fat: 10
+  unit: g
+  piece_weight: 180
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "鸡腿1个约180g可食部 + 酱油15g + 糖5g + 油10g，总约210g成品"
+
+p073:
+  name: 土豆炖牛肉
+  cat: 菜品
+  cal: 130
+  protein: 12
+  carb: 8
+  fat: 6
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "牛腩200g + 土豆200g + 胡萝卜50g + 油10g + 酱油15g，总约480g成品"
+
+p074:
+  name: 萝卜炖排骨
+  cat: 菜品
+  cal: 110
+  protein: 9
+  carb: 6
+  fat: 6
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "猪排骨200g + 白萝卜200g + 姜片5g + 料酒10g，总约420g成品"
+
+p075:
+  name: 水煮肉片
+  cat: 菜品
+  cal: 140
+  protein: 14
+  carb: 4
+  fat: 8
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "猪瘦肉200g + 豆芽100g + 豆瓣酱15g + 油20g + 高汤200ml，总约550g成品"
+
+p076:
+  name: 水煮鱼
+  cat: 菜品
+  cal: 230
+  protein: 15
+  carb: 4
+  fat: 20
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "草鱼片300g + 豆芽/千张100g + 辣椒红油80g，总约520g成品"
+
+p077:
+  name: 酸菜鱼
+  cat: 菜品
+  cal: 170
+  protein: 14
+  carb: 7
+  fat: 11
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "草鱼片300g + 酸菜150g + 食用油30g，总约480g成品"
+
+p078:
+  name: 剁椒鱼头
+  cat: 菜品
+  cal: 180
+  protein: 11
+  carb: 5
+  fat: 14
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "花鲢鱼头500g + 剁椒50g + 食用油40g，总约580g成品"
+
+p079:
+  name: 辣子鸡
+  cat: 菜品
+  cal: 280
+  protein: 16
+  carb: 6
+  fat: 22
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "鸡腿肉400g + 干辣椒50g + 食用油100g（油炸），总约420g成品"
+
+p080:
+  name: 清蒸鱼
+  cat: 菜品
+  cal: 110
+  protein: 20
+  carb: 1
+  fat: 3
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "草鱼/鲈鱼500g + 葱姜少许 + 热油10g淋面，总约500g成品"
+
+p081:
+  name: 红烧鱼
+  cat: 菜品
+  cal: 160
+  protein: 18
+  carb: 6
+  fat: 8
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "草鱼块500g + 酱油15g + 糖10g + 食用油20g，总约550g成品"
+
+p082:
+  name: 糖醋里脊
+  cat: 菜品
+  cal: 280
+  protein: 14
+  carb: 24
+  fat: 16
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "猪里脊300g + 淀粉50g + 糖醋汁（糖30g+醋20g） + 食用油80g油炸，总约400g成品"
+
+p083:
+  name: 干锅花菜
+  cat: 菜品
+  cal: 130
+  protein: 4
+  carb: 7
+  fat: 11
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "花菜400g + 五花肉片50g + 食用油25g，总约470g成品"
+
+p084:
+  name: 干煸豆角
+  cat: 菜品
+  cal: 140
+  protein: 5
+  carb: 6
+  fat: 12
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "豆角400g + 猪肉末30g + 食用油30g（略炸），总约450g成品"
+
+p085:
+  name: 地三鲜
+  cat: 菜品
+  cal: 150
+  protein: 3
+  carb: 13
+  fat: 10
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "土豆200g + 茄子200g + 青椒100g + 食用油40g（过油），总约520g成品"
+
+p086:
+  name: 酸辣土豆丝
+  cat: 菜品
+  cal: 85
+  protein: 2
+  carb: 13
+  fat: 3
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "土豆400g + 干辣椒5g + 醋10g + 食用油10g，总约420g成品"
+
+p087:
+  name: 醋溜白菜
+  cat: 菜品
+  cal: 55
+  protein: 2
+  carb: 7
+  fat: 3
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "大白菜500g + 醋10g + 食用油10g，总约520g成品"
+
+p088:
+  name: 手撕包菜
+  cat: 菜品
+  cal: 70
+  protein: 2
+  carb: 8
+  fat: 4
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "包菜500g + 干辣椒3g + 食用油15g，总约520g成品"
+
+p089:
+  name: 蒜蓉西兰花
+  cat: 菜品
+  cal: 65
+  protein: 3
+  carb: 7
+  fat: 3
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "西兰花400g + 蒜末15g + 食用油10g，总约430g成品"
+
+p090:
+  name: 清炒时蔬
+  cat: 菜品
+  cal: 60
+  protein: 2
+  carb: 6
+  fat: 3
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "时蔬300g + 食用油10g，总约320g成品"
+
+p091:
+  name: 上汤娃娃菜
+  cat: 菜品
+  cal: 90
+  protein: 5
+  carb: 7
+  fat: 5
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "娃娃菜400g + 皮蛋1个50g + 火腿末20g + 高汤150ml + 食用油10g，总约500g成品"
+
+p092:
+  name: 白灼虾
+  cat: 菜品
+  cal: 90
+  protein: 20
+  carb: 1
+  fat: 1
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "基围虾400g + 姜葱少许 + 蘸料10g，总约420g成品"
+
+p093:
+  name: 油焖大虾
+  cat: 菜品
+  cal: 150
+  protein: 17
+  carb: 4
+  fat: 8
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "大虾400g + 食用油20g + 糖5g + 酱油5g，总约420g成品"
+
+p094:
+  name: 香辣虾
+  cat: 菜品
+  cal: 180
+  protein: 15
+  carb: 5
+  fat: 13
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "大虾400g + 干辣椒30g + 食用油60g（油炸）+ 花椒5g，总约450g成品"
+
+p095:
+  name: 凉拌黄瓜
+  cat: 菜品
+  cal: 25
+  protein: 1
+  carb: 4
+  fat: 1
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "黄瓜400g + 蒜末10g + 醋15g + 香油5g + 盐2g，总约430g成品"
+
+p096:
+  name: 凉拌木耳
+  cat: 菜品
+  cal: 30
+  protein: 1
+  carb: 5
+  fat: 1
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "干木耳泡发200g + 蒜末10g + 醋10g + 香油5g，总约220g成品"
+
+p097:
+  name: 口水鸡
+  cat: 菜品
+  cal: 160
+  protein: 13
+  carb: 3
+  fat: 12
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "鸡腿2只300g + 红油30g + 花椒油5g + 酱油15g + 花生碎10g，总约360g成品"
+
+p098:
+  name: 夫妻肺片
+  cat: 菜品
+  cal: 180
+  protein: 12
+  carb: 4
+  fat: 14
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "牛腱肉100g + 牛肚50g + 牛耳50g + 红油40g + 花生碎15g，总约350g成品"
+
+p099:
+  name: 白切鸡
+  cat: 菜品
+  cal: 120
+  protein: 18
+  carb: 1
+  fat: 4
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "三黄鸡500g + 姜葱蘸料20g，总约400g可食部"
+
+p100:
+  name: 盐焗鸡
+  cat: 菜品
+  cal: 130
+  protein: 18
+  carb: 1
+  fat: 5
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "整鸡500g + 粗盐500g（盐焗）+ 沙姜粉5g，总约400g可食部"
+
+p101:
+  name: 烤鸭
+  cat: 菜品
+  cal: 400
+  protein: 18
+  carb: 5
+  fat: 35
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "北京烤鸭：半只烤鸭约750g生重烤后约500g成品（皮30%约150g + 肉70%约350g）+ 白糖30g + 甜面酱30g，总约560g成品"
+
+p102:
+  name: 叉烧
+  cat: 菜品
+  cal: 420
+  protein: 16
+  carb: 12
+  fat: 36
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "广式叉烧：猪五花500g + 蜂蜜50g + 生抽30g + 老抽20g + 料酒15g，烤后约400g成品"
+
+p103:
+  name: 烧鹅
+  cat: 菜品
+  cal: 450
+  protein: 15
+  carb: 3
+  fat: 40
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "广式烧鹅：鹅750g生重烤后约500g成品（皮约150g + 肉约350g）+ 糖色30g + 香料"
+
+p104:
+  name: 麻辣烫
+  cat: 菜品
+  cal: 120
+  protein: 8
+  carb: 12
+  fat: 5
+  unit: g
+  piece_weight: null
+  basis: rough_estimate
+  confidence: 1
+  basis_detail: "麻辣烫波动极大，按常见一碗估算：汤底150g + 蔬菜100g + 豆制品50g + 肉类50g + 粉丝30g，总约380g"
+
+p105:
+  name: 火锅
+  cat: 菜品
+  cal: 150
+  protein: 10
+  carb: 8
+  fat: 9
+  unit: g
+  piece_weight: null
+  basis: rough_estimate
+  confidence: 1
+  basis_detail: "火锅极度依赖点单，按常见一人份估算：肉类200g + 蔬菜150g + 豆制品80g + 丸类50g + 蘸料30g，总约510g"
+
+p106:
+  name: 冒菜
+  cat: 菜品
+  cal: 130
+  protein: 8
+  carb: 10
+  fat: 7
+  unit: g
+  piece_weight: null
+  basis: rough_estimate
+  confidence: 1
+  basis_detail: "冒菜介于火锅与家常菜之间，按常见一碗估算：汤底150g + 肉类80g + 蔬菜100g + 豆制品50g，总约380g"
+
+p107:
+  name: 串串香
+  cat: 菜品
+  cal: 180
+  protein: 10
+  carb: 6
+  fat: 13
+  unit: g
+  piece_weight: null
+  basis: rough_estimate
+  confidence: 1
+  basis_detail: "串串香按常见30签估算：肉类150g + 蔬菜100g + 豆制品50g + 汤底100g，总约400g"
+
+p108:
+  name: 麻辣香锅
+  cat: 菜品
+  cal: 160
+  protein: 12
+  carb: 10
+  fat: 9
+  unit: g
+  piece_weight: null
+  basis: rough_estimate
+  confidence: 1
+  basis_detail: "麻辣香锅按常见一份估算：肉类150g + 蔬菜200g + 豆制品80g + 油50g + 调料30g，总约510g"
+
+p109:
+  name: 大盘鸡
+  cat: 菜品
+  cal: 140
+  protein: 14
+  carb: 15
+  fat: 5
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "西北大盘鸡：鸡腿肉500g + 土豆400g + 青椒100g + 洋葱100g + 油50g + 调料30g，炒后加汤炖约1200g成品"
+
+p110:
+  name: 地锅鸡
+  cat: 菜品
+  cal: 150
+  protein: 14
+  carb: 18
+  fat: 6
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "北方地锅鸡：鸡肉500g + 土豆300g + 豆角200g + 面饼200g + 油40g + 调料30g，炖后约1200g"
+
+p111:
+  name: 黄焖鸡
+  cat: 菜品
+  cal: 160
+  protein: 15
+  carb: 8
+  fat: 9
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "鲁菜黄焖鸡：鸡腿肉400g + 香菇100g + 青椒80g + 土豆150g + 油30g + 酱料40g，炖后约800g"
+
+p112:
+  name: 紫菜蛋花汤
+  cat: 菜品
+  cal: 35
+  protein: 5
+  carb: 3
+  fat: 1
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "紫菜蛋花汤：紫菜5g + 鸡蛋2个(100g) + 水500g + 香油5g + 盐2g，做汤约520g"
+
+p113:
+  name: 番茄蛋汤
+  cat: 菜品
+  cal: 40
+  protein: 4
+  carb: 5
+  fat: 1.5
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "番茄蛋汤：番茄200g + 鸡蛋2个(100g) + 水600g + 油10g + 盐3g，做汤约720g"
+
+p114:
+  name: 冬瓜排骨汤
+  cat: 菜品
+  cal: 80
+  protein: 8
+  carb: 4
+  fat: 4
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "冬瓜排骨汤：猪排骨300g + 冬瓜400g + 水1000g + 姜3片，炖后约1300g汤"
+
+p115:
+  name: 玉米排骨汤
+  cat: 菜品
+  cal: 90
+  protein: 9
+  carb: 8
+  fat: 4.5
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "玉米排骨汤：猪排骨300g + 玉米2根(400g) + 水1000g + 姜3片，炖后约1350g"
+
+p116:
+  name: 老鸭汤
+  cat: 菜品
+  cal: 70
+  protein: 7
+  carb: 2
+  fat: 4
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "老鸭汤：老鸭500g + 火腿30g + 姜5片 + 水1500g，炖后约2000g汤"
+
+p117:
+  name: 蔬菜沙拉
+  cat: 菜品
+  cal: 60
+  protein: 2
+  carb: 6
+  fat: 4
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "蔬菜沙拉：生菜100g + 番茄80g + 黄瓜80g + 胡萝卜50g + 沙拉酱30g，总约340g"
+
+p118:
+  name: 羊肉串
+  cat: 菜品
+  cal: 280
+  protein: 20
+  carb: 1
+  fat: 21
+  unit: g
+  piece_weight: 50
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "羊肉串：羊后腿肉200g切块 + 孜然5g + 辣椒粉3g + 盐2g，穿5串烤制，每串约50g成品"
+
+p119:
+  name: 烤鸡翅
+  cat: 菜品
+  cal: 250
+  protein: 22
+  carb: 2
+  fat: 16
+  unit: g
+  piece_weight: 45
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "烤鸡翅：鸡翅中8个(约360g生重) + 蜜汁腌料30g，烤后约280g，每个约35g可食部"
+
+p120:
+  name: 猪瘦肉
+  cat: 肉类蛋类
+  cal: 143
+  protein: 20.3
+  carb: 0
+  fat: 6.2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值：猪瘦肉(前尖)，生鲜可食部"
+
+p121:
+  name: 五花肉
+  cat: 肉类蛋类
+  cal: 395
+  protein: 14.2
+  carb: 0
+  fat: 37.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 2
+  audit_note: "按成分表「猪肉（肥瘦）」口径：395kcal/脂肪37g；若指「五花（肥）」则约 508kcal/脂肪53g，两条都成立，取决于部位定义"
+  basis_detail: "中国食物成分表标准值：猪五花肉(生)"
+
+p122:
+  name: 猪里脊
+  cat: 肉类蛋类
+  cal: 155
+  protein: 20.5
+  carb: 0
+  fat: 7.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值：猪里脊(生)"
+
+p123:
+  name: 排骨
+  cat: 肉类蛋类
+  cal: 278
+  protein: 13.6
+  carb: 0
+  fat: 24.4
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值：猪排骨(生)，含骨约40%"
+
+p124:
+  name: 猪蹄
+  cat: 肉类蛋类
+  cal: 260
+  protein: 17.1
+  carb: 0
+  fat: 22.5
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值：猪猪蹄(生)"
+
+p125:
+  name: 猪肝
+  cat: 肉类蛋类
+  cal: 129
+  protein: 19.3
+  carb: 3.1
+  fat: 3.9
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值：猪肝脏(生)"
+
+p126:
+  name: 猪血
+  cat: 肉类蛋类
+  cal: 55
+  protein: 12.2
+  carb: 0.9
+  fat: 0.3
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，生鲜可食部"
+
+p127:
+  name: 牛瘦肉
+  cat: 肉类蛋类
+  cal: 125
+  protein: 22
+  carb: 0
+  fat: 2.6
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，牛里脊/后腿瘦肉，生鲜可食部"
+
+p128:
+  name: 牛腩
+  cat: 肉类蛋类
+  cal: 350
+  protein: 17
+  carb: 0
+  fat: 32
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，带筋肥瘦牛肉，生鲜可食部"
+
+p129:
+  name: 牛腱
+  cat: 肉类蛋类
+  cal: 200
+  protein: 22
+  carb: 0
+  fat: 11
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，牛腿腱子肉，生鲜可食部"
+
+p130:
+  name: 牛排
+  cat: 肉类蛋类
+  cal: 270
+  protein: 20
+  carb: 0
+  fat: 20
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，牛肉排，生鲜可食部（约七分瘦三分肥）"
+
+p131:
+  name: 肥牛卷
+  cat: 肉类蛋类
+  cal: 450
+  protein: 15
+  carb: 0
+  fat: 42
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 2
+  basis_detail: "超市商品标准值，肥瘦相间冷冻卷切牛肉"
+
+p132:
+  name: 羊肉
+  cat: 肉类蛋类
+  cal: 285
+  protein: 20
+  carb: 0
+  fat: 22
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，羊后腿肉，生鲜可食部"
+
+p133:
+  name: 羊排
+  cat: 肉类蛋类
+  cal: 350
+  protein: 15
+  carb: 0
+  fat: 32
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，带骨羊排，生鲜可食部（去骨后可食部约70%）"
+
+p134:
+  name: 鸡胸肉
+  cat: 肉类蛋类
+  cal: 133
+  protein: 24
+  carb: 0
+  fat: 2.5
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，去皮鸡胸肉，生鲜可食部"
+
+p135:
+  name: 鸡腿
+  cat: 肉类蛋类
+  cal: 181
+  protein: 17
+  carb: 0
+  fat: 12
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，去皮鸡腿肉，生鲜可食部"
+
+p136:
+  name: 鸡翅
+  cat: 肉类蛋类
+  cal: 200
+  protein: 18
+  carb: 0
+  fat: 14
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，去皮鸡翅，生鲜可食部"
+
+p137:
+  name: 鸡爪
+  cat: 肉类蛋类
+  cal: 254
+  protein: 23.9
+  carb: 2.7
+  fat: 16.4
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，生鸡爪，可食部（连骨约50g/个，去骨可食部约20g/个）"
+
+p138:
+  name: 整鸡
+  cat: 肉类蛋类
+  cal: 167
+  protein: 19
+  carb: 0
+  fat: 11
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，土鸡/仔鸡，生鲜可食部（去头爪内脏后）"
+
+p139:
+  name: 鸡胗
+  cat: 肉类蛋类
+  cal: 93
+  protein: 18
+  carb: 0
+  fat: 2.5
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，生鸡肫，可食部"
+
+p140:
+  name: 鸭肉
+  cat: 肉类蛋类
+  cal: 420
+  protein: 15
+  carb: 0
+  fat: 40
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，填鸭/家鸭，生鲜可食部（高脂）"
+
+p141:
+  name: 鸭腿
+  cat: 肉类蛋类
+  cal: 190
+  protein: 17
+  carb: 0
+  fat: 12
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，去皮鸭腿肉，生鲜可食部"
+
+p142:
+  name: 鸭脖
+  cat: 肉类蛋类
+  cal: 80
+  protein: 15
+  carb: 1
+  fat: 1.5
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 2
+  basis_detail: "中国食物成分表标准值，熟卤鸭脖，可食部（连骨约30g/根，可食肉约10g）"
+
+p143:
+  name: 鸡蛋
+  cat: 肉类蛋类
+  cal: 144
+  protein: 13
+  carb: 1.3
+  fat: 9
+  unit: g
+  piece_weight: 50
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，生鸡蛋，可食部约50g/个"
+
+p144:
+  name: 煎蛋
+  cat: 肉类蛋类
+  cal: 180
+  protein: 12
+  carb: 0.5
+  fat: 13
+  unit: g
+  piece_weight: 60
+  basis: rough_estimate
+  confidence: 2
+  basis_detail: "1个鸡蛋50g + 煎制用油约10g，成品约60g，吸油后热量升高"
+
+p145:
+  name: 荷包蛋
+  cat: 肉类蛋类
+  cal: 160
+  protein: 12
+  carb: 0.5
+  fat: 11
+  unit: g
+  piece_weight: 55
+  basis: rough_estimate
+  confidence: 2
+  basis_detail: "1个鸡蛋50g + 少量煎油约5g，成品约55g，油量少于煎蛋"
+
+p146:
+  name: 咸鸭蛋
+  cat: 肉类蛋类
+  cal: 190
+  protein: 12
+  carb: 2.5
+  fat: 15
+  unit: g
+  piece_weight: 65
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，腌制咸鸭蛋，可食部约65g/个"
+
+p147:
+  name: 皮蛋
+  cat: 肉类蛋类
+  cal: 87
+  protein: 12
+  carb: 1.5
+  fat: 4
+  unit: g
+  piece_weight: 90
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，松花皮蛋，可食部约90g/个"
+
+p148:
+  name: 草鱼
+  cat: 肉类蛋类
+  cal: 113
+  protein: 17
+  carb: 0
+  fat: 4.5
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，淡水草鱼，生鲜可食部"
+
+p149:
+  name: 鲈鱼
+  cat: 肉类蛋类
+  cal: 105
+  protein: 18
+  carb: 0
+  fat: 3.5
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，海鲈鱼，生鲜可食部"
+
+p150:
+  name: 三文鱼
+  cat: 肉类蛋类
+  cal: 139
+  protein: 20
+  carb: 0
+  fat: 5.5
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，大西洋鲑，生鲜可食部"
+
+p151:
+  name: 带鱼
+  cat: 肉类蛋类
+  cal: 127
+  protein: 18
+  carb: 0
+  fat: 6
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，生鲜可食部"
+
+p152:
+  name: 鳕鱼
+  cat: 肉类蛋类
+  cal: 82
+  protein: 15.9
+  carb: 0
+  fat: 2.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，大西洋鳕鱼，生鲜可食部"
+
+p153:
+  name: 金枪鱼
+  cat: 肉类蛋类
+  cal: 109
+  protein: 22.8
+  carb: 0
+  fat: 2.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，鲜金枪鱼，生鲜可食部"
+
+p154:
+  name: 基围虾
+  cat: 肉类蛋类
+  cal: 98
+  protein: 17.5
+  carb: 1.3
+  fat: 1.6
+  unit: g
+  piece_weight: 15
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，生鲜可食部，1个约15g可食部"
+
+p155:
+  name: 小龙虾
+  cat: 肉类蛋类
+  cal: 78
+  protein: 12
+  carb: 1
+  fat: 2
+  unit: g
+  piece_weight: null
+  basis: rough_estimate
+  confidence: 1
+  basis_detail: "食用部分主要为虾肉，各品种差异大，热量波动明显"
+
+p156:
+  name: 虾仁
+  cat: 肉类蛋类
+  cal: 88
+  protein: 18.5
+  carb: 0.5
+  fat: 1.2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，鲜虾仁，可食部"
+
+p157:
+  name: 螃蟹
+  cat: 肉类蛋类
+  cal: 95
+  protein: 14
+  carb: 0
+  fat: 3.5
+  unit: g
+  piece_weight: 150
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，大闸蟹，生鲜可食部约150g/只（含壳整体约200g）"
+
+p158:
+  name: 蛤蜊
+  cat: 肉类蛋类
+  cal: 50
+  protein: 9.5
+  carb: 1.5
+  fat: 0.8
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，花蛤，生鲜可食部"
+
+p159:
+  name: 生蚝
+  cat: 肉类蛋类
+  cal: 60
+  protein: 9.1
+  carb: 3.5
+  fat: 1.3
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，牡蛎，生鲜可食部"
+
+p160:
+  name: 鱿鱼
+  cat: 肉类蛋类
+  cal: 86
+  protein: 15.1
+  carb: 0.6
+  fat: 2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，鲜鱿鱼，可食部"
+
+p161:
+  name: 培根
+  cat: 肉类蛋类
+  cal: 443
+  protein: 16
+  carb: 0.3
+  fat: 42
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，烟熏培根，加工肉制品"
+
+p162:
+  name: 火腿
+  cat: 肉类蛋类
+  cal: 187
+  protein: 22
+  carb: 0.9
+  fat: 10.7
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，中式火腿，可食部"
+
+p163:
+  name: 香肠
+  cat: 肉类蛋类
+  cal: 470
+  protein: 16.6
+  carb: 3.5
+  fat: 44
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，广式香肠，加工肉制品"
+
+p164:
+  name: 午餐肉
+  cat: 肉类蛋类
+  cal: 253
+  protein: 8.5
+  carb: 3.5
+  fat: 24
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，罐头午餐肉，可食部"
+
+p165:
+  name: 腊肠
+  cat: 肉类蛋类
+  cal: 480
+  protein: 17
+  carb: 8
+  fat: 45
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，中式腊肠，加工肉制品"
+
+p166:
+  name: 豆腐
+  cat: 肉类蛋类
+  cal: 81
+  protein: 8.1
+  carb: 2.1
+  fat: 4.8
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，北豆腐，可食部"
+
+p167:
+  name: 豆干
+  cat: 肉类蛋类
+  cal: 167
+  protein: 18.5
+  carb: 5.3
+  fat: 8.4
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，白豆干，可食部"
+
+p168:
+  name: 腐竹
+  cat: 肉类蛋类
+  cal: 426
+  protein: 44.7
+  carb: 24.5
+  fat: 22.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，干腐竹，可食部"
+
+p169:
+  name: 油豆腐
+  cat: 肉类蛋类
+  cal: 236
+  protein: 18.5
+  carb: 6.3
+  fat: 15.5
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: ""
+
+p170:
+  name: 千张
+  cat: 肉类蛋类
+  cal: 185
+  protein: 24.2
+  carb: 5.6
+  fat: 9.3
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，千张，可食部"
+
+p171:
+  name: 大白菜
+  cat: 蔬菜
+  cal: 15
+  protein: 1.3
+  carb: 2.0
+  fat: 0.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，大白菜，生鲜可食部"
+
+p172:
+  name: 娃娃菜
+  cat: 蔬菜
+  cal: 18
+  protein: 1.4
+  carb: 2.5
+  fat: 0.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，娃娃菜，生鲜可食部"
+
+p173:
+  name: 小白菜
+  cat: 蔬菜
+  cal: 16
+  protein: 1.5
+  carb: 2.0
+  fat: 0.2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，小白菜，生鲜可食部"
+
+p174:
+  name: 上海青
+  cat: 蔬菜
+  cal: 14
+  protein: 1.4
+  carb: 2.0
+  fat: 0.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，上海青，生鲜可食部"
+
+p175:
+  name: 菠菜
+  cat: 蔬菜
+  cal: 24
+  protein: 2.6
+  carb: 3.0
+  fat: 0.3
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值，菠菜，生鲜可食部"
+
+p176:
+  name: 生菜
+  cat: 蔬菜
+  cal: 15
+  protein: 1.5
+  carb: 2.5
+  fat: 0.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值"
+
+p177:
+  name: 油麦菜
+  cat: 蔬菜
+  cal: 20
+  protein: 1.7
+  carb: 2.5
+  fat: 0.3
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值"
+
+p178:
+  name: 空心菜
+  cat: 蔬菜
+  cal: 17
+  protein: 1.5
+  carb: 3.0
+  fat: 0.2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值"
+
+p179:
+  name: 芥兰
+  cat: 蔬菜
+  cal: 20
+  protein: 1.8
+  carb: 3.5
+  fat: 0.2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值"
+
+p180:
+  name: 菜心
+  cat: 蔬菜
+  cal: 17
+  protein: 1.6
+  carb: 2.5
+  fat: 0.2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值"
+
+p181:
+  name: 茼蒿
+  cat: 蔬菜
+  cal: 20
+  protein: 1.9
+  carb: 2.5
+  fat: 0.3
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值"
+
+p182:
+  name: 芹菜
+  cat: 蔬菜
+  cal: 14
+  protein: 0.6
+  carb: 2.2
+  fat: 0.2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值"
+
+p183:
+  name: 韭菜
+  cat: 蔬菜
+  cal: 26
+  protein: 2.4
+  carb: 3.5
+  fat: 0.5
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值"
+
+p184:
+  name: 香菜
+  cat: 蔬菜
+  cal: 35
+  protein: 2.0
+  carb: 4.0
+  fat: 0.5
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值"
+
+p185:
+  name: 蒜苗
+  cat: 蔬菜
+  cal: 30
+  protein: 1.8
+  carb: 5.5
+  fat: 0.3
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值"
+
+p186:
+  name: 西兰花
+  cat: 蔬菜
+  cal: 36
+  protein: 3.3
+  carb: 5.0
+  fat: 0.3
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值"
+
+p187:
+  name: 花菜
+  cat: 蔬菜
+  cal: 25
+  protein: 1.8
+  carb: 4.0
+  fat: 0.2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值"
+
+p188:
+  name: 土豆
+  cat: 蔬菜
+  cal: 77
+  protein: 2.0
+  carb: 16.5
+  fat: 0.1
+  unit: g
+  piece_weight: 150
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值；常见单个土豆约150g可食部"
+
+p189:
+  name: 铁棍山药
+  cat: 蔬菜
+  cal: 57
+  protein: 1.9
+  carb: 11.0
+  fat: 0.1
+  unit: g
+  piece_weight: 100
+  basis: composition_table
+  confidence: 2
+  basis_detail: "中国食物成分表标准值；铁棍山药单根可食部约100g"
+
+p190:
+  name: 莲藕
+  cat: 蔬菜
+  cal: 73
+  protein: 1.9
+  carb: 15.0
+  fat: 0.1
+  unit: g
+  piece_weight: 300
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值；整节莲藕可食部约300g"
+
+p191:
+  name: 芋头
+  cat: 蔬菜
+  cal: 81
+  protein: 1.7
+  carb: 18.0
+  fat: 0.3
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值"
+
+p192:
+  name: 马蹄
+  cat: 蔬菜
+  cal: 73
+  protein: 1.4
+  carb: 16.0
+  fat: 0.1
+  unit: g
+  piece_weight: 20
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值；单个马蹄可食部约20g"
+
+p193:
+  name: 白萝卜
+  cat: 蔬菜
+  cal: 16
+  protein: 0.8
+  carb: 3.2
+  fat: 0.1
+  unit: g
+  piece_weight: 600
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值；常见单个白萝卜可食部约600g"
+
+p194:
+  name: 胡萝卜
+  cat: 蔬菜
+  cal: 35
+  protein: 0.8
+  carb: 8.0
+  fat: 0.2
+  unit: g
+  piece_weight: 80
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值；常见单个胡萝卜可食部约80g"
+
+p195:
+  name: 青萝卜
+  cat: 蔬菜
+  cal: 18
+  protein: 0.8
+  carb: 3.5
+  fat: 0.1
+  unit: g
+  piece_weight: 500
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值；常见单个青萝卜可食部约500g"
+
+p196:
+  name: 番茄
+  cat: 蔬菜
+  cal: 18
+  protein: 0.9
+  carb: 3.5
+  fat: 0.2
+  unit: g
+  piece_weight: 120
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值；常见单个番茄可食部约120g"
+
+p197:
+  name: 黄瓜
+  cat: 蔬菜
+  cal: 15
+  protein: 0.8
+  carb: 2.5
+  fat: 0.1
+  unit: g
+  piece_weight: 200
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值；常见单个黄瓜可食部约200g"
+
+p198:
+  name: 冬瓜
+  cat: 蔬菜
+  cal: 11
+  protein: 0.4
+  carb: 2.0
+  fat: 0.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值"
+
+p199:
+  name: 南瓜
+  cat: 蔬菜
+  cal: 23
+  protein: 0.6
+  carb: 5.0
+  fat: 0.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值"
+
+p200:
+  name: 丝瓜
+  cat: 蔬菜
+  cal: 18
+  protein: 0.9
+  carb: 2.8
+  fat: 0.1
+  unit: g
+  piece_weight: 200
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值；常见单个丝瓜可食部约200g"
+
+p201:
+  name: 苦瓜
+  cat: 蔬菜
+  cal: 19
+  protein: 0.4
+  carb: 3.6
+  fat: 0.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p202:
+  name: 西葫芦
+  cat: 蔬菜
+  cal: 16
+  protein: 0.8
+  carb: 2.6
+  fat: 0.2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p203:
+  name: 茄子
+  cat: 蔬菜
+  cal: 24
+  protein: 1.1
+  carb: 4.5
+  fat: 0.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p204:
+  name: 青椒
+  cat: 蔬菜
+  cal: 15
+  protein: 1.0
+  carb: 3.9
+  fat: 0.3
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: ""
+
+p205:
+  name: 彩椒
+  cat: 蔬菜
+  cal: 27
+  protein: 1.8
+  carb: 6.0
+  fat: 0.2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（甜椒，红/黄）"
+
+p206:
+  name: 小米椒
+  cat: 蔬菜
+  cal: 45
+  protein: 1.0
+  carb: 8.0
+  fat: 0.5
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 2
+  basis_detail: "中国食物成分表标准值（鲜辣椒）"
+
+p207:
+  name: 四季豆
+  cat: 蔬菜
+  cal: 28
+  protein: 2.0
+  carb: 5.0
+  fat: 0.2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p208:
+  name: 豇豆
+  cat: 蔬菜
+  cal: 30
+  protein: 2.0
+  carb: 5.5
+  fat: 0.2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p209:
+  name: 荷兰豆
+  cat: 蔬菜
+  cal: 27
+  protein: 1.8
+  carb: 4.0
+  fat: 0.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p210:
+  name: 豌豆
+  cat: 蔬菜
+  cal: 111
+  protein: 8.0
+  carb: 20.0
+  fat: 0.4
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p211:
+  name: 毛豆
+  cat: 蔬菜
+  cal: 131
+  protein: 13.0
+  carb: 5.0
+  fat: 5.0
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜毛豆，带荚）"
+
+p212:
+  name: 黄豆芽
+  cat: 蔬菜
+  cal: 17
+  protein: 2.5
+  carb: 1.8
+  fat: 0.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p213:
+  name: 绿豆芽
+  cat: 蔬菜
+  cal: 14
+  protein: 2.0
+  carb: 1.3
+  fat: 0.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p214:
+  name: 香菇
+  cat: 蔬菜
+  cal: 26
+  protein: 2.2
+  carb: 4.0
+  fat: 0.3
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p215:
+  name: 金针菇
+  cat: 蔬菜
+  cal: 29
+  protein: 2.3
+  carb: 5.5
+  fat: 0.3
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p216:
+  name: 杏鲍菇
+  cat: 蔬菜
+  cal: 35
+  protein: 1.0
+  carb: 6.0
+  fat: 0.6
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p217:
+  name: 平菇
+  cat: 蔬菜
+  cal: 24
+  protein: 1.9
+  carb: 4.0
+  fat: 0.4
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p218:
+  name: 木耳
+  cat: 蔬菜
+  cal: 25
+  protein: 1.5
+  carb: 5.0
+  fat: 0.2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（水发）"
+
+p219:
+  name: 银耳
+  cat: 蔬菜
+  cal: 25
+  protein: 1.6
+  carb: 6.0
+  fat: 0.2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（水发）"
+
+p220:
+  name: 海带
+  cat: 蔬菜
+  cal: 13
+  protein: 0.8
+  carb: 2.0
+  fat: 0.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（湿海带）"
+
+p221:
+  name: 紫菜
+  cat: 蔬菜
+  cal: 20
+  protein: 2.0
+  carb: 3.0
+  fat: 0.2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（干紫菜）"
+
+p222:
+  name: 竹笋
+  cat: 蔬菜
+  cal: 19
+  protein: 2.6
+  carb: 2.0
+  fat: 0.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p223:
+  name: 莴笋
+  cat: 蔬菜
+  cal: 14
+  protein: 0.9
+  carb: 2.0
+  fat: 0.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p224:
+  name: 芦笋
+  cat: 蔬菜
+  cal: 20
+  protein: 2.4
+  carb: 3.0
+  fat: 0.1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p225:
+  name: 秋葵
+  cat: 蔬菜
+  cal: 31
+  protein: 1.8
+  carb: 6.0
+  fat: 0.2
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p226:
+  name: 洋葱
+  cat: 蔬菜
+  cal: 40
+  protein: 1.1
+  carb: 9.3
+  fat: 0.1
+  unit: g
+  piece_weight: 150
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（生）"
+
+p227:
+  name: 大蒜
+  cat: 蔬菜
+  cal: 130
+  protein: 4.4
+  carb: 29.9
+  fat: 0.2
+  unit: g
+  piece_weight: 8
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（生）"
+
+p228:
+  name: 生姜
+  cat: 蔬菜
+  cal: 44
+  protein: 1.3
+  carb: 9.2
+  fat: 0.6
+  unit: g
+  piece_weight: 20
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（生）"
+
+p229:
+  name: 大葱
+  cat: 蔬菜
+  cal: 27
+  protein: 1.3
+  carb: 5.7
+  fat: 0.3
+  unit: g
+  piece_weight: 50
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（生）"
+
+p230:
+  name: 苹果
+  cat: 水果
+  cal: 53
+  protein: 0.3
+  carb: 13.5
+  fat: 0.2
+  unit: g
+  piece_weight: 180
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（红富士等常见品种生）"
+
+p231:
+  name: 香蕉
+  cat: 水果
+  cal: 93
+  protein: 1.5
+  carb: 22.0
+  fat: 0.2
+  unit: g
+  piece_weight: 120
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（生）"
+
+p232:
+  name: 橙子
+  cat: 水果
+  cal: 47
+  protein: 0.8
+  carb: 11.3
+  fat: 0.1
+  unit: g
+  piece_weight: 150
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（甜橙生）"
+
+p233:
+  name: 橘子
+  cat: 水果
+  cal: 44
+  protein: 0.9
+  carb: 11.2
+  fat: 0.1
+  unit: g
+  piece_weight: 100
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（蜜桔生）"
+
+p234:
+  name: 柚子
+  cat: 水果
+  cal: 41
+  protein: 0.6
+  carb: 9.1
+  fat: 0.2
+  unit: g
+  piece_weight: 200
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（沙田柚生）"
+
+p235:
+  name: 柠檬
+  cat: 水果
+  cal: 29
+  protein: 0.9
+  carb: 9.5
+  fat: 0.1
+  unit: g
+  piece_weight: 80
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（生）"
+
+p236:
+  name: 葡萄
+  cat: 水果
+  cal: 46
+  protein: 0.5
+  carb: 11.0
+  fat: 0.4
+  unit: g
+  piece_weight: 12
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（巨峰等常见葡萄生）"
+
+p237:
+  name: 提子
+  cat: 水果
+  cal: 55
+  protein: 0.7
+  carb: 13.8
+  fat: 0.4
+  unit: g
+  piece_weight: 10
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（红提生）"
+
+p238:
+  name: 草莓
+  cat: 水果
+  cal: 32
+  protein: 0.8
+  carb: 7.7
+  fat: 0.3
+  unit: g
+  piece_weight: 20
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（生）"
+
+p239:
+  name: 蓝莓
+  cat: 水果
+  cal: 57
+  protein: 0.7
+  carb: 13.2
+  fat: 0.3
+  unit: g
+  piece_weight: 3
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（生）"
+
+p240:
+  name: 桑葚
+  cat: 水果
+  cal: 40
+  protein: 1.0
+  carb: 9.7
+  fat: 0.3
+  unit: g
+  piece_weight: 5
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜）"
+
+p241:
+  name: 西瓜
+  cat: 水果
+  cal: 31
+  protein: 0.6
+  carb: 6.2
+  fat: 0.1
+  unit: g
+  piece_weight: 600
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（中瓜生可食部）"
+
+p242:
+  name: 哈密瓜
+  cat: 水果
+  cal: 36
+  protein: 0.6
+  carb: 8.2
+  fat: 0.1
+  unit: g
+  piece_weight: 400
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（生可食部）"
+
+p243:
+  name: 甜瓜
+  cat: 水果
+  cal: 26
+  protein: 0.4
+  carb: 6.3
+  fat: 0.1
+  unit: g
+  piece_weight: 500
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（白兰瓜生）"
+
+p244:
+  name: 桃子
+  cat: 水果
+  cal: 43
+  protein: 0.9
+  carb: 10.5
+  fat: 0.1
+  unit: g
+  piece_weight: 150
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（水蜜桃生）"
+
+p245:
+  name: 油桃
+  cat: 水果
+  cal: 49
+  protein: 0.9
+  carb: 11.8
+  fat: 0.2
+  unit: g
+  piece_weight: 120
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（生）"
+
+p246:
+  name: 李子
+  cat: 水果
+  cal: 38
+  protein: 0.8
+  carb: 9.6
+  fat: 0.2
+  unit: g
+  piece_weight: 30
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（黑布林生）"
+
+p247:
+  name: 杏
+  cat: 水果
+  cal: 39
+  protein: 0.9
+  carb: 9.2
+  fat: 0.2
+  unit: g
+  piece_weight: 25
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（鲜杏生）"
+
+p248:
+  name: 樱桃
+  cat: 水果
+  cal: 52
+  protein: 1.0
+  carb: 11.2
+  fat: 0.2
+  unit: g
+  piece_weight: 8
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（中国樱桃生）"
+
+p249:
+  name: 车厘子
+  cat: 水果
+  cal: 63
+  protein: 1.0
+  carb: 15.0
+  fat: 0.2
+  unit: g
+  piece_weight: 12
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（进口大樱桃生）"
+
+p250:
+  name: 雪梨
+  cat: 水果
+  cal: 42
+  protein: 0.4
+  carb: 10.9
+  fat: 0.1
+  unit: g
+  piece_weight: 250
+  basis: composition_table
+  confidence: 3
+  basis_detail: "中国食物成分表标准值（生）"
+
+p251:
+  name: 香梨
+  cat: 水果
+  cal: 42
+  protein: 0.4
+  carb: 10.0
+  fat: 0.2
+  unit: g
+  piece_weight: 150
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约75%"
+
+p252:
+  name: 芒果
+  cat: 水果
+  cal: 60
+  protein: 0.6
+  carb: 14.0
+  fat: 0.3
+  unit: g
+  piece_weight: 200
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约60%"
+
+p253:
+  name: 菠萝
+  cat: 水果
+  cal: 44
+  protein: 0.5
+  carb: 10.5
+  fat: 0.1
+  unit: g
+  piece_weight: 300
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约15%"
+
+p254:
+  name: 木瓜
+  cat: 水果
+  cal: 27
+  protein: 0.5
+  carb: 6.3
+  fat: 0.1
+  unit: g
+  piece_weight: 500
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约50%"
+
+p255:
+  name: 火龙果
+  cat: 水果
+  cal: 50
+  protein: 1.1
+  carb: 11.0
+  fat: 0.3
+  unit: g
+  piece_weight: 200
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约80%"
+
+p256:
+  name: 猕猴桃
+  cat: 水果
+  cal: 61
+  protein: 1.1
+  carb: 14.5
+  fat: 0.5
+  unit: g
+  piece_weight: 80
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约90%"
+
+p257:
+  name: 百香果
+  cat: 水果
+  cal: 42
+  protein: 2.4
+  carb: 9.5
+  fat: 0.6
+  unit: g
+  piece_weight: 15
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约25%（果肉）"
+
+p258:
+  name: 榴莲
+  cat: 水果
+  cal: 147
+  protein: 1.4
+  carb: 20.0
+  fat: 7.5
+  unit: g
+  piece_weight: 150
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约20-30%"
+
+p259:
+  name: 山竹
+  cat: 水果
+  cal: 68
+  protein: 0.4
+  carb: 16.0
+  fat: 0.3
+  unit: g
+  piece_weight: 100
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约15%"
+
+p260:
+  name: 椰子
+  cat: 水果
+  cal: 241
+  protein: 3.3
+  carb: 11.5
+  fat: 22.7
+  unit: g
+  piece_weight: 500
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约15%（椰肉），椰子水另计"
+
+p261:
+  name: 荔枝
+  cat: 水果
+  cal: 70
+  protein: 0.8
+  carb: 16.5
+  fat: 0.3
+  unit: g
+  piece_weight: 20
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约70%"
+
+p262:
+  name: 龙眼
+  cat: 水果
+  cal: 60
+  protein: 1.1
+  carb: 13.0
+  fat: 0.2
+  unit: g
+  piece_weight: 15
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约75%"
+
+p263:
+  name: 枇杷
+  cat: 水果
+  cal: 37
+  protein: 0.6
+  carb: 8.7
+  fat: 0.1
+  unit: g
+  piece_weight: 15
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约55%"
+
+p264:
+  name: 石榴
+  cat: 水果
+  cal: 68
+  protein: 0.9
+  carb: 15.0
+  fat: 0.2
+  unit: g
+  piece_weight: 250
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约40%"
+
+p265:
+  name: 柿子
+  cat: 水果
+  cal: 65
+  protein: 0.7
+  carb: 15.0
+  fat: 0.1
+  unit: g
+  piece_weight: 180
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约80%"
+
+p266:
+  name: 鲜枣
+  cat: 水果
+  cal: 125
+  protein: 1.2
+  carb: 30.0
+  fat: 0.2
+  unit: g
+  piece_weight: 15
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约85%"
+
+p267:
+  name: 牛油果
+  cat: 水果
+  cal: 161
+  protein: 2.0
+  carb: 9.0
+  fat: 14.7
+  unit: g
+  piece_weight: 150
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约60%"
+
+p268:
+  name: 无花果
+  cat: 水果
+  cal: 55
+  protein: 1.0
+  carb: 12.0
+  fat: 0.4
+  unit: g
+  piece_weight: 50
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约90%"
+
+p269:
+  name: 杨梅
+  cat: 水果
+  cal: 30
+  protein: 0.8
+  carb: 6.6
+  fat: 0.3
+  unit: g
+  piece_weight: 5
+  basis: composition_table
+  confidence: 3
+  basis_detail: "《中国食物成分表》标准值，可食部约85%"
+
+p270:
+  name: 珍珠奶茶
+  cat: 饮品
+  cal: 43
+  protein: 0.5
+  carb: 4.4
+  fat: 2.8
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 1
+  basis_detail: "引用 milk_tea.yaml 的无糖 base；按植脂末基底推算（40g 植脂末/500ml：脂肪35% 碳水55% 蛋白5%）。甜度 delta 与加料 delta 由 opts_tpl.yaml 组合计算，不在此预生成"
+
+p271:
+  name: 芝士奶盖茶
+  cat: 饮品
+  cal: 85
+  protein: 1.1
+  carb: 5.6
+  fat: 6.8
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 1
+  basis_detail: "奶茶底(43kcal/100ml) + 芝士奶盖(奶油+芝士，脂肪高) 按 500ml 配比折算；原值 180kcal/100ml 疑将「每份」误当「每100ml」"
+
+p272:
+  name: 水果茶
+  cat: 饮品
+  cal: 45
+  protein: 0.5
+  carb: 11.0
+  fat: 0.1
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "红茶底200g + 混合水果50g + 糖浆15g，总约270g"
+
+p273:
+  name: 柠檬茶
+  cat: 饮品
+  cal: 35
+  protein: 0.2
+  carb: 9.0
+  fat: 0.1
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "红茶底200g + 柠檬片20g + 糖浆20g，总约240g"
+
+p274:
+  name: 杨枝甘露
+  cat: 饮品
+  cal: 110
+  protein: 2.0
+  carb: 18.0
+  fat: 3.5
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "西柚果肉30g + 芒果泥50g + 椰奶100g + 西米15g，总约200g"
+
+p275:
+  name: 烧仙草
+  cat: 饮品
+  cal: 85
+  protein: 1.5
+  carb: 16.0
+  fat: 1.0
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "烧仙草冻150g + 红豆20g + 炼乳15g + 糖水50g，总约235g"
+
+p276:
+  name: 美式咖啡
+  cat: 饮品
+  cal: 5
+  protein: 0.1
+  carb: 0.1
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "浓缩咖啡25g + 热水220g，无添加糖奶"
+
+p277:
+  name: 拿铁
+  cat: 饮品
+  cal: 48
+  protein: 2.5
+  carb: 3.8
+  fat: 1.6
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "浓缩咖啡25g + 鲜牛奶220g（全脂奶约3.2g/100g蛋白、3.5g/100g脂肪、4.8g/100g碳水）"
+
+p278:
+  name: 卡布奇诺
+  cat: 饮品
+  cal: 42
+  protein: 2.2
+  carb: 3.4
+  fat: 1.4
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "浓缩咖啡25g + 蒸汽牛奶180g + 奶泡约30g（以全脂奶计）"
+
+p279:
+  name: 摩卡
+  cat: 饮品
+  cal: 72
+  protein: 2.4
+  carb: 10.5
+  fat: 1.8
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: ""
+
+p280:
+  name: 速溶咖啡
+  cat: 饮品
+  cal: 18
+  protein: 0.2
+  carb: 4.0
+  fat: 0.1
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "速溶咖啡粉5g + 热水200g，无糖无奶；若加糖加奶按添加量另计"
+
+p281:
+  name: 可乐
+  cat: 饮品
+  cal: 42
+  protein: 0
+  carb: 10.6
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "参照GB 28050及常见品牌营养成分表，每100ml含糖约10.6g"
+
+p282:
+  name: 雪碧
+  cat: 饮品
+  cal: 40
+  protein: 0
+  carb: 10.0
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "参照GB 28050及常见品牌营养成分表，每100ml含糖约10g"
+
+p283:
+  name: 气泡水
+  cat: 饮品
+  cal: 0
+  protein: 0
+  carb: 0
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "无糖无添加气泡水，仅含二氧化碳和水"
+
+p284:
+  name: 牛奶
+  cat: 饮品
+  cal: 65
+  protein: 3.0
+  carb: 4.7
+  fat: 3.2
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "全脂牛奶，参照中国食物成分表标准版第6版"
+
+p285:
+  name: 酸奶
+  cat: 饮品
+  cal: 72
+  protein: 3.0
+  carb: 9.5
+  fat: 1.8
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "全脂牛奶发酵后加糖约8%（8g/100g），乳糖部分转化为乳酸，净碳水略降"
+
+p286:
+  name: 豆浆
+  cat: 饮品
+  cal: 32
+  protein: 1.8
+  carb: 1.5
+  fat: 1.6
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "黄豆20g + 水200g磨浆煮熟，去渣，未加糖；以干黄豆成分折算"
+
+p287:
+  name: 豆奶
+  cat: 饮品
+  cal: 35
+  protein: 2.0
+  carb: 2.0
+  fat: 1.5
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 2
+  basis_detail: "参照市售预包装豆奶常见营养标签平均值"
+
+p288:
+  name: 椰奶
+  cat: 饮品
+  cal: 60
+  protein: 0.6
+  carb: 8.5
+  fat: 2.5
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "按「椰汁饮料」（市售包装椰汁）口径取值；若指烹饪用「椰浆」则应为约 180kcal、脂肪 19g，需明确口径"
+
+p289:
+  name: 橙汁
+  cat: 饮品
+  cal: 45
+  protein: 0.5
+  carb: 10.4
+  fat: 0.1
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "橙汁（100%），参照中国食物成分表标准版第6版"
+
+p290:
+  name: 苹果汁
+  cat: 饮品
+  cal: 46
+  protein: 0.1
+  carb: 11.3
+  fat: 0.1
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "苹果汁（100%），参照中国食物成分表标准版第6版"
+
+p291:
+  name: 西瓜汁
+  cat: 饮品
+  cal: 25
+  protein: 0.4
+  carb: 6.0
+  fat: 0.1
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "西瓜果肉打汁，西瓜本身水分高糖分较低，100g西瓜约含糖6g"
+
+p292:
+  name: 椰子水
+  cat: 饮品
+  cal: 19
+  protein: 0.4
+  carb: 3.7
+  fat: 0.1
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "天然椰子水，参照中国食物成分表及常见产品营养标签"
+
+p293:
+  name: 绿茶
+  cat: 饮品
+  cal: 2
+  protein: 0.1
+  carb: 0.3
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "绿茶茶汤，无糖无奶，茶叶浸出物热量极低"
+
+p294:
+  name: 红茶
+  cat: 饮品
+  cal: 2
+  protein: 0.1
+  carb: 0.3
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "红茶茶汤，无糖无奶，茶叶浸出物热量极低"
+
+p295:
+  name: 乌龙茶
+  cat: 饮品
+  cal: 2
+  protein: 0.1
+  carb: 0.3
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "乌龙茶汤，无糖无奶，茶叶浸出物热量极低"
+
+p296:
+  name: 普洱茶
+  cat: 饮品
+  cal: 2
+  protein: 0.1
+  carb: 0.3
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "普洱茶汤，无糖无奶，茶叶浸出物热量极低"
+
+p297:
+  name: 茉莉花茶
+  cat: 饮品
+  cal: 2
+  protein: 0.1
+  carb: 0.3
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "茉莉花茶汤，无糖无奶，茶叶浸出物热量极低"
+
+p298:
+  name: 啤酒
+  cat: 饮品
+  cal: 43
+  protein: 0.4
+  carb: 3.6
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "普通拉格啤酒，参照中国食物成分表，酒精约3.5%v/v"
+
+p299:
+  name: 白酒
+  cat: 饮品
+  cal: 295
+  protein: 0
+  carb: 0.1
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 2
+  basis_detail: "50度白酒，酒精7kcal/g，50g酒精/100g≈350kcal，扣除水分等修正至约295kcal"
+
+p300:
+  name: 红酒
+  cat: 饮品
+  cal: 80
+  protein: 0.1
+  carb: 0.4
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 2
+  basis_detail: "干红葡萄酒，酒精度约12-13%vol，参照常见葡萄酒营养成分数据"
+
+p301:
+  name: 鸡尾酒
+  cat: 饮品
+  cal: 100
+  protein: 0
+  carb: 8
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: rough_estimate
+  confidence: 1
+  basis_detail: "鸡尾酒类型差异极大，此处取中等甜度混合烈酒类平均值"
+
+p302:
+  name: 能量饮料
+  cat: 饮品
+  cal: 45
+  protein: 0
+  carb: 11
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 2
+  basis_detail: "参考中国食物成分表及红牛等产品标签数据"
+
+p303:
+  name: 运动饮料
+  cat: 饮品
+  cal: 28
+  protein: 0
+  carb: 7
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 2
+  basis_detail: "参考佳得乐等运动饮料营养成分表"
+
+p304:
+  name: 凉茶
+  cat: 饮品
+  cal: 22
+  protein: 0
+  carb: 5.5
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 2
+  basis_detail: "参考王老吉/加多宝等罐装凉茶营养成分表"
+
+p305:
+  name: 酸梅汤
+  cat: 饮品
+  cal: 38
+  protein: 0
+  carb: 9.5
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "乌梅15g + 山楂10g + 甘草3g + 冰糖25g + 水500ml，熬制后约480ml成品"
+
+p306:
+  name: 奶昔
+  cat: 饮品
+  cal: 95
+  protein: 3
+  carb: 13
+  fat: 3.5
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "全脂牛奶150g + 香草冰淇淋80g + 糖浆10g，搅拌后约230g成品"
+
+p307:
+  name: 冰沙
+  cat: 饮品
+  cal: 55
+  protein: 0.5
+  carb: 13
+  fat: 0.3
+  unit: ml
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "草莓150g + 冰块100g + 糖浆20g，搅打成沙后约250g"
+
+p308:
+  name: 矿泉水
+  cat: 饮品
+  cal: 0
+  protein: 0
+  carb: 0
+  fat: 0
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "矿泉水无热量及宏量营养素，仅含微量矿物质"
+
+p309:
+  name: 薯片
+  cat: 零食
+  cal: 536
+  protein: 6
+  carb: 53
+  fat: 34
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "参考中国食物成分表膨化食品类土豆片数据"
+
+p310:
+  name: 薯条
+  cat: 零食
+  cal: 312
+  protein: 3.4
+  carb: 41
+  fat: 15
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "土豆150g + 植物油15g（炸制），成品约165g"
+
+p311:
+  name: 虾条
+  cat: 零食
+  cal: 510
+  protein: 6
+  carb: 55
+  fat: 26
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "参考中国食物成分表膨化食品类虾味条数据"
+
+p312:
+  name: 锅巴
+  cat: 零食
+  cal: 470
+  protein: 5.5
+  carb: 48
+  fat: 26
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "熟米饭100g + 植物油12g + 调料3g，煎炸后约105g"
+
+p313:
+  name: 爆米花
+  cat: 零食
+  cal: 390
+  protein: 4
+  carb: 80
+  fat: 5
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "玉米粒40g + 食用油10g，爆开约350g，此处为市售影院黄油爆米花估算"
+
+p314:
+  name: 饼干
+  cat: 零食
+  cal: 450
+  protein: 7
+  carb: 70
+  fat: 15
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "参考中国食物成分表饼干类通用数据"
+
+p315:
+  name: 曲奇
+  cat: 零食
+  cal: 500
+  protein: 6
+  carb: 60
+  fat: 25
+  unit: g
+  piece_weight: 12
+  basis: composition_table
+  confidence: 3
+  basis_detail: "参考中国食物成分表酥性饼干数据，1个约12g"
+
+p316:
+  name: 威化
+  cat: 零食
+  cal: 480
+  protein: 5
+  carb: 62
+  fat: 22
+  unit: g
+  piece_weight: 8
+  basis: composition_table
+  confidence: 3
+  basis_detail: "参考中国食物成分表威化饼干数据，1块约8g"
+
+p317:
+  name: 蛋卷
+  cat: 零食
+  cal: 510
+  protein: 6
+  carb: 56
+  fat: 27
+  unit: g
+  piece_weight: 10
+  basis: composition_table
+  confidence: 3
+  basis_detail: "参考中国食物成分表蛋卷类数据，1根约10g"
+
+p318:
+  name: 黑巧克力
+  cat: 零食
+  cal: 599
+  protein: 7
+  carb: 46
+  fat: 39
+  unit: g
+  piece_weight: 10
+  basis: composition_table
+  confidence: 3
+  basis_detail: "参考中国食物成分表可可含量70%黑巧克力数据，1块约10g"
+
+p319:
+  name: 牛奶巧克力
+  cat: 零食
+  cal: 535
+  protein: 7
+  carb: 59
+  fat: 30
+  unit: g
+  piece_weight: 10
+  basis: composition_table
+  confidence: 3
+  basis_detail: "参考中国食物成分表牛奶巧克力数据，1块约10g"
+
+p320:
+  name: 奶油蛋糕
+  cat: 零食
+  cal: 360
+  protein: 6
+  carb: 42
+  fat: 18
+  unit: g
+  piece_weight: 80
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "低筋面粉100g + 细砂糖60g + 鸡蛋2个(100g) + 黄油60g + 淡奶油100g，烘烤后约320g成品"
+
+p321:
+  name: 芝士蛋糕
+  cat: 零食
+  cal: 340
+  protein: 6.5
+  carb: 25
+  fat: 24
+  unit: g
+  piece_weight: 100
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "奶油奶酪200g + 细砂糖50g + 鸡蛋2个(100g) + 消化饼干碎50g + 黄油25g，烤后约320g"
+
+p322:
+  name: 慕斯
+  cat: 零食
+  cal: 280
+  protein: 4
+  carb: 18
+  fat: 21
+  unit: g
+  piece_weight: 100
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "淡奶油100g + 蛋黄2个(36g) + 细砂糖30g + 明胶片5g，冷藏成型后约170g"
+
+p323:
+  name: 甜甜圈
+  cat: 零食
+  cal: 452
+  protein: 5.5
+  carb: 51
+  fat: 25
+  unit: g
+  piece_weight: 80
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "高筋面粉100g + 细砂糖20g + 鸡蛋1个(50g) + 黄油20g + 植物油25g（油炸），成品约160g"
+
+p324:
+  name: 蛋挞
+  cat: 零食
+  cal: 330
+  protein: 6
+  carb: 28
+  fat: 20
+  unit: g
+  piece_weight: 55
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "水油皮(面粉30g+猪油15g+水20g) + 蛋挞液(全蛋50g+牛奶50g+细砂糖10g)，烤制后约55g/个"
+
+p325:
+  name: 泡芙
+  cat: 零食
+  cal: 320
+  protein: 6
+  carb: 28
+  fat: 20
+  unit: g
+  piece_weight: 60
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "泡芙面糊(水50g+黄油20g+低粉30g+鸡蛋2个100g) + 打发奶油80g，烤制后约140g面团体，填入奶油约220g总重"
+
+p326:
+  name: 冰淇淋
+  cat: 零食
+  cal: 200
+  protein: 3
+  carb: 25
+  fat: 11
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "稀奶油50g + 全脂牛奶100g + 白砂糖40g + 蛋黄20g + 淀粉5g，总约180g成品，平均后"
+
+p327:
+  name: 雪糕
+  cat: 零食
+  cal: 140
+  protein: 2
+  carb: 22
+  fat: 5
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "水/牛奶80g + 白砂糖30g + 植物油8g +  Stabilizer 2g，总约100g成品，平均后"
+
+p328:
+  name: 冰棍
+  cat: 零食
+  cal: 80
+  protein: 0
+  carb: 20
+  fat: 0
+  unit: g
+  piece_weight: 80
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "水100g + 白砂糖20g + 果汁/香精少量，总约100g成品，常见单支约80g"
+
+p329:
+  name: 混合坚果
+  cat: 零食
+  cal: 600
+  protein: 15
+  carb: 18
+  fat: 53
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 2
+  basis_detail: "常见烘焙混合坚果（腰果/杏仁/核桃/花生等）按约各25%配比综合估算"
+
+p330:
+  name: 瓜子
+  cat: 零食
+  cal: 600
+  protein: 18
+  carb: 15
+  fat: 53
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 2
+  basis_detail: "炒瓜子仁参考中国食物成分表标准值（西瓜子/葵花籽均值）"
+
+p331:
+  name: 花生
+  cat: 零食
+  cal: 570
+  protein: 25
+  carb: 16
+  fat: 49
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 2
+  basis_detail: "熟花生仁参考中国食物成分表标准值（油炸/烘烤均值）"
+
+p332:
+  name: 开心果
+  cat: 零食
+  cal: 560
+  protein: 20
+  carb: 22
+  fat: 44
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 2
+  basis_detail: "熟开心果仁参考USDA及中国食物成分表标准值"
+
+p333:
+  name: 腰果
+  cat: 零食
+  cal: 550
+  protein: 14
+  carb: 30
+  fat: 43
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 2
+  basis_detail: "熟腰果参考中国食物成分表标准值"
+
+p334:
+  name: 核桃
+  cat: 零食
+  cal: 650
+  protein: 15
+  carb: 10
+  fat: 63
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 2
+  basis_detail: "核桃仁参考中国食物成分表标准值（干核桃均值）"
+
+p335:
+  name: 果冻
+  cat: 零食
+  cal: 60
+  protein: 0
+  carb: 15
+  fat: 0
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "水100g + 白砂糖12g + 果汁3g + 明胶/卡拉胶2g，总约117g成品"
+
+p336:
+  name: 布丁
+  cat: 零食
+  cal: 120
+  protein: 3
+  carb: 16
+  fat: 4
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "牛奶80g + 鸡蛋20g + 白砂糖10g + 明胶2g，总约100g成品"
+
+p337:
+  name: 棉花糖
+  cat: 零食
+  cal: 360
+  protein: 1
+  carb: 88
+  fat: 0
+  unit: g
+  piece_weight: 15
+  basis: composition_table
+  confidence: 2
+  basis_detail: "纯糖打发制品，参考USDA棉花糖标准值，单颗约15g"
+
+p338:
+  name: 辣条
+  cat: 零食
+  cal: 380
+  protein: 8
+  carb: 42
+  fat: 20
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 1
+  basis_detail: "小麦粉60g + 大豆蛋白15g + 植物油15g + 调味料8g + 水20g，总约118g成品"
+
+p339:
+  name: 牛肉干
+  cat: 零食
+  cal: 300
+  protein: 35
+  carb: 20
+  fat: 12
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "瘦牛肉100g + 酱油15g + 糖10g + 香料少许，烘干后约得60g成品"
+
+p340:
+  name: 肉脯
+  cat: 零食
+  cal: 280
+  protein: 25
+  carb: 30
+  fat: 10
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "猪肉糜100g + 糖15g + 酱油10g + 料酒5g，烤制约得70g成品"
+
+p341:
+  name: 鱼豆腐
+  cat: 零食
+  cal: 150
+  protein: 8
+  carb: 10
+  fat: 8
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "鱼糜60g + 淀粉20g + 植物油8g + 调味料5g，总约93g成品"
+
+p342:
+  name: 月饼
+  cat: 零食
+  cal: 400
+  protein: 7
+  carb: 50
+  fat: 20
+  unit: g
+  piece_weight: 75
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面粉100g + 糖50g + 植物油30g + 糖浆20g + 莲蓉/豆沙馅80g，总约280g，常见单枚约75g"
+
+p343:
+  name: 沙琪玛
+  cat: 零食
+  cal: 420
+  protein: 7
+  carb: 58
+  fat: 18
+  unit: g
+  piece_weight: 30
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面粉80g + 鸡蛋20g + 糖40g + 植物油30g + 蜂蜜10g，总约180g成品，常见单块约30g"
+
+p344:
+  name: 麻花
+  cat: 零食
+  cal: 450
+  protein: 8
+  carb: 52
+  fat: 24
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "面粉100g + 糖20g + 植物油35g + 鸡蛋15g，油炸后约得110g成品"
+
+p345:
+  name: 山楂片
+  cat: 零食
+  cal: 300
+  protein: 0
+  carb: 75
+  fat: 0
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "山楂泥100g + 白砂糖70g + 水适量，熬制脱水后约得120g成品"
+
+p346:
+  name: 蜜饯
+  cat: 零食
+  cal: 280
+  protein: 0
+  carb: 70
+  fat: 0
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 1
+  basis_detail: "水果100g + 白砂糖60g + 水适量，糖渍脱水后约得80g成品，因种类差异大"
+
+p347:
+  name: 口香糖
+  cat: 零食
+  cal: 280
+  protein: 0
+  carb: 75
+  fat: 5
+  unit: g
+  piece_weight: 2
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "木糖醇50g + 砂糖20g +  Gum base 15g + 香精少量，总约100g，常见单粒约2g"

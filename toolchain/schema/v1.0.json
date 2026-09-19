@@ -1,0 +1,165 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CalTrack 食物库数据格式 v1.0",
+  "description": "单一事实来源。App 启动时校验 schemaVersion，不匹配直接报错。",
+
+  "type": "object",
+  "required": ["v", "generated", "fingerprint", "vesselTpl", "optTpl", "foods"],
+  "additionalProperties": false,
+
+  "properties": {
+    "v": {
+      "type": "string",
+      "description": "库版本号，语义化版本。如 1.0.0"
+    },
+    "generated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "生成时间，ISO 8601"
+    },
+    "fingerprint": {
+      "type": "object",
+      "required": ["version", "sources", "count", "generatedAt"],
+      "properties": {
+        "version": { "type": "string" },
+        "sources": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "来源文件清单"
+        },
+        "count": { "type": "integer", "minimum": 1 },
+        "generatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "vesselTpl": {
+      "type": "object",
+      "description": "计量器具模板。UI 靠它生成分段控件。",
+      "patternProperties": {
+        "^[a-z]+$": {
+          "type": "object",
+          "required": ["label", "sizes"],
+          "properties": {
+            "label": { "type": "string" },
+            "sizes": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["k", "name", "amount", "unit"],
+                "properties": {
+                  "k": { "type": "string" },
+                  "name": { "type": "string" },
+                  "amount": { "type": "number", "exclusiveMinimum": 0 },
+                  "unit": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "optTpl": {
+      "type": "object",
+      "description": "选项模板（甜度等）。与 vessel 同构，选项可跨食物复用。",
+      "patternProperties": {
+        "^[a-z]+$": {
+          "type": "object",
+          "required": ["key", "label", "def", "hint", "opts"],
+          "properties": {
+            "key": { "type": "string" },
+            "label": { "type": "string" },
+            "type": {
+              "type": "string",
+              "enum": ["single", "multi"],
+              "description": "single=单选（分段控件） multi=多选（chips）"
+            },
+            "scale": {
+              "type": "string",
+              "enum": ["none", "by_capacity"],
+              "description": "delta 缩放方式：by_capacity 表示按实际容量线性缩放（基准见 base_amount）"
+            },
+            "base_amount": { "type": "number" },
+            "base_unit": { "type": "string" },
+            "def": {
+              "oneOf": [
+                { "type": "string" },
+                { "type": "array", "items": { "type": "string" } }
+              ],
+              "description": "默认值。multi 类型用数组（可为空数组）。"
+            },
+            "hint": { "type": "string" },
+            "opts": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "object",
+                "required": ["k", "name", "delta_kcal", "estimate"],
+                "properties": {
+                  "k": { "type": "string" },
+                  "name": { "type": "string" },
+                  "delta_kcal": { "type": "number" },
+                  "estimate": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "foods": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "cat", "base", "conf", "editable", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z]+_?[0-9]+$",
+            "description": "食物 ID。公共库 pNNN（如 p001），自建 u_NNN（v1.1，如 u_1737）。前缀不同即天然隔离。"
+          },
+          "name": { "type": "string", "minLength": 1 },
+          "cat": { "type": "string", "minLength": 1 },
+          "base": {
+            "type": "object",
+            "required": ["cal", "per", "unit"],
+            "properties": {
+              "cal": { "type": "number", "exclusiveMinimum": 0 },
+              "per": { "type": "number", "exclusiveMinimum": 0 },
+              "unit": { "type": "string", "enum": ["g", "ml"] }
+            }
+          },
+          "pieceWeight": {
+            "type": ["number", "null"],
+            "description": "按「个/根/片/串」计的食物，1 个的可食部克重。按碗/份/杯计的为 null。"
+          },
+          "img": {
+            "type": "string",
+            "description": "图标文件名，对应 assets/icons-final/<分类>/ 下的 WebP。"
+          },
+          "vessel": {
+            "type": "string",
+            "description": "引用 vesselTpl 的 key。null 表示无分段控件，退回普通份量。"
+          },
+          "opts": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "引用 optTpl 的 key 列表"
+          },
+          "conf": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3,
+            "description": "置信度：1=估算 2=中 3=高"
+          },
+          "editable": { "type": "boolean" },
+          "source": {
+            "type": "string",
+            "description": "数据来源标识"
+          }
+        }
+      }
+    }
+  }
+}

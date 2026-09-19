@@ -1,0 +1,399 @@
+# v1.0 图表清单 —— 「要画哪些食物图标」的唯一事实来源
+#
+# 定位：一项食物 = 一项数据条目 = 一张专属图（Boss 拍板：不做品类兜底复用）
+# 范围：基础食材 + 中式成品菜 + 包装食品，含奶茶品类（v1.0 不做品牌）
+# 说明：本文件只管「画什么」，不含任何热量数值。营养数据走另一条线（sources/*.yaml）
+#
+# 下一步：为每项补 container（视觉容器）+ view（视角），再按下述模板拼 prompt 生图。
+# 器皿是第一识别特征，必须人工核（否则会出现「铜锅画成铁盆」这类错误）。
+# 视觉容器槽位已生成于 icons_v1_visual.yaml（注意：与数据线的 vessel 计量器具不同义）。
+
+version: "1.0"
+
+# 分类定义：
+#   name —— 用于 UI 显示（中文）
+#   key  —— 用于目录名与文件名（ASCII）
+# 为什么路径必须用 ASCII：中文路径在 URL percent-encoding、跨平台文件系统编码
+# （Windows GBK vs Linux/macOS UTF-8）、打包工具与真机文件 API 上都存在兼容风险。
+categories:
+  - { key: staple,    name: 主食 }
+  - { key: dish,      name: 菜品 }
+  - { key: protein,   name: 肉类蛋类 }
+  - { key: vegetable, name: 蔬菜 }
+  - { key: fruit,     name: 水果 }
+  - { key: drink,     name: 饮品 }
+  - { key: snack,     name: 零食 }
+
+# 生图固定骨架：只替换 {container} / {content} / {toppings} / {state} / {view}
+# 规约：说「是什么」，别说「感觉像什么」
+#   有效：逐项枚举食材 / 容器材质与形状 / 状态动态词 / 视角词
+#   无效：抽象概括（assorted ingredients）
+#   有害：主观形容词（milky brown）
+prompt_template: >-
+  {container}, {content}, {toppings}, {state}, {view},
+  pure white background, soft drop shadow, product photography,
+  even studio lighting, square composition, high detail,
+  no text, no watermark, no logo, no people, no hands
+
+foods:
+
+  # ── 主食（米饭面食粥粉饼 + 炒饭盖饭）────────────────────────────
+  - { id: p001, name: 米饭,           cat: 主食 }
+  - { id: p002, name: 蛋炒饭,         cat: 主食 }
+  - { id: p003, name: 扬州炒饭,       cat: 主食 }
+  - { id: p004, name: 咖喱饭,         cat: 主食 }
+  - { id: p005, name: 盖浇饭,         cat: 主食 }
+  - { id: p006, name: 煲仔饭,         cat: 主食 }
+  - { id: p007, name: 卤肉饭,         cat: 主食 }
+  - { id: p008, name: 黄焖鸡米饭,     cat: 主食 }
+  - { id: p009, name: 手抓饭,         cat: 主食 }
+  - { id: p010, name: 石锅拌饭,       cat: 主食 }
+  - { id: p011, name: 白粥,           cat: 主食 }
+  - { id: p012, name: 皮蛋瘦肉粥,     cat: 主食 }
+  - { id: p013, name: 小米粥,         cat: 主食 }
+  - { id: p014, name: 八宝粥,         cat: 主食 }
+  - { id: p015, name: 南瓜粥,         cat: 主食 }
+  - { id: p016, name: 绿豆粥,         cat: 主食 }
+  - { id: p017, name: 馒头,           cat: 主食 }
+  - { id: p018, name: 花卷,           cat: 主食 }
+  - { id: p019, name: 肉包,           cat: 主食 }
+  - { id: p020, name: 菜包,           cat: 主食 }
+  - { id: p021, name: 小笼包,         cat: 主食 }
+  - { id: p022, name: 生煎包,         cat: 主食 }
+  - { id: p023, name: 烧麦,           cat: 主食 }
+  - { id: p024, name: 猪肉白菜饺子,   cat: 主食 }
+  - { id: p025, name: 韭菜鸡蛋饺子,   cat: 主食 }
+  - { id: p026, name: 馄饨,           cat: 主食 }
+  - { id: p027, name: 汤圆,           cat: 主食 }
+  - { id: p028, name: 粽子,           cat: 主食 }
+  - { id: p029, name: 清汤面,         cat: 主食 }
+  - { id: p030, name: 牛肉面,         cat: 主食 }
+  - { id: p031, name: 拉面,           cat: 主食 }
+  - { id: p032, name: 炸酱面,         cat: 主食 }
+  - { id: p033, name: 热干面,         cat: 主食 }
+  - { id: p034, name: 担担面,         cat: 主食 }
+  - { id: p035, name: 刀削面,         cat: 主食 }
+  - { id: p036, name: 油泼面,         cat: 主食 }
+  - { id: p037, name: 螺蛳粉,         cat: 主食 }
+  - { id: p038, name: 桂林米粉,       cat: 主食 }
+  - { id: p039, name: 过桥米线,       cat: 主食 }
+  - { id: p040, name: 酸辣粉,         cat: 主食 }
+  - { id: p041, name: 凉皮,           cat: 主食 }
+  - { id: p042, name: 肠粉,           cat: 主食 }
+  - { id: p043, name: 炒河粉,         cat: 主食 }
+  - { id: p044, name: 油条,           cat: 主食 }
+  - { id: p045, name: 煎饼果子,       cat: 主食 }
+  - { id: p046, name: 手抓饼,         cat: 主食 }
+  - { id: p047, name: 鸡蛋灌饼,       cat: 主食 }
+  - { id: p048, name: 葱油饼,         cat: 主食 }
+  - { id: p049, name: 烧饼,           cat: 主食 }
+  - { id: p050, name: 意大利面,       cat: 主食 }
+  - { id: p051, name: 披萨,           cat: 主食 }
+  - { id: p052, name: 汉堡,           cat: 主食 }
+  - { id: p053, name: 三明治,         cat: 主食 }
+  - { id: p054, name: 吐司面包,       cat: 主食 }
+  - { id: p055, name: 牛角包,         cat: 主食 }
+  - { id: p056, name: 煮玉米,         cat: 主食 }
+  - { id: p057, name: 蒸红薯,         cat: 主食 }
+  - { id: p058, name: 紫薯,           cat: 主食 }
+  - { id: p059, name: 蒸山药,         cat: 主食 }
+  - { id: p060, name: 土豆泥,         cat: 主食 }
+  - { id: p061, name: 年糕,           cat: 主食 }
+
+  # ── 中式菜品（家常菜 / 地方菜 / 快餐主菜）────────────────────────
+  - { id: p062, name: 番茄炒蛋,       cat: 菜品 }
+  - { id: p063, name: 青椒肉丝,       cat: 菜品 }
+  - { id: p064, name: 鱼香肉丝,       cat: 菜品 }
+  - { id: p065, name: 宫保鸡丁,       cat: 菜品 }
+  - { id: p066, name: 麻婆豆腐,       cat: 菜品 }
+  - { id: p067, name: 回锅肉,         cat: 菜品 }
+  - { id: p068, name: 农家小炒肉,     cat: 菜品 }
+  - { id: p069, name: 红烧肉,         cat: 菜品 }
+  - { id: p070, name: 糖醋排骨,       cat: 菜品 }
+  - { id: p071, name: 可乐鸡翅,       cat: 菜品 }
+  - { id: p072, name: 红烧鸡腿,       cat: 菜品 }
+  - { id: p073, name: 土豆炖牛肉,     cat: 菜品 }
+  - { id: p074, name: 萝卜炖排骨,     cat: 菜品 }
+  - { id: p075, name: 水煮肉片,       cat: 菜品 }
+  - { id: p076, name: 水煮鱼,         cat: 菜品 }
+  - { id: p077, name: 酸菜鱼,         cat: 菜品 }
+  - { id: p078, name: 剁椒鱼头,       cat: 菜品 }
+  - { id: p079, name: 辣子鸡,         cat: 菜品 }
+  - { id: p080, name: 清蒸鱼,         cat: 菜品 }
+  - { id: p081, name: 红烧鱼,         cat: 菜品 }
+  - { id: p082, name: 糖醋里脊,       cat: 菜品 }
+  - { id: p083, name: 干锅花菜,       cat: 菜品 }
+  - { id: p084, name: 干煸豆角,       cat: 菜品 }
+  - { id: p085, name: 地三鲜,         cat: 菜品 }
+  - { id: p086, name: 酸辣土豆丝,     cat: 菜品 }
+  - { id: p087, name: 醋溜白菜,       cat: 菜品 }
+  - { id: p088, name: 手撕包菜,       cat: 菜品 }
+  - { id: p089, name: 蒜蓉西兰花,     cat: 菜品 }
+  - { id: p090, name: 清炒时蔬,       cat: 菜品 }
+  - { id: p091, name: 上汤娃娃菜,     cat: 菜品 }
+  - { id: p092, name: 白灼虾,         cat: 菜品 }
+  - { id: p093, name: 油焖大虾,       cat: 菜品 }
+  - { id: p094, name: 香辣虾,         cat: 菜品 }
+  - { id: p095, name: 凉拌黄瓜,       cat: 菜品 }
+  - { id: p096, name: 凉拌木耳,       cat: 菜品 }
+  - { id: p097, name: 口水鸡,         cat: 菜品 }
+  - { id: p098, name: 夫妻肺片,       cat: 菜品 }
+  - { id: p099, name: 白切鸡,         cat: 菜品 }
+  - { id: p100, name: 盐焗鸡,         cat: 菜品 }
+  - { id: p101, name: 烤鸭,           cat: 菜品 }
+  - { id: p102, name: 叉烧,           cat: 菜品 }
+  - { id: p103, name: 烧鹅,           cat: 菜品 }
+  - { id: p104, name: 麻辣烫,         cat: 菜品 }
+  - { id: p105, name: 火锅,           cat: 菜品 }
+  - { id: p106, name: 冒菜,           cat: 菜品 }
+  - { id: p107, name: 串串香,         cat: 菜品 }
+  - { id: p108, name: 麻辣香锅,       cat: 菜品 }
+  - { id: p109, name: 大盘鸡,         cat: 菜品 }
+  - { id: p110, name: 地锅鸡,         cat: 菜品 }
+  - { id: p111, name: 黄焖鸡,         cat: 菜品 }
+  - { id: p112, name: 紫菜蛋花汤,     cat: 菜品 }
+  - { id: p113, name: 番茄蛋汤,       cat: 菜品 }
+  - { id: p114, name: 冬瓜排骨汤,     cat: 菜品 }
+  - { id: p115, name: 玉米排骨汤,     cat: 菜品 }
+  - { id: p116, name: 老鸭汤,         cat: 菜品 }
+  - { id: p117, name: 蔬菜沙拉,       cat: 菜品 }
+  - { id: p118, name: 羊肉串,         cat: 菜品 }
+  - { id: p119, name: 烤鸡翅,         cat: 菜品 }
+
+  # ── 肉类蛋类（含水产、豆制品）────────────────────────────────────
+  - { id: p120, name: 猪瘦肉,         cat: 肉类蛋类 }
+  - { id: p121, name: 五花肉,         cat: 肉类蛋类 }
+  - { id: p122, name: 猪里脊,         cat: 肉类蛋类 }
+  - { id: p123, name: 排骨,           cat: 肉类蛋类 }
+  - { id: p124, name: 猪蹄,           cat: 肉类蛋类 }
+  - { id: p125, name: 猪肝,           cat: 肉类蛋类 }
+  - { id: p126, name: 猪血,           cat: 肉类蛋类 }
+  - { id: p127, name: 牛瘦肉,         cat: 肉类蛋类 }
+  - { id: p128, name: 牛腩,           cat: 肉类蛋类 }
+  - { id: p129, name: 牛腱,           cat: 肉类蛋类 }
+  - { id: p130, name: 牛排,           cat: 肉类蛋类 }
+  - { id: p131, name: 肥牛卷,         cat: 肉类蛋类 }
+  - { id: p132, name: 羊肉,           cat: 肉类蛋类 }
+  - { id: p133, name: 羊排,           cat: 肉类蛋类 }
+  - { id: p134, name: 鸡胸肉,         cat: 肉类蛋类 }
+  - { id: p135, name: 鸡腿,           cat: 肉类蛋类 }
+  - { id: p136, name: 鸡翅,           cat: 肉类蛋类 }
+  - { id: p137, name: 鸡爪,           cat: 肉类蛋类 }
+  - { id: p138, name: 整鸡,           cat: 肉类蛋类 }
+  - { id: p139, name: 鸡胗,           cat: 肉类蛋类 }
+  - { id: p140, name: 鸭肉,           cat: 肉类蛋类 }
+  - { id: p141, name: 鸭腿,           cat: 肉类蛋类 }
+  - { id: p142, name: 鸭脖,           cat: 肉类蛋类 }
+  - { id: p143, name: 鸡蛋,           cat: 肉类蛋类 }
+  - { id: p144, name: 煎蛋,           cat: 肉类蛋类 }
+  - { id: p145, name: 荷包蛋,         cat: 肉类蛋类 }
+  - { id: p146, name: 咸鸭蛋,         cat: 肉类蛋类 }
+  - { id: p147, name: 皮蛋,           cat: 肉类蛋类 }
+  - { id: p148, name: 草鱼,           cat: 肉类蛋类 }
+  - { id: p149, name: 鲈鱼,           cat: 肉类蛋类 }
+  - { id: p150, name: 三文鱼,         cat: 肉类蛋类 }
+  - { id: p151, name: 带鱼,           cat: 肉类蛋类 }
+  - { id: p152, name: 鳕鱼,           cat: 肉类蛋类 }
+  - { id: p153, name: 金枪鱼,         cat: 肉类蛋类 }
+  - { id: p154, name: 基围虾,         cat: 肉类蛋类 }
+  - { id: p155, name: 小龙虾,         cat: 肉类蛋类 }
+  - { id: p156, name: 虾仁,           cat: 肉类蛋类 }
+  - { id: p157, name: 螃蟹,           cat: 肉类蛋类 }
+  - { id: p158, name: 蛤蜊,           cat: 肉类蛋类 }
+  - { id: p159, name: 生蚝,           cat: 肉类蛋类 }
+  - { id: p160, name: 鱿鱼,           cat: 肉类蛋类 }
+  - { id: p161, name: 培根,           cat: 肉类蛋类 }
+  - { id: p162, name: 火腿,           cat: 肉类蛋类 }
+  - { id: p163, name: 香肠,           cat: 肉类蛋类 }
+  - { id: p164, name: 午餐肉,         cat: 肉类蛋类 }
+  - { id: p165, name: 腊肠,           cat: 肉类蛋类 }
+  - { id: p166, name: 豆腐,           cat: 肉类蛋类 }
+  - { id: p167, name: 豆干,           cat: 肉类蛋类 }
+  - { id: p168, name: 腐竹,           cat: 肉类蛋类 }
+  - { id: p169, name: 油豆腐,         cat: 肉类蛋类 }
+  - { id: p170, name: 千张,           cat: 肉类蛋类 }
+
+  # ── 蔬菜 ──────────────────────────────────────────────────────
+  - { id: p171, name: 大白菜,         cat: 蔬菜 }
+  - { id: p172, name: 娃娃菜,         cat: 蔬菜 }
+  - { id: p173, name: 小白菜,         cat: 蔬菜 }
+  - { id: p174, name: 上海青,         cat: 蔬菜 }
+  - { id: p175, name: 菠菜,           cat: 蔬菜 }
+  - { id: p176, name: 生菜,           cat: 蔬菜 }
+  - { id: p177, name: 油麦菜,         cat: 蔬菜 }
+  - { id: p178, name: 空心菜,         cat: 蔬菜 }
+  - { id: p179, name: 芥兰,           cat: 蔬菜 }
+  - { id: p180, name: 菜心,           cat: 蔬菜 }
+  - { id: p181, name: 茼蒿,           cat: 蔬菜 }
+  - { id: p182, name: 芹菜,           cat: 蔬菜 }
+  - { id: p183, name: 韭菜,           cat: 蔬菜 }
+  - { id: p184, name: 香菜,           cat: 蔬菜 }
+  - { id: p185, name: 蒜苗,           cat: 蔬菜 }
+  - { id: p186, name: 西兰花,         cat: 蔬菜 }
+  - { id: p187, name: 花菜,           cat: 蔬菜 }
+  - { id: p188, name: 土豆,           cat: 蔬菜 }
+  - { id: p189, name: 铁棍山药,       cat: 蔬菜 }
+  - { id: p190, name: 莲藕,           cat: 蔬菜 }
+  - { id: p191, name: 芋头,           cat: 蔬菜 }
+  - { id: p192, name: 马蹄,           cat: 蔬菜 }
+  - { id: p193, name: 白萝卜,         cat: 蔬菜 }
+  - { id: p194, name: 胡萝卜,         cat: 蔬菜 }
+  - { id: p195, name: 青萝卜,         cat: 蔬菜 }
+  - { id: p196, name: 番茄,           cat: 蔬菜 }
+  - { id: p197, name: 黄瓜,           cat: 蔬菜 }
+  - { id: p198, name: 冬瓜,           cat: 蔬菜 }
+  - { id: p199, name: 南瓜,           cat: 蔬菜 }
+  - { id: p200, name: 丝瓜,           cat: 蔬菜 }
+  - { id: p201, name: 苦瓜,           cat: 蔬菜 }
+  - { id: p202, name: 西葫芦,         cat: 蔬菜 }
+  - { id: p203, name: 茄子,           cat: 蔬菜 }
+  - { id: p204, name: 青椒,           cat: 蔬菜 }
+  - { id: p205, name: 彩椒,           cat: 蔬菜 }
+  - { id: p206, name: 小米椒,         cat: 蔬菜 }
+  - { id: p207, name: 四季豆,         cat: 蔬菜 }
+  - { id: p208, name: 豇豆,           cat: 蔬菜 }
+  - { id: p209, name: 荷兰豆,         cat: 蔬菜 }
+  - { id: p210, name: 豌豆,           cat: 蔬菜 }
+  - { id: p211, name: 毛豆,           cat: 蔬菜 }
+  - { id: p212, name: 黄豆芽,         cat: 蔬菜 }
+  - { id: p213, name: 绿豆芽,         cat: 蔬菜 }
+  - { id: p214, name: 香菇,           cat: 蔬菜 }
+  - { id: p215, name: 金针菇,         cat: 蔬菜 }
+  - { id: p216, name: 杏鲍菇,         cat: 蔬菜 }
+  - { id: p217, name: 平菇,           cat: 蔬菜 }
+  - { id: p218, name: 木耳,           cat: 蔬菜 }
+  - { id: p219, name: 银耳,           cat: 蔬菜 }
+  - { id: p220, name: 海带,           cat: 蔬菜 }
+  - { id: p221, name: 紫菜,           cat: 蔬菜 }
+  - { id: p222, name: 竹笋,           cat: 蔬菜 }
+  - { id: p223, name: 莴笋,           cat: 蔬菜 }
+  - { id: p224, name: 芦笋,           cat: 蔬菜 }
+  - { id: p225, name: 秋葵,           cat: 蔬菜 }
+  - { id: p226, name: 洋葱,           cat: 蔬菜 }
+  - { id: p227, name: 大蒜,           cat: 蔬菜 }
+  - { id: p228, name: 生姜,           cat: 蔬菜 }
+  - { id: p229, name: 大葱,           cat: 蔬菜 }
+
+  # ── 水果 ──────────────────────────────────────────────────────
+  - { id: p230, name: 苹果,           cat: 水果 }
+  - { id: p231, name: 香蕉,           cat: 水果 }
+  - { id: p232, name: 橙子,           cat: 水果 }
+  - { id: p233, name: 橘子,           cat: 水果 }
+  - { id: p234, name: 柚子,           cat: 水果 }
+  - { id: p235, name: 柠檬,           cat: 水果 }
+  - { id: p236, name: 葡萄,           cat: 水果 }
+  - { id: p237, name: 提子,           cat: 水果 }
+  - { id: p238, name: 草莓,           cat: 水果 }
+  - { id: p239, name: 蓝莓,           cat: 水果 }
+  - { id: p240, name: 桑葚,           cat: 水果 }
+  - { id: p241, name: 西瓜,           cat: 水果 }
+  - { id: p242, name: 哈密瓜,         cat: 水果 }
+  - { id: p243, name: 甜瓜,           cat: 水果 }
+  - { id: p244, name: 桃子,           cat: 水果 }
+  - { id: p245, name: 油桃,           cat: 水果 }
+  - { id: p246, name: 李子,           cat: 水果 }
+  - { id: p247, name: 杏,             cat: 水果 }
+  - { id: p248, name: 樱桃,           cat: 水果 }
+  - { id: p249, name: 车厘子,         cat: 水果 }
+  - { id: p250, name: 雪梨,           cat: 水果 }
+  - { id: p251, name: 香梨,           cat: 水果 }
+  - { id: p252, name: 芒果,           cat: 水果 }
+  - { id: p253, name: 菠萝,           cat: 水果 }
+  - { id: p254, name: 木瓜,           cat: 水果 }
+  - { id: p255, name: 火龙果,         cat: 水果 }
+  - { id: p256, name: 猕猴桃,         cat: 水果 }
+  - { id: p257, name: 百香果,         cat: 水果 }
+  - { id: p258, name: 榴莲,           cat: 水果 }
+  - { id: p259, name: 山竹,           cat: 水果 }
+  - { id: p260, name: 椰子,           cat: 水果 }
+  - { id: p261, name: 荔枝,           cat: 水果 }
+  - { id: p262, name: 龙眼,           cat: 水果 }
+  - { id: p263, name: 枇杷,           cat: 水果 }
+  - { id: p264, name: 石榴,           cat: 水果 }
+  - { id: p265, name: 柿子,           cat: 水果 }
+  - { id: p266, name: 鲜枣,           cat: 水果 }
+  - { id: p267, name: 牛油果,         cat: 水果 }
+  - { id: p268, name: 无花果,         cat: 水果 }
+  - { id: p269, name: 杨梅,           cat: 水果 }
+
+  # ── 饮品 ──────────────────────────────────────────────────────
+  - { id: p270, name: 珍珠奶茶,       cat: 饮品 }
+  - { id: p271, name: 芝士奶盖茶,     cat: 饮品 }
+  - { id: p272, name: 水果茶,         cat: 饮品 }
+  - { id: p273, name: 柠檬茶,         cat: 饮品 }
+  - { id: p274, name: 杨枝甘露,       cat: 饮品 }
+  - { id: p275, name: 烧仙草,         cat: 饮品 }
+  - { id: p276, name: 美式咖啡,       cat: 饮品 }
+  - { id: p277, name: 拿铁,           cat: 饮品 }
+  - { id: p278, name: 卡布奇诺,       cat: 饮品 }
+  - { id: p279, name: 摩卡,           cat: 饮品 }
+  - { id: p280, name: 速溶咖啡,       cat: 饮品 }
+  - { id: p281, name: 可乐,           cat: 饮品 }
+  - { id: p282, name: 雪碧,           cat: 饮品 }
+  - { id: p283, name: 气泡水,         cat: 饮品 }
+  - { id: p284, name: 牛奶,           cat: 饮品 }
+  - { id: p285, name: 酸奶,           cat: 饮品 }
+  - { id: p286, name: 豆浆,           cat: 饮品 }
+  - { id: p287, name: 豆奶,           cat: 饮品 }
+  - { id: p288, name: 椰奶,           cat: 饮品 }
+  - { id: p289, name: 橙汁,           cat: 饮品 }
+  - { id: p290, name: 苹果汁,         cat: 饮品 }
+  - { id: p291, name: 西瓜汁,         cat: 饮品 }
+  - { id: p292, name: 椰子水,         cat: 饮品 }
+  - { id: p293, name: 绿茶,           cat: 饮品 }
+  - { id: p294, name: 红茶,           cat: 饮品 }
+  - { id: p295, name: 乌龙茶,         cat: 饮品 }
+  - { id: p296, name: 普洱茶,         cat: 饮品 }
+  - { id: p297, name: 茉莉花茶,       cat: 饮品 }
+  - { id: p298, name: 啤酒,           cat: 饮品 }
+  - { id: p299, name: 白酒,           cat: 饮品 }
+  - { id: p300, name: 红酒,           cat: 饮品 }
+  - { id: p301, name: 鸡尾酒,         cat: 饮品 }
+  - { id: p302, name: 能量饮料,       cat: 饮品 }
+  - { id: p303, name: 运动饮料,       cat: 饮品 }
+  - { id: p304, name: 凉茶,           cat: 饮品 }
+  - { id: p305, name: 酸梅汤,         cat: 饮品 }
+  - { id: p306, name: 奶昔,           cat: 饮品 }
+  - { id: p307, name: 冰沙,           cat: 饮品 }
+  - { id: p308, name: 矿泉水,         cat: 饮品 }
+
+  # ── 零食 ──────────────────────────────────────────────────────
+  - { id: p309, name: 薯片,           cat: 零食 }
+  - { id: p310, name: 薯条,           cat: 零食 }
+  - { id: p311, name: 虾条,           cat: 零食 }
+  - { id: p312, name: 锅巴,           cat: 零食 }
+  - { id: p313, name: 爆米花,         cat: 零食 }
+  - { id: p314, name: 饼干,           cat: 零食 }
+  - { id: p315, name: 曲奇,           cat: 零食 }
+  - { id: p316, name: 威化,           cat: 零食 }
+  - { id: p317, name: 蛋卷,           cat: 零食 }
+  - { id: p318, name: 黑巧克力,       cat: 零食 }
+  - { id: p319, name: 牛奶巧克力,     cat: 零食 }
+  - { id: p320, name: 奶油蛋糕,       cat: 零食 }
+  - { id: p321, name: 芝士蛋糕,       cat: 零食 }
+  - { id: p322, name: 慕斯,           cat: 零食 }
+  - { id: p323, name: 甜甜圈,         cat: 零食 }
+  - { id: p324, name: 蛋挞,           cat: 零食 }
+  - { id: p325, name: 泡芙,           cat: 零食 }
+  - { id: p326, name: 冰淇淋,         cat: 零食 }
+  - { id: p327, name: 雪糕,           cat: 零食 }
+  - { id: p328, name: 冰棍,           cat: 零食 }
+  - { id: p329, name: 混合坚果,       cat: 零食 }
+  - { id: p330, name: 瓜子,           cat: 零食 }
+  - { id: p331, name: 花生,           cat: 零食 }
+  - { id: p332, name: 开心果,         cat: 零食 }
+  - { id: p333, name: 腰果,           cat: 零食 }
+  - { id: p334, name: 核桃,           cat: 零食 }
+  - { id: p335, name: 果冻,           cat: 零食 }
+  - { id: p336, name: 布丁,           cat: 零食 }
+  - { id: p337, name: 棉花糖,         cat: 零食 }
+  - { id: p338, name: 辣条,           cat: 零食 }
+  - { id: p339, name: 牛肉干,         cat: 零食 }
+  - { id: p340, name: 肉脯,           cat: 零食 }
+  - { id: p341, name: 鱼豆腐,         cat: 零食 }
+  - { id: p342, name: 月饼,           cat: 零食 }
+  - { id: p343, name: 沙琪玛,         cat: 零食 }
+  - { id: p344, name: 麻花,           cat: 零食 }
+  - { id: p345, name: 山楂片,         cat: 零食 }
+  - { id: p346, name: 蜜饯,           cat: 零食 }
+  - { id: p347, name: 口香糖,         cat: 零食 }

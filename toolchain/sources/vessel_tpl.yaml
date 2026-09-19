@@ -1,0 +1,125 @@
+# 计量器具模板集（vesselTpl）—— 全局单一事实来源
+#
+# 用途：UI 靠它生成「份量」分段控件；食物条目用 `vessel: <key>` 引用。
+# 架构依据（FoodLibraryPlan 10.2）：
+#   杯型是通用概念，具体容量是食物自己的 —— 所以「模板 + 覆盖」：
+#     有 vessel  → UI 渲染分段控件
+#     需改容量   → 食物条目用 override: {"中杯": 600} 覆盖
+#
+# ⚠️ 数值说明：以下克重/ml 为「常见餐饮份量」的估算值（conf=1），
+#    落地前需按《中国食物成分表》的份量参考逐项核一遍。
+#    本文件只管「份量」，不含任何热量数值。
+#
+# ⚠️ 命名区分：本文件的 vessel 是「计量器具」（带容量档位），
+#    与 icons_v1_visual.yaml 的 container（生图视觉容器描述）不同义，勿混用。
+
+version: "1.0"
+
+templates:
+
+  # ── 液体：杯类 ────────────────────────────────────────────────
+  cup:                    # 现制茶饮（奶茶/水果茶）—— 与 milk_tea.yaml 保持一致
+    label: 杯
+    sizes:
+      - { k: s, name: 小杯, amount: 350, unit: ml }
+      - { k: m, name: 中杯, amount: 500, unit: ml }
+      - { k: l, name: 大杯, amount: 700, unit: ml }
+
+  cup_coffee:             # 咖啡 —— 容量明显小于奶茶，必须独立成模板
+    label: 杯
+    sizes:
+      - { k: m, name: 中杯, amount: 355, unit: ml }
+      - { k: l, name: 大杯, amount: 473, unit: ml }
+
+  cup_soda:               # 汽水 / 快餐杯
+    label: 杯
+    sizes:
+      - { k: s, name: 小杯, amount: 330, unit: ml }
+      - { k: m, name: 中杯, amount: 500, unit: ml }
+      - { k: l, name: 大杯, amount: 700, unit: ml }
+
+  mug:                    # 马克杯：牛奶 / 豆浆 / 豆奶 / 椰奶
+    label: 杯
+    sizes:
+      - { k: mug, name: 一杯, amount: 300, unit: ml }
+
+  glass:                  # 玻璃杯：水 / 果汁 / 椰子水
+    label: 杯
+    sizes:
+      - { k: glass, name: 一杯, amount: 250, unit: ml }
+
+  glass_wine:             # 葡萄酒杯
+    label: 杯
+    sizes:
+      - { k: glass, name: 一杯, amount: 150, unit: ml }
+
+  shot:                   # 白酒 / 烈酒小杯
+    label: 杯
+    sizes:
+      - { k: shot, name: 一小杯, amount: 50, unit: ml }
+
+  bottle:                 # 瓶装：啤酒 / 矿泉水
+    label: 瓶
+    sizes:
+      - { k: s, name: 小瓶, amount: 330, unit: ml }
+      - { k: l, name: 大瓶, amount: 550, unit: ml }
+
+  can:                    # 罐装：可乐 / 雪碧 / 功能饮料
+    label: 罐
+    sizes:
+      - { k: can, name: 一罐, amount: 330, unit: ml }
+
+  # ── 固体：碗 / 盘类 ──────────────────────────────────────────
+  bowl_rice:              # 米饭 / 粥 / 拌饭
+    label: 碗
+    sizes:
+      - { k: s, name: 小碗, amount: 150, unit: g }
+      - { k: m, name: 中碗, amount: 200, unit: g }
+      - { k: l, name: 大碗, amount: 300, unit: g }
+
+  bowl_noodle:            # 面条 / 米粉 / 米线
+    label: 碗
+    sizes:
+      - { k: s, name: 小碗, amount: 250, unit: g }
+      - { k: l, name: 大碗, amount: 400, unit: g }
+
+  bowl_soup:              # 汤类
+    label: 碗
+    sizes:
+      - { k: bowl, name: 一碗, amount: 250, unit: g }
+
+  pot:                    # 火锅 / 麻辣烫 / 冒菜 / 麻辣香锅（按份，非按容量）
+    label: 份
+    sizes:
+      - { k: s, name: 小份, amount: 400, unit: g }
+      - { k: m, name: 一份, amount: 700, unit: g }
+      - { k: l, name: 大份, amount: 1000, unit: g }
+
+  plate:                  # 菜品 / 沙拉（按份）
+    label: 份
+    sizes:
+      - { k: half, name: 半份, amount: 100, unit: g }
+      - { k: one, name: 一份, amount: 200, unit: g }
+      - { k: two, name: 两份, amount: 400, unit: g }
+
+  # ── 计数类 ────────────────────────────────────────────────────
+  piece:                  # 个：水果 / 鸡蛋 / 包子 / 蛋糕
+    label: 个
+    sizes:
+      - { k: one, name: 1个, amount: 1, unit: 个 }
+
+  slice:                  # 片：面包 / 披萨 / 西瓜
+    label: 片
+    sizes:
+      - { k: one, name: 1片, amount: 1, unit: 片 }
+
+  skewer:                 # 串：羊肉串 / 串串香
+    label: 串
+    sizes:
+      - { k: one, name: 1串, amount: 1, unit: 串 }
+
+  bag:                    # 袋/包：薯片 / 饼干 / 坚果
+    label: 包
+    sizes:
+      - { k: s, name: 小包, amount: 50, unit: g }
+      - { k: l, name: 大包, amount: 100, unit: g }
