@@ -1,3 +1,10 @@
+<!--
+[变更日志]
+修改时间：2026-09-19
+AI模型：CodeBuddy (GLM)
+修改内容：调试链路踩坑清单新增两条铁律：① Agent 会话内只允许秒级命令，严禁跑常驻进程（cli auto）与多步重启序列；② 「module not found」类报错必须先核对编译产物再动源码（旧 bundle 缓存是高频假象）
+-->
+
 # AGENTS.md — CalTrack 项目开发指引
 
 > 本文件供 AI Agent 在当前项目中工作时读取，是项目静态宪法。
@@ -28,11 +35,16 @@ kaluli/
 │   ├── IconPlan.md            # 图标方案
 │   ├── UI_Spec.md             # Figma/Pixso 交付规格
 │   └── Critique_Lenny.md      # 设计审视（独特性诊断）
-├── app/                       # 前端
+├── app/                       # 前端（uni-app x 项目根）
+│   ├── manifest.json          # 应用配置（含 uni-app-x 节点=项目类型标识；appid 待 DCloud 云端分配）
+│   ├── pages.json             # 页面路由（3 页，全部 navigationStyle:custom；不用原生 tabBar，见「当前待办」）
+│   ├── App.uvue               # 应用根组件（onLaunch 触发 device store 初始化）
+│   ├── main.uts               # 启动入口（createSSRApp + Pinia）
 │   ├── prototype/             # 交互原型
 │   │   └── CalTrack_Protoype.html
-│   └── src/                   # uni-app x 源码（开发中）
-│       ├── pages/             # 8 屏页面（每页配 pages/<Name>.md）
+│   └── src/                   # 源码
+│       ├── styles/tokens.css  # 设计 Token 落地（CSS 自定义属性；唯一来源 design/DesignTokens.md）
+│       ├── pages/             # 页面（每页配 pages/<Name>.md）
 │       ├── components/        # 可复用组件（每组件配 components/<Name>.md）
 │       ├── stores/            # Pinia（8 个 store，每 store 配 stores/<name>.md）
 │       │   ├── device.ts          # 设备能力全局 store（启动检测一次，所有模块读取）
@@ -62,6 +74,8 @@ kaluli/
 │           ├── schema-version-check.ts  # food_library schema 版本校验
 │           ├── no-handwritten-food.ts   # 扫描手写食物数据
 │           └── pre-commit-log.ts       # 提交前变更日志检查
+├── debug/                     # App 调试工具（node）：miniprogram-automator 后台截图/取数据（shot.js）
+│                              #   ⚠️ node_modules 不进 git
 ├── toolchain/                 # 数据与素材处理（Python，不进 App 包）
 │   ├── sources/               # 数据源（人可读 YAML）
 │   │   ├── icons_v1.yaml          # 347 项食物清单（图标线 + 数据线的共同事实来源）
@@ -103,8 +117,13 @@ kaluli/
 
 ### 视觉
 - **薄荷液滴**是唯一视觉方向（v3.0），v2.0 Apple 材质主义已废止
-- 色板：mint `#7CEBC6→#1FBF8F→#0E9C74`，bg `#F1FAF6`，超标用珊瑚 `#FF9E7D`（不用红）
-- 小字（≤15px）必须用 `#0B7A5C`，因为 `#1FBF8F` 在白底只有 2.3:1 对比度
+- **色值以 `design/DesignTokens.md` 为唯一事实来源**（2026-09-19 从 Ardot 变量集导出，此前文档中的色值是手抄的、普遍差 1）
+  - 主渐变 mint：`#7DEBC7 → #1FBF8F → #0D9C73`，深色 mint-deep `#0A7A5C`
+  - 页面底 bg `#F2FAF5`，超标用珊瑚 `#FF9E7D`（不用红），接近上限用琥珀 `#E8B54D`
+  - 文字三级：label-1 `#0A4F3D` ／ label-2 `#0F4F3D`@60% ／ label-3 `#0F4F3D`@34%
+  - 玻璃底 glass-bg `#FFFFFF`@74%（**带透明度，实现时不能丢 alpha**）
+  - 圆角 card 20 ／ chip 18 ／ sheet 34；字号 hero 46 ／ title 17 ／ section 15.5 ／ body 13.5 ／ caption 12
+- 小字（≤15px）必须用 `mint-deep #0A7A5C`，因为 `#1FBF8F` 在白底只有 2.3:1 对比度
 - 深色模式 v1.0 不做
 
 ### 交互
@@ -258,6 +277,63 @@ kaluli/
 
 ---
 
+## App 端调试链路（AI 自主看效果与日志）
+
+> **前置（Boss 一次性完成，勿动）**：HBuilderX 保持「运行 → 运行到小程序模拟器 → 微信开发者工具」长驻；
+> 微信开发者工具已登录、服务端口开启；本地设置里**关闭「过滤无依赖文件」**（否则误杀 uni-app x 动态加载的页面模块）。
+> ⚠️ uni-app x **不支持** `npm run dev:mp-weixin`（编译器在 HBuilderX 内部，无独立 npm 入口），勿再尝试。
+
+**首选工作流（2026-09-19 定案，零窗口打扰）**：改代码 → HBuilderX watch 自动编译 → 微信工具自动热重载（3~8s）→ **官方 automator 协议**看效果/取数据：
+
+```powershell
+node debug\shot.js [输出路径]   # 截图 + 当前页面路径；窗口最小化/任意状态均可，完全不碰窗口
+```
+
+- `debug/shot.js` 基于官方 `miniprogram-automator`（连 `ws://127.0.0.1:9420`，npm 依赖在 `debug/`）
+- **实测**：窗口最小化状态下，截图与 `currentPage` 均成功
+- **能力不止截图**：`page.data()` 取页面数据、`element.tap()` 模拟点击、`page.$()` 查元素、`evaluate` 执行 JS、`callWxMethod` 调 API —— **视觉与数据层都能后台拿，不依赖窗口状态**
+- wechatide 命令（下方）降级为辅助：仅 `-Reload` 场景（关窗重开）和 `get_simulator_console`（grep 日志）仍在用
+
+```powershell
+$wx   = "D:\soft\微信web开发者工具\wechatide.cmd"
+$proj = "D:\project\other-porject\kaluli\app\unpackage\dist\dev\mp-weixin"  # 盘符大小写必须与微信工具记录一致（用 D:\）
+$tok  = "<微信工具 设置→安全 里的 MCP Token>"
+
+# 截图（返回 JPEG 路径，随后 read_file 读图）
+& $wx -c codebuddy simulator_screenshot --project $proj --wait 3 --token $tok
+
+# 控制台日志（grep 语法；空结果≠console为空）
+& $wx -c codebuddy get_simulator_console --project $proj --command "grep -i error" --token $tok
+
+# 强制重载（热重载失灵/出现瞬态错误时）
+& $wx -c codebuddy close_project_window --project $proj --token $tok
+& $wx -c codebuddy open_project_window  --project $proj --token $tok
+```
+
+**工具清单**（`wechatide -c codebuddy <tool> --help` 查参数）：ide 状态/开窗/关窗；project 导入/列表；simulator_screenshot / simulator_open_page / simulator_refresh；get_simulator_console；automation_*（element_action / evaluate / navigate / page_action / wx_api —— 模拟点击与执行 JS）。
+
+**CLI 全量参考**：微信工具 CLI 的 19 个命令、全局选项（含 `--disable-gpu`）与本项目实测坑，见 **`toolchain/WxCliReference.md`**（2026-09-19 全量 `-h` 实测沉淀，排障先看它的「速查表」）。
+
+**踩坑**：
+- HBuilderX CLI（`cli launch mp-weixin`）的 watch **只编译一次**，不能替代 GUI 运行模式
+- 微信工具对 uni-app x 产物**不会自主重载**：无 watch 驱动时 `simulator_refresh` 也无效，必须关窗重开
+- **热重载对「新增组件/页面」不可靠**：hotreload 补丁环境解析不了新注册组件，报 `uid null` 并导致渲染部分损坏（如液体消失、新列表不渲染）。**改文案/样式可热重载；新增组件后必须关窗重开**
+- `close_project_window` 会**连自动化服务一起杀**：重开后必须执行 `cli.bat auto --project <产物路径> --auto-port 9420 --trust-project` 恢复，否则截图报 `waitForAutomatorReady timeout`
+- **零窗口操作（v4 定案）**：截图/取数据**一律走 automator 纯协议**（`node debug/shot.js`），**任何情况都不碰用户窗口**。v2 的"移屏外"方案**已废弃**（Boss 点任务栏时窗口"闪屏消失"，被否决两次）
+- **Agent 命令纪律（2026-09-19 事故沉淀，Boss 强退对话多次后定案）**：会话内**只允许秒级返回的命令**（automator 截图/取数、grep 日志、`cache --clean compile`）。**严禁执行**：① 常驻进程（`cli auto` 启动后永不返回，会挂死会话）；② 多步重启序列（关窗→开窗→auto 每步 `--wait` 叠加超时）。需要重启/恢复自动化时，给出手动操作指引让 Boss 执行
+- **「module 'xxx' is not defined」诊断铁律**：先 grep **产物目录**核对报错的 require 路径与产物文件是否一致——一致则是**微信工具旧 bundle 缓存**（文件改名后热重载遗留，实测 `food.ts → food_store.ts` 即此例），清缓存/重跑即可，**严禁没核对产物就来回改源码**
+- **热重载崩（uid null，新增组件后渲染损坏）的修复降级链（v5，源自 Boss 人工开发经验的 CLI 化）**：
+  ① **`cli.bat cache --clean compile --project <产物路径>`** —— 清编译缓存触发完整重编译 = 人工操作「清缓存→刷新模拟器」的命令行版。**已实测跑通、零窗口操作**。⚠️ 勿用 `--clean all`（会连登录态一起清，要重新扫码）
+  ② `node debug/reload.js` —— automator `reLaunch` 重启页面（协议已实测），可与 ① 配合使用
+  ③ `debug_shot.ps1 -Reload` —— 重开窗口保底（闪现约 1 秒自动缩任务栏），前两招无效才用
+- **窗口最小化的影响边界**：wechatide 的 `simulator_screenshot` 会超时（Chromium 节流）；**automator 协议不受影响（实测）** —— 所以截图一律走 automator，wechatide 只用于 -Reload 与 grep 日志
+- **ps1 中文路径编码坑**：PowerShell 5 按 ANSI 解码无 BOM 文件，含中文路径的 `.ps1` 必须**存为 UTF-8 with BOM**，否则运行时报"路径不存在"。修复：`[IO.File]::WriteAllText($f,$c,(New-Object Text.UTF8Encoding $true))`
+- 命令行调用必须显式传 `--token`（MCP Token）
+- `--path` 必须 `D:\` 开头（小写 `d:\` 报 project window not found）
+- HBuilderX 编译报错看 `cli logcat mp-weixin --project <源码项目> --mode lastBuild`（产物目录路径传给 wechatide、源码路径传给 HBuilderX cli，两者不同勿混）
+
+---
+
 ## 防幻觉约束 (Anti-Hallucination Constraints)
 
 **原则：AI 在本项目中所有输出必须可追溯到「设计稿 / 原型 / 已有文档 / Boss 原话」四者之一，四者之外的一律不许编。**
@@ -354,15 +430,21 @@ app/src/
 ## 已知风险
 
 - `backdrop-filter` 在 uni-app x 原生渲染大概率不支持 → 搭骨架后第一时间真机验证
+- **CSS 自定义属性（`var()`）在 uni-app x 原生端是否支持未经真机验证** → 若不支持，`app/src/styles/tokens.css` 的字面值改为内联进各 uvue（值不变）
 - 液体 rAF 动画低端机可能要去掉波纹，只留水位 transition（已由 useDeviceStore.liquidWave 自动处理）
 - 音效在静音模式下不应触发 → 加系统静音检测 `uni.getSystemInfoSync().audioStatus`
-- emoji 仍为占位，需换 Pixabay 真实食物图
+- **uvue 模板 v-for 循环变量禁用单字母 `r`**（2026-09-19 Settings 页实测）：症状为该 v-for 块插值全空、行数错乱、同页其他 v-for 卡片消失，**控制台零报错**；静态对照实验定位后，改名 `item` 即愈。其余单字母 d/m/s/i/h/b 实测正常，`r` 高度疑似与 WXML 编译产物内部变量冲突 —— **v-for 变量一律语义化命名（item/row/drop）**
 
 ## 当前待办
 
-- [ ] 等 Boss 拍板：出 uni-app x 代码骨架 vs 继续打磨设计
-- [ ] 真机验证 backdrop-filter
-- [ ] emoji → Pixabay 真实食物图
+- [ ] **等 Boss 拍板：工程化路线** —— HBuilderX（`manifest.json` 等放**项目根**，官方示例结构无 `src/`）vs CLI（配置放 `src/` 下，另需 `package.json`/`vite.config.ts`）。当前骨架按「根目录放配置 + `src/` 放源码」建，`pages.json` 的 path 带 `src/` 前缀
+- [ ] **等 Boss 拍板：Tabbar 方案** —— 设计稿是玻璃 + 上凸 14px 加号，但官方文档明确「uni-app x **不再支持** tabbar 的 midbutton」。候选：① 页面内自绘 Tabbar 组件（最贴近设计稿）② 用 uni-ui x 的 `uni-tab-bar` ③ 用原生 tabBar 的 `blurEffect` 但**放弃上凸加号**
+- [ ] **等 Boss 拍板：色值口径** —— 画板节点硬编码是旧值（bg `#F1FAF6` / label `#0B4F3C`）、变量集是新值（`#F2FAF5` / `#0A4F3D`），差 ±1。文档已统一按**变量集**
+- [ ] **等 Boss 拍板：「菜品」Tab** —— 设计稿 `CategoryTabs` 只 7 个 Tab、缺菜品，347 条中 58 条菜品无法筛选
+- [ ] 真机验证 `backdrop-filter`
+- [ ] 真机验证 CSS 自定义属性（`var()`）
+- [ ] 补齐 7 个 store（food / goal / settings / library / vessel / opt / user）
+- [ ] 实现组件：Tabbar / Bottle / Sheet / Modal / 各 Icon
 - [ ] 合规 critic loop 复评
 
 > 完整待办清单（含历史决策、接手检查清单）见 `docs/progress.md`。

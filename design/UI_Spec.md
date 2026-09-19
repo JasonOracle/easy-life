@@ -1,7 +1,7 @@
 # CalTrack UI 交付规格 · For Figma / Pixso
 
-> **本文件是唯一给设计工具用的文档。** 与 `CalTrack_VisualLanguage.md` 冲突时，以本文件为准；
-> 与其余任何文档冲突时，一律以本文件 + `CalTrack_Protoype.html` 为准。
+> **本文件是唯一给设计工具用的文档。** 与 `design/VisualLanguage.md` 冲突时，以本文件为准；
+> 与其余任何文档冲突时，一律以本文件 + `app/prototype/CalTrack_Protoype.html` 为准。
 >
 > 设计工具：Figma / Pixso 均可。画板 375 × 812（iPhone X），@1x 出图，标注用 pt。
 
@@ -18,9 +18,11 @@ AI 生图的失败方式几乎都一样：**一次性要一整页 → 得到一�
 | 2 | 只建**组件**（第 3 章，一个一个建，不要一次全要） | "建一个名为 Bottle/Default 的 component" |
 | 3 | 拼页面（第 4 章，一屏一屏来） | "用已建的组件拼 Home 页，按元素树顺序" |
 | 4 | 补图标（第 6 章 SVG 清单） | 直接粘 SVG，不要让 AI 重画 |
-| 5 | 截图对照 | 打开 `CalTrack_Protoype.html` 逐屏截图，并排比对 |
+| 5 | 截图对照 | 打开 `app/prototype/CalTrack_Protoype.html` 逐屏截图，并排比对 |
 
-> **截图比文档准。** 第 5 步不能省——原型 HTML 是所有页面的真源，文字描述必然有损耗。
+> **截图比文档准。** 第 5 步不能省——原型 HTML（`app/prototype/CalTrack_Protoype.html`）是所有页面的真源，文字描述必然有损耗。
+>
+> ⚠️ **色值以 `design/DesignTokens.md` 为准**（2026-09-19 从 Ardot 变量集导出）；本文件的色值已同步校正，但设计稿仍是唯一准绳。
 
 ---
 
@@ -30,7 +32,7 @@ AI 生图的失败方式几乎都一样：**一次性要一整页 → 得到一�
 |---|---|
 | 画板 | 375 × 812 |
 | 状态栏 | 高 44，背景透明白 |
-| 页面底 | `--ct-bg #F1FAF6` |
+| 页面底 | `--ct-bg #F2FAF5` |
 | 左右边距 | 18 |
 | 卡片间距 | 14 |
 | 底部导航 | 玻璃 + 顶部 hairline；加号按钮 58×58，`margin-top:-22`（上凸） |
@@ -46,18 +48,18 @@ AI 生图的失败方式几乎都一样：**一次性要一整页 → 得到一�
 
 | 变量名 | 值 | 用途 |
 |---|---|---|
-| `mint/e1` | `#7CEBC6` | 液面高光、渐变起点 |
+| `mint/e1` | `#7DEBC7` | 液面高光、渐变起点 |
 | `mint/e2` | `#1FBF8F` | 液体主体、按钮底、激活态 |
-| `mint/e3` | `#0E9C74` | 瓶底深、渐变终点 |
-| `mint/deep` | `#0B7A5C` | **小字强调（≤15px 唯一可用绿）** |
-| `bg` | `#F1FAF6` | 页面底 |
+| `mint/e3` | `#0D9C73` | 瓶底深、渐变终点 |
+| `mint/deep` | `#0A7A5C` | **小字强调（≤15px 唯一可用绿）** |
+| `bg` | `#F2FAF5` | 页面底 |
 | `glass` | `rgba(255,255,255,.74)` | 玻璃卡（配 Background blur 20） |
 | `sep` | `rgba(18,110,85,.10)` | 分隔线 0.5px |
-| `label/1` | `#0B4F3C` | 主文字（深墨绿，**不用纯黑**） |
-| `label/2` | `rgba(16,80,62,.60)` | 次级文字 |
-| `label/3` | `rgba(16,80,62,.34)` | 占位、未激活 |
+| `label/1` | `#0A4F3D` | 主文字（深墨绿，**不用纯黑**） |
+| `label/2` | `rgba(15,79,61,.60)` | 次级文字 |
+| `label/3` | `rgba(15,79,61,.34)` | 占位、未激活 |
 | `blue` | `#38A3F5` | 链接、次要操作 |
-| `amber` | `#E9B44C` | 接近上限（剩余 ≤ 200） |
+| `amber` | `#E8B54D` | 接近上限（剩余 ≤ 200） |
 | `coral` | `#FF9E7D` | **超标（不用红色）** |
 | `purple` | `#A88BE8` | 预留：营养素 |
 
@@ -65,8 +67,8 @@ AI 生图的失败方式几乎都一样：**一次性要一整页 → 得到一�
 
 | 变量名 | 值 |
 |---|---|
-| `grad/liquid` | `#7CEBC6 0% → #1FBF8F 52% → #0E9C74 100%`，线性 180°（上浅下深） |
-| `grad/button` | 线性 160°，`#7CEBC6 → #1FBF8F` |
+| `grad/liquid` | `#7DEBC7 0% → #1FBF8F 52% → #0D9C73 100%`，线性 180°（上浅下深） |
+| `grad/button` | 线性 160°，`#7DEBC7 → #1FBF8F` |
 
 ### 2.3 字阶
 
@@ -166,7 +168,7 @@ AI 生图的失败方式几乎都一样：**一次性要一整页 → 得到一�
 | 弹窗空态（未选食物） | 薄荷描边水滴 SVG + 灰色 `-- kcal` |
 | 搜索无结果 | 空态 + 「＋ 自己创建」入口 |
 | 超标 | 液体转珊瑚 `#FF9E7D`，数字变色，**不用红色** |
-| 剩余 ≤ 200 | 转琥珀 `#E9B44C` |
+| 剩余 ≤ 200 | 转琥珀 `#E8B54D` |
 | 新的一天 | 瓶子倒空 |
 | 首次进入 | 直接设定水位，**不晃动** |
 | 长食物名 | 单行省略，不换行 |
@@ -177,7 +179,7 @@ AI 生图的失败方式几乎都一样：**一次性要一整页 → 得到一�
 ## 6. 图标
 
 ### 6.1 来源
-- 食物图：Pixabay 真实照片（WebP 512，Top 200 专属 + 40 张品类兜底）
+- 食物图：**Agnes AI 文生图**（WebP 512，347 张**全专属**，无品类兜底复用）
 - UI 图标：iconfont.cn SVG，24 viewBox / 1.8px stroke / round cap
 - **容器与状态图标（杯/碗/份/个/糖粒）：本项目自制，清单见下**
 
@@ -217,7 +219,9 @@ AI 生图的失败方式几乎都一样：**一次性要一整页 → 得到一�
 
 | 文档 | 何时用 |
 |---|---|
-| `CalTrack_VisualLanguage.md` | 想理解"为什么这么定"（情感北极星、隐喻、动效时序） |
-| `CalTrack_UIDesign.md` | **只取 onboarding 4 屏与空状态交互逻辑**，视觉部分已过时 |
-| `CalTrack_IconPlan.md` | 真去下载图标时（Pixabay 搜索词清单） |
-| `CalTrack_PRD.md` / `ProductBreakdown` / `Review` / `FoodLibraryPlan` / `DesignCritique` | **不要喂给设计工具**——产品与数据文档，混进来只会稀释视觉规格 |
+| `design/VisualLanguage.md` | 想理解"为什么这么定"（情感北极星、隐喻、动效时序）；**色值以 `design/DesignTokens.md` 为准** |
+| `design/IconPlan.md` | 图标相关决策 |
+| `design/Critique_Lenny.md` | 设计审视（独特性诊断） |
+| `docs/PRD.md` / `docs/Review.md` / `docs/FoodLibraryPlan.md` / `docs/progress.md` | **不要喂给设计工具**——产品与数据文档，混进来只会稀释视觉规格 |
+
+> `CalTrack_UIDesign.md` 已不存在于仓库，原表该项作废；如需 onboarding 4 屏逻辑，请在 `app/prototype/CalTrack_Protoype.html` 中读取。
