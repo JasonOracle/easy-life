@@ -1,2 +1,0 @@
-"use strict";const t=require("../common/vendor.js"),i=require("../composables/useDeviceCapability.js"),r=t.defineStore("device",{state:()=>({capability:i.detectDeviceCapability()}),getters:{tier:e=>e.capability.tier,haptics:e=>e.capability.haptics,liquidWave:e=>e.capability.liquidWave,sound:e=>e.capability.sound,backdropBlur:e=>e.capability.backdropBlur,platform:e=>e.capability.platform},actions:{refresh(){this.capability=i.detectDeviceCapability()}}});exports.useDeviceStore=r;
-//# sourceMappingURL=../../.sourcemap/mp-weixin/stores/device.js.map

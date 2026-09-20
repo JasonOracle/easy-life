@@ -6,20 +6,6 @@
         "navigationStyle": "custom",
         "backgroundColorContent": "#F2FAF5"
       }
-    },
-    {
-      "path": "pages/profile/Profile",
-      "style": {
-        "navigationStyle": "custom",
-        "backgroundColorContent": "#F2FAF5"
-      }
-    },
-    {
-      "path": "pages/settings/Settings",
-      "style": {
-        "navigationStyle": "custom",
-        "backgroundColorContent": "#F2FAF5"
-      }
     }
   ],
   "globalStyle": {

@@ -1,8 +1,6 @@
 {
   "pages": [
-    "pages/home/Home",
-    "pages/profile/Profile",
-    "pages/settings/Settings"
+    "pages/home/Home"
   ],
   "window": {
     "navigationStyle": "custom",

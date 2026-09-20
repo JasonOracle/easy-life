@@ -28,45 +28,16 @@ kaluli/
 │   ├── IconPlan.md            # 图标方案
 │   ├── UI_Spec.md             # Figma/Pixso 交付规格
 │   └── Critique_Lenny.md      # 设计审视（独特性诊断）
-├── app/                       # 前端（uni-app x 项目根）
-│   ├── manifest.json          # 应用配置（含 uni-app-x 节点=项目类型标识；appid 待 DCloud 云端分配）
-│   ├── pages.json             # 页面路由（3 页，全部 navigationStyle:custom；不用原生 tabBar，见「当前待办」）
-│   ├── App.uvue               # 应用根组件（onLaunch 触发 device store 初始化）
-│   ├── main.uts               # 启动入口（createSSRApp + Pinia）
+├── app/                       # 前端（uni-app x 项目根）⚠️ 2026-09-20 起推倒重写，当前为最小手脚架
+│   ├── manifest.json          # 应用配置（含 uni-app-x 节点=项目类型标识；appid 已分配 __UNI__F70225F）
+│   ├── pages.json             # 页面路由（当前仅 1 页占位；全部 navigationStyle:custom）
+│   ├── App.uvue               # 应用根组件（手脚架阶段无启动初始化）
+│   ├── main.uts               # 启动入口（仅 createSSRApp；Pinia 等业务挂载待重建）
+│   ├── pages/home/            # 唯一路由页（手脚架占位，配 Home.md）
 │   ├── prototype/             # 交互原型
 │   │   └── CalTrack_Protoype.html
-│   └── src/                   # 源码
-│       ├── styles/tokens.css  # 设计 Token 落地（CSS 自定义属性；唯一来源 design/DesignTokens.md）
-│       ├── pages/             # 页面（每页配 pages/<Name>.md）
-│       ├── components/        # 可复用组件（每组件配 components/<Name>.md）
-│       ├── stores/            # Pinia（8 个 store，每 store 配 stores/<name>.md）
-│       │   ├── device.ts          # 设备能力全局 store（启动检测一次，所有模块读取）
-│       │   ├── food.ts            # 食物记录 CRUD
-│       │   ├── goal.ts            # 目标热量
-│       │   ├── settings.ts        # 用户偏好（音量/通知/暗色）
-│       │   ├── library.ts         # 食物库全量加载 + 搜索索引
-│       │   ├── vessel.ts          # 注册制：计量器具模板扩展点
-│       │   ├── opt.ts             # 注册制：选项模板扩展点
-│       │   └── user.ts            # 用户信息
-│       ├── composables/       # 组合式逻辑（每 composable 配 <name>.md）
-│       │   ├── useLiquid.ts       # 液体晃动动画
-│       │   ├── useFeedback.ts    # 反馈引擎（动画+触觉+音效）
-│       │   ├── useHaptics.ts      # 触觉反馈分级
-│       │   ├── useSound.ts        # 音效播放
-│       │   ├── useAnimation.ts    # 动画反馈
-│       │   └── useDeviceCapability.ts # 设备能力检测（分平台分档）
-│       ├── data/              # 生成物，不手写
-│       │   └── food_library.json  # 347 条食物 + 18 器具模板 + 4 选项模板（toolchain/build.py 产出）
-│       ├── static/icons/      # 生成物，不手写，由 build.py 从 assets/icons-final/ 增量同步
-│       │                      #   347 张 WebP / 5.6MB / 7 个 ASCII 分类目录
-│       │                      #   引用约定：img 字段 <catKey>/<id>.webp，前缀 static/icons/
-│       └── utils/
-│           ├── schema.ts       # 数据结构定义
-│           └── storage.ts      # 本地存储封装（三层降级）
-│       └── hooks/             # 自动化兜底钩子
-│           ├── schema-version-check.ts  # food_library schema 版本校验
-│           ├── no-handwritten-food.ts   # 扫描手写食物数据
-│           └── pre-commit-log.ts       # 提交前变更日志检查
+│   └── （待重建）components/ stores/ composables/ styles/ data/ static/  # 按设计稿逐步重建；
+│                              #   data/ 与 static/icons/ 仍为生成物（toolchain/build.py 产出），严禁手写
 ├── debug/                     # App 调试工具（node）：miniprogram-automator 后台截图/取数据（shot.js）
 │                              #   ⚠️ node_modules 不进 git
 ├── toolchain/                 # 数据与素材处理（Python，不进 App 包）

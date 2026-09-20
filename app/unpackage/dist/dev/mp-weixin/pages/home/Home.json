@@ -1,10 +1,5 @@
 {
   "navigationStyle": "custom",
   "backgroundColorContent": "#F2FAF5",
-  "usingComponents": {
-    "bottle": "../../components/Bottle",
-    "meal-icon": "../../components/MealIcon",
-    "add-sheet": "../../components/AddSheet",
-    "food-picker-sheet": "../../components/FoodPickerSheet"
-  }
+  "usingComponents": {}
 }

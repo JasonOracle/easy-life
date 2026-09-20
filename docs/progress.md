@@ -10,6 +10,19 @@
 
 ## 最近进度
 
+### 2026-09-20 — App 部分全部推倒重写：先回到最小可运行手脚架（Boss 指令）
+
+- **背景**：Boss 明确「app 部分代码需要重新写，先初始化为只有手脚架的样子，能运行就行」
+- **执行内容**：
+  - 删除旧业务代码：`app/components/`（Bottle/AddSheet/FoodPickerSheet/SheetShell/MealIcon 等）、`app/stores/`（device/food/goal）、`app/composables/`、`app/styles/tokens.css`、旧页面 `pages/profile/`、`pages/settings/`
+  - 删除旧资源目录：`app/src/`（旧版重复源码+图标副本）、`app/data/`（food_library.json 生成物副本，toolchain 仍可再产出）、`app/static/`（旧图标）
+  - 保留：`manifest.json`（含 appid/wx appid，新建项目无法再生）、`pages.json`、`App.uvue`、`main.uts`、`pages/home/Home.uvue` + 配对 `Home.md`、`prototype/` 原型
+  - 入口瘦身：`main.uts` 去掉 Pinia 挂载、`App.uvue` 去掉 device store 初始化；`pages.json` 只留 Home 单页
+  - Home.uvue 为纯占位：薄荷底 `#F2FAF5` + 标题「CalTrack / 手脚架已就绪」
+- **验证**：HBuilderX 热重载 → automator 后台截图确认（`.workbuddy/shots/scaffold_home.png`），页面正常渲染、路由 `pages/home/Home`
+- **后续**：业务按设计稿（Ardot 727289305476547）逐步重建；食物数据等需要时从 `toolchain/build.py` 重新产出，严禁手写
+- **同会话附带**：Cline MCP 新增 `pencil`（Pen 本地）、`ardot-remote`（云端 http）、`cloudbase`（npx）、`ardot`（本地 http，后改 disabled:true）、`pen-dev`（npx pen.dev mcp，端口 3000）；全局技能目录 `~/.claude/skills` 安装 5 个新技能（ai-worldclass-design / agent-design-figma / grill-me / fluid-interaction-expert / design-taste-plus）
+
 ### 2026-09-20 — 首页餐次区按新稿还原（Boss 反馈「meal-card 阴影不够、餐次图标不对」）
 
 - **触发**：Boss 贴设计稿 vs 实机截图，指出 meal-card 阴影不够、餐次图标不对，明确 scope 只改餐次区

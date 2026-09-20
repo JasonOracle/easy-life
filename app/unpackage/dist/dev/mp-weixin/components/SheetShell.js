@@ -1,2 +1,0 @@
-"use strict";const e=require("../common/vendor.js"),a=e.defineComponent({__name:"SheetShell",props:{show:{type:Boolean,default:!1}},emits:["close"],setup(s,t){var n=t.emit;const _=n;function r(){_("close")}return(o,i)=>{"raw js";return e.e({a:s.show},s.show?{b:e.o(r,"4d"),c:e.sei(e.gei(o,""),"view"),d:`${o.u_s_b_h}px`,e:`${o.u_s_a_i_b}px`,f:e.pvhc(o.$scope.data.virtualHostClass)}:{})}}});wx.createComponent(a);
-//# sourceMappingURL=../../.sourcemap/mp-weixin/components/SheetShell.js.map
