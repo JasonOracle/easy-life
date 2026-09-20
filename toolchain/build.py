@@ -38,7 +38,7 @@ from validate import SOURCES, load_sources, validate_sources
 
 BASE = Path(__file__).resolve().parent
 DIST_OUT = BASE / "dist" / "food_library.json"
-APP_DEST = BASE.parent / "app" / "data" / "food_library.json"
+APP_DEST = BASE.parent / "app" / "src" / "data" / "food_library.json"
 
 LIB_VERSION = "1.0.0"
 ICON_BASE_DIR = "icons-final"
@@ -67,9 +67,6 @@ def build(src: dict) -> dict:
                 "cal": nut["cal"],
                 "per": 100,                       # 统一按每 100g / 100ml
                 "unit": nut["unit"],
-                "protein": nut.get("protein"),
-                "carb": nut.get("carb"),
-                "fat": nut.get("fat"),
             },
             "pieceWeight": nut.get("piece_weight"),
             "vessel": use.get("vessel_tpl"),

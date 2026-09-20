@@ -9,25 +9,5 @@
     "backgroundColorContent": "#F2FAF5",
     "navigationBarTextStyle": "black"
   },
-  "tabBar": {
-    "color": "#A9BAB3",
-    "selectedColor": "#0A4F3D",
-    "backgroundColor": "#FFFFFF",
-    "borderStyle": "black",
-    "list": [
-      {
-        "pagePath": "pages/home/Home",
-        "text": "首页",
-        "iconPath": "static/tab/home.png",
-        "selectedIconPath": "static/tab/home-active.png"
-      },
-      {
-        "pagePath": "pages/profile/Profile",
-        "text": "我的",
-        "iconPath": "static/tab/profile.png",
-        "selectedIconPath": "static/tab/profile-active.png"
-      }
-    ]
-  },
   "usingComponents": {}
 }

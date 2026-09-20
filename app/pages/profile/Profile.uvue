@@ -6,14 +6,7 @@
  *           液体头图218（头像+统计条）/ 波浪收边（CSS 圆近似，设计稿为 SVG path）/
  *           周概览玻璃卡（徽章+七颗液滴：达标#5BD3AC·超标#FF9E7D·空缺#D5E5DD·今天#1FBF8F+描边）/
  *           趋势柱状图（底部对齐+目标线+目标标签）/ 历史 3 行（StatusDot 状态）。
- *           数据全部为设计稿演示值，待接 store。
- *           追记：接入 TabBar 组件（active=profile，加号 v1 暂跳首页）；
- *           content 底部 padding 96px 防尾行被盖。
- *           追记2：改用原生 tabBar → 移除自绘 TabBar 引用；七天概览/趋势/历史
- *           改由 foodStore 近七天 entries 派生（demo 硬编码数据删除）。
- *           追记3（UI 还原度评审 Round1）：P-2「查看全部 30 天记录 ›」、
- *           P-3 文案对齐设计稿（老刘 / 记录 128 天 · 目标 1800 kcal / 头像白卡无字）；
- *           P-1 hero 统计条两份设计资产矛盾（ScreenSpecs 有 vs 导出图无）待 Boss 拍板未动。]
+ *           数据全部为设计稿演示值，待接 store。]
  */
 
 <template>
@@ -22,10 +15,10 @@
     <view class="hero">
       <view class="status-bar" />
       <view class="avatar-row">
-        <view class="avatar" />
+        <view class="avatar"><text class="avatar-char">卡</text></view>
         <view class="name-col">
-          <text class="name">老刘</text>
-          <text class="name-sub">记录 128 天 · 目标 1800 kcal</text>
+          <text class="name">卡路里记录者</text>
+          <text class="name-sub">已坚持记录 38 天</text>
         </view>
       </view>
       <view class="stat-bar">
@@ -52,7 +45,7 @@
       <view class="week-card">
         <view class="week-head">
           <text class="week-title">本周概览</text>
-          <view class="week-badge"><text class="week-badge-text">{{ weekBadgeText }}</text></view>
+          <view class="week-badge"><text class="week-badge-text">达标 4 天</text></view>
         </view>
         <view class="week-drops">
           <view v-for="d in drops" :key="d.day" class="drop">
@@ -83,76 +76,31 @@
             </view>
           </view>
         </view>
-        <text class="view-all">查看全部 30 天记录 ›</text>
+        <text class="view-all">查看全部 ›</text>
       </view>
     </view>
   </view>
 </template>
 
 <script setup lang="uts">
-import { computed } from 'vue'
-import { useFoodStore } from '../../stores/food_store.ts'
-import { useGoalStore } from '../../stores/goal.uts'
-
-const foodStore = useFoodStore()
-const goalStore = useGoalStore()
-
-// ── 七天数据全部由 foodStore.weekTotals 派生（seed 演示数据，热量为库值计算）──
-
+// ── 演示数据（Ardot 3:612/3:643/3:654 原文照抄，非编造）── 待接 store
 type Drop = { day: string, state: string }
-const WEEK_LABELS = ['日', '一', '二', '三', '四', '五', '六']
-
-function isSameDay(a: number, b: number): boolean {
-  const da = new Date(a)
-  const db = new Date(b)
-  return da.getFullYear() === db.getFullYear() && da.getMonth() === db.getMonth() && da.getDate() === db.getDate()
-}
-
-function dayState(total: number, ts: number, goal: number): string {
-  if (total <= 0) return 'empty'
-  if (isSameDay(ts, Date.now())) return 'today'
-  return total > goal ? 'over' : 'ok'
-}
-
-const drops = computed((): Drop[] => {
-  return foodStore.weekTotals.map((w): Drop => {
-    const d = new Date(w.ts)
-    return { day: WEEK_LABELS[d.getDay()], state: dayState(w.total, w.ts, goalStore.calorieGoal) }
-  })
-})
-
-/** 徽章「达标 X 天」：过去 6 天（不含今日）中 0 < 总量 ≤ 目标 的天数 */
-const weekBadgeText = computed((): string => {
-  const now = Date.now()
-  const okDays = foodStore.weekTotals.filter((w) => {
-    return !isSameDay(w.ts, now) && w.total > 0 && w.total <= goalStore.calorieGoal
-  }).length
-  return `达标 ${okDays} 天`
-})
-
+const drops: Drop[] = [
+  { day: '一', state: 'ok' }, { day: '二', state: 'ok' }, { day: '三', state: 'ok' },
+  { day: '四', state: 'ok' }, { day: '五', state: 'over' }, { day: '六', state: 'empty' },
+  { day: '日', state: 'today' },
+]
 type Bar = { h: number, type: string }
-const bars = computed((): Bar[] => {
-  return foodStore.weekTotals.map((w): Bar => {
-    // 高度：目标=68px 基准，钳位 8~92px
-    const h = w.total <= 0 ? 8 : Math.min(92, Math.max(8, Math.round(w.total / goalStore.calorieGoal * 68)))
-    return { h, type: dayState(w.total, w.ts, goalStore.calorieGoal) }
-  })
-})
-
+const bars: Bar[] = [
+  { h: 68, type: 'ok' }, { h: 54, type: 'ok' }, { h: 80, type: 'ok' }, { h: 62, type: 'ok' },
+  { h: 92, type: 'over' }, { h: 8, type: 'empty' }, { h: 74, type: 'today' },
+]
 type His = { date: string, cal: string, over: boolean }
-const history = computed((): His[] => {
-  // 最近 3 个完整日（不含今天）：weekTotals 倒数第 2~4 位
-  const arr = foodStore.weekTotals
-  const rows: His[] = []
-  for (let i = arr.length - 2; i >= arr.length - 4 && i >= 0; i--) {
-    const w = arr[i]
-    const d = new Date(w.ts)
-    const label = `${d.getMonth() + 1}月${d.getDate()}日 · 周${WEEK_LABELS[d.getDay()]}`
-    rows.push({ date: label, cal: Math.round(w.total).toString(), over: w.total > goalStore.calorieGoal })
-  }
-  return rows
-})
-
+const history: His[] = [
+  { date: '9月18日 · 周五', cal: '1950', over: true },
+  { date: '9月17日 · 周四', cal: '1720', over: false },
+  { date: '9月16日 · 周三', cal: '1580', over: false },
+]
 function barStyle(h: number): string {
   return 'height: ' + h.toString() + 'px;'
 }
@@ -174,6 +122,8 @@ function barStyle(h: number): string {
   background-color: #FFFFFF; border: 2px solid #FFFFFF;
   align-items: center; justify-content: center;
 }
+/* 渐变裁字（background-clip:text）uvue 不支持 → 纯色深绿近似 */
+.avatar-char { font-size: 26px; font-weight: 700; color: #0A7A5C; }
 .name-col { gap: 4px; }
 .name { font-size: 17px; font-weight: 600; color: #FFFFFF; }
 .name-sub { font-size: 12px; color: rgba(255,255,255,0.82); }
@@ -197,7 +147,6 @@ function barStyle(h: number): string {
 .b2 { width: 6px; height: 6px; left: 315px; top: 135px; }
 .b3 { width: 5px; height: 5px; left: 230px; top: 125px; }
 
-/* 原生 tabBar 不占页面高度，无需预留底部 padding */
 .content { flex: 1; padding: 10px 18px 0; gap: 12px; }
 
 /* ── 本周概览玻璃卡 ── */

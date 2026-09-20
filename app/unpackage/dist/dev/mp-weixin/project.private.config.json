@@ -2,5 +2,18 @@
   "setting": {
     "compileHotReLoad": true,
     "preloadBackgroundData": false
+  },
+  "condition": {
+    "miniprogram": {
+      "list": [
+        {
+          "name": "pages/home/Home",
+          "pathName": "pages/home/Home",
+          "query": "",
+          "scene": null,
+          "launchMode": "default"
+        }
+      ]
+    }
   }
 }

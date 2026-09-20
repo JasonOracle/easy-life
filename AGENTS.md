@@ -1,10 +1,3 @@
-<!--
-[变更日志]
-修改时间：2026-09-19
-AI模型：CodeBuddy (GLM)
-修改内容：调试链路踩坑清单新增两条铁律：① Agent 会话内只允许秒级命令，严禁跑常驻进程（cli auto）与多步重启序列；② 「module not found」类报错必须先核对编译产物再动源码（旧 bundle 缓存是高频假象）
--->
-
 # AGENTS.md — CalTrack 项目开发指引
 
 > 本文件供 AI Agent 在当前项目中工作时读取，是项目静态宪法。
@@ -312,16 +305,12 @@ $tok  = "<微信工具 设置→安全 里的 MCP Token>"
 
 **工具清单**（`wechatide -c codebuddy <tool> --help` 查参数）：ide 状态/开窗/关窗；project 导入/列表；simulator_screenshot / simulator_open_page / simulator_refresh；get_simulator_console；automation_*（element_action / evaluate / navigate / page_action / wx_api —— 模拟点击与执行 JS）。
 
-**CLI 全量参考**：微信工具 CLI 的 19 个命令、全局选项（含 `--disable-gpu`）与本项目实测坑，见 **`toolchain/WxCliReference.md`**（2026-09-19 全量 `-h` 实测沉淀，排障先看它的「速查表」）。
-
 **踩坑**：
 - HBuilderX CLI（`cli launch mp-weixin`）的 watch **只编译一次**，不能替代 GUI 运行模式
 - 微信工具对 uni-app x 产物**不会自主重载**：无 watch 驱动时 `simulator_refresh` 也无效，必须关窗重开
 - **热重载对「新增组件/页面」不可靠**：hotreload 补丁环境解析不了新注册组件，报 `uid null` 并导致渲染部分损坏（如液体消失、新列表不渲染）。**改文案/样式可热重载；新增组件后必须关窗重开**
 - `close_project_window` 会**连自动化服务一起杀**：重开后必须执行 `cli.bat auto --project <产物路径> --auto-port 9420 --trust-project` 恢复，否则截图报 `waitForAutomatorReady timeout`
 - **零窗口操作（v4 定案）**：截图/取数据**一律走 automator 纯协议**（`node debug/shot.js`），**任何情况都不碰用户窗口**。v2 的"移屏外"方案**已废弃**（Boss 点任务栏时窗口"闪屏消失"，被否决两次）
-- **Agent 命令纪律（2026-09-19 事故沉淀，Boss 强退对话多次后定案）**：会话内**只允许秒级返回的命令**（automator 截图/取数、grep 日志、`cache --clean compile`）。**严禁执行**：① 常驻进程（`cli auto` 启动后永不返回，会挂死会话）；② 多步重启序列（关窗→开窗→auto 每步 `--wait` 叠加超时）。需要重启/恢复自动化时，给出手动操作指引让 Boss 执行
-- **「module 'xxx' is not defined」诊断铁律**：先 grep **产物目录**核对报错的 require 路径与产物文件是否一致——一致则是**微信工具旧 bundle 缓存**（文件改名后热重载遗留，实测 `food.ts → food_store.ts` 即此例），清缓存/重跑即可，**严禁没核对产物就来回改源码**
 - **热重载崩（uid null，新增组件后渲染损坏）的修复降级链（v5，源自 Boss 人工开发经验的 CLI 化）**：
   ① **`cli.bat cache --clean compile --project <产物路径>`** —— 清编译缓存触发完整重编译 = 人工操作「清缓存→刷新模拟器」的命令行版。**已实测跑通、零窗口操作**。⚠️ 勿用 `--clean all`（会连登录态一起清，要重新扫码）
   ② `node debug/reload.js` —— automator `reLaunch` 重启页面（协议已实测），可与 ① 配合使用
