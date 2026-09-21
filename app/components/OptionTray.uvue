@@ -1,0 +1,139 @@
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Muse Spark
+  修改内容：[新建：方案 B 单选底槽——共用底槽＋悬浮选中件（光晕＋落地影＋抬升＋提亮）；
+    图片 :src 运行时绑定（绕开编译器 assets 跨页碰撞铁律）]
+-->
+
+<template>
+  <view class="tray">
+    <view
+      class="opt"
+      v-for="(optItem, optIdx) in options"
+      :key="optIdx"
+      @click="select(optItem.key)"
+    >
+      <view class="halo" v-if="optItem.key === modelValue"></view>
+      <view class="float" :class="{ 'float-on': optItem.key === modelValue }">
+        <image
+          v-if="optItem.art !== ''"
+          class="opt-art"
+          :src="optItem.art"
+          mode="aspectFit"
+          :style="{ width: optItem.artW + 'px', height: optItem.artH + 'px', opacity: optItem.key === modelValue ? 1 : 0.62 }"
+        ></image>
+        <text class="opt-name" :class="{ 'opt-name-on': optItem.key === modelValue }">{{ optItem.label }}</text>
+        <text class="opt-sub" :class="{ 'opt-sub-on': optItem.key === modelValue }" v-if="optItem.sub !== ''">{{ optItem.sub }}</text>
+      </view>
+      <image
+        v-if="optItem.key === modelValue"
+        class="opt-shadow"
+        :src="'/static/common/shadow512.png'"
+        mode="aspectFit"
+      ></image>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * 方案 B 单选底槽（分量/甜度/糖包等单选组通用）。
+ * 选中态＝悬浮件（白底＋影＋抬升 4px＋物件 ×1.12 等效）＋径向光晕；
+ * 未选中＝物件 opacity .62＋名 muted。
+ * 动效：220ms cubic-bezier(.22,1,.36,1) 的位移/透明/阴影过渡。
+ */
+
+export type TrayOption = {
+  key: string
+  label: string
+  sub: string
+  art: string
+  artW: number
+  artH: number
+}
+
+const props = defineProps<{
+  options: TrayOption[]
+  modelValue: string
+}>()
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', v: string): void
+}>()
+
+function select(key: string): void {
+  if (key === props.modelValue) return
+  try {
+    uni.vibrateShort()
+  } catch (e) {
+    // 无触觉设备忽略
+  }
+  emit('update:modelValue', key)
+}
+</script>
+
+<style>
+.tray {
+  flex-direction: row;
+  background-color: #F2FAF5;
+  border-radius: 20px;
+  padding: 12px 10px;
+}
+.opt {
+  flex: 1;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+  padding-top: 10px;
+  padding-bottom: 6px;
+}
+.halo {
+  position: absolute;
+  top: 0px;
+  width: 90px;
+  height: 80px;
+  border-radius: 45px;
+  background-color: rgba(31, 191, 143, 0.22);
+}
+.float {
+  align-items: center;
+  background-color: transparent;
+  border-radius: 14px;
+  padding: 8px 6px;
+  transform: translateY(0px);
+  transition-property: transform, background-color, box-shadow;
+  transition-duration: 220ms;
+}
+.float-on {
+  background-color: #FFFFFF;
+  transform: translateY(-4px);
+  box-shadow: 0 5px 12px rgba(10, 79, 61, 0.25);
+}
+.opt-art {
+  transition-property: opacity;
+  transition-duration: 220ms;
+}
+.opt-name {
+  font-size: 13px;
+  color: #73918B;
+  margin-top: 6px;
+}
+.opt-name-on {
+  color: #0A4F3D;
+  font-weight: bold;
+}
+.opt-sub {
+  font-size: 11px;
+  color: #8FAEAF;
+  margin-top: 2px;
+}
+.opt-sub-on {
+  color: #0A7A5C;
+}
+.opt-shadow {
+  width: 64px;
+  height: 12px;
+  margin-top: 2px;
+}
+</style>

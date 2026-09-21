@@ -349,3 +349,9 @@ p344: { name: 麻花, cat: 零食, vessel_tpl: piece, opts_tpl: [] }
 p345: { name: 山楂片, cat: 零食, vessel_tpl: bag, opts_tpl: [] }
 p346: { name: 蜜饯, cat: 零食, vessel_tpl: bag, opts_tpl: [] }
 p347: { name: 口香糖, cat: 零食, vessel_tpl: piece, opts_tpl: [] }
+p348: { name: 燕麦片, cat: 主食, vessel_tpl: bowl_rice, opts_tpl: [] }
+p349: { name: 水煮蛋, cat: 肉类蛋类, vessel_tpl: piece, opts_tpl: [] }
+p350: { name: 全脂牛奶, cat: 饮品, vessel_tpl: mug, opts_tpl: [] }
+p351: { name: 鸡胸肉沙拉, cat: 菜品, vessel_tpl: plate, opts_tpl: [] }
+p352: { name: 糙米饭, cat: 主食, vessel_tpl: bowl_rice, opts_tpl: [] }
+p353: { name: 清炒西兰花, cat: 蔬菜, vessel_tpl: plate, opts_tpl: [] }

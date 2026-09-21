@@ -1,0 +1,466 @@
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Muse Spark
+  修改内容：[新建：公共添加食物弹层（分量底槽/计数步进器/甜度底槽/餐次照片卡/确认 emit）；
+    奶茶外无甜度组时甜度区整段隐藏；multi 选项组本轮不渲染；确认不写库（只组装 payload）]
+-->
+
+<template>
+  <view class="mask" v-if="show">
+    <view class="sheet" v-if="food != null">
+      <view class="handle"></view>
+      <view class="food-row">
+        <image class="food-thumb" :src="'/static/icons/' + food.img" mode="aspectFill"></image>
+        <view class="food-text">
+          <text class="food-name">{{ food.name }}</text>
+          <text class="food-unit">{{ vesselLabel }}</text>
+        </view>
+        <text class="big-kcal">{{ totalKcal }}</text>
+        <text class="kcal-unit">kcal</text>
+      </view>
+      <text class="sub-row">按所选分量与选项估算</text>
+
+      <text class="form-label">分量</text>
+      <CountStepper
+        v-if="isCountUnit"
+        v-model="count"
+        :unit-label="vesselLabel"
+        :grams-per-unit="pieceWeight"
+        :kcal-per-unit="kcalPerUnit"
+      />
+      <OptionTray v-else :options="sizeOpts" v-model="sizeKey" />
+
+      <template v-for="(grpItem, grpIdx) in singleGroups" :key="grpIdx">
+        <text class="form-label">{{ grpItem.label }}</text>
+        <OptionTray :options="sweetOpts(grpItem)" :model-value="sweetPick(grpItem.key)" @update:modelValue="(v) => setSweet(grpItem.key, v)" />
+      </template>
+
+      <text class="form-label">餐次</text>
+      <view class="meal-row">
+        <view
+          class="meal-card"
+          :class="{ 'meal-card-on': mealItem.key === meal }"
+          v-for="(mealItem, mealIdx) in mealCards"
+          :key="mealIdx"
+          @click="pickMeal(mealItem.key)"
+        >
+          <image class="meal-photo" :src="mealItem.photo" mode="aspectFill"></image>
+          <view class="meal-scrim"></view>
+          <text class="meal-name" :class="{ 'meal-name-on': mealItem.key === meal }">{{ mealItem.label }}</text>
+          <text class="meal-time">{{ mealItem.time }}</text>
+          <view class="seal" v-if="mealItem.key === meal">
+            <text class="seal-glyph">✓</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="confirm-btn" @click="confirm">
+        <text class="confirm-text">确认添加 · {{ totalKcal }} kcal</text>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+import { computed } from 'vue'
+import { watch } from 'vue'
+import OptionTray from './OptionTray.uvue'
+import type { TrayOption } from './OptionTray.uvue'
+import CountStepper from './CountStepper.uvue'
+import {
+  getFoodById,
+  gramsOf,
+  optGroupsOf,
+  optDeltaOf,
+  vesselSizesOf,
+  DEFAULT_COUNT,
+  COUNT_UNITS,
+  type FoodBase,
+  type OptGroup,
+} from '../stores/food'
+
+/**
+ * 公共添加食物弹层（pencil 弹窗①–⑥⑧ 统一结构）。
+ * 奶茶有甜度组，其余只有分量＋餐次；计件类（个/片/串）分量区走步进器，其余走底槽分段。
+ * multi 型选项组（加料）本轮不渲染；确认只 emit payload，不写库。
+ */
+
+const props = defineProps<{
+  show: boolean
+  foodId: string
+}>()
+
+const emit = defineEmits<{
+  (e: 'update:show', v: boolean): void
+  (e: 'confirm', v: AddPayload): void
+}>()
+
+export type AddPayload = {
+  foodId: string
+  amount: number
+  unit: string
+  meal: string
+  sweets: Record<string, string>
+  extraKcal: number
+  kcal: number
+}
+
+const VESSEL_ART: Record<string, string> = {
+  cup: '/static/vessels/v3_cup.png',
+  cup_coffee: '/static/vessels/v3_cup.png',
+  cup_soda: '/static/vessels/v3_cup.png',
+  mug: '/static/vessels/v3_mug.png',
+  glass: '/static/vessels/v3_glass.png',
+  glass_wine: '/static/vessels/v3_glass_wine.png',
+  shot: '/static/vessels/v3_shot.png',
+  bottle: '/static/vessels/v3_bottle.png',
+  can: '/static/vessels/v3_can.png',
+  bowl_rice: '/static/vessels/v3_bowl.png',
+  bowl_noodle: '/static/vessels/v3_bowl.png',
+  bowl_soup: '/static/vessels/v3_bowl.png',
+  pot: '/static/vessels/v3_pot.png',
+  plate: '/static/vessels/v3_plate.png',
+  bag: '/static/vessels/v3_bag.png',
+}
+
+const MEAL_CARDS = [
+  { key: 'breakfast', label: '早餐', time: '07:30', photo: '/static/meals/meal_breakfast.png' },
+  { key: 'lunch', label: '午餐', time: '12:10', photo: '/static/meals/meal_lunch.png' },
+  { key: 'dinner', label: '晚餐', time: '18:20', photo: '/static/meals/meal_dinner.png' },
+  { key: 'snack', label: '夜宵', time: '21:00', photo: '/static/meals/meal_night.png' },
+]
+
+function defaultMeal(): string {
+  const h = new Date().getHours()
+  if (h < 10) return 'breakfast'
+  if (h < 15) return 'lunch'
+  if (h < 21) return 'dinner'
+  return 'snack'
+}
+
+const food = computed<FoodBase | null>(() => getFoodById(props.foodId) ?? null)
+const vesselLabel = computed(() => {
+  const f = food.value
+  if (f == null || f.vessel == null) return ''
+  const labels: Record<string, string> = {
+    cup: '杯', cup_coffee: '杯', cup_soda: '杯', mug: '杯', glass: '杯',
+    glass_wine: '杯', shot: '杯', bottle: '瓶', can: '罐', bowl_rice: '碗',
+    bowl_noodle: '碗', bowl_soup: '碗', pot: '份', plate: '份', bag: '包',
+    piece: '个', slice: '片', skewer: '串',
+  }
+  return labels[f.vessel] ?? ''
+})
+const isCountUnit = computed(() => {
+  const f = food.value
+  if (f == null) return false
+  const lbl = vesselLabel.value
+  return COUNT_UNITS.some((u): boolean => u === lbl)
+})
+const pieceWeight = computed(() => food.value?.pieceWeight ?? 0)
+const kcalPerUnit = computed(() => {
+  const f = food.value
+  if (f == null) return 0
+  return Math.round(f.kcal * pieceWeight.value / 100)
+})
+
+const count = ref(DEFAULT_COUNT)
+const sizeKey = ref('')
+const sweetSel = ref<Record<string, string>>({})
+const meal = ref(defaultMeal())
+const mealCards = MEAL_CARDS
+
+function resetForFood(): void {
+  const f = food.value
+  count.value = DEFAULT_COUNT
+  meal.value = defaultMeal()
+  const sel: Record<string, string> = {}
+  if (f != null) {
+    const sizes = vesselSizesOf(f.vessel ?? '')
+    if (sizes.length > 1) {
+      sizeKey.value = sizes[1]?.k ?? sizes[0]?.k ?? ''
+    } else {
+      sizeKey.value = sizes[0]?.k ?? ''
+    }
+    for (const g of optGroupsOf(f)) {
+      if (g.type === 'single' && typeof g.def === 'string') sel[g.key] = g.def
+    }
+  } else {
+    sizeKey.value = ''
+  }
+  sweetSel.value = sel
+}
+
+watch(
+  () => props.foodId,
+  () => {
+    resetForFood()
+  }
+)
+resetForFood()
+
+const singleGroups = computed<OptGroup[]>(() => {
+  const f = food.value
+  if (f == null) return []
+  return optGroupsOf(f).filter((g) => g.type === 'single')
+})
+
+function sweetPick(key: string): string {
+  return sweetSel.value[key] ?? ''
+}
+
+function setSweet(key: string, v: string): void {
+  const next = { ...sweetSel.value }
+  next[key] = v
+  sweetSel.value = next
+}
+
+const sizeOpts = computed<TrayOption[]>(() => {
+  const f = food.value
+  if (f == null) return []
+  const sizes = vesselSizesOf(f.vessel ?? '')
+  const maxAmt = sizes.reduce((m, s) => (s.amount > m ? s.amount : m), 1)
+  const art = VESSEL_ART[f.vessel ?? ''] ?? ''
+  return sizes.map((s) => {
+    const scale = Math.cbrt(s.amount / maxAmt)
+    const k = scale < 0.7 ? 0.7 : scale
+    return {
+      key: s.k,
+      label: s.name,
+      sub: s.amount.toString() + s.unit,
+      art,
+      artW: Math.round(56 * k),
+      artH: Math.round(48 * k),
+    }
+  })
+})
+
+function sweetOpts(grp: OptGroup): TrayOption[] {
+  const grams = currentGrams()
+  return grp.items.map((it) => {
+    const d = optDeltaOf(grp, it, grams)
+    return {
+      key: it.k,
+      label: it.name,
+      sub: d > 0 ? '+' + d.toString() + ' kcal' : '',
+      art: '',
+      artW: 0,
+      artH: 0,
+    }
+  })
+}
+
+function currentGrams(): number {
+  const f = food.value
+  if (f == null) return 0
+  if (isCountUnit.value) return gramsOf(f, count.value, vesselLabel.value)
+  const sizes = vesselSizesOf(f.vessel ?? '')
+  const hit = sizes.find((s) => s.k === sizeKey.value)
+  return hit != null ? hit.amount : 0
+}
+
+function extraKcalOf(): number {
+  const f = food.value
+  if (f == null) return 0
+  const grams = currentGrams()
+  let extra = 0
+  for (const g of singleGroups.value) {
+    const k = sweetSel.value[g.key] ?? ''
+    const it = g.items.find((x) => x.k === k)
+    if (it != null) extra += optDeltaOf(g, it, grams)
+  }
+  return extra
+}
+
+const totalKcal = computed(() => {
+  const f = food.value
+  if (f == null) return 0
+  const grams = currentGrams()
+  return Math.round(f.kcal * grams / 100 + extraKcalOf())
+})
+
+function pickMeal(key: string): void {
+  if (key === meal.value) return
+  meal.value = key
+  try {
+    uni.vibrateShort()
+  } catch (e) {
+    // 无触觉设备忽略
+  }
+}
+
+function confirm(): void {
+  const f = food.value
+  if (f == null) return
+  const sizes = vesselSizesOf(f.vessel ?? '')
+  const hit = sizes.find((s) => s.k === sizeKey.value)
+  try {
+    uni.vibrateLong()
+  } catch (e) {
+    // 无触觉设备忽略
+  }
+  emit('confirm', {
+    foodId: f.id,
+    amount: isCountUnit.value ? count.value : (hit != null ? hit.amount : 0),
+    unit: isCountUnit.value ? vesselLabel.value : (hit != null ? hit.unit : f.unit),
+    meal: meal.value,
+    sweets: { ...sweetSel.value },
+    extraKcal: extraKcalOf(),
+    kcal: totalKcal.value,
+  })
+}
+</script>
+
+<style>
+.mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(10, 79, 61, 0.35);
+  justify-content: flex-end;
+}
+.sheet {
+  background-color: #FFFFFF;
+  border-top-left-radius: 34px;
+  border-top-right-radius: 34px;
+  padding: 12px 18px 24px 18px;
+}
+.handle {
+  width: 44px;
+  height: 5px;
+  border-radius: 3px;
+  background-color: #DCEDE6;
+  align-self: center;
+}
+.food-row {
+  flex-direction: row;
+  align-items: center;
+  margin-top: 12px;
+}
+.food-thumb {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+}
+.food-text {
+  flex: 1;
+  margin-left: 10px;
+}
+.food-name {
+  font-size: 16px;
+  color: #0A4F3D;
+}
+.food-unit {
+  font-size: 12px;
+  color: #8FAEAF;
+  margin-top: 2px;
+}
+.big-kcal {
+  font-size: 30px;
+  font-weight: bold;
+  color: #0A4F3D;
+}
+.kcal-unit {
+  font-size: 12px;
+  color: #73918B;
+  margin-left: 2px;
+}
+.sub-row {
+  font-size: 11px;
+  color: #8FAEAF;
+  margin-top: 6px;
+}
+.form-label {
+  font-size: 13px;
+  color: #0A4F3D;
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+.meal-row {
+  flex-direction: row;
+  justify-content: space-between;
+}
+.meal-card {
+  position: relative;
+  width: 76px;
+  height: 96px;
+  border-radius: 16px;
+  overflow: hidden;
+  border-width: 2px;
+  border-color: transparent;
+}
+.meal-card-on {
+  border-color: #1FBF8F;
+  transform: translateY(-4px);
+}
+.meal-photo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 76px;
+  height: 96px;
+}
+.meal-scrim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44px;
+  background-color: rgba(10, 79, 61, 0.45);
+}
+.meal-name {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 20px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.72);
+  text-align: center;
+}
+.meal-name-on {
+  color: #FFFFFF;
+  font-weight: bold;
+}
+.meal-time {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 6px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.72);
+  text-align: center;
+}
+.seal {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background-color: #1FBF8F;
+  justify-content: center;
+  align-items: center;
+}
+.seal-glyph {
+  font-size: 12px;
+  color: #FFFFFF;
+}
+.confirm-btn {
+  height: 52px;
+  border-radius: 26px;
+  background-color: #1FBF8F;
+  justify-content: center;
+  align-items: center;
+  margin-top: 16px;
+  box-shadow: 0 8px 18px rgba(31, 191, 143, 0.34);
+}
+.confirm-text {
+  font-size: 15px;
+  color: #FFFFFF;
+}
+</style>

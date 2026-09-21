@@ -1,0 +1,71 @@
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Muse Spark
+  修改内容：[新建：共享底部 Tab（首页/我的），v2 稿 10:333 规格；redirectTo 切换防栈堆积；
+    图片 :src 运行时绑定（绕开编译器 assets 跨页碰撞铁律）]
+-->
+
+<template>
+  <view class="tabbar">
+    <view class="tab-item" @click="switchTab('home')">
+      <image class="tab-icon-home" :src="'/static/home/tab_home.png'" mode="aspectFit"></image>
+      <text class="tab-label" :class="{ 'tab-label-active': active === 'home' }">首页</text>
+    </view>
+    <view class="tab-item" @click="switchTab('profile')">
+      <image class="tab-icon-profile" :src="'/static/home/tab_profile.png'" mode="aspectFit"></image>
+      <text class="tab-label" :class="{ 'tab-label-active': active === 'profile' }">我的</text>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+const props = defineProps<{
+  /** 当前激活页 */
+  active: string
+}>()
+
+function switchTab(target: string): void {
+  if (target === props.active) return
+  if (target === 'home') {
+    uni.redirectTo({ url: '/pages/home/Home' })
+  } else {
+    uni.redirectTo({ url: '/pages/profile/Profile' })
+  }
+}
+</script>
+
+<style>
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  flex-direction: row;
+  background-color: #F8FCFA;
+  border-top-width: 1px;
+  border-top-color: #E3EFE8;
+  padding-top: 10px;
+  padding-bottom: 20px;
+}
+.tab-item {
+  flex: 1;
+  align-items: center;
+}
+.tab-icon-home {
+  width: 29px;
+  height: 27px;
+}
+.tab-icon-profile {
+  width: 25px;
+  height: 25px;
+}
+.tab-label {
+  font-size: 11px;
+  color: #5C7570;
+  margin-top: 4px;
+}
+.tab-label-active {
+  color: #17916B;
+}
+</style>

@@ -397,3 +397,9 @@ foods:
   - { id: p345, name: 山楂片,         cat: 零食 }
   - { id: p346, name: 蜜饯,           cat: 零食 }
   - { id: p347, name: 口香糖,         cat: 零食 }
+  - { id: p348, name: 燕麦片,         cat: 主食 }
+  - { id: p349, name: 水煮蛋,         cat: 肉类蛋类 }
+  - { id: p350, name: 全脂牛奶,       cat: 饮品 }
+  - { id: p351, name: 鸡胸肉沙拉,     cat: 菜品 }
+  - { id: p352, name: 糙米饭,         cat: 主食 }
+  - { id: p353, name: 清炒西兰花,     cat: 蔬菜 }

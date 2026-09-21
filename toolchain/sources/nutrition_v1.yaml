@@ -667,7 +667,8 @@ p051:
   carb: 33
   fat: 10
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 常见披萨片约150g
   basis: recipe_estimate
   confidence: 2
   basis_detail: "披萨皮100g + 马苏里拉芝士20g + 番茄酱15g + 配料（香肠/青椒等）30g + 油10g，总约175g成品"
@@ -680,7 +681,8 @@ p052:
   carb: 30
   fat: 14
   unit: g
-  piece_weight: null
+  piece_weight: 170
+  piece_note: 常见汉堡中等规格约170g
   basis: recipe_estimate
   confidence: 2
   basis_detail: "汉堡胚80g + 牛肉饼80g + 生菜10g + 番茄15g + 芝士片15g + 酱料15g，总约215g成品"
@@ -693,7 +695,8 @@ p053:
   carb: 24
   fat: 6
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 常见三明治中等规格约150g
   basis: recipe_estimate
   confidence: 2
   basis_detail: "切片面包2片60g + 火腿30g + 芝士片15g + 生菜10g + 番茄15g + 沙拉酱10g，总约140g成品"
@@ -745,7 +748,8 @@ p057:
   carb: 20
   fat: 0.3
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 中等大小蒸红薯约150g
   basis: composition_table
   confidence: 3
   basis_detail: "红心甘薯蒸熟，每100g可食部"
@@ -758,7 +762,8 @@ p058:
   carb: 20
   fat: 0.2
   unit: g
-  piece_weight: null
+  piece_weight: 120
+  piece_note: 中等紫薯约120g
   basis: composition_table
   confidence: 3
   basis_detail: "紫薯蒸熟，每100g可食部"
@@ -771,7 +776,8 @@ p059:
   carb: 14
   fat: 0.1
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 中等蒸山药一段约150g
   basis: composition_table
   confidence: 3
   basis_detail: "铁棍山药蒸熟，每100g可食部"
@@ -1395,7 +1401,8 @@ p107:
   carb: 6
   fat: 13
   unit: g
-  piece_weight: null
+  piece_weight: 18
+  piece_note: 常见串串香带签肉约18g
   basis: rough_estimate
   confidence: 1
   basis_detail: "串串香按常见30签估算：肉类150g + 蔬菜100g + 豆制品50g + 汤底100g，总约400g"
@@ -1564,7 +1571,8 @@ p120:
   carb: 0
   fat: 6.2
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 中等规格猪瘦肉一块约150g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值：猪瘦肉(前尖)，生鲜可食部"
@@ -1577,7 +1585,8 @@ p121:
   carb: 0
   fat: 37.1
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 中等规格五花肉一块约150g
   basis: composition_table
   confidence: 2
   audit_note: "按成分表「猪肉（肥瘦）」口径：395kcal/脂肪37g；若指「五花（肥）」则约 508kcal/脂肪53g，两条都成立，取决于部位定义"
@@ -1591,7 +1600,8 @@ p122:
   carb: 0
   fat: 7.1
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 中等规格猪里脊一块约150g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值：猪里脊(生)"
@@ -1604,7 +1614,8 @@ p123:
   carb: 0
   fat: 24.4
   unit: g
-  piece_weight: null
+  piece_weight: 35
+  piece_note: 一根排骨可食部约35g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值：猪排骨(生)，含骨约40%"
@@ -1617,7 +1628,8 @@ p124:
   carb: 0
   fat: 22.5
   unit: g
-  piece_weight: null
+  piece_weight: 400
+  piece_note: 常见整只猪蹄中等规格约400g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值：猪猪蹄(生)"
@@ -1630,7 +1642,8 @@ p125:
   carb: 3.1
   fat: 3.9
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 常见猪肝一份约150g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值：猪肝脏(生)"
@@ -1643,7 +1656,8 @@ p126:
   carb: 0.9
   fat: 0.3
   unit: g
-  piece_weight: null
+  piece_weight: 200
+  piece_note: 常见猪血一块约200g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，生鲜可食部"
@@ -1656,7 +1670,8 @@ p127:
   carb: 0
   fat: 2.6
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 中等规格牛瘦肉一块约150g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，牛里脊/后腿瘦肉，生鲜可食部"
@@ -1669,7 +1684,8 @@ p128:
   carb: 0
   fat: 32
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 中等规格牛腩一块约150g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，带筋肥瘦牛肉，生鲜可食部"
@@ -1682,7 +1698,8 @@ p129:
   carb: 0
   fat: 11
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 中等规格牛腱一块约150g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，牛腿腱子肉，生鲜可食部"
@@ -1695,7 +1712,8 @@ p130:
   carb: 0
   fat: 20
   unit: g
-  piece_weight: null
+  piece_weight: 200
+  piece_note: 常见牛排中等规格约200g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，牛肉排，生鲜可食部（约七分瘦三分肥）"
@@ -1708,7 +1726,8 @@ p131:
   carb: 0
   fat: 42
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 火锅肥牛卷一份约150g
   basis: composition_table
   confidence: 2
   basis_detail: "超市商品标准值，肥瘦相间冷冻卷切牛肉"
@@ -1721,7 +1740,8 @@ p132:
   carb: 0
   fat: 22
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 中等规格羊肉一块约150g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，羊后腿肉，生鲜可食部"
@@ -1734,7 +1754,8 @@ p133:
   carb: 0
   fat: 32
   unit: g
-  piece_weight: null
+  piece_weight: 80
+  piece_note: 一根羊排可食部约80g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，带骨羊排，生鲜可食部（去骨后可食部约70%）"
@@ -1747,7 +1768,8 @@ p134:
   carb: 0
   fat: 2.5
   unit: g
-  piece_weight: null
+  piece_weight: 180
+  piece_note: 常见鸡胸肉单只约180g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，去皮鸡胸肉，生鲜可食部"
@@ -1760,7 +1782,8 @@ p135:
   carb: 0
   fat: 12
   unit: g
-  piece_weight: null
+  piece_weight: 120
+  piece_note: 常见鸡腿可食部约120g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，去皮鸡腿肉，生鲜可食部"
@@ -1773,7 +1796,8 @@ p136:
   carb: 0
   fat: 14
   unit: g
-  piece_weight: null
+  piece_weight: 30
+  piece_note: 常见鸡翅可食部约30g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，去皮鸡翅，生鲜可食部"
@@ -1786,7 +1810,8 @@ p137:
   carb: 2.7
   fat: 16.4
   unit: g
-  piece_weight: null
+  piece_weight: 35
+  piece_note: 常见鸡爪可食部约35g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，生鸡爪，可食部（连骨约50g/个，去骨可食部约20g/个）"
@@ -1799,7 +1824,8 @@ p138:
   carb: 0
   fat: 11
   unit: g
-  piece_weight: null
+  piece_weight: 1500
+  piece_note: 市售整鸡中等规格约1.5kg
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，土鸡/仔鸡，生鲜可食部（去头爪内脏后）"
@@ -1812,7 +1838,8 @@ p139:
   carb: 0
   fat: 2.5
   unit: g
-  piece_weight: null
+  piece_weight: 35
+  piece_note: 单只鸡胗中等规格约35g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，生鸡肫，可食部"
@@ -1825,7 +1852,8 @@ p140:
   carb: 0
   fat: 40
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 常见鸭肉块中等规格约150g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，填鸭/家鸭，生鲜可食部（高脂）"
@@ -1838,7 +1866,8 @@ p141:
   carb: 0
   fat: 12
   unit: g
-  piece_weight: null
+  piece_weight: 80
+  piece_note: 单只鸭腿可食部约80g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，去皮鸭腿肉，生鲜可食部"
@@ -1851,7 +1880,8 @@ p142:
   carb: 1
   fat: 1.5
   unit: g
-  piece_weight: null
+  piece_weight: 25
+  piece_note: 单只鸭脖可食部约25g
   basis: composition_table
   confidence: 2
   basis_detail: "中国食物成分表标准值，熟卤鸭脖，可食部（连骨约30g/根，可食肉约10g）"
@@ -1929,7 +1959,8 @@ p148:
   carb: 0
   fat: 4.5
   unit: g
-  piece_weight: null
+  piece_weight: 1200
+  piece_note: 市售草鱼中等规格约1.2kg
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，淡水草鱼，生鲜可食部"
@@ -1942,7 +1973,8 @@ p149:
   carb: 0
   fat: 3.5
   unit: g
-  piece_weight: null
+  piece_weight: 500
+  piece_note: 市售鲈鱼单条约500g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，海鲈鱼，生鲜可食部"
@@ -1955,7 +1987,8 @@ p150:
   carb: 0
   fat: 5.5
   unit: g
-  piece_weight: null
+  piece_weight: 180
+  piece_note: 常见三文鱼排中等规格约180g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，大西洋鲑，生鲜可食部"
@@ -1968,7 +2001,8 @@ p151:
   carb: 0
   fat: 6
   unit: g
-  piece_weight: null
+  piece_weight: 250
+  piece_note: 市售带鱼单条约250g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，生鲜可食部"
@@ -1981,7 +2015,8 @@ p152:
   carb: 0
   fat: 2.1
   unit: g
-  piece_weight: null
+  piece_weight: 180
+  piece_note: 常见鳕鱼排中等规格约180g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，大西洋鳕鱼，生鲜可食部"
@@ -1994,7 +2029,8 @@ p153:
   carb: 0
   fat: 2.1
   unit: g
-  piece_weight: null
+  piece_weight: 180
+  piece_note: 常见金枪鱼排中等规格约180g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，鲜金枪鱼，生鲜可食部"
@@ -2020,7 +2056,8 @@ p155:
   carb: 1
   fat: 2
   unit: g
-  piece_weight: null
+  piece_weight: 8
+  piece_note: 单只小龙虾可食部约8g
   basis: rough_estimate
   confidence: 1
   basis_detail: "食用部分主要为虾肉，各品种差异大，热量波动明显"
@@ -2033,7 +2070,8 @@ p156:
   carb: 0.5
   fat: 1.2
   unit: g
-  piece_weight: null
+  piece_weight: 10
+  piece_note: 中等规格单只虾仁约10g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，鲜虾仁，可食部"
@@ -2059,7 +2097,8 @@ p158:
   carb: 1.5
   fat: 0.8
   unit: g
-  piece_weight: null
+  piece_weight: 8
+  piece_note: 单只蛤蜊可食部约8g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，花蛤，生鲜可食部"
@@ -2072,7 +2111,8 @@ p159:
   carb: 3.5
   fat: 1.3
   unit: g
-  piece_weight: null
+  piece_weight: 60
+  piece_note: 单只生蚝可食部约60g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，牡蛎，生鲜可食部"
@@ -2085,7 +2125,8 @@ p160:
   carb: 0.6
   fat: 2
   unit: g
-  piece_weight: null
+  piece_weight: 250
+  piece_note: 常见鱿鱼中等规格约250g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，鲜鱿鱼，可食部"
@@ -2098,7 +2139,8 @@ p161:
   carb: 0.3
   fat: 42
   unit: g
-  piece_weight: null
+  piece_weight: 20
+  piece_note: 市售培根常见一片约20g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，烟熏培根，加工肉制品"
@@ -2111,7 +2153,8 @@ p162:
   carb: 0.9
   fat: 10.7
   unit: g
-  piece_weight: null
+  piece_weight: 35
+  piece_note: 市售火腿常见一片约35g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，中式火腿，可食部"
@@ -2124,7 +2167,8 @@ p163:
   carb: 3.5
   fat: 44
   unit: g
-  piece_weight: null
+  piece_weight: 60
+  piece_note: 常见香肠单根约60g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，广式香肠，加工肉制品"
@@ -2137,7 +2181,8 @@ p164:
   carb: 3.5
   fat: 24
   unit: g
-  piece_weight: null
+  piece_weight: 45
+  piece_note: 常见午餐肉一片约45g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，罐头午餐肉，可食部"
@@ -2150,7 +2195,8 @@ p165:
   carb: 8
   fat: 45
   unit: g
-  piece_weight: null
+  piece_weight: 55
+  piece_note: 常见腊肠单根约55g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，中式腊肠，加工肉制品"
@@ -2163,7 +2209,8 @@ p166:
   carb: 2.1
   fat: 4.8
   unit: g
-  piece_weight: null
+  piece_weight: 200
+  piece_note: 常见豆腐块中等规格约200g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，北豆腐，可食部"
@@ -2176,7 +2223,8 @@ p167:
   carb: 5.3
   fat: 8.4
   unit: g
-  piece_weight: null
+  piece_weight: 35
+  piece_note: 常见豆干单块约35g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，白豆干，可食部"
@@ -2189,7 +2237,8 @@ p168:
   carb: 24.5
   fat: 22.1
   unit: g
-  piece_weight: null
+  piece_weight: 12
+  piece_note: 常见腐竹单根约12g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，干腐竹，可食部"
@@ -2202,7 +2251,8 @@ p169:
   carb: 6.3
   fat: 15.5
   unit: g
-  piece_weight: null
+  piece_weight: 20
+  piece_note: 常见油豆腐单只约20g
   basis: composition_table
   confidence: 3
   basis_detail: ""
@@ -2215,7 +2265,8 @@ p170:
   carb: 5.6
   fat: 9.3
   unit: g
-  piece_weight: null
+  piece_weight: 25
+  piece_note: 千张片常见中等规格估算
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，千张，可食部"
@@ -2228,7 +2279,8 @@ p171:
   carb: 2.0
   fat: 0.1
   unit: g
-  piece_weight: null
+  piece_weight: 1000
+  piece_note: 中等大白菜可食部约1000g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，大白菜，生鲜可食部"
@@ -2241,7 +2293,8 @@ p172:
   carb: 2.5
   fat: 0.1
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 娃娃菜中等规格约150g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，娃娃菜，生鲜可食部"
@@ -2254,7 +2307,8 @@ p173:
   carb: 2.0
   fat: 0.2
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 小白菜中等规格约150g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，小白菜，生鲜可食部"
@@ -2267,7 +2321,8 @@ p174:
   carb: 2.0
   fat: 0.1
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 上海青中等规格约150g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，上海青，生鲜可食部"
@@ -2280,7 +2335,8 @@ p175:
   carb: 3.0
   fat: 0.3
   unit: g
-  piece_weight: null
+  piece_weight: 120
+  piece_note: 菠菜中等规格约120g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值，菠菜，生鲜可食部"
@@ -2293,7 +2349,8 @@ p176:
   carb: 2.5
   fat: 0.1
   unit: g
-  piece_weight: null
+  piece_weight: 300
+  piece_note: 生菜中等规格约300g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值"
@@ -2306,7 +2363,8 @@ p177:
   carb: 2.5
   fat: 0.3
   unit: g
-  piece_weight: null
+  piece_weight: 200
+  piece_note: 油麦菜中等规格约200g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值"
@@ -2319,7 +2377,8 @@ p178:
   carb: 3.0
   fat: 0.2
   unit: g
-  piece_weight: null
+  piece_weight: 200
+  piece_note: 空心菜中等规格约200g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值"
@@ -2332,7 +2391,8 @@ p179:
   carb: 3.5
   fat: 0.2
   unit: g
-  piece_weight: null
+  piece_weight: 200
+  piece_note: 芥兰中等规格约200g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值"
@@ -2345,7 +2405,8 @@ p180:
   carb: 2.5
   fat: 0.2
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 菜心中等规格约150g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值"
@@ -2618,7 +2679,8 @@ p201:
   carb: 3.6
   fat: 0.1
   unit: g
-  piece_weight: null
+  piece_weight: 250
+  piece_note: 苦瓜中等规格约250g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜）"
@@ -2631,7 +2693,8 @@ p202:
   carb: 2.6
   fat: 0.2
   unit: g
-  piece_weight: null
+  piece_weight: 350
+  piece_note: 西葫芦中等规格约350g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜）"
@@ -2644,7 +2707,8 @@ p203:
   carb: 4.5
   fat: 0.1
   unit: g
-  piece_weight: null
+  piece_weight: 250
+  piece_note: 茄子中等规格约250g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜）"
@@ -2657,7 +2721,8 @@ p204:
   carb: 3.9
   fat: 0.3
   unit: g
-  piece_weight: null
+  piece_weight: 120
+  piece_note: 青椒中等规格约120g
   basis: composition_table
   confidence: 3
   basis_detail: ""
@@ -2670,7 +2735,8 @@ p205:
   carb: 6.0
   fat: 0.2
   unit: g
-  piece_weight: null
+  piece_weight: 180
+  piece_note: 彩椒中等规格约180g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（甜椒，红/黄）"
@@ -2683,7 +2749,8 @@ p206:
   carb: 8.0
   fat: 0.5
   unit: g
-  piece_weight: null
+  piece_weight: 8
+  piece_note: 小米椒单个约8g
   basis: composition_table
   confidence: 2
   basis_detail: "中国食物成分表标准值（鲜辣椒）"
@@ -2696,7 +2763,8 @@ p207:
   carb: 5.0
   fat: 0.2
   unit: g
-  piece_weight: null
+  piece_weight: 60
+  piece_note: 四季豆单根约60g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜）"
@@ -2709,7 +2777,8 @@ p208:
   carb: 5.5
   fat: 0.2
   unit: g
-  piece_weight: null
+  piece_weight: 100
+  piece_note: 豇豆单根约100g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜）"
@@ -2722,7 +2791,8 @@ p209:
   carb: 4.0
   fat: 0.1
   unit: g
-  piece_weight: null
+  piece_weight: 40
+  piece_note: 荷兰豆单荚约40g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜）"
@@ -2735,7 +2805,8 @@ p210:
   carb: 20.0
   fat: 0.4
   unit: g
-  piece_weight: null
+  piece_weight: 25
+  piece_note: 豌豆荚单个约25g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜）"
@@ -2748,7 +2819,8 @@ p211:
   carb: 5.0
   fat: 5.0
   unit: g
-  piece_weight: null
+  piece_weight: 20
+  piece_note: 毛豆荚单个约20g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜毛豆，带荚）"
@@ -2761,7 +2833,8 @@ p212:
   carb: 1.8
   fat: 0.1
   unit: g
-  piece_weight: null
+  piece_weight: 80
+  piece_note: 黄豆芽单把约80g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜）"
@@ -2774,7 +2847,8 @@ p213:
   carb: 1.3
   fat: 0.1
   unit: g
-  piece_weight: null
+  piece_weight: 85
+  piece_note: 绿豆芽单把约85g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜）"
@@ -2787,7 +2861,8 @@ p214:
   carb: 4.0
   fat: 0.3
   unit: g
-  piece_weight: null
+  piece_weight: 40
+  piece_note: 香菇中等规格约40g
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜）"
@@ -2800,7 +2875,8 @@ p215:
   carb: 5.5
   fat: 0.3
   unit: g
-  piece_weight: null
+  piece_weight: 50
+  piece_note: 金针菇中等一份估算
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜）"
@@ -2813,7 +2889,8 @@ p216:
   carb: 6.0
   fat: 0.6
   unit: g
-  piece_weight: null
+  piece_weight: 80
+  piece_note: 常见中等规格杏鲍菇
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜）"
@@ -2826,7 +2903,8 @@ p217:
   carb: 4.0
   fat: 0.4
   unit: g
-  piece_weight: null
+  piece_weight: 80
+  piece_note: 中等大小平菇一个
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜）"
@@ -2839,7 +2917,8 @@ p218:
   carb: 5.0
   fat: 0.2
   unit: g
-  piece_weight: null
+  piece_weight: 20
+  piece_note: 泡发后中等一片估算
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（水发）"
@@ -2852,7 +2931,8 @@ p219:
   carb: 6.0
   fat: 0.2
   unit: g
-  piece_weight: null
+  piece_weight: 15
+  piece_note: 干银耳中等一朵
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（水发）"
@@ -2865,7 +2945,8 @@ p220:
   carb: 2.0
   fat: 0.1
   unit: g
-  piece_weight: null
+  piece_weight: 100
+  piece_note: 海带中等一片规格
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（湿海带）"
@@ -2878,7 +2959,8 @@ p221:
   carb: 3.0
   fat: 0.2
   unit: g
-  piece_weight: null
+  piece_weight: 3
+  piece_note: 干紫菜常见一张
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（干紫菜）"
@@ -2891,7 +2973,8 @@ p222:
   carb: 2.0
   fat: 0.1
   unit: g
-  piece_weight: null
+  piece_weight: 150
+  piece_note: 中等竹笋一个
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜）"
@@ -2904,7 +2987,8 @@ p223:
   carb: 2.0
   fat: 0.1
   unit: g
-  piece_weight: null
+  piece_weight: 300
+  piece_note: 常见市售中等莴笋
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜）"
@@ -2917,7 +3001,8 @@ p224:
   carb: 3.0
   fat: 0.1
   unit: g
-  piece_weight: null
+  piece_weight: 20
+  piece_note: 中等芦笋一根
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜）"
@@ -2930,7 +3015,8 @@ p225:
   carb: 6.0
   fat: 0.2
   unit: g
-  piece_weight: null
+  piece_weight: 15
+  piece_note: 常见秋葵一根
   basis: composition_table
   confidence: 3
   basis_detail: "中国食物成分表标准值（鲜）"
@@ -4035,7 +4121,8 @@ p310:
   carb: 41
   fat: 15
   unit: g
-  piece_weight: null
+  piece_weight: 8
+  piece_note: 单根薯条中等规格
   basis: recipe_estimate
   confidence: 2
   basis_detail: "土豆150g + 植物油15g（炸制），成品约165g"
@@ -4243,7 +4330,8 @@ p326:
   carb: 25
   fat: 11
   unit: g
-  piece_weight: null
+  piece_weight: 100
+  piece_note: 冰淇淋杯/球常见规格
   basis: recipe_estimate
   confidence: 2
   basis_detail: "稀奶油50g + 全脂牛奶100g + 白砂糖40g + 蛋黄20g + 淀粉5g，总约180g成品，平均后"
@@ -4256,7 +4344,8 @@ p327:
   carb: 22
   fat: 5
   unit: g
-  piece_weight: null
+  piece_weight: 80
+  piece_note: 常见雪糕支中等规格
   basis: recipe_estimate
   confidence: 2
   basis_detail: "水/牛奶80g + 白砂糖30g + 植物油8g +  Stabilizer 2g，总约100g成品，平均后"
@@ -4360,7 +4449,8 @@ p335:
   carb: 15
   fat: 0
   unit: g
-  piece_weight: null
+  piece_weight: 100
+  piece_note: 果冻杯常见规格
   basis: recipe_estimate
   confidence: 2
   basis_detail: "水100g + 白砂糖12g + 果汁3g + 明胶/卡拉胶2g，总约117g成品"
@@ -4373,7 +4463,8 @@ p336:
   carb: 16
   fat: 4
   unit: g
-  piece_weight: null
+  piece_weight: 100
+  piece_note: 布丁杯常见规格
   basis: recipe_estimate
   confidence: 2
   basis_detail: "牛奶80g + 鸡蛋20g + 白砂糖10g + 明胶2g，总约100g成品"
@@ -4438,7 +4529,8 @@ p341:
   carb: 10
   fat: 8
   unit: g
-  piece_weight: null
+  piece_weight: 20
+  piece_note: 鱼豆腐常见单块规格
   basis: recipe_estimate
   confidence: 2
   basis_detail: "鱼糜60g + 淀粉20g + 植物油8g + 调味料5g，总约93g成品"
@@ -4477,7 +4569,8 @@ p344:
   carb: 52
   fat: 24
   unit: g
-  piece_weight: null
+  piece_weight: 60
+  piece_note: 中等麻花一个
   basis: recipe_estimate
   confidence: 2
   basis_detail: "面粉100g + 糖20g + 植物油35g + 鸡蛋15g，油炸后约得110g成品"
@@ -4520,3 +4613,80 @@ p347:
   basis: recipe_estimate
   confidence: 2
   basis_detail: "木糖醇50g + 砂糖20g +  Gum base 15g + 香精少量，总约100g，常见单粒约2g"
+p348:
+  name: 燕麦片
+  cat: 主食
+  cal: 375
+  protein: 13
+  carb: 66
+  fat: 7
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "干燕麦片常见营养成分，冲泡吸水增重，热量按干重计"
+
+p349:
+  name: 水煮蛋
+  cat: 肉类蛋类
+  cal: 144
+  protein: 13
+  carb: 1.3
+  fat: 9
+  unit: g
+  piece_weight: 60
+  basis: composition_table
+  confidence: 3
+  basis_detail: "与鸡蛋同值，去壳单只约60g"
+
+p350:
+  name: 全脂牛奶
+  cat: 饮品
+  cal: 65
+  protein: 3
+  carb: 4.7
+  fat: 3.2
+  unit: ml
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "市售全脂牛奶常见值"
+
+p351:
+  name: 鸡胸肉沙拉
+  cat: 菜品
+  cal: 91.5
+  protein: 8.3
+  carb: 3
+  fat: 2.5
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "鸡胸肉100g + 生菜番茄黄瓜共250g，总约350g成品"
+
+p352:
+  name: 糙米饭
+  cat: 主食
+  cal: 112
+  protein: 2.6
+  carb: 23
+  fat: 1
+  unit: g
+  piece_weight: null
+  basis: composition_table
+  confidence: 3
+  basis_detail: "煮熟糙米饭常见值"
+
+p353:
+  name: 清炒西兰花
+  cat: 蔬菜
+  cal: 60
+  protein: 3.5
+  carb: 5
+  fat: 3.5
+  unit: g
+  piece_weight: null
+  basis: recipe_estimate
+  confidence: 2
+  basis_detail: "西兰花150g + 油8g，总约100g成品"

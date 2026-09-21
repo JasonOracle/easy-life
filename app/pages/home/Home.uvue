@@ -1,5 +1,21 @@
 <!--
   [变更日志]
+  修改时间：2026-09-21
+  AI模型：Muse Spark
+  修改内容：[FAB 接 AddFood 弹窗（演示珍珠奶茶），确认弹 FoodToast（不写库）]
+  修改时间：2026-09-21
+  AI模型：Muse Spark
+  修改内容：[接 store 读数：数字/宏量/餐次走 food＋goal；晚餐默认收起可展开；行图走库内图标]
+  修改时间：2026-09-21
+  AI模型：Muse Spark
+  修改内容：[页内 Tab 替换为共享 Tabbar 组件（active=home），删冗余样式]
+  修改时间：2026-09-21
+  AI模型：Muse Spark
+  修改内容：[我的 Tab 接 navigateTo 个人中心页]
+  修改时间：2026-09-20
+  AI模型：Muse Spark
+  修改内容：[按 v2 设计稿（727788215940571）重建首页 P1：Header/Hero/宏量卡/三餐/页内 Tab；
+    小程序端加号胶囊避让（getMenuButtonBoundingClientRect）；图片用设计稿导出 PNG；系统字体降级]
   修改时间：2026-09-20
   AI模型：CodeBuddy (GLM)
   修改内容：[重构为最小手脚架首页：清空业务结构，仅保留品牌标题占位以验证工程可运行]
@@ -7,29 +23,537 @@
 
 <template>
   <view class="page">
-    <text class="title">CalTrack</text>
-    <text class="desc">手脚架已就绪</text>
+    <!-- 顶栏 -->
+    <view class="header" :style="{ paddingTop: sbH + 'px' }">
+      <view class="title-row">
+        <view class="title-left">
+          <text class="title">轻律生活</text>
+          <text class="subtitle">让健康饮食成为一种习惯</text>
+        </view>
+        <view class="fab" :style="{ right: fabRight, top: fabTop }" @click="openAdd">
+          <text class="fab-plus">＋</text>
+        </view>
+      </view>
+      <view class="date-row">
+        <image class="date-icon" :src="'/static/home/date_icon.png'" mode="aspectFit"></image>
+        <text class="date-text">9月19日 · 周五</text>
+      </view>
+    </view>
+
+    <!-- Hero -->
+    <view class="hero">
+      <image class="hero-wave" :src="'/static/home/hero_wave.png'" mode="widthFix"></image>
+      <image class="bottle" :src="'/static/home/bottle.png'" mode="aspectFit"></image>
+      <image class="sticker" :src="'/static/home/sticker.png'" mode="aspectFit"></image>
+      <view class="hero-text">
+        <text class="remain-label">还能吃</text>
+        <view class="remain-num-row">
+          <text class="remain-num">{{ remainCal }}</text>
+          <text class="remain-unit">kcal</text>
+        </view>
+        <text class="consumed">已摄入 {{ food.totalCal }} / {{ goal.calorieGoal }} kcal</text>
+        <view class="goal-pill">
+          <text class="goal-pill-text">每日目标 {{ goal.calorieGoal }} kcal</text>
+          <image class="pill-edit" :src="'/static/home/pill_edit.png'" mode="aspectFit"></image>
+        </view>
+      </view>
+    </view>
+
+    <!-- 宏量卡 -->
+    <view class="macro-card">
+      <view class="macro-col">
+        <image class="macro-icon" :src="'/static/home/macro_protein.png'" mode="aspectFit"></image>
+        <text class="macro-num">{{ macroP }}g</text>
+        <text class="macro-label">蛋白质</text>
+      </view>
+      <view class="macro-div"></view>
+      <view class="macro-col">
+        <image class="macro-icon" :src="'/static/home/macro_carb.png'" mode="aspectFit"></image>
+        <text class="macro-num">{{ macroC }}g</text>
+        <text class="macro-label">碳水</text>
+      </view>
+      <view class="macro-div"></view>
+      <view class="macro-col">
+        <image class="macro-icon" :src="'/static/home/macro_fat.png'" mode="aspectFit"></image>
+        <text class="macro-num">{{ macroF }}g</text>
+        <text class="macro-label">脂肪</text>
+      </view>
+    </view>
+
+    <!-- 今日餐次 -->
+    <view class="meal-section-head">
+      <text class="meal-section-title">今日餐次</text>
+      <view class="all-records">
+        <text class="all-records-text">全部记录</text>
+        <image class="chev-right" :src="'/static/home/chev_right.png'" mode="aspectFit"></image>
+      </view>
+    </view>
+
+    <view class="meal-block" v-for="(meal, mealIdx) in meals" :key="mealIdx">
+      <view class="meal-rail">
+        <view class="meal-circle">
+          <image class="meal-circle-icon" :src="meal.icon" mode="aspectFit"></image>
+        </view>
+        <view class="rail-line" v-if="mealIdx < meals.length - 1"></view>
+      </view>
+      <view class="meal-main">
+        <view class="meal-head">
+          <text class="meal-name">{{ meal.name }}<text class="meal-time"> · {{ meal.time }}</text></text>
+          <text class="meal-kcal">{{ meal.totalKcal }} kcal</text>
+        </view>
+        <view class="meal-card" v-if="meal.key !== 'dinner' || showDinner">
+          <view v-for="(rowItem, rowIdx) in meal.rows" :key="rowIdx">
+            <view class="meal-row">
+              <image class="meal-thumb" :src="rowItem.img" mode="aspectFill"></image>
+              <text class="meal-row-name">{{ rowItem.name }}</text>
+              <text class="meal-row-kcal">{{ rowItem.kcal }} kcal</text>
+            </view>
+            <view class="meal-row-div" v-if="rowIdx < meal.rows.length - 1"></view>
+          </view>
+        </view>
+        <view class="meal-expand" v-if="meal.key === 'dinner' && !showDinner">
+          <view class="expand-btn" @click="toggleDinner">
+            <image class="chev-down" :src="'/static/home/chev_down.png'" mode="aspectFit"></image>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部 Tab（共享组件，Tabbar 终案前按 v2 两 Tab 落地） -->
+    <Tabbar active="home" />
+
+    <!-- 添加食物弹窗（演示珍珠奶茶；确认只弹 Toast，不写库） -->
+    <AddFood v-model:show="addShow" :food-id="addFoodId" @confirm="onAddConfirm" />
+    <FoodToast v-model:show="toastShow" :kcal="toastKcal" :meal-label="toastMeal" />
   </view>
 </template>
 
 <script setup lang="uts">
+import { ref } from 'vue'
+
+/**
+ * 演示数据（稿面静态值，store 重建后再接真实数据）。
+ * 缩放系数 0.794：v2 画布 472px → 应用 375px。
+ */
+
+// 状态栏高度（自定义导航时顶栏避让）
+let sbH = 0
+try {
+  const sysInfo = uni.getSystemInfoSync()
+  sbH = sysInfo.statusBarHeight ?? 0
+} catch (e) {
+  sbH = 0
+}
+
+// 右上加号位置：默认稿面位置；小程序端放到胶囊左侧防遮挡
+const fabRight = ref('14px')
+const fabTop = ref('2px')
+// #ifdef MP-WEIXIN
+try {
+  const sys = uni.getSystemInfoSync()
+  const capsule = uni.getMenuButtonBoundingClientRect()
+  if (capsule != null && capsule.left > 0) {
+    fabRight.value = (sys.windowWidth - capsule.left + 10) + 'px'
+    fabTop.value = (capsule.top - (sys.statusBarHeight ?? 0)) + 'px'
+  }
+} catch (e) {
+  // 取不到胶囊信息时保持默认位置
+}
+// #endif
+
+import Tabbar from '../../components/Tabbar.uvue'
+import { computed } from 'vue'
+import AddFood from '../../components/AddFood.uvue'
+import type { AddPayload } from '../../components/AddFood.uvue'
+import FoodToast from '../../components/FoodToast.uvue'
+import { useFoodStore } from '../../stores/food'
+import { useGoalStore } from '../../stores/goal'
+
+/**
+ * 接 store 读数（今日种子精确还原 v2 行：早 420 / 午 560 / 晚 390，宏量 68/156/42）。
+ * 稿面「已摄入 1270 / 还能吃 530」自身与餐和 1370 矛盾，以 store 真值（1368/432）为准。
+ */
+const food = useFoodStore()
+const goal = useGoalStore()
+
+const remainCal = computed(() => goal.calorieGoal - food.totalCal)
+const macroP = computed(() => Math.round(food.totalProtein))
+const macroC = computed(() => Math.round(food.totalCarbs))
+const macroF = computed(() => Math.round(food.totalFat))
+
+type MealRow = {
+  img: string
+  name: string
+  kcal: number
+}
+
+type Meal = {
+  key: string
+  icon: string
+  name: string
+  time: string
+  totalKcal: number
+  rows: MealRow[]
+}
+
+const MEAL_ICONS: Record<string, string> = {
+  breakfast: '/static/home/meal_sun.png',
+  lunch: '/static/home/meal_sun_l.png',
+  dinner: '/static/home/meal_moon.png',
+}
+
+/** 添加弹窗＋Toast（确认不写库，只反馈） */
+const addShow = ref(false)
+const addFoodId = ref('p054')
+const toastShow = ref(false)
+const toastKcal = ref(0)
+const toastMeal = ref('')
+
+const MEAL_LABELS: Record<string, string> = {
+  breakfast: '早餐',
+  lunch: '午餐',
+  dinner: '晚餐',
+  snack: '夜宵',
+}
+
+function openAdd(): void {
+  addShow.value = true
+}
+
+function onAddConfirm(payload: AddPayload): void {
+  addShow.value = false
+  toastKcal.value = payload.kcal
+  toastMeal.value = MEAL_LABELS[payload.meal] ?? ''
+  toastShow.value = true
+}
+
+/** 晚餐按稿面默认收起（点展开钮可看明细） */
+const showDinner = ref(false)
+
+function toggleDinner(): void {
+  showDinner.value = !showDinner.value
+}
+
+const meals = computed<Meal[]>(() =>
+  food.mealRows
+    .filter((m) => m.key === 'breakfast' || m.key === 'lunch' || m.key === 'dinner')
+    .map((m) => ({
+      key: m.key,
+      icon: MEAL_ICONS[m.key] ?? '/static/home/meal_sun.png',
+      name: m.name,
+      time: m.time,
+      totalKcal: typeof m.cal === 'number' ? m.cal : 0,
+      rows: m.details.map((d) => ({
+        img: '/static/icons/' + d.img,
+        name: d.name,
+        kcal: d.kcal,
+      })),
+    }))
+)
 </script>
 
 <style>
 .page {
   flex: 1;
-  justify-content: center;
-  align-items: center;
   background-color: #F2FAF5;
+  padding-bottom: 78px;
+}
+.header {
+  padding-left: 17px;
+  padding-right: 14px;
+}
+.title-row {
+  position: relative;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 6px;
+}
+.title-left {
+  flex-direction: column;
 }
 .title {
-  font-size: 32px;
+  font-size: 24px;
   font-weight: bold;
-  color: #0A4F3D;
+  color: #0F5B44;
 }
-.desc {
+.subtitle {
+  font-size: 13px;
+  color: #46706B;
+  margin-top: 4px;
+}
+.fab {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background-color: #2EB886;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 5px 13px rgba(31, 140, 97, 0.28);
+}
+.fab-plus {
+  font-size: 20px;
+  color: #FFFFFF;
+}
+.date-row {
+  flex-direction: row;
+  align-items: center;
+  margin-top: 10px;
+}
+.date-icon {
+  width: 17px;
+  height: 16px;
+  margin-right: 4px;
+}
+.date-text {
+  font-size: 13px;
+  color: #2F7E6E;
+}
+.hero {
+  position: relative;
+  height: 235px;
+  margin-top: 4px;
+}
+.hero-wave {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 220px;
+}
+.bottle {
+  position: absolute;
+  left: 4px;
+  top: 33px;
+  width: 178px;
+  height: 192px;
+}
+.sticker {
+  position: absolute;
+  right: 4px;
+  top: 40px;
+  width: 100px;
+  height: 98px;
+}
+.hero-text {
+  position: absolute;
+  left: 173px;
+  top: 56px;
+}
+.remain-label {
+  font-size: 19px;
+  font-weight: bold;
+  color: #0F5B44;
+}
+.remain-num-row {
+  flex-direction: row;
+  align-items: baseline;
+}
+.remain-num {
+  font-size: 52px;
+  font-weight: bold;
+  color: #0A5A40;
+}
+.remain-unit {
+  font-size: 19px;
+  font-weight: bold;
+  color: #0A5A40;
+  margin-left: 2px;
+}
+.consumed {
+  font-size: 13px;
+  color: #618585;
+  margin-top: 2px;
+}
+.goal-pill {
+  flex-direction: row;
+  align-items: center;
+  background-color: #FFFFFF;
+  border-radius: 18px;
+  padding-left: 14px;
+  padding-right: 12px;
+  height: 37px;
+  margin-top: 8px;
+  box-shadow: 0 3px 10px rgba(26, 102, 77, 0.08);
+}
+.goal-pill-text {
+  font-size: 12px;
+  color: #0B7954;
+}
+.pill-edit {
+  width: 11px;
+  height: 13px;
+  margin-left: 6px;
+}
+.macro-card {
+  flex-direction: row;
+  background-color: #FFFFFF;
+  border-radius: 19px;
+  margin-left: 14px;
+  margin-right: 14px;
+  margin-top: 6px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  box-shadow: 0 5px 13px rgba(26, 102, 77, 0.07);
+}
+.macro-col {
+  flex: 1;
+  align-items: center;
+}
+.macro-icon {
+  width: 27px;
+  height: 22px;
+}
+.macro-num {
+  font-size: 21px;
+  font-weight: bold;
+  color: #0A5A40;
+  margin-top: 4px;
+}
+.macro-label {
+  font-size: 12px;
+  color: #73918B;
+  margin-top: 2px;
+}
+.macro-div {
+  width: 1px;
+  background-color: #E3F0EA;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+.meal-section-head {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-left: 17px;
+  margin-right: 14px;
+  margin-top: 16px;
+}
+.meal-section-title {
+  font-size: 17px;
+  font-weight: bold;
+  color: #0F5B44;
+}
+.all-records {
+  flex-direction: row;
+  align-items: center;
+}
+.all-records-text {
+  font-size: 12px;
+  color: #8FAEAF;
+}
+.chev-right {
+  width: 8px;
+  height: 12px;
+  margin-left: 4px;
+}
+.meal-block {
+  flex-direction: row;
+  margin-left: 17px;
+  margin-right: 14px;
   margin-top: 12px;
-  font-size: 14px;
-  color: #0A7A5C;
+}
+.meal-rail {
+  width: 42px;
+  align-items: center;
+}
+.meal-circle {
+  width: 37px;
+  height: 37px;
+  border-radius: 19px;
+  background-color: #29B385;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(31, 140, 97, 0.25);
+}
+.meal-circle-icon {
+  width: 27px;
+  height: 25px;
+}
+.rail-line {
+  flex: 1;
+  width: 1px;
+  background-color: #DCEDE6;
+  margin-top: 6px;
+  margin-bottom: -12px;
+}
+.meal-main {
+  flex: 1;
+  margin-left: 6px;
+}
+.meal-head {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.meal-name {
+  font-size: 17px;
+  font-weight: bold;
+  color: #0F5B44;
+}
+.meal-time {
+  font-size: 16px;
+  font-weight: normal;
+  color: #8FAEAF;
+}
+.meal-kcal {
+  font-size: 17px;
+  font-weight: bold;
+  color: #0A5A40;
+}
+.meal-card {
+  background-color: #FFFFFF;
+  border-radius: 16px;
+  margin-top: 8px;
+  padding-left: 10px;
+  padding-right: 12px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  box-shadow: 0 4px 11px rgba(26, 102, 77, 0.06);
+}
+.meal-row {
+  flex-direction: row;
+  align-items: center;
+  height: 41px;
+}
+.meal-thumb {
+  width: 37px;
+  height: 37px;
+  border-radius: 8px;
+}
+.meal-row-name {
+  flex: 1;
+  font-size: 13px;
+  color: #14584A;
+  margin-left: 8px;
+}
+.meal-row-kcal {
+  font-size: 13px;
+  color: #0B7954;
+}
+.meal-row-div {
+  height: 1px;
+  background-color: #F0F5F2;
+  margin-left: 45px;
+}
+.meal-expand {
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+.expand-btn {
+  width: 29px;
+  height: 29px;
+  border-radius: 15px;
+  background-color: #FFFFFF;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 3px 8px rgba(26, 102, 77, 0.08);
+}
+.chev-down {
+  width: 10px;
+  height: 13px;
 }
 </style>

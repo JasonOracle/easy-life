@@ -10,6 +10,128 @@
 
 ## 最近进度
 
+### 2026-09-21 — 公共添加食物弹窗全链路落地（六组件＋Store 增补，实拍全链路验收通过）
+
+- **组件库**：`OptionTray`（方案 B 底槽＋光晕＋软阴影贴图）／`CountStepper`（默认 3／上限 100／对数能量条 p=ln(1+n)/ln(101)／阈值三色／截界抖动 4px／键入态 clamp）／`FoodToast`（+N kcal／已加入X／已添加 pill，2s 自动＋点按关闭，长触觉）／`GoalModal`（表盘展示＋五档 chips／保存 emit）／`AddFood`（分量底槽／计数步进器／甜度底槽／餐次四照片卡／确认 emit payload）共 6 个 `.uvue` ＋各配 `.md`
+- **Store 增补**：`food.ts` 加 `MAX_COUNT=100`/`DEFAULT_COUNT=3`/`portionRatio`/`portionLevel`/`gramsOf`（README §2.x 原样）；软阴影贴图 `app/static/common/shadow512.png`（小程序 `blur` 无效替代）
+- **图片资产**：器皿 12 张＋餐次 4 张从 Pencil `v3_` 素材直取进 `app/static/vessels/`、`app/static/meals/`；缩略图沿用设计稿导出
+- **接线**：首页 FAB → `AddFood(p054)`（吐司面包，验证计数步进器）→ 确认 → `FoodToast`（L3 触觉＋2s 自动＋点按关闭）；设置目标行 → `GoalModal`（chips 切档保存 emit → `goal.setGoal` → 个人中心目标同步）；个人中心齿轮 → 设置页
+- **验证清单（实拍全绿）**：
+  - ✅ 步进器：- 按钮禁用（1）→ + 点两下 3→5 条色 mint→amber → 连点 100 显示 coral 且加号禁用＋轨道抖 4px → - 点回退到 1
+  - ✅ 分量/甜度/餐次：OptionTray 底槽悬浮选中态（光晕径向渐变 22% ＋落地影 40% ＋抬升 4px），甜度 10 格段浮板，餐次照片卡描边印章
+  - ✅ 设置目标：GoalModal 表盘 1800 ＋ 五档 chips（1200-2400 步进 300）切档保存 → `goal.setGoal` → 个人中心目标同步
+  - ✅ Toast：`FoodToast` +N kcal/已加入X/已添加 pill，2s 自动消失，点按立即关闭，出现即长触觉（L3）
+  - ✅ 控制台 error 空；三页截图核对无崩坏
+- **已知偏差（真值优先）**：步进器默认 3 ≠ 旧 1；上限 100 ≠ 旧 99；Toast 无音效（资产缺失，仅触觉）
+
+### 2026-09-21 — GoalModal 编译修复 + SettleBadge/GoalModal 文档落地
+
+- **编译修复**：GoalModal.uvue 三处编译错误全修——① 重复 `close()`/`save()` 函数声明（242–249 行已有正确版本，303–310 行重复删除）；② 缺少 `import { computed } from 'vue'`（`isApp`/`dialRatioComputed`/`conicRingStyle`/`thumbStyle` 四个 computed 属性未导入）；③ CSS 样式 50+ 处句号 `.` 替换为分号 `;`（`.unit`/`.ticks`/`.tick`/`.controls`/`.control-btn`/`.quick-label`/`.quick-tray`/`.chip`/`.tip`/`.save-btn` 等全量修正）
+- **验证**：编译通过（9 个鸿蒙兼容性 warning 可忽略）；微信开发者工具截图确认 GoalModal 弹窗渲染正确——Dial 圆环 conic-gradient 从顶部顺时针、1800 初始值、刻度 1200/1500/1800/2100/2400、−/+ 按钮、快速选择 chips（1800 高亮）、提示卡、保存按钮
+- **自动化限制**：wechatide automation tap 无法触发 GoalModal 内部的 `@click` 事件（uni-app x 组件事件系统与 wechatide 原生 tap 不兼容），交互验证需真机或手动测试
+- **文档落地**：新建 `app/components/GoalModal.md`（用途/依赖/设计决策/边界降级/设计稿对应）+ `app/components/SettleBadge.md`（同结构）
+
+### 2026-09-21 — 弹层③ 从 toast 改成结算徽章，并定稿动效时间轴
+
+- **为什么改**：原「圆圈+卡片+撤销」横向 toast 被否——335 宽里塞「已加入夜宵」+数字+单位+撤销只能压到
+  11px 中文（小程序不可读），而且加记录是这一屏唯一的正反馈时刻，toast 的「顺便说一声」语义与
+  「颜值即卖点」冲突。改成居中**徽章** 264×256：圆环 = 今日预算用掉多少，中心大字 = 这次加了多少
+- **做法**：先出 A/B/C 三版对照，再按要求补第四版苹果风格 D；**四版一律去掉撤销**（v1.0 删除走首页餐次行长按）；
+  独立上下文 critic 评出 A > D > C > B；老板拍板「把 D 的圆环特色并进 A、去掉数字左边的加号」，
+  合并版定稿后删掉 B/C/D 三块对照板
+- **几何要点**：`kcal` 与数字同行会撞环带 → 改 `NumStack` 竖排（数字上、单位下）；删掉撤销胶囊后内容偏下，
+  六个子节点 y 统一上移 10 校准到上下留白 30/30；环带 `#1FBF8F26`（mint 15%）不是灰，两端 16×16 圆点做圆头
+- **动效规范**（画板 `MU1O4`，9 条轨道 0–2 400ms）：**环扫过角度与中心数字滚动共用同一个 `progress`**
+  （单一 `t`、`easeOutCubic`、620ms）——一个 CSS transition 一个 JS 计时器必然露馅；只用 scale 不用
+  translateY，阴影不参与动画，数字用等宽字形防抖动；环到位那一帧 `uni.vibrateShort`；超预算环扫满转
+  `#E8B54D` 但**大数字保持墨绿**（它不是坏消息）；低端机降级为纯淡入淡出
+- **跨端**：小程序 `conic-gradient` 双层圆环（基础库 <2.11 退化整圆+数字）；uni-app x 原生**不支持
+  conic-gradient** → `<canvas>` 2d `arc` + `lineCap:'round'`，两端都从同一个 progress 取数
+- **踩坑**：`mcp__pencil__execute` 的代码参数是 `input` 不是 `code`（传 `code` 被静默忽略 → hang）；
+  对已有 frame 再 `Insert` 子节点会进 `Get` 但 `Export` 整棵空白 → 整棵树用**一次字面量 `Replace`** 灌入
+- **交付**：`docs/design/2026-09-21-settlement-badge/`（README + `export/` 2 张 2x）。
+  **纯设计稿，App 未接**（`SettleBadge.uvue` 待建）
+
+### 2026-09-21 — 补两个入口弹层：食物选择列表（单选回显圈）＋ 每日热量目标
+
+- **弹层⓪ 食物选择列表** `n3dgv`：搜索框 335×46 `r23`、分类 chip 60×34（选中 `mint-e2` 实心、
+  未选 `bg-tab-idle`，第 6 个刻意溢出右缘暗示可滑）、5 行食物 335×76。
+  **行尾不是加号**（首版误读参考图，已改）：这层是**单选 + 自动收起**，圆圈是「上次选的是哪条」的
+  回显 —— 未选 = `#BFE3D6` 1.5 描边空圈，已选 = `mint-e2` 实心白勾 + 阴影 + 行底 `$bg` `r16` +
+  缩略转白底 + 副标转 `$ink2` 600，且已选行上下两条分隔线隐掉（否则圆角行底被切断）。
+  首次进入无选中项时五行全空圈，**不默认高亮第一行**。每行重建为独立 `Row_*` frame 才能挂按压态
+- **弹层⑨ 每日热量目标** `qnNST`：头部 + `Dial` 调节卡（1800 Inter 46 + 加减白圆 + 线性滑杆
+  239×8，thumb 圆心 = fill 右端）+ 快速选择 + 提示卡 + 保存。**快速选择按刚定稿的 B 底槽做**
+  （白卡浮起），不是参考图里的 mint 实心；GOAL 1200–2400 步长 50，落在档位才亮对应段，
+  不在档位五段全灰（避免把 1850 读成 1800）
+- **踩坑**：`TakeScreenshot` 对落在视口外的新建画板直接 hang（不是返回空白），改用 `Export` 验证；
+  非法 lucide 图标名只出 warning 不抛错（`rice-bowl` 不存在，米饭改用 `wheat`）
+- **交付**：`docs/design/2026-09-21-entry-picker-and-goal-sheet/`（README + 2 张 2x 交付图）。
+  两个弹层均为**纯设计稿，App 未接**
+
+### 2026-09-21 — 弹层 v4：B 选中态全量推广 + 计数步进器能量条（设计侧定稿，待落代码）
+
+- **选中态方案 B 推广到 6 个弹窗**：分量/甜度共用「底槽 + 器物卡」范式（`PortionTray` 335×134
+  `#F2FAF5` r20），选中 = 原图满不透明 + mint 径向光晕 + 加浓接地投影 + 抬升 1.12×；未选 = 62% 透明
+  + 弱投影。甜度档另建 `alsdY`（5 段 63×64，选中白卡浮起 + 10 格糖条点亮）
+- **餐次卡重做**（本轮最关键返工）：首版给选中卡加了浅蒙版，截图直接读成「禁用态」。**新铁律：选中卡
+  绝不能加浅色蒙版** → 选中 = 照片满不透明 + 强 scrim + 2px `#1FBF8F` 外描边 + 上移 4px + 右上 mint
+  印章；未选 = 72% 透明 + `#0A4F3D` 22% 压暗。六弹窗统一底边 `mcY+96`，距 ConfirmBtn 恒 12px
+- **计数类只保留 1 个弹窗**：⑧吐司为准，⑦水煮蛋 / ⑨羊肉串 已删（老板：个串片只需一个展示）
+- **能量条算法定稿**：`p(n)=ln(1+n)/ln(101)`，刻度 1/5/25/100 显式暴露非线性；阈值 ≤4 mint / 5–24 琥珀 /
+  ≥25 珊瑚，上限 100。此前的「pip 逐颗点亮」被否（100 串放不下），彻底废弃
+- **DesignTokens 全画板回校**：变量对齐 + 两轮字面色号清扫（第二轮 157 节点）+ 圆角归一到
+  sheet 34 / card 20 / chip 18（60 处）+ 12.5/11.5 字号统一为 caption 12（49 节点）。**全画板 fill /
+  渐变 stop / stroke / effect 四类审计已零 off-token**（原先手调的 `#FFC9AE` 已改为 `#FF9E7D8C`）
+- **交付**：`docs/design/2026-09-21-selection-state-and-count-stepper/`（README 实现文档，含 UTS 参考
+  实现、光晕公式、motion hook 时长表、落地清单 + `export/` 12 张 2x 交付图）。**App 代码未动**——
+  `AddSheet.uvue` 仍是 `e3798b8` 删除后的空档
+
+### 2026-09-21 — Tabbar＋stores 落地（共享组件＋5 stores＋Pinia，实拍验证通过）
+
+- **Tabbar**：共享 `Tabbar.uvue`（v2 双 Tab 规格：BG `#F8FCFA`／顶线／11px 字，激活 `#17916B`），
+  Home／Profile 内嵌（active 切换），`redirectTo` 防堆栈；**实拍点按「我的」→ Profile，我的变绿 ✓**
+  midbutton 旧案终结：v2 加号本就在首页右上，不存在中钮需求
+- **stores**：git 历史恢复 device／goal／food（composable 同回），新建 settings／user；
+  food 增记录快照（foodName＋source＋schemaVersion）＋`ct_*` 本地持久化；
+  main.uts 恢复 Pinia，App.onLaunch 恢复 device 初始化
+- **页面暂不接线**：三页保持稿面静态值（种子推导总数≠530/1270，接线会变数），等 AddSheet 记录流一起切
+- **验证**：CLI 编译成功（3 页＋组件，仅 3 条鸿蒙 UA 旧 warning）→ 关窗重开 → 首页截图一致 →
+  实拍 tap 切页 → 控制台 error 空
+
+### 2026-09-21 — P2 个人中心＋P3 设置页落地，三页闭环（模拟器验证通过）
+
+- **P2**：`Profile.uvue`（渐变头图老刘/128天/齿轮→设置、今日热量530＋58.6%进度＋三统计、达标 Banner 压卡、
+  本周4/7七点、热量趋势7柱＋目标线1800、最近记录超标+150/达标×2、页内 Tab 我的激活）＋12 张导出图
+- **P3**：`Settings.uvue`（渐变头图＋返回、偏好/目标/数据三组、shield 本机声明、珊瑚描边危险卡、页脚）＋11 张导出图
+- **路由**：pages.json 补 profile＋settings；首页 Tab 我的→profile；齿轮→settings；返回键回退
+- **还原因 deviation**：对勾圆按实测改绿底 `#009771`；返回白圈白箭不可见→改 mint 字形 ‹＋薄荷 ring；
+  趋势日期只标前 4 柱（与稿面一致）；柱渐变纯色近似
+- **🔴 新铁律（编译器 assets 冲突）**：多页静态 `src="/static/..."` 会被收进同一 `common/assets.js`，
+  按序号＋后缀共享命名空间，跨页序号碰撞直接串图（设置页图标整体错位实锤）。**解法：图片一律
+  `:src="'...'"` 运行时绑定，绕开静态资源收集**（副作用：assets.js 不再生成，旧包热更会报
+  缺文件——必须清缓存＋关窗重开一次；已验证新包三页全对、控制台 error 空）
+- **验证**：CLI 编译成功（3 页）→ cache clean → 关窗重开 → 三页截图 1:1 → 控制台 error 空
+
+### 2026-09-20 — P1 首页按 v2 稿重建落地（模拟器验证通过）
+
+- **范围**：`Home.uvue` 重写（Header/Hero/宏量68-152-42/早420午560晚390收起/页内双 Tab）＋`Home.md`＋22 张设计稿导出图（`app/static/home/`）
+- **加号胶囊避让（Boss 要求）**：小程序端 `getMenuButtonBoundingClientRect()` 放胶囊左侧（try/catch 取不到回落稿面位置），其他端按稿面；实机截图确认加号在胶囊左侧
+- **链路沉淀**：HBuilderX 项目列表里 `kaluli` 是 Web 型不会编译，`app(UniApp_VUE)` 才是工程，CLI 用 `--project app`；外部改文件 GUI 不自动重编，`cli launch mp-weixin --project app --compile true` 单次编译＋关窗重开生效；微信 MCP Token 已存 `.workbuddy/wx_token.txt`（git 忽略），重载/日志可自助
+- **验证**：CLI 编译成功（1 页，31s）→ 关窗重开 → automator 截图结构正确 → 控制台 error 空
+- **已知缺口**：瓶子静态图占位（液动下轮）；晚餐收起态；我的 Tab 无跳转（P2 接路由）
+
+### 2026-09-20 — 计件类份量改数量输入：93 个 piece_weight 缺口补齐（数据半截落地）
+
+- **起因**：Boss 指串/片/个用单选项分段（1个/1片/1串）没法选数量，提议用户自主输入；拍板：步进器＋点按输入、只改计件类、杯碗不动
+- **数据缺口**：178 个计件条目（piece 87 / slice 5 / skewer 1…按 vessel 计）中 93 个 `piece_weight` 为 null，无它则公式 `kcal=round(count×pw×cal/100)` 算不出
+- **执行**：
+  - 新建 `toolchain/fill_piece_weights.py`（行级补丁，不重跑全量以保住人工修正）：Agnes API 定向问 93 个单个克重，23s 全回，`piece_weight` 就地填＋`piece_note` 留依据，conf/basis 不动
+  - `validate.py` 新增⑦计件类 piece_weight 必填（构建期拦截）；`build.py` 的 base 补齐 protein/carb/fat（此前会静默丢宏量，宏量同比缩放依赖它）
+  - `validate`＋`build` 双绿灯：347 条，pieceWeight 覆盖 102→195，计件类 178/178，产物同步 `app/src/data/`＋347 图标
+- **版本说明**：`LIB_VERSION` 保持 1.0.0 未动（fingerprint 时间戳可追溯；发版时 Boss 定是否升 patch）
+- **待办（UI 半截）**：AddSheet 手脚架时已删，数量步进器等 AddSheet 重建时落地；93 个估算值待人工抽核（`piece_note` 可查）
+
 ### 2026-09-20 — App 部分全部推倒重写：先回到最小可运行手脚架（Boss 指令）
 
 - **背景**：Boss 明确「app 部分代码需要重新写，先初始化为只有手脚架的样子，能运行就行」
@@ -400,6 +522,17 @@
 
 | 时间 | 变更 |
 |---|---|
+| 2026-09-21 | **公共添加食物弹窗全链路落地**：OptionTray/CountStepper/FoodToast/GoalModal/AddFood 6 组件＋food.ts 增补 MAX_COUNT/portionRatio/portionLevel/gramsOf+软阴影贴图，FAB→AddFood(p054 吐司)→确认→FoodToast(L3触觉/2s自动/点按关闭)；设置目标行→GoalModal(chips保存)→目标同步；步进器实拍 1→5(amber)→100(coral/禁用/抖动)→回退1；OptionTray 底槽悬浮选中态(光晕/影/抬升)；GoalModal 表盘+chips 保存同步；FoodToast L3触觉/2s自动/点按关闭；控制台空；步进器默认3/上限100 |
+| 2026-09-21 | **GoalModal 编译修复**：重复 close/save 函数声明删除 + 缺少 computed import 补全 + CSS 50+ 处句号换分号；GoalModal/SettleBadge .md 文档落地；编译通过截图验证弹窗渲染正确；wechatide automation tap 无法触发 uni-app x 组件 @click（已知限制） |
+| 2026-09-21 | **弹层③ 结算徽章定稿**：toast → 居中 264×256 圆环徽章（四版 A/B/C/D 对照 + critic loop → D 的环并入 A、去加号、去撤销），新增动效时间轴画板 `MU1O4`（9 轨 0–2 400ms，环与数字共用单一 `progress`）；文档 `docs/design/2026-09-21-settlement-badge/`（README + 2 张 2x 交付图）；**App 未接** |
+| 2026-09-21 | **补两个入口弹层**：弹层⓪ 食物选择列表（单选 + 自动收起，行尾圆圈做「上次选中」回显）＋ 弹层⑨ 每日热量目标（线性滑杆 + 快速选择套用 B 底槽）；文档 `docs/design/2026-09-21-entry-picker-and-goal-sheet/`；纯设计稿未接 App |
+| 2026-09-21 | **弹层 v4 设计定稿**：B 选中态推广到 6 个弹窗（分量/甜度共用底槽 `PortionTray`，餐次改满版照片 + mint 外描边 + 印章，废弃「选中加浅蒙版」）；计数类只留 ⑧吐司，⑦⑨ 删除；能量条算法 `p(n)=ln(1+n)/ln(101)` + 1/5/25/100 刻度定稿；全画板按 DesignTokens 回校（157 节点色号 + 60 处圆角 + 49 处字号）。新实现文档 `docs/design/2026-09-21-selection-state-and-count-stepper/README.md`；**App 代码未动** |
+| 2026-09-21 | v3 弹层文档标注废弃项：计数类 `v3_ball/v3_tile/v3_skewer` 固定 66px 图、餐次卡 77×74 照片条、`#2CC79A` 描边，均指向 2026-09-21 v4 文档 |
+| 2026-09-20 | 计件份量数据半截落地：93 个 piece_weight 补齐＋validate 计件必填＋build base 补宏量，双绿灯 |
+| 2026-09-20 | P1 首页 v2 重建落地：Home 重写＋22 导出图＋加号胶囊避让，编译＋截图＋控制台三绿 |
+| 2026-09-21 | P2＋P3 落地：Profile/Settings 重建＋路由＋导航，三页截图＋控制台全绿；新增 assets 冲突铁律 |
+| 2026-09-21 | Tabbar＋stores 落地：共享组件＋实拍切页＋5 stores＋Pinia，控制台空；页面暂不接线 |
+| 2026-09-21 | 三页接 store：库＋6 行菜（353 条）＋种子重解＋三页接线，三页截图＋控制台全绿 |
 | 2026-09-20 | **画布清理**：按老板圈图删除 6 块 v2 旧板（旧①糖块版/旧②/旧④/旧⑥/旧⑦/旧⑧）+ v2 toast `FkjGk`；Ardot 13–17 号板按要求保留未动。 |
 | 2026-09-20 | **弹层 v3.2 —— 餐次改「时间空间状态」实拍风光照（老板定方案B）**：老板指出餐次应体现时间空间状态而非用食物区分（食物与餐次无绑定）。定稿：**同一片丘陵的四个时刻**——早餐日出/午餐正午/晚餐黄昏/夜宵月夜，Agnes `16:9` 一次过 4 张（`v3_sky_*.png`）。弹层餐次卡改照片条 69×42（`mode:'fill'`）+ 名称 + 时间段；餐次板重建为 `ZL2sa`（丘陵四时刻， Replace 灌树）。**新踩坑**：Pencil 的 `assets/` 目录只在打开文档时建立索引，运行中新增图片渲染为棋盘格；解法 = 放进文档目录的 `images/` 子目录（运行时可发现）再引用 `images/xxx.png`。交付：`docs/design/2026-09-20-add-food-popup-v3/` 重打包（22 张素材 + 9 弹层 + 6 板 + README v3.2）。 |
 | 2026-09-20 | 首页餐次区按新稿还原：meal-card 补白卡 + 投影 + 行间分隔线、时间轴改 flex rail 列、餐次图标重画（太阳/月亮 PNG + 正圆渐变），详见「最近进度」 |

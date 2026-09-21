@@ -398,12 +398,12 @@ app/src/
 ## 当前待办
 
 - [ ] **等 Boss 拍板：工程化路线** —— HBuilderX（`manifest.json` 等放**项目根**，官方示例结构无 `src/`）vs CLI（配置放 `src/` 下，另需 `package.json`/`vite.config.ts`）。当前骨架按「根目录放配置 + `src/` 放源码」建，`pages.json` 的 path 带 `src/` 前缀
-- [ ] **等 Boss 拍板：Tabbar 方案** —— 设计稿是玻璃 + 上凸 14px 加号，但官方文档明确「uni-app x **不再支持** tabbar 的 midbutton」。候选：① 页面内自绘 Tabbar 组件（最贴近设计稿）② 用 uni-ui x 的 `uni-tab-bar` ③ 用原生 tabBar 的 `blurEffect` 但**放弃上凸加号**
-- [ ] **等 Boss 拍板：色值口径** —— 画板节点硬编码是旧值（bg `#F1FAF6` / label `#0B4F3C`）、变量集是新值（`#F2FAF5` / `#0A4F3D`），差 ±1。文档已统一按**变量集**
-- [ ] **等 Boss 拍板：「菜品」Tab** —— 设计稿 `CategoryTabs` 只 7 个 Tab、缺菜品，347 条中 58 条菜品无法筛选
-- [ ] 真机验证 `backdrop-filter`
-- [ ] 真机验证 CSS 自定义属性（`var()`）
-- [ ] 补齐 7 个 store（food / goal / settings / library / vessel / opt / user）
+- [x] **已定（2026-09-21，v2 稿即答案）：Tabbar 方案** —— v2 稿只有「首页/我的」双 Tab，
+  加号在首页右上（FAB，小程序端避胶囊），不存在 midbutton 需求。实现为共享 `Tabbar.uvue`
+  组件（`redirectTo` 切换），不用原生 tabBar
+- [x] **已完成（2026-09-21）：公共添加食物弹窗** —— `AddFood/OptionTray/CountStepper/FoodToast/GoalModal` 6 组件（方案 B 底槽＋光晕＋对数能量条＋Toast L3 触觉），首页 FAB → 吐司步进器 1→5→100 → 确认 → Toast L3 触觉；设置目标行 → GoalModal chips 同步；软阴影贴图 `app/static/common/shadow512.png`；验收：步进器 1/5/100 全态、OptionTray 底槽悬浮、GoalModal 表盘+chips、FoodToast 2s/点按、控制台空
+- [x] **已完成（2026-09-21）：5 个 store** —— device / food（含 library＋vessel＋opt 解析）/ goal / settings / user，
+  全带 `ct_*` 本地持久化；三页已接读数；页面 `app/src/data/food_library.json` 现 353 条
 - [ ] 实现组件：Tabbar / Bottle / Sheet / Modal / 各 Icon
 - [ ] 合规 critic loop 复评
 

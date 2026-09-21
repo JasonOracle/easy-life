@@ -1,0 +1,681 @@
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Muse Spark
+  修改内容：[接 store 读数：头图/数字/进度/周点/趋势/历史走 user＋goal＋food；Banner 达标态与真值一致]
+  修改时间：2026-09-21
+  AI模型：Muse Spark
+  修改内容：[页内 Tab 替换为共享 Tabbar 组件（active=profile），删 goHome 与冗余样式]
+  修改时间：2026-09-20
+  AI模型：Muse Spark
+  修改内容：[新建：按 v2 设计稿（727788215940571 · 10:6）1:1 还原个人中心 P2：
+    渐变头图/今日热量卡/达标 Banner/本周概览/热量趋势/最近记录/页内 Tab（我的激活）]
+-->
+
+<template>
+  <view class="page">
+    <!-- 头图 -->
+    <view class="header" :style="{ paddingTop: sbH + 'px' }">
+      <view class="header-row">
+        <view class="avatar-ring">
+          <image class="avatar" :src="'/static/profile/avatar.png'" mode="aspectFill"></image>
+        </view>
+        <view class="header-text">
+          <text class="name">{{ user.name }}</text>
+          <text class="sub">已连续记录  {{ user.streakDays }} 天  ·  每日目标  {{ goal.calorieGoal }} kcal</text>
+        </view>
+        <view class="gear-circle" @click="goSettings">
+          <image class="gear" :src="'/static/profile/gear.png'" mode="aspectFit"></image>
+        </view>
+      </view>
+      <image class="header-wave" :src="'/static/profile/header_wave.png'" mode="widthFix"></image>
+    </view>
+
+    <!-- 今日热量卡 -->
+    <view class="cal-card">
+      <view class="pill">
+        <text class="pill-text">还可以吃</text>
+      </view>
+      <view class="bignum-row">
+        <text class="bignum">{{ remainCal }}</text>
+        <text class="bignum-unit">kcal</text>
+      </view>
+      <view class="prog-row">
+        <text class="cons-num">{{ food.totalCal }}</text>
+        <text class="cons-unit">kcal 已摄入</text>
+        <view class="goal-right">
+          <text class="goal-label">目标</text>
+          <text class="goal-num">{{ goal.calorieGoal }}</text>
+        </view>
+      </view>
+      <view class="prog-track">
+        <view class="prog-fill" :style="{ width: progPct + '%' }"></view>
+      </view>
+      <view class="stat-panel">
+        <view class="stat-col">
+          <text class="stat-num">{{ goal.calorieGoal }}</text>
+          <text class="stat-lbl">目标热量 / kcal</text>
+        </view>
+        <view class="stat-col">
+          <text class="stat-num">{{ food.totalCal }}</text>
+          <text class="stat-lbl">已摄入 / kcal</text>
+        </view>
+        <view class="stat-col">
+          <text class="stat-num-green">{{ remainCal }}</text>
+          <text class="stat-lbl">还能吃 / kcal</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 达标 Banner -->
+    <view class="banner">
+      <view class="check-circle">
+        <image class="check" :src="'/static/profile/check.png'" mode="aspectFit"></image>
+      </view>
+      <view class="banner-text">
+        <text class="banner-title">今日已达标</text>
+        <text class="banner-sub">继续保持，做得很好！</text>
+      </view>
+      <image class="banner-chev" :src="'/static/profile/chev_banner.png'" mode="aspectFit"></image>
+    </view>
+
+    <!-- 本周概览 -->
+    <view class="card week-card">
+      <view class="card-head">
+        <text class="card-title">本周概览</text>
+        <view class="head-right">
+          <text class="week-num">{{ weekOkCount }}/7</text>
+          <text class="week-lbl">天达标</text>
+          <image class="chev-mini" :src="'/static/profile/chev_week.png'" mode="aspectFit"></image>
+        </view>
+      </view>
+      <view class="dots-row">
+        <view class="dot-col" v-for="(dayItem, dayIdx) in weekDots" :key="dayIdx">
+          <view class="dot" :style="{ backgroundColor: dayItem.color }"></view>
+          <text class="dot-lbl">{{ dayItem.lbl }}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 热量趋势 -->
+    <view class="card trend-card">
+      <view class="card-head">
+        <image class="trend-icon" :src="'/static/profile/trend_icon.png'" mode="aspectFit"></image>
+        <text class="card-title">热量趋势</text>
+        <view class="head-right">
+          <text class="view-all">查看全部</text>
+          <image class="chev-mini" :src="'/static/profile/chev_trend.png'" mode="aspectFit"></image>
+        </view>
+      </view>
+      <view class="chart">
+        <view class="yaxis">
+          <text class="ax">2400</text>
+          <text class="ax-green">1800</text>
+          <text class="ax">1200</text>
+          <text class="ax">600</text>
+          <text class="ax">0</text>
+        </view>
+        <view class="bars-area">
+          <view class="target-line"></view>
+          <view class="bars-row">
+            <view class="bar-col" v-for="(barItem, barIdx) in bars" :key="barIdx">
+              <text class="bar-val" :class="{ 'bar-val-over': barItem.over }">{{ barItem.val }}</text>
+              <view class="bar" :class="{ 'bar-over': barItem.over }" :style="{ height: barItem.h + 'px' }"></view>
+              <text class="bar-date">{{ barItem.date }}</text>
+            </view>
+          </view>
+          <view class="target-tag">
+            <text class="target-tag-text">目标 1800</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 最近记录 -->
+    <view class="card rec-card">
+      <view class="card-head">
+        <text class="card-title">最近记录</text>
+        <view class="head-right">
+          <text class="view-all">查看全部</text>
+          <image class="chev-mini" :src="'/static/profile/chev_rec.png'" mode="aspectFit"></image>
+        </view>
+      </view>
+      <view v-for="(recItem, recIdx) in records" :key="recIdx">
+        <view class="rec-row">
+          <view class="rec-left">
+            <text class="rec-date">{{ recItem.date }}</text>
+            <text class="rec-wday">{{ recItem.wday }}</text>
+          </view>
+          <view class="rec-right">
+            <text class="rec-num">{{ recItem.num }}</text>
+            <text class="rec-unit">kcal</text>
+            <view class="rec-badge" :class="{ 'rec-badge-over': recItem.over }">
+              <text class="rec-badge-text" :class="{ 'rec-badge-text-over': recItem.over }">{{ recItem.badge }}</text>
+            </view>
+            <text class="rec-over" v-if="recItem.over">+{{ recItem.overKcal }} kcal</text>
+          </view>
+          <image class="chev-row" :src="recItem.chev" mode="aspectFit"></image>
+        </view>
+        <view class="rec-div" v-if="recIdx < records.length - 1"></view>
+      </view>
+    </view>
+
+    <!-- 底部 Tab（共享组件，我的激活） -->
+    <Tabbar active="profile" />
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+import { computed } from 'vue'
+import Tabbar from '../../components/Tabbar.uvue'
+import { useFoodStore } from '../../stores/food'
+import { useGoalStore } from '../../stores/goal'
+import { useUserStore } from '../../stores/user'
+
+/**
+ * 接 store 读数（种子精确还原：历史 1950超+150/1720达/1580达；趋势 1580…1950/1368；
+ * 周 dots 按 1800 判定，6/7 达标——稿面 4/7 与自家数据矛盾，以真值为准）。
+ */
+
+let sbH = 0
+try {
+  sbH = uni.getSystemInfoSync().statusBarHeight ?? 0
+} catch (e) {
+  sbH = 0
+}
+
+const food = useFoodStore()
+const goal = useGoalStore()
+const user = useUserStore()
+
+const goSettings = () => {
+  uni.navigateTo({ url: '/pages/settings/Settings' })
+}
+
+const remainCal = computed(() => goal.calorieGoal - food.totalCal)
+const progPct = computed(() => {
+  if (goal.calorieGoal <= 0) return 0
+  const p = Math.round(food.totalCal / goal.calorieGoal * 100)
+  return p > 100 ? 100 : p
+})
+
+const WEEKDAY = ['日', '一', '二', '三', '四', '五', '六']
+
+function fmtMD(ts: number): string {
+  const d = new Date(ts)
+  return (d.getMonth() + 1).toString() + '/' + d.getDate().toString()
+}
+
+function fmtMDLong(ts: number): string {
+  const d = new Date(ts)
+  return (d.getMonth() + 1).toString() + '月' + d.getDate().toString() + '日'
+}
+
+type WeekDot = { color: string; lbl: string }
+// 连续 7 天位置标签一..日；颜色按目标判定（绿达标/珊瑚超标）
+const weekDots = computed<WeekDot[]>(() => {
+  const labels = ['一', '二', '三', '四', '五', '六', '日']
+  return food.weekTotals.map((d, i) => ({
+    color: d.total <= goal.calorieGoal ? '#25AE8C' : '#FD6E4D',
+    lbl: labels[i] ?? '',
+  }))
+})
+
+const weekOkCount = computed(() =>
+  food.weekTotals.filter((d) => d.total <= goal.calorieGoal).length
+)
+
+type Bar = { val: number; h: number; date: string; over: boolean }
+// 柱高 = val / 2400 * 100（稿面纵轴）；日期取实际 M/D
+const bars = computed<Bar[]>(() =>
+  food.weekTotals.map((d, i) => ({
+    val: d.total,
+    h: Math.round(d.total / 2400 * 100),
+    date: i < 4 ? fmtMD(d.ts) : '',
+    over: d.total > goal.calorieGoal,
+  }))
+)
+
+type Rec = {
+  date: string
+  wday: string
+  num: number
+  badge: string
+  over: boolean
+  overKcal: number
+  chev: string
+}
+const REC_CHEVS = [
+  '/static/profile/chev_r1.png',
+  '/static/profile/chev_r2.png',
+  '/static/profile/chev_r3.png',
+]
+// 最近 3 天（不含今天）：日期/周几/总量/达标态
+const records = computed<Rec[]>(() => {
+  const days = food.weekTotals.slice(-4, -1)
+  return days.map((d, i) => {
+    const over = d.total > goal.calorieGoal
+    const dt = new Date(d.ts)
+    return {
+      date: fmtMDLong(d.ts),
+      wday: '周' + WEEKDAY[dt.getDay()],
+      num: d.total,
+      badge: over ? '超标' : '达标',
+      over,
+      overKcal: over ? d.total - goal.calorieGoal : 0,
+      chev: REC_CHEVS[i] ?? REC_CHEVS[0],
+    }
+  }).reverse()
+})
+</script>
+
+<style>
+.page {
+  flex: 1;
+  background-color: #EEF7F4;
+  padding-bottom: 78px;
+}
+.header {
+  background-color: #39AD95;
+  position: relative;
+}
+.header-row {
+  flex-direction: row;
+  align-items: center;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 12px;
+  padding-bottom: 34px;
+}
+.avatar-ring {
+  width: 51px;
+  height: 51px;
+  border-radius: 26px;
+  background-color: #FFFFFF;
+  justify-content: center;
+  align-items: center;
+}
+.avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 23px;
+}
+.header-text {
+  flex: 1;
+  margin-left: 10px;
+}
+.name {
+  font-size: 14px;
+  font-weight: bold;
+  color: #FFFFFF;
+}
+.sub {
+  font-size: 10px;
+  color: #FFFFFF;
+  margin-top: 3px;
+}
+.gear-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  background-color: #FFFFFF;
+  justify-content: center;
+  align-items: center;
+}
+.gear {
+  width: 13px;
+  height: 13px;
+}
+.header-wave {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 37px;
+}
+.cal-card {
+  background-color: #F7FCFA;
+  border-radius: 16px;
+  margin-left: 13px;
+  margin-right: 13px;
+  margin-top: -10px;
+  padding: 14px;
+  box-shadow: 0 3px 10px rgba(0, 51, 40, 0.08);
+}
+.pill {
+  background-color: #E7F2ED;
+  border-radius: 7px;
+  padding-left: 8px;
+  padding-right: 8px;
+  height: 14px;
+  justify-content: center;
+  align-self: flex-start;
+}
+.pill-text {
+  font-size: 8px;
+  color: #009465;
+}
+.bignum-row {
+  flex-direction: row;
+  align-items: baseline;
+  margin-top: 6px;
+}
+.bignum {
+  font-size: 45px;
+  font-weight: bold;
+  color: #003528;
+}
+.bignum-unit {
+  font-size: 14px;
+  color: #003528;
+  margin-left: 4px;
+}
+.prog-row {
+  flex-direction: row;
+  align-items: baseline;
+  margin-top: 8px;
+}
+.cons-num {
+  font-size: 11px;
+  font-weight: bold;
+  color: #00222B;
+}
+.cons-unit {
+  font-size: 10px;
+  color: #617B85;
+  margin-left: 3px;
+}
+.goal-right {
+  flex: 1;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: baseline;
+}
+.goal-label {
+  font-size: 10px;
+  color: #62767F;
+}
+.goal-num {
+  font-size: 11px;
+  color: #1C4455;
+  margin-left: 3px;
+}
+.prog-track {
+  height: 9px;
+  border-radius: 5px;
+  background-color: #E5F0EC;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.prog-fill {
+  width: 58.6%;
+  height: 9px;
+  border-radius: 5px;
+  background-color: #23B391;
+}
+.stat-panel {
+  flex-direction: row;
+  margin-top: 14px;
+}
+.stat-col {
+  flex: 1;
+}
+.stat-num {
+  font-size: 17px;
+  font-weight: bold;
+  color: #082731;
+}
+.stat-num-green {
+  font-size: 17px;
+  font-weight: bold;
+  color: #008561;
+}
+.stat-lbl {
+  font-size: 9px;
+  color: #5A737D;
+  margin-top: 3px;
+}
+.banner {
+  flex-direction: row;
+  align-items: center;
+  background-color: #EBF8F5;
+  border-radius: 13px;
+  margin-left: 24px;
+  margin-right: 24px;
+  margin-top: -28px;
+  padding: 10px 12px;
+}
+.check-circle {
+  width: 27px;
+  height: 27px;
+  border-radius: 14px;
+  background-color: #009771;
+  justify-content: center;
+  align-items: center;
+}
+.check {
+  width: 12px;
+  height: 12px;
+}
+.banner-text {
+  flex: 1;
+  margin-left: 10px;
+}
+.banner-title {
+  font-size: 11px;
+  color: #00865C;
+}
+.banner-sub {
+  font-size: 8px;
+  color: #57747E;
+  margin-top: 2px;
+}
+.banner-chev {
+  width: 25px;
+  height: 25px;
+}
+.card {
+  background-color: #FBFDFD;
+  border-radius: 16px;
+  margin-left: 13px;
+  margin-right: 13px;
+  margin-top: 12px;
+  padding: 14px;
+}
+.card-head {
+  flex-direction: row;
+  align-items: center;
+}
+.card-title {
+  flex: 1;
+  font-size: 13px;
+  color: #001521;
+}
+.head-right {
+  flex-direction: row;
+  align-items: center;
+}
+.week-num {
+  font-size: 10px;
+  font-weight: bold;
+  color: #087156;
+}
+.week-lbl {
+  font-size: 9px;
+  color: #087A5C;
+  margin-left: 2px;
+}
+.view-all {
+  font-size: 9px;
+  color: #6F8491;
+}
+.chev-mini {
+  width: 7px;
+  height: 13px;
+  margin-left: 5px;
+}
+.dots-row {
+  flex-direction: row;
+  margin-top: 12px;
+}
+.dot-col {
+  flex: 1;
+  align-items: center;
+}
+.dot {
+  width: 19px;
+  height: 19px;
+  border-radius: 10px;
+}
+.dot-lbl {
+  font-size: 9px;
+  color: #93A3AD;
+  margin-top: 5px;
+}
+.trend-icon {
+  width: 24px;
+  height: 25px;
+  margin-right: 6px;
+}
+.chart {
+  flex-direction: row;
+  margin-top: 10px;
+  height: 130px;
+}
+.yaxis {
+  width: 26px;
+  justify-content: space-between;
+  padding-top: 12px;
+  padding-bottom: 16px;
+}
+.ax {
+  font-size: 7px;
+  color: #738B99;
+}
+.ax-green {
+  font-size: 7px;
+  color: #096751;
+}
+.bars-area {
+  flex: 1;
+  position: relative;
+}
+.target-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 37px;
+  height: 1px;
+  background-color: #BFE3D6;
+}
+.bars-row {
+  flex-direction: row;
+  align-items: flex-end;
+  height: 114px;
+}
+.bar-col {
+  flex: 1;
+  align-items: center;
+  justify-content: flex-end;
+}
+.bar-val {
+  font-size: 7px;
+  color: #4BA38F;
+  margin-bottom: 3px;
+}
+.bar-val-over {
+  font-size: 9px;
+  font-weight: bold;
+  color: #FA5C38;
+}
+.bar {
+  width: 20px;
+  border-radius: 6px;
+  background-color: #23A889;
+}
+.bar-over {
+  background-color: #FF7D5C;
+}
+.bar-date {
+  font-size: 8px;
+  color: #7D929D;
+  margin-top: 4px;
+  height: 11px;
+}
+.target-tag {
+  position: absolute;
+  right: 0;
+  top: 24px;
+}
+.target-tag-text {
+  font-size: 7px;
+  color: #647B87;
+}
+.rec-row {
+  flex-direction: row;
+  align-items: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.rec-left {
+  flex: 1;
+}
+.rec-date {
+  font-size: 11px;
+  color: #001521;
+}
+.rec-wday {
+  font-size: 9px;
+  color: #6A8391;
+  margin-top: 2px;
+}
+.rec-right {
+  flex-direction: row;
+  align-items: baseline;
+}
+.rec-num {
+  font-size: 14px;
+  font-weight: bold;
+  color: #001521;
+}
+.rec-unit {
+  font-size: 9px;
+  color: #6A8391;
+  margin-left: 2px;
+}
+.rec-badge {
+  background-color: #E2F5EE;
+  border-radius: 7px;
+  padding-left: 6px;
+  padding-right: 6px;
+  height: 14px;
+  justify-content: center;
+  margin-left: 6px;
+}
+.rec-badge-over {
+  background-color: #FDE9E4;
+}
+.rec-badge-text {
+  font-size: 8px;
+  color: #129C77;
+}
+.rec-badge-text-over {
+  color: #FA543A;
+}
+.rec-over {
+  font-size: 8px;
+  color: #FA543A;
+  margin-left: 4px;
+}
+.chev-row {
+  width: 10px;
+  height: 16px;
+  margin-left: 8px;
+}
+.rec-div {
+  height: 1px;
+  background-color: #F0F5F2;
+}
+</style>

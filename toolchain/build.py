@@ -7,7 +7,8 @@
 #              + vessel_tpl / opts_tpl（模板集）→ food_library.json;
 #           2. 食物条目新增 pieceWeight（按个计食物的克重）与 img（图标文件名）;
 #           3. 打包前统一走 validate.validate_sources() 校验，不通过即中止;
-#           4. basis_detail / audit_note 等源文件注释字段不进产物（省体积）]
+#           4. basis_detail / audit_note 等源文件注释字段不进产物（省体积）;
+#           5. base 补齐 protein / carb / fat（与 dist 现货对齐，计件热量公式依赖宏量同比缩放）]
 
 """build.py — 食物库打包（多源合并模式）
 
@@ -43,7 +44,7 @@ APP_DEST = BASE.parent / "app" / "src" / "data" / "food_library.json"
 LIB_VERSION = "1.0.0"
 ICON_BASE_DIR = "icons-final"
 ICON_SRC = BASE.parent / "assets" / ICON_BASE_DIR          # 产物：<catKey>/<id>.webp
-ICON_DEST = BASE.parent / "app" / "src" / "static" / "icons"  # App 静态资源目录
+ICON_DEST = BASE.parent / "app" / "static" / "icons"  # App 静态资源目录（uni-app x 以 app/ 为项目根，static 常驻）
 
 
 def build(src: dict) -> dict:
@@ -67,6 +68,9 @@ def build(src: dict) -> dict:
                 "cal": nut["cal"],
                 "per": 100,                       # 统一按每 100g / 100ml
                 "unit": nut["unit"],
+                "protein": nut["protein"],        # 计件数量步进器做宏量同比缩放时用
+                "carb": nut["carb"],
+                "fat": nut["fat"],
             },
             "pieceWeight": nut.get("piece_weight"),
             "vessel": use.get("vessel_tpl"),

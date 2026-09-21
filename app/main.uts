@@ -1,5 +1,8 @@
 /**
  * [变更日志]
+ * 修改时间：2026-09-21
+ * AI模型：Muse Spark
+ * 修改内容：[恢复 Pinia 挂载（device/food/goal/settings/user 共 5 个 store）]
  * 修改时间：2026-09-20
  * AI模型：CodeBuddy (GLM)
  * 修改内容：[重构为最小手脚架：移除 Pinia 及全部业务 store 挂载，仅保留 createSSRApp 入口]
@@ -7,8 +10,10 @@
 
 import App from './App.uvue'
 import { createSSRApp } from 'vue'
+import { createPinia } from 'pinia'
 
 export function createApp() {
   const app = createSSRApp(App)
+  app.use(createPinia())
   return { app }
 }

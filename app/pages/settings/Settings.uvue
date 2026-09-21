@@ -1,0 +1,371 @@
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Muse Spark
+  修改内容：[目标管理行开 GoalModal（保存调 setGoal）；开关保持稿面静态]
+  修改时间：2026-09-21
+  AI模型：Muse Spark
+  修改内容：[目标管理行接 goal 读数；开关保持稿面静态（见 script 说明）]
+  修改时间：2026-09-20
+  AI模型：Muse Spark
+  修改内容：[新建：按 v2 设计稿（727788215940571 · 11:3）1:1 还原设置页 P3：
+    渐变头图/偏好组/目标管理组/数据管理组/危险区/页脚]
+-->
+
+<template>
+  <view class="page">
+    <!-- 头图 -->
+    <view class="header" :style="{ paddingTop: sbH + 'px' }">
+      <view class="header-row">
+        <view class="back-btn" @click="goBack">
+          <text class="chev-back-glyph">‹</text>
+        </view>
+        <view class="header-text">
+          <text class="title">设置</text>
+          <text class="subtitle">管理你的饮食记录与偏好</text>
+        </view>
+      </view>
+      <image class="header-wave" :src="'/static/settings/header_wave.png'" mode="widthFix"></image>
+    </view>
+
+    <!-- 偏好 -->
+    <text class="sec-title">偏好</text>
+    <view class="card">
+      <view class="row">
+        <view class="chip">
+          <image class="chip-icon" :src="'/static/settings/icon_moon.png'" mode="aspectFit"></image>
+        </view>
+        <text class="row-title">深色模式</text>
+        <view class="toggle toggle-on">
+          <view class="knob knob-on"></view>
+        </view>
+      </view>
+      <view class="row-div"></view>
+      <view class="row">
+        <view class="chip">
+          <image class="chip-icon" :src="'/static/settings/icon_bell.png'" mode="aspectFit"></image>
+        </view>
+        <view class="row-text">
+          <text class="row-title">用餐提醒</text>
+          <text class="row-sub">早中晚各提醒一次，敬请期待</text>
+        </view>
+        <view class="soon-pill">
+          <text class="soon-pill-text">即将上线</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 目标管理 -->
+    <text class="sec-title">目标管理</text>
+    <view class="card">
+      <view class="row" @click="openGoal">
+        <view class="chip">
+          <image class="chip-icon" :src="'/static/settings/icon_target.png'" mode="aspectFit"></image>
+        </view>
+        <view class="row-text">
+          <text class="row-title">每日热量目标</text>
+          <text class="row-sub">当前目标 {{ goal.calorieGoal }} kcal</text>
+        </view>
+        <image class="chev" :src="'/static/home/chev_right.png'" mode="aspectFit"></image>
+      </view>
+      <view class="row-div"></view>
+      <view class="row">
+        <view class="chip">
+          <image class="chip-icon" :src="'/static/settings/icon_mega.png'" mode="aspectFit"></image>
+        </view>
+        <view class="row-text">
+          <text class="row-title">自定义餐次</text>
+          <text class="row-sub">早餐、午餐、晚餐、加餐…</text>
+        </view>
+        <image class="chev" :src="'/static/home/chev_right.png'" mode="aspectFit"></image>
+      </view>
+    </view>
+
+    <!-- 数据管理 -->
+    <text class="sec-title">数据管理</text>
+    <view class="card">
+      <view class="row">
+        <view class="chip">
+          <image class="chip-icon" :src="'/static/settings/icon_down.png'" mode="aspectFit"></image>
+        </view>
+        <view class="row-text">
+          <text class="row-title">导出数据</text>
+          <text class="row-sub">备份到本地</text>
+        </view>
+        <image class="chev" :src="'/static/home/chev_right.png'" mode="aspectFit"></image>
+      </view>
+      <view class="row-div"></view>
+      <view class="row">
+        <view class="chip">
+          <image class="chip-icon" :src="'/static/settings/icon_up.png'" mode="aspectFit"></image>
+        </view>
+        <view class="row-text">
+          <text class="row-title">导入数据</text>
+          <text class="row-sub">从文件恢复</text>
+        </view>
+        <image class="chev" :src="'/static/home/chev_right.png'" mode="aspectFit"></image>
+      </view>
+    </view>
+
+    <!-- 本机声明 -->
+    <view class="shield-row">
+      <image class="shield-icon" :src="'/static/settings/icon_shield.png'" mode="aspectFit"></image>
+      <text class="shield-note">所有数据仅保存在本机</text>
+    </view>
+
+    <!-- 危险区 -->
+    <view class="card-danger">
+      <view class="chip-danger">
+        <image class="chip-icon" :src="'/static/settings/icon_trash.png'" mode="aspectFit"></image>
+      </view>
+      <text class="danger-text">清空所有数据</text>
+    </view>
+
+    <!-- 页脚 -->
+    <view class="footer">
+      <image class="brand-icon" :src="'/static/settings/icon_leaf.png'" mode="aspectFit"></image>
+      <text class="brand">轻律生活  CalTrack</text>
+      <text class="ver">v1.0.0</text>
+      <text class="footnote">数据仅保存在本机</text>
+    </view>
+
+    <!-- 每日热量目标弹窗 -->
+    <GoalModal v-model:show="goalShow" :initial="goal.calorieGoal" @save="goal.setGoal" />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * 接 store 读数：目标管理行读 goal；开关暂为稿面静态（v1.0 深色模式不做，store 恒关，
+ * 若绑定会把 ON 画成 OFF，与稿面漂移，故展示层保持稿面）。
+ * 缩放系数 0.794：v2 画布 472px → 应用 375px。
+ */
+import { useGoalStore } from '../../stores/goal'
+import { ref } from 'vue'
+import GoalModal from '../../components/GoalModal.uvue'
+
+const goal = useGoalStore()
+const goalShow = ref(false)
+
+function openGoal(): void {
+  goalShow.value = true
+}
+
+let sbH = 0
+try {
+  sbH = uni.getSystemInfoSync().statusBarHeight ?? 0
+} catch (e) {
+  sbH = 0
+}
+
+const goBack = () => {
+  uni.navigateBack()
+}
+</script>
+
+<style>
+.page {
+  flex: 1;
+  background-color: #F2FAF5;
+  padding-bottom: 30px;
+}
+.header {
+  background-color: #1FBD90;
+  position: relative;
+}
+.header-row {
+  flex-direction: row;
+  align-items: center;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 10px;
+  padding-bottom: 52px;
+}
+.back-btn {
+  width: 41px;
+  height: 41px;
+  border-radius: 21px;
+  background-color: #FFFFFF;
+  border-width: 1px;
+  border-color: #86E6C6;
+  justify-content: center;
+  align-items: center;
+}
+.chev-back-glyph {
+  font-size: 22px;
+  color: #0A7A5C;
+  margin-top: -2px;
+}
+.header-text {
+  margin-left: 12px;
+}
+.title {
+  font-size: 19px;
+  font-weight: bold;
+  color: #FFFFFF;
+}
+.subtitle {
+  font-size: 11px;
+  color: #EBFBF5;
+  margin-top: 3px;
+}
+.header-wave {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 80px;
+}
+.sec-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: #245E58;
+  margin-left: 25px;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+.card {
+  background-color: #FCFFFF;
+  border-radius: 18px;
+  margin-left: 21px;
+  margin-right: 21px;
+  padding-left: 14px;
+  padding-right: 14px;
+}
+.row {
+  flex-direction: row;
+  align-items: center;
+  padding-top: 13px;
+  padding-bottom: 13px;
+}
+.chip {
+  width: 38px;
+  height: 38px;
+  border-radius: 19px;
+  background-color: #E0F5EC;
+  justify-content: center;
+  align-items: center;
+}
+.chip-icon {
+  width: 20px;
+  height: 20px;
+}
+.row-text {
+  flex: 1;
+  margin-left: 10px;
+}
+.row-title {
+  font-size: 14px;
+  color: #0A4F3D;
+}
+.row-sub {
+  font-size: 11px;
+  color: #8FAEAF;
+  margin-top: 3px;
+}
+.row-div {
+  height: 1px;
+  background-color: #EAF3EF;
+  margin-left: 48px;
+}
+.chev {
+  width: 10px;
+  height: 16px;
+}
+.toggle {
+  width: 47px;
+  height: 28px;
+  border-radius: 14px;
+  background-color: #D5E5DD;
+  justify-content: center;
+}
+.toggle-on {
+  background-color: #1FBF8F;
+}
+.knob {
+  width: 23px;
+  height: 23px;
+  border-radius: 12px;
+  background-color: #FFFFFF;
+  margin-left: 3px;
+}
+.knob-on {
+  margin-left: 21px;
+}
+.soon-pill {
+  background-color: #EFF4F2;
+  border-radius: 9px;
+  padding-left: 9px;
+  padding-right: 9px;
+  height: 18px;
+  justify-content: center;
+}
+.soon-pill-text {
+  font-size: 12px;
+  color: #718E89;
+}
+.shield-row {
+  flex-direction: row;
+  align-items: center;
+  margin-left: 29px;
+  margin-top: 14px;
+}
+.shield-icon {
+  width: 15px;
+  height: 15px;
+}
+.shield-note {
+  font-size: 12px;
+  color: #4A7373;
+  margin-left: 6px;
+}
+.card-danger {
+  flex-direction: row;
+  align-items: center;
+  background-color: #FFFFFF;
+  border-radius: 18px;
+  border-width: 1px;
+  border-color: #FBA095;
+  margin-left: 21px;
+  margin-right: 21px;
+  margin-top: 12px;
+  padding: 14px;
+}
+.chip-danger {
+  width: 38px;
+  height: 38px;
+  border-radius: 19px;
+  background-color: #FDE9E4;
+  justify-content: center;
+  align-items: center;
+}
+.danger-text {
+  font-size: 14px;
+  color: #E0633C;
+  margin-left: 10px;
+}
+.footer {
+  align-items: center;
+  margin-top: 26px;
+}
+.brand-icon {
+  width: 20px;
+  height: 20px;
+}
+.brand {
+  font-size: 13px;
+  color: #0A4F3D;
+  margin-top: 6px;
+}
+.ver {
+  font-size: 11px;
+  color: #8FAEAF;
+  margin-top: 3px;
+}
+.footnote {
+  font-size: 10px;
+  color: #8FAEAF;
+  margin-top: 3px;
+}
+</style>

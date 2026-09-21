@@ -1,0 +1,151 @@
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Muse Spark
+  修改内容：[新建：添加成功 toast（+N kcal／已加入X／已添加 pill），2s 自动＋点按关闭；
+    L3 反馈（成就触觉，长按型）；定时器销毁清理]
+-->
+
+<template>
+  <view class="mask" v-if="show" @click="dismiss">
+    <view class="toast">
+      <view class="cup-circle">
+        <text class="cup-glyph">✓</text>
+      </view>
+      <view class="toast-card">
+        <text class="plus-num">+{{ kcal }}</text>
+        <text class="plus-unit">kcal</text>
+        <text class="sub">已加入{{ mealLabel }}</text>
+      </view>
+      <view class="pill">
+        <text class="pill-text">已添加</text>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+import { watch } from 'vue'
+import { onUnmounted } from 'vue'
+import { useDeviceStore } from '../stores/device'
+import { useSettingsStore } from '../stores/settings'
+
+/**
+ * 添加成功 toast（设计稿 弹窗③）。
+ * 出现即 L3 反馈（长触觉；音效资产缺失暂略）；2s 自动消失，点按立即关闭。
+ */
+
+const props = defineProps<{
+  show: boolean
+  kcal: number
+  mealLabel: string
+}>()
+
+const emit = defineEmits<{
+  (e: 'update:show', v: boolean): void
+}>()
+
+const device = useDeviceStore()
+const settings = useSettingsStore()
+const timer = ref(0)
+
+function dismiss(): void {
+  emit('update:show', false)
+}
+
+function arm(): void {
+  if (timer.value > 0) {
+    clearTimeout(timer.value)
+    timer.value = 0
+  }
+  if (!props.show) return
+  if (device.haptics && settings.hapticsEnabled) {
+    try {
+      uni.vibrateLong()
+    } catch (e) {
+      // 无触觉设备忽略
+    }
+  }
+  timer.value = setTimeout(() => {
+    timer.value = 0
+    emit('update:show', false)
+  }, 2000) as unknown as number
+}
+
+watch(
+  () => props.show,
+  () => {
+    arm()
+  }
+)
+
+onUnmounted(() => {
+  if (timer.value > 0) clearTimeout(timer.value)
+})
+</script>
+
+<style>
+.mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(10, 79, 61, 0.35);
+  justify-content: center;
+  align-items: center;
+}
+.toast {
+  align-items: center;
+}
+.cup-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 36px;
+  background-color: #1FBF8F;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 8px 20px rgba(31, 191, 143, 0.4);
+}
+.cup-glyph {
+  font-size: 34px;
+  color: #FFFFFF;
+}
+.toast-card {
+  flex-direction: row;
+  align-items: baseline;
+  background-color: #FFFFFF;
+  border-radius: 18px;
+  padding: 14px 22px;
+  margin-top: 14px;
+}
+.plus-num {
+  font-size: 30px;
+  font-weight: bold;
+  color: #0A4F3D;
+}
+.plus-unit {
+  font-size: 14px;
+  color: #0A4F3D;
+  margin-left: 4px;
+}
+.sub {
+  font-size: 13px;
+  color: #73918B;
+  margin-left: 10px;
+}
+.pill {
+  background-color: #1FBF8F;
+  border-radius: 14px;
+  padding-left: 18px;
+  padding-right: 18px;
+  height: 28px;
+  justify-content: center;
+  margin-top: 12px;
+}
+.pill-text {
+  font-size: 13px;
+  color: #FFFFFF;
+}
+</style>

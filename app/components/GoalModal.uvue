@@ -1,0 +1,510 @@
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Muse Spark
+  修改内容：[重写：设置每日热量目标弹窗（Dial 可拖拽+减/加按钮+Thumb+Track/Fill+Ticks+快捷选择+保存 emit）；
+    Dial canvas 2d arc+lineCap:round，Thumb 圆心=fill右端，拖拽交互；conic-gradient 降级；
+    快捷选择 chips；保存 emit 给父调 setGoal]
+-->
+
+<template>
+  <view class="mask" v-if="show">
+    <view class="sheet">
+      <view class="handle"></view>
+      <view class="head-row">
+        <view class="head-text">
+          <text class="title">设置每日热量目标</text>
+          <text class="sub">根据你的目标，调整每日摄入热量</text>
+        </view>
+        <view class="close-btn" @click="close">
+          <text class="close-glyph">×</text>
+        </view>
+      </view>
+      <view class="dial">
+        <text class="bignum">{{ picked }}</text>
+        <text class="unit">kcal</text>
+        <view class="dial-track">
+          <canvas
+            v-if="isApp"
+            class="dial-canvas"
+            canvas-id="dial-ring"
+            type="2d"
+            :style="{ position: 'absolute', left: '0px', top: '0px', width: '264px', height: '264px' }"
+            @touchstart="onDialTouchStart"
+            @touchmove="onDialTouchMove"
+            @touchend="onDialTouchEnd"
+            @touchcancel="onDialTouchEnd"
+          ></canvas>
+          <view
+            v-else
+            class="dial-ring-conic"
+            :style="conicRingStyle"
+          ></view>
+          <view class="dial-thumb" :style="thumbStyle"></view>
+          <text class="bignum">{{ picked }}</text>
+          <text class="unit">kcal</text>
+          <view class="ticks">
+            <text class="tick" v-for="(tickItem, tickIdx) in ticks" :key="tickIdx">{{ tickItem }}</text>
+          </view>
+        </view>
+        <view class="controls">
+          <view class="control-btn" @click="step(-1)" :class="{ disabled: picked <= minVal }">
+            <text>−</text>
+          </view>
+          <view class="control-btn" @click="step(1)" :class="{ disabled: picked >= maxVal }">
+            <text>＋</text>
+          </view>
+        </view>
+        <text class="quick-label">快速选择</text>
+        <view class="quick-tray">
+          <view
+            class="chip"
+            :class="{ 'chip-on': chipItem === picked }"
+            v-for="(chipItem, chipIdx) in ticks"
+            :key="chipIdx"
+            @click="pick(chipItem)"
+          >
+            <text class="chip-num" :class="{ 'chip-num-on': chipItem === picked }">{{ chipItem }}</text>
+            <text class="chip-unit">kcal</text>
+          </view>
+        </view>
+        <view class="tip">
+          <text class="tip-title">合理的热量目标有助于健康减重</text>
+          <text class="tip-sub">建议根据你的性别、年龄、身高、体重和运动量进行设置</text>
+        </view>
+        <view class="save-btn" @click="save">
+          <text class="save-text">保存设置</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+import { computed } from 'vue'
+import { watch } from 'vue'
+import { onMounted } from 'vue'
+import { onUnmounted } from 'vue'
+
+/**
+ * 设置每日热量目标（pencil 设置每日热量目标）。
+ * Dial 可拖拽 + 减/加按钮 + Thumb + Track/Fill + Ticks + 快捷选择 chips；
+ * Dial canvas 2d arc+lineCap:round，Thumb 圆心=fill右端，拖拽交互；
+ * 快捷选择 chips；保存 emit 给父调 setGoal
+ */
+
+const props = defineProps<{
+  show: boolean
+  initial: number
+}>()
+
+const emit = defineEmits<{
+  (e: 'update:show', v: boolean): void
+  (e: 'save', v: number): void
+}>()
+
+const MIN_VAL = 1200
+const MAX_VAL = 2400
+const STEP = 100
+const START_ANGLE = -Math.PI / 2
+
+const ticks = [1200, 1500, 1800, 2100, 2400]
+const picked = ref(props.initial)
+const dialRatio = ref(0)
+const isDragging = ref(false)
+const dialCtx = ref<UniCanvasContext | null>(null)
+
+const minVal = MIN_VAL
+const maxVal = MAX_VAL
+const stepVal = STEP
+
+const isApp = computed(() => {
+  try {
+    const info = uni.getSystemInfoSync()
+    return info.platform === 'android' || info.platform === 'ios'
+  } catch (e) {
+    return false
+  }
+})
+
+const dialRatioComputed = computed(() => {
+  return (picked.value - minVal) / (maxVal - minVal)
+})
+
+const conicRingStyle = computed(() => {
+  const ratio = dialRatioComputed.value
+  return {
+    position: 'absolute',
+    left: '0px',
+    top: '0px',
+    width: '264px',
+    height: '264px',
+    borderRadius: '50%',
+    backgroundColor: '#F2FAF5',
+    backgroundImage: `conic-gradient(from -90deg, #1FBF8F 0turn, #1FBF8F ${ratio}turn, #E0E7E4 ${ratio}turn)`,
+  }
+})
+
+const thumbStyle = computed(() => {
+  const ratio = dialRatioComputed.value
+  const angle = START_ANGLE + ratio * Math.PI * 2
+  const cx = 132
+  const cy = 132
+  const radius = 132 - 8 // thumb center radius
+  const x = cx + radius * Math.cos(angle)
+  const y = cy + radius * Math.sin(angle)
+  return {
+    position: 'absolute',
+    left: `${Math.round(x - 16)}px`,
+    top: `${Math.round(y - 16)}px`,
+    width: '32px',
+    height: '32px',
+    borderRadius: '16px',
+    backgroundColor: '#FFFFFF',
+    boxShadow: '0 2px 8px rgba(10, 79, 61, 0.2)',
+    borderWidth: '2px',
+    borderColor: '#1FBF8F',
+    zIndex: 10,
+  }
+})
+
+watch(
+  () => props.show,
+  (v) => {
+    if (v) picked.value = props.initial
+  }
+)
+
+onMounted(() => {
+  if (isApp.value) {
+    uni.createCanvasContext('dial-ring', null)
+      .then(ctx => { dialCtx.value = ctx })
+      .catch(() => { /* ignore */ })
+  }
+})
+
+onUnmounted(() => {
+  // cleanup if needed
+})
+
+function drawDial(): void {
+  if (!isApp.value || !dialCtx.value) return
+  const ratio = dialRatioComputed.value
+  const cx = 132
+  const cy = 132
+  const radius = 132 - 8
+  const lineWidth = 16
+  const startAngle = START_ANGLE
+  const endAngle = startAngle + ratio * Math.PI * 2
+  
+  const ctx = dialCtx.value
+  ctx.clearRect(0, 0, 264, 264)
+  
+  // Background track
+  ctx.beginPath()
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2)
+  ctx.lineWidth = lineWidth
+  ctx.strokeStyle = '#E0E7E4'
+  ctx.stroke()
+  
+  // Progress arc
+  ctx.beginPath()
+  ctx.arc(cx, cy, radius, startAngle, endAngle)
+  ctx.lineWidth = lineWidth
+  ctx.lineCap = 'round'
+  ctx.strokeStyle = '#1FBF8F'
+  ctx.stroke()
+}
+
+function pick(v: number): void {
+  if (v === picked.value) return
+  picked.value = Math.min(Math.max(v, MIN_VAL), MAX_VAL)
+  if (isApp.value) drawDial()
+  try {
+    uni.vibrateShort()
+  } catch (e) {
+    // 无触觉设备忽略
+  }
+}
+
+function step(d: number): void {
+  const next = picked.value + d * STEP
+  if (next < MIN_VAL || next > MAX_VAL) return
+  picked.value = next
+  if (isApp.value) drawDial()
+  try {
+    uni.vibrateShort()
+  } catch (e) {
+    // 无触觉设备忽略
+  }
+}
+
+function close(): void {
+  emit('update:show', false)
+}
+
+function save(): void {
+  emit('save', picked.value)
+  emit('update:show', false)
+}
+
+function onDialTouchStart(e: any): void {
+  isDragging.value = true
+  updateDialFromTouch(e)
+}
+
+function onDialTouchMove(e: any): void {
+  if (!isDragging.value) return
+  updateDialFromTouch(e)
+}
+
+function onDialTouchEnd(): void {
+  isDragging.value = false
+}
+
+function updateDialFromTouch(e: any): void {
+  const touches = e.touches || e.changedTouches
+  if (!touches || touches.length === 0) return
+  
+  const touch = touches[0]
+  // In uni-app, touch coordinates are in clientX/clientY
+  const x = touch.clientX || touch.x || 0
+  const y = touch.clientY || touch.y || 0
+  
+  // Calculate angle from center
+  const cx = 132
+  const cy = 132
+  const dx = x - cx
+  const dy = y - cy
+  
+  let angle = Math.atan2(dy, dx)
+  if (angle < START_ANGLE) angle += Math.PI * 2
+  if (angle > START_ANGLE + Math.PI * 2) angle = START_ANGLE + Math.PI * 2
+  
+  let ratio = (angle - START_ANGLE) / (Math.PI * 2)
+  ratio = Math.min(Math.max(ratio, 0), 1)
+  
+  const newVal = Math.round(MIN_VAL + ratio * (MAX_VAL - MIN_VAL))
+  const clamped = Math.min(Math.max(newVal, MIN_VAL), MAX_VAL)
+  
+  // Snap to step
+  const stepped = Math.round((clamped - MIN_VAL) / STEP) * STEP + MIN_VAL
+  const finalVal = Math.min(Math.max(stepped, MIN_VAL), MAX_VAL)
+  
+  if (finalVal !== picked.value) {
+    picked.value = finalVal
+    if (isApp.value) drawDial()
+    try {
+      uni.vibrateShort()
+    } catch (e) {}
+  }
+}
+</script>
+
+<style>
+.mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(10, 79, 61, 0.35);
+  justify-content: flex-end;
+}
+.sheet {
+  background-color: #FFFFFF;
+  border-top-left-radius: 34px;
+  border-top-right-radius: 34px;
+  padding: 12px 18px 24px 18px;
+}
+.handle {
+  width: 44px;
+  height: 5px;
+  border-radius: 3px;
+  background-color: #DCEDE6;
+  align-self: center;
+}
+.head-row {
+  flex-direction: row;
+  align-items: flex-start;
+  margin-top: 12px;
+}
+.head-text {
+  flex: 1;
+}
+.title {
+  font-size: 17px;
+  font-weight: bold;
+  color: #0A4F3D;
+}
+.sub {
+  font-size: 12px;
+  color: #73918B;
+  margin-top: 4px;
+}
+.close-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  background-color: #F2FAF5;
+  justify-content: center;
+  align-items: center;
+}
+.close-glyph {
+  font-size: 18px;
+  color: #73918B;
+}
+.dial {
+  align-items: center;
+  margin-top: 10px;
+  position: relative;
+}
+.dial-track {
+  position: relative;
+  width: 264px;
+  height: 264px;
+}
+.dial-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 264px;
+  height: 264px;
+}
+.dial-ring-conic {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 264px;
+  height: 264px;
+  border-radius: 50%;
+}
+.dial-thumb {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background-color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(10, 79, 61, 0.2);
+  border-width: 2px;
+  border-color: #1FBF8F;
+}
+.bignum {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 60px;
+  text-align: center;
+  font-size: 46px;
+  font-weight: bold;
+  color: #0A4F3D;
+  z-index: 5;
+}
+.unit {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 116px;
+  text-align: center;
+  font-size: 13px;
+  color: #73918B;
+  z-index: 5;
+}
+.ticks {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 150px;
+  flex-direction: row;
+  justify-content: space-between;
+  z-index: 5;
+}
+.tick {
+  font-size: 11px;
+  color: #8FAEAF;
+}
+.controls {
+  flex-direction: row;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 20px;
+}
+.control-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  background-color: #FFFFFF;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(10, 79, 61, 0.1);
+  font-size: 20px;
+  color: #0A7A5C;
+}
+.control-btn.disabled {
+  color: #A9BAB3;
+  box-shadow: none;
+}
+.quick-label {
+  font-size: 13px;
+  color: #0A4F3D;
+  margin-top: 14px;
+}
+.quick-tray {
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+.chip {
+  align-items: center;
+  background-color: #F2FAF5;
+  border-radius: 14px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  min-width: 58px;
+}
+.chip-on {
+  background-color: #1FBF8F;
+}
+.chip-num {
+  font-size: 15px;
+  font-weight: bold;
+  color: #0A4F3D;
+}
+.chip-num-on {
+  color: #FFFFFF;
+}
+.chip-unit {
+  font-size: 10px;
+  color: #8FAEAF;
+  margin-top: 2px;
+}
+.tip {
+  background-color: #F2FAF5;
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-top: 14px;
+}
+.tip-title {
+  font-size: 13px;
+  color: #0A4F3D;
+}
+.tip-sub {
+  font-size: 11px;
+  color: #73918B;
+  margin-top: 4px;
+}
+.save-btn {
+  height: 48px;
+  border-radius: 24px;
+  background-color: #1FBF8F;
+  justify-content: center;
+  align-items: center;
+  margin-top: 14px;
+  box-shadow: 0 8px 18px rgba(31, 191, 143, 0.34);
+}
+.save-text {
+  font-size: 15px;
+  color: #FFFFFF;
+}
+</style>

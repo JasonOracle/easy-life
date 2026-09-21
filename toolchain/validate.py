@@ -6,7 +6,9 @@
 #              / vessel_tpl / opts_tpl 五份源文件;
 #           2. 新增三源 id 对齐校验（清单里有、营养或引用缺失即报错）;
 #           3. 新增数值合理性、模板引用、basis 与 confidence 一致性、宏量配平校验;
-#           4. 保留 load_yaml 供 build.py 复用]
+#           4. 保留 load_yaml 供 build.py 复用;
+#           5. 新增计件类（piece/slice/skewer）piece_weight 必填校验
+#             （数量步进器热量公式依赖，构建期拦掉缺口）]
 
 """validate.py — 食物库数据源校验（多源模式）
 
@@ -113,6 +115,13 @@ def validate_sources(src: dict) -> list:
             errors.append(f"{prefix}: recipe_estimate 不应标 conf=3（配方推算不是权威值）")
         if basis == "rough_estimate" and conf == 3:
             errors.append(f"{prefix}: rough_estimate 不应标 conf=3（粗略估算不是权威值）")
+
+        # ⑦ 计件类 piece_weight 必填（数量步进器热量公式的输入，缺了算不出）
+        vessel_tpl = use.get("vessel_tpl")
+        if vessel_tpl in ("piece", "slice", "skewer"):
+            pw = nut.get("piece_weight")
+            if not isinstance(pw, (int, float)) or pw <= 0:
+                errors.append(f"{prefix}: 计件类（{vessel_tpl}）piece_weight 缺失或非法（{pw}）")
 
         # ⑥ 宏量配平（酒精类天然对不上：酒精 7kcal/g 不计入三大营养素）
         protein, carb, fat = nut.get("protein"), nut.get("carb"), nut.get("fat")
