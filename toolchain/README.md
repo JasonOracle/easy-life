@@ -1,5 +1,19 @@
 <!--
 [变更日志]
+修改时间：2026-09-22
+AI模型：Qoder (Claude)
+修改内容：[1. 源文件口径 5 份 → 6 份：icons_v1_visual.yaml（生图槽位）已纳入 validate.py，
+              校验项由「三源 id 对齐」改为「四源 id 对齐」，并在数据流一节登记「漏校验导致绿灯放过计数漂移」这一坑;
+           2. 实测产出表按磁盘真值刷新：353 条 / 181.6KB / conf 179·163·11 / 有单个克重 196 条;
+           3. 图标目录口径改准：唯一入库副本 app/static/icons（353 张，347 张 512×512 + 6 张 92×92），
+              assets/icons-final 已进 .gitignore 降级为可重建缓存，同步目标路径 app/src/static/icons 系错误写法已更正;
+           4. 新增 D 章节登记构建闸门 hooks.py（五道闸 + install 到 .git/hooks）；脚本表补齐实际存在的脚本，
+              并标注 gen_tab_icons.py 无任何引用、去留待 Boss 拍板;
+           5. C 章节引用分布表按 353 条实测重算；已知风险登记人工核对进度 0/30]
+-->
+
+<!--
+[变更日志]
 修改时间：2026-09-19
 AI模型：CodeBuddy (DeepSeek-V4.1-Flash)
 修改内容：[1. 补全素材获取流水线说明（fetch_icons.py / compress_icons.py）;
@@ -16,53 +30,67 @@ AI模型：CodeBuddy (DeepSeek-V4.1-Flash)
 
 # toolchain/ — 食物库数据 + 素材处理
 
-**不进 App 包，产物单向流动。** 两条独立流水线，互不依赖：
+**不进 App 包，产物单向流动。** 数据线（A）与素材线（B）互不依赖，C 是 A 的一条子线，D 守住 A/B 的产物：
 
 | 流水线 | 输入 | 产物 | 消费方 |
 |---|---|---|---|
-| **A. 营养数据** | `sources/*.yaml`（5 份） | `app/src/data/food_library.json`（347 条 / 136KB） | App 启动加载 |
-| **B. 图标素材** | Agnes 文生图（`gen_icons.py`） | `assets/icons-final/`（347 张 / 5.60MB） | App 图片资源 |
+| **A. 营养数据** | `sources/*.yaml`（6 份） | `app/src/data/food_library.json`（353 条 / 181.6KB） | App 启动加载 |
+| **B. 图标素材** | Agnes 文生图（`gen_icons.py`） | 原始 PNG `assets/icons-gen/`（347 张，入库存档）→ 压缩 `assets/icons-final/`（本地缓存，已 gitignore）→ **App 唯一入库副本 `app/static/icons/`（353 张 / 5.61MB）** | App 图片资源 |
+| **C. 份量与选项** | `vessel_tpl.yaml` + `opts_tpl.yaml` + `icons_v1_usage.yaml` | 合并进 A 的产物（`vessel` / `opts` / `pieceWeight` 字段） | App 热量计算 |
+| **D. 构建闸门** | 源码树 + 生成物 + git 暂存区 | `hooks.py` 五道闸（见文末 D 章） | 提交/构建前拦截 |
+
+> **图标的已知缺口（2026-09-22）**：`app/static/icons/` 里 347 张是 512×512，
+> 后补的 **p348–p353 六张是 92×92 小图**（`assets/icons-gen/` 里**没有**它们的原始 PNG，
+> 因为它们没跑过批量生图）。重跑这 6 张要再花 API 额度，**尚未做**。
 
 ---
 
 # A. 营养数据流水线（多源模式）
 
-## 五份源文件
+## 六份源文件
 
 | 文件 | 内容 | 谁维护 |
 |---|---|---|
-| `sources/icons_v1.yaml` | **347 项食物清单**（id / name / cat） | 人工维护（**唯一事实来源**） |
+| `sources/icons_v1.yaml` | **353 项食物清单**（id / name / cat） | 人工维护（**唯一事实来源**） |
 | `sources/nutrition_v1.yaml` | 营养数据（cal/protein/carb/fat/unit/piece_weight/basis/confidence） | `gen_nutrition.py` 生成 + 人工核 |
 | `sources/icons_v1_usage.yaml` | 份量与选项引用（vessel_tpl / opts_tpl） | `gen_usage_spec.py` 生成 + 人工审 |
+| `sources/icons_v1_visual.yaml` | 生图槽位（container / content / toppings / state / view） | `gen_visual_spec.py` 生成 + 人工审（**2026-09-22 起纳入校验**） |
 | `sources/vessel_tpl.yaml` | 计量器具模板集（18 个） | 人工设计 |
 | `sources/opts_tpl.yaml` | 选项模板集（4 个） | 人工设计 |
+
+> `sources/milk_tea.yaml` 是首版单条数据的历史留档，**不参与校验与打包**（已被上面六份取代）。
 
 ## 脚本
 
 | 文件 | 作用 |
 |---|---|
 | `gen_nutrition.py` | 分层生成营养数据初稿：基础食材→成分表值，复合食物→配方推算（附可复核拆解） |
+| `gen_visual_spec.py` | 生成生图槽位源（`icons_v1_visual.yaml`） |
 | `gen_usage_spec.py` | 生成份量与选项引用 |
-| `validate.py` | **多源一致性校验**：三源 id 对齐 / 模板引用 / 数值合理性 / basis-confidence 一致 / 宏量配平 |
-| `build.py` | **多源合并** → `dist/food_library.json` + 同步 `app/src/data/` |
+| `fill_piece_weights.py` | 批量补齐「1 个 = 多少克」（`piece_weight`），供 `piece` / `slice` / `skewer` 类算热量 |
+| `validate.py` | **多源一致性校验**：四源 id 对齐 / 模板引用 / 数值合理性 / basis-confidence 一致 / 宏量配平 |
+| `build.py` | **多源合并** → `dist/food_library.json` + 同步 `app/src/data/` + 增量同步 `app/static/icons/` |
 | `schema/v1.0.json` | 输出 JSON 格式定义（App 启动时校验用） |
+| `hooks.py` | **构建闸门**（五道闸，见文末 D 章） |
+| `gen_tab_icons.py` | 原生 tabBar 图标生成（PIL 矢量绘制 81×81 透明底，非 AI 生图；脚本声明的产物 `app/static/tab/*.png` **当前仓库里并不存在**）。⚠️ **未被任何文档或脚本引用，去留待 Boss 拍板（2026-09-22）**——App 实际用的是共享组件 `Tabbar.uvue`，不走原生 tabBar |
 
 ## 用法
 
 ```bash
 python -X utf8 toolchain/gen_nutrition.py    # 重新生成营养数据初稿
-python -X utf8 toolchain/validate.py         # 校验五份源文件的一致性
-python -X utf8 toolchain/build.py            # 打包 → dist/ + app/src/data/
+python -X utf8 toolchain/validate.py         # 校验六份源文件的一致性
+python -X utf8 toolchain/build.py            # 打包 → dist/ + app/src/data/ + 同步 app/static/icons/
+python -X utf8 toolchain/hooks.py all        # 跑全部五道构建闸门（见 D 章）
 ```
 
-> `validate.py` 的校验项：清单无重复 id、**三源 id 完全对齐**（清单 ↔ 营养 ↔ 引用）、模板引用合法、
+> `validate.py` 的校验项：清单无重复 id、**四源 id 完全对齐**（清单 ↔ 营养 ↔ 引用 ↔ 生图槽位）、模板引用合法、
 > `unit ∈ {g,ml}`、`confidence ∈ {1,2,3}`、`recipe_estimate` 不得标 `conf=3`、
 > 宏量配平（`蛋白×4 + 碳水×4 + 脂肪×9 ≈ 标称热量`，酒精类自动跳过）。
 
 ## 三条铁律
 
 1. **App 里绝不手写食物数据** — `food_library.json` 是生成物，改数据必须走 toolchain
-2. **每次产出带指纹** — `fingerprint` 含版本 + **5 份源文件清单** + 条数 + 生成时间，出事可回溯
+2. **每次产出带指纹** — `fingerprint` 含版本 + **6 份源文件清单** + 条数 + 生成时间，出事可回溯
 3. **启动时校验 schema** — App 启动时比对 `schemaVersion`，不匹配直接报错
 
 ## 数据流
@@ -71,29 +99,46 @@ python -X utf8 toolchain/build.py            # 打包 → dist/ + app/src/data/
 icons_v1.yaml ────────┐
 nutrition_v1.yaml ────┤
 icons_v1_usage.yaml ──┼→ validate.py ─→ build.py ─→ dist/food_library.json
-vessel_tpl.yaml ──────┤                                  ↓
-opts_tpl.yaml ────────┘               app/src/data/food_library.json（只读）
+icons_v1_visual.yaml ─┤                                  ↓
+vessel_tpl.yaml ──────┤               app/src/data/food_library.json（只读）
+opts_tpl.yaml ────────┘
 ```
 
-## v1.0 实测产出
+> ⚠️ **为什么「四源对齐」是后补的（2026-09-22 踩坑登记）**：`icons_v1_visual.yaml`（生图槽位）此前**完全不在
+> `validate.py` 的校验范围内**，于是它停在 347 条、清单已经补到 353 条，**校验一路绿灯**，直到要重跑生图时
+> 才发现这六条没有槽位。**教训：多源模式下「没被校验的源」等于「会静默漂移的源」**——
+> 新增任何一份 `sources/*.yaml` 都必须同时进 `validate.py` 的 `SOURCES`。
+> 现该闸已加：生图槽位缺条目、或残留 `gen_visual_spec.py` 的 `MISSING: true` 占位，**validate 直接红**。
+
+## 实测产出（2026-09-22 复核磁盘真值）
 
 | 项 | 值 |
 |---|---|
-| 食物条数 | **347** |
-| 产物体积 | **135.7KB** |
-| 置信度分布 | `conf=3` 175 ｜ `conf=2` 161 ｜ `conf=1` 11 |
-| 有器皿分段 | 347 条（全部） |
-| 有选项 | 10 条 ｜ 有单个克重 102 条 |
+| 食物条数 | **353**（定案时 347，p348–p353 为后补六条） |
+| 产物体积 | **181.6KB** |
+| 分类分布 | 主食 63 ｜ 菜品 59 ｜ 肉类蛋类 52 ｜ 蔬菜 60 ｜ 水果 40 ｜ 饮品 40 ｜ 零食 39 |
+| 置信度分布 | `conf=3` 179 ｜ `conf=2` 163 ｜ `conf=1` 11 |
+| 有器皿分段 | 353 条（全部） ｜ 器具模板 18 个 ｜ 选项模板 4 个 |
+| 有选项 | 10 条 ｜ 有单个克重（`piece_weight`）**196 条** |
+| 图标 | `app/static/icons/` 353 张 / **5.61MB** / 平均 16.3KB ｜ 347 张 512×512 ＋ p348–p353 六张 92×92 |
 
 ## 图标同步（打包时一并处理）
 
 App 打包只会包含 `app/` 目录内的文件，所以 `assets/` 下的产物图标必须复制一份进 App：
 
 ```
-assets/icons-final/<catKey>/<id>.webp        ← 产物（toolchain 侧）
+assets/icons-final/<catKey>/<id>.webp        ← 压缩中间产物（toolchain 侧，已进 .gitignore = 本地缓存）
         ↓  build.py 增量同步（只复制缺失或更新的）
-app/src/static/icons/<catKey>/<id>.webp      ← App 侧副本
+app/static/icons/<catKey>/<id>.webp          ← App 侧副本 = **唯一入库副本**（353 张）
 ```
+
+**入库分工（2026-09-22 去重定案）**：
+- `assets/icons-gen/` — 生图**原始 PNG 入库**（347 张 + `_report.json`）。AI 生图有随机性，重跑拿不到同一批图，原图必须留档
+- `assets/icons-final/` — 512 WebP 压缩产物**不再入库**（与 App 副本字节全等），内容与 `app/static/icons/` 重复。重建命令：
+  `python toolchain/compress_icons.py assets/icons-gen assets/icons-final --max-size-kb 25`
+- `app/static/icons/` — **唯一入库副本**，App 直接引用。新克隆机器没有 `icons-final/` 也能正常跑（`build.py` 会打印跳过提示）
+- ⚠️ **缺口**：p348–p353 六条**没有**原始 PNG（未跑批量生图），App 内目前是 **92×92 小图**（其余 512×512）；
+  重跑生图要再花 API 额度，**尚未做**
 
 **引用约定**：
 - `food_library.json` 的 `img` 字段 = `<catKey>/<id>.webp`（如 `staple/p001.webp`）
@@ -102,8 +147,9 @@ app/src/static/icons/<catKey>/<id>.webp      ← App 侧副本
 
 ## 已知风险
 
-- `conf=3` 的 175 条通过了自动筛查（分类区间 + 宏量配平），但**未逐条对照权威成分表**；
-  `sources/nutrition_checklist.md` 列了 30 条按风险排序的优先核对项
+- `conf=3` 的 179 条通过了自动筛查（分类区间 + 宏量配平），但**未逐条对照权威成分表**；
+  `sources/nutrition_checklist.md` 列了 30 条按风险排序的优先核对项，
+  **截至 2026-09-22 人工核对进度 0/30**——营养数值仍属「AI 初稿 + 脚本配平」，未经权威来源逐条确认
 - 失误模式集中在**量纲**（LLM 把「每份」的热量误标为「每 100ml」）—— 扩充数据时重点防
 - `basis_detail` / `audit_note` 是可追溯字段，**不进 App 产物**（`build.py` 已裁掉）
 
@@ -115,24 +161,28 @@ app/src/static/icons/<catKey>/<id>.webp      ← App 侧副本
 
 | 文件 | 作用 |
 |---|---|
-| `fetch_icons.py` | 抓图：按四张图源的顺位拉取真实照片/AI 生成图，落盘到 `assets/icons/` |
-| `compress_icons.py` | 压图：PNG → WebP 512×512，自适应 quality，输出 `assets/icons-compressed/` |
-| `assets/icons/icon_index.json` | 索引：每张图的来源 / URL / 大小 / 本地路径（`fetch_icons.py` 生成） |
-| `fetch.log` / `icon_fetch.log` | 抓取日志 |
+| `gen_icons.py` | **生图（当前主路线）**：按 `icons_v1.yaml` + `icons_v1_visual.yaml` 批量纯文生图，20 路并发 + Key 池轮转 + 429 退避 + 白底像素校验，落盘 `assets/icons-gen/<catKey>/<id>.png`（另有 `_report.json`） |
+| `compress_icons.py` | 压图：PNG → WebP 512×512，自适应 quality，`--max-size-kb`（默认 25）控体积，输出 `assets/icons-final/`（已 gitignore 的中间产物，最终入库副本由 `build.py` 同步到 `app/static/icons/`） |
+| `fetch_icons.py` | ⚠️ **旧路线（真实图源抓取），当前纯文生图方案不用，保留备用**。落盘 `assets/icons/` |
+| `assets/icons/icon_index.json` | 旧路线索引：每张图的来源 / URL / 大小 / 本地路径（`fetch_icons.py` 生成，当前目录未落盘） |
+| `fetch.log` / `icon_fetch.log` | 旧路线抓取日志 |
 
 ## 用法
 
 ```powershell
 cd d:/project/other-porject/kaluli
 
-# 抓单个分类
+# 生图（当前主路线）：全量 / 抽样 / 指定 id
+python -X utf8 toolchain/gen_icons.py --all
+python -X utf8 toolchain/gen_icons.py --sample
+python -X utf8 toolchain/gen_icons.py --ids p105,p104,p270
+
+# 压缩（icons-gen → icons-final，单张上限 25KB）
+python -X utf8 toolchain/compress_icons.py assets/icons-gen assets/icons-final --max-size-kb 25
+
+# 旧路线（真实图源抓取，当前不用）
 python -X utf8 toolchain/fetch_icons.py --category fruits
-
-# 抓全部 70 项
 python -X utf8 toolchain/fetch_icons.py --all
-
-# 只压不抓（全量重新压缩）
-python -X utf8 toolchain/compress_icons.py assets/icons assets/icons-compressed
 ```
 
 > ⚠️ **Windows 上 `-X utf8` 不能省。** 脚本里有 emoji 输出，GBK 控制台会直接 `UnicodeEncodeError` 退出。
@@ -141,16 +191,19 @@ python -X utf8 toolchain/compress_icons.py assets/icons assets/icons-compressed
 ## 数据流
 
 ```
-图源 API  →  fetch_icons.py  →  assets/icons/<分类>/<食物>.png   (原始，0.8–3MB)
-                                      ↓
-                              compress_icons.py
-                                      ↓
-                     assets/icons-compressed/<分类>/<食物>.webp  (512×512，13–50KB)
-                                      ↓
-                              App 图片资源
+icons_v1_visual.yaml 槽位  →  gen_icons.py（Agnes 文生图）  →  assets/icons-gen/<catKey>/<id>.png   (原始 1024×1024，~800KB，入库存档)
+                                                     ↓
+                                       compress_icons.py --max-size-kb 25
+                                                     ↓
+                                  assets/icons-final/<catKey>/<id>.webp  (512×512，≤25KB —— 中间产物，已 gitignore)
+                                                     ↓
+                                       build.py 增量同步 → app/static/icons/（唯一入库副本，App 引用）
+
+【旧路线，当前不走】图源 API → fetch_icons.py → assets/icons/*.png → compress_icons.py → assets/icons-compressed/*.webp
 ```
 
-**跳过判据**：`fetch_icons.py` 只看 `assets/icons-compressed/*.webp` 是否存在。webp 在 → 整项跳过；webp 不在 → **即使 PNG 已存在也会重新下载并覆盖**。
+**跳过判据（仅旧路线）**：`fetch_icons.py` 只看 `assets/icons-compressed/*.webp` 是否存在。webp 在 → 整项跳过；webp 不在 → **即使 PNG 已存在也会重新下载并覆盖**。
+**`gen_icons.py` 的跳过判据**：目标 PNG 已存在且白底校验合格即跳过（`--dry-run` 可只看结果不重生成）。
 
 ---
 
@@ -332,14 +385,14 @@ AI 图**必须逐张人工检查**，重点四项：
 
 | 要求项 | 设计目标 | 文生图方案现状 | 结论 |
 |---|---|---|---|
-| 尺寸 | WebP **512** | 1K(1024) 生成 → 降采样 512 | ✅ 天然满足 |
-| 体积 | **15–25KB/张** | 当前平均 **28KB** | ⚠️ 需改压缩参数 |
+| 尺寸 | WebP **512** | 1K(1024) 生成 → 降采样 512 | ✅ 天然满足（347 张；后补 p348–p353 六张暂为 92×92，未重跑生图） |
+| 体积 | **15–25KB/张** | 实测平均 **16.3KB/张**，最大 25.0KB，**超标 0 张** | ✅ 已收口（`--max-size-kb` 默认已改 25） |
 | 背景 | **白底 + 柔和投影** | prompt 直接指定，实测四角像素 4/4 纯白 | ✅ 天然满足 |
-| 张数 | 200 专属图 + ~40 品类兜底图 ≈ **240 张** | 尚未开工 | ⏳ 待食物清单 |
+| 张数 | 每食物一张专属图 | **353 张已产出并入库** `app/static/icons/`（合计 5.61MB） | ✅ 已完成（旧规划「200 专属 + 40 兜底 ≈240 张」已作废，兜底图取消） |
 
 **白底问题已被文生图方案天然解决**——prompt 里直接写 `pure white background, soft drop shadow`，实测 10/10 张四角纯白。**不再需要抠图、图生图或 CSS 套底。**
 
-**只剩体积一项要改**：`compress_icons.py` 的 `max_size_kb` 默认 50KB，需下调到 25KB；且当前降档循环在 `quality <= 50` 时就 `break`，可能压不到 25KB 以下，需一并调整循环终止条件。
+**体积一项已改完**：`compress_icons.py` 的 `max_size_kb` 默认已下调到 **25KB**（`--max-size-kb` 参数），降档循环终止条件同步调整，实测 353 张零超标。
 
 ---
 
@@ -372,12 +425,16 @@ AI 图**必须逐张人工检查**，重点四项：
 
 ## B.6 制作食物库图标的执行顺序（定案流程）
 
-1. **定食物清单**：Top 200 专属图 + ~40 品类兜底图 ≈ 240 张
-   - 前置条件：Boss 拍板 v1.0 食物库做 **5000 条**还是 **18000 条**（`FoodLibraryPlan.md` 待拍板第 1 条）
+> **执行状态（2026-09-22）**：本流程已跑完一轮，产出 347 张原始 PNG（`assets/icons-gen/`）→ 512 WebP → App 副本。
+> 下面第 1 步的「240 张 / 5000 vs 18000 条」是当时的规划口径，现已定为**每食物一张专属图**（现库 353 条 = 353 张）；
+> 后补的 p348–p353 六条**没走本流程**（无原始 PNG、App 内暂用 92×92 小图），补跑时从第 2 步起照常执行。
+
+1. **定食物清单**：每个食物一张专属图（现 353 条；曾规划 Top 200 专属图 + ~40 品类兜底图 ≈ 240 张，兜底方案已作废）
+   - 前置条件：~~Boss 拍板 v1.0 食物库做 **5000 条**还是 **18000 条**~~ → ✅ 已定 **347 条起步**（后补至 353 条）
 2. **建器皿对照表**：人工维护「食物 → 标准器皿 + 视角 + 必填特征」，建议落 `toolchain/sources/icons.yaml`
 3. **人工审对照表**（审核前置）：只看器皿一列，5 秒/个。**这是唯一能挡住"铁盆当火锅"这类错误的关卡**
 4. **按模板拼 prompt**：`{器皿} + {内容物} + {逐项枚举配料} + {状态词} + {视角}` + 固定骨架
-5. **批量生图**：20 路并发，240 张约 3.5 分钟
+5. **批量生图**：20 路并发，347 张实测 5.45 分钟
 6. **自动校验白底**：四角像素 `min(c) > 235`
 7. **人工过目**：重点看器皿与主体。首轮预期合格率 **80%**
 8. **失败项改 prompt 重做**：预期每个失败项 1–3 轮（越"料多"的食物越容易翻车）
@@ -396,7 +453,7 @@ AI 图**必须逐张人工检查**，重点四项：
 |---|---|---|
 | `sources/vessel_tpl.yaml` | **计量器具模板集**（18 个器具：杯/碗/盘/个/串/包…，各带容量档位） | 人工维护 |
 | `sources/opts_tpl.yaml` | **选项模板集**（`sweet` / `topping` / `sugar_pack` / `syrup_pump`） | 人工维护 |
-| `sources/icons_v1_usage.yaml` | 347 项食物各自引用哪个器具模板、哪些选项模板 | 脚本生成（`gen_usage_spec.py`）+ 人工审 |
+| `sources/icons_v1_usage.yaml` | 353 项食物各自引用哪个器具模板、哪些选项模板 | 脚本生成（`gen_usage_spec.py`）+ 人工审 |
 
 架构依据（`FoodLibraryPlan.md` 10.2 / 10.2.1）：**模板 + 引用**，不给任何单品硬编码字段。
 食物条目不写死容量与选项，只写 `vessel_tpl: cup` / `opts_tpl: [sweet, topping]`。
@@ -434,17 +491,47 @@ AI 图**必须逐张人工检查**，重点四项：
 | 摩卡 | 给甜度选项 | 无选项（配方固定） |
 | 纯茶（绿茶/红茶/乌龙/普洱/茉莉花茶） | 给 `sweet` + `topping` | **自己泡的茶不含糖** → `mug` + 无选项；只有茶饮店现制产品（水果茶/柠檬茶）才给 `sweet` |
 
-## 当前引用分布（347 项）
+## 当前引用分布（353 项，实测自产物 `foods` 字段）
 
 | vessel_tpl | 数量 | | opts_tpl | 数量 |
 |---|---|---|---|---|
-| piece（按个） | 170 | | `[sweet, topping]` 现制茶饮 | 4 |
-| plate（按份） | 69 | | `[sweet]` 现制甜品饮品 | 2 |
+| piece（按个） | 171 | | `[sweet, topping]` 现制茶饮 | 4 |
+| plate（按份） | 71 | | `[sweet]` 现制甜品饮品 | 2 |
 | bag（袋装） | 20 | | `[sugar_pack]` 美式/速溶 | 2 |
-| bowl_rice | 16 | | `[syrup_pump]` 拿铁/卡布 | 2 |
-| bowl_noodle | 11 | | 其余 337 项 | 无选项 |
-| cup（现制茶饮） | 11 | | | |
-| 其余 12 类 | 50 | | | |
+| bowl_rice | 18 | | `[syrup_pump]` 拿铁/卡布 | 2 |
+| bowl_noodle | 11 | | 其余 343 项 | 无选项 |
+| cup（现制茶饮） | 6 | | | |
+| 其余 12 类 | 56 | | | |
 
-> `piece` 占比最高（170 项，49%）是正常的——水果、单块肉、蛋、单个零食都按「个」计。
-> 但注意：`piece` 的 `amount = 1`，**必须由食物条目提供「1 个 = 多少克」**，否则无法算热量。
+> `piece` 占比最高（171 项，约 48%）是正常的——水果、单块肉、蛋、单个零食都按「个」计。
+> 但注意：`piece` 的 `amount = 1`，**必须由食物条目提供「1 个 = 多少克」**（现 196 条带 `pieceWeight`），否则无法算热量。
+
+---
+
+# D. 构建闸门（`hooks.py`）
+
+`AGENTS.md`「Hooks 兜底强约束」一节原本只有承诺、零代码，**2026-09-22 落地为 `toolchain/hooks.py`**。
+它把关键约束从「AI 自觉」变成自动化红灯拦截。
+
+## 五道闸
+
+| 闸门名 | 检查内容 | 失败动作 |
+|---|---|---|
+| `schema-version-check` | 产物 `app/src/data/food_library.json` 的顶层键与必填字段必须匹配 `toolchain/schema/v1.0.json`，且版本号对得上（schema 文件 v1.0 ↔ 数据 `v` 1.0.x）、`fingerprint` 完整 | 红灯拦截 |
+| `food-data-integrity` | ① 条数三处对齐（`icons_v1.yaml` ↔ `fingerprint.count` ↔ `foods` 数组）；② `dist/` 与 `app/src/data/` 副本 sha256 一致；③ **禁手写食物数据**扫描：视图层（`pages`/`components`/`composables`）出现 `"pNNN"` id 字面量或 `name+img` 内联条目即拒；④ App 图标张数 ≠ 食物条数 → 警告 | 红灯拦截（图标数不等仅警告）。`stores/` 因演示种子计划经 Boss 授权引用 id，**豁免 id 检查但仍查内联条目** |
+| `class-prefix-collision` | 组件（`app/components/`）定义的类名若同时被别的文件定义或使用 → 拒（mp-weixin 样式同池，同名互污） | 红灯拦截 |
+| `pre-commit` | ① 暂存区内改过的代码/配置文件顶部必须含 `[变更日志]`；② 生成物（`app/src/data/food_library.json`、`app/static/icons/`）必须与 `toolchain/` 源变更同批提交 | 红灯拦截（`app/unpackage/`、`debug/shots/` 与生成物本身豁免） |
+| `end-of-session` | 改了 `app/` 文件但 `docs/progress.md` 未进本次变更 | **只警告不拦**（AGENTS 规定失败动作＝提示补全） |
+
+## 用法
+
+```bash
+python -X utf8 toolchain/hooks.py list        # 打印说明 + 可用检查
+python -X utf8 toolchain/hooks.py all         # 依次跑全部五道闸（全绿 exit 0，任一红灯 exit 1）
+python -X utf8 toolchain/hooks.py pre-commit  # 只跑提交闸
+python -X utf8 toolchain/hooks.py install     # 把闸门写进 .git/hooks/pre-commit（可重复执行，重跑即更新）
+```
+
+> ⚠️ **`.git/hooks` 不随仓库分发**：换机器或新克隆后，闸门不会自动生效，**必须各自跑一次 `install`**。
+> `install` 生成的钩子会跑 `all`（五道全跑），并在找不到 python 时打印提示后放行（不阻塞提交）。
+> Windows 控制台 GBK 下脚本已把 stdout/stderr 降级为 `errors="replace"`，emoji 不再崩闸门。

@@ -1,4 +1,13 @@
-# Home.uvue — 首页（v2 稿 P1 还原）
+# Home.uvue 组件设计说明
+
+> 变更记录：
+> - 2026-09-22（Gemini 系列）：页底预留 78px 升级为动态避让 `92px / calc(82px + env(safe-area-inset-bottom))`，解决全面屏下内容滚到底被悬浮胶囊遮挡的问题，保持 14px 呼吸间距。
+> - 2026-09-22（Qoder）：液态玻璃悬浮胶囊重构配套——①删 `tabFade` 与 `onPageScroll`（新胶囊恒常可见）；
+>   ②页底预留 40 → 78（Boss 拍板按胶囊实占重算）；③目标 Pill 日历图标 `.pill-cal` 的 `openRecords()` 由 navigateTo 改 redirectTo（Records 已升一级 Tab，不压栈）；
+>   ④验收图 `debug/shots/tab8_home.png` 入库。
+> - 2026-09-22（Qoder）：#29 配套（Boss 拍板「缩页底预留位」）：`.page padding-bottom` 78 → 40。
+> - 2026-09-22（Qoder）：#29 续（Boss：「我想要的 tabbar 是 scroll-fade-navbar 那种效果」）：
+>   重新挂回 `onPageScroll`，按 0→60px 线性算 `tabFade` 透传给 Tabbar（2026-09-22 胶囊化后已随 fade 一并废弃，留作追溯）。
 
 ## 💡 核心思想
 
@@ -22,20 +31,22 @@
 
 - 缩放 0.794（472→375）；瓶子首版用导出图静态占位，液体动画下轮
 - 晚餐按稿面收起态渲染（仅头行＋展开钮，无明细卡）
-- Tabbar 终案前用页内自绘双 Tab 过渡（首页激活绿／我的灰）
+- 底部 Tab 用共享 `<Tabbar active="home" ></Tabbar>`（三槽悬浮玻璃胶囊的左起第一格；页内自绘双 Tab 过渡方案早已替换）。
+  **2026-09-22 胶囊化后 `fade` prop 已删**——新胶囊恒常可见，本页不再有任何 `onPageScroll` 监听
 
 ## 边界与降级
 
 - 取不到胶囊信息（非小程序／API 缺失）→ 加号回落稿面默认位置，不崩
 - 图片缺失 → 空位，后续补；v-for 变量语义化命名（meal／rowItem），禁用单字母 r
 - 小程序端需真机确认加号与胶囊间距；本页自身不用 `backdrop-filter`（共享 Tabbar 的玻璃模糊除外，见 `components/Tabbar.md`）
-- **页底预留 40px（2026-09-22 #29 配套，Boss 拍板「缩页底预留位」）**：原 78px 让内容停在玻璃 Tabbar 之上、栏后无物可透；
-  压到 40 后滚到底有约 36px 内容常驻栏下（观感换穿透）。取舍与像素取证见 `components/Tabbar.md`
-- **TabBar 随滚动渐显（2026-09-22 #29 续，Boss：「我想要的 tabbar 是 scroll-fade-navbar 那种效果」）**：本页重新挂回
-  `onPageScroll`（#28 曾因「常驻栏不透明无需监听」删掉），按 `scrollTop/60` 夹到 0~1、0.05 量化后写 `tabFade` 透传给 Tabbar；
-  顶部静止时底槽完全透明，滚过 60px 到满玻璃
+- **页底预留（2026-09-22 方案A动态避让）**：`.page padding-bottom` 升级为动态安全区全避让：无小白条基准 92px，带小白条机型（MP-WEIXIN）自动叠加 `calc(82px + env(safe-area-inset-bottom))`（实测 116px）。确保内容滚到最底端时完整展示于 Tabbar 悬浮胶囊上方，并留出 14px 呼吸间距。
+- **~~TabBar 随滚动渐显（#29 续）~~ 已废弃（2026-09-22，Boss 拍板第 3 条）**：`tabFade` 与整段 `onPageScroll`
+  删除，胶囊恒常可见；#28 时「常驻栏不透明故无需监听」的结论重新成立
 
 ## 与设计稿的对应
 
 - v2 稿 10:223 下全部节点：Title 轻律生活／530 还能吃／68g-152g-42g／早420午560晚390／Tab 首页·我的
+  （**Tab 数已变**：2026-09-22 液态玻璃胶囊为三格「首页·日历·我的」，见 `components/Tabbar.md`；v2 稿面尚未同步重画）
+- 验收（2026-09-22 零窗口 automator）：`debug/shots/tab8_home.png` ＝ 悬浮胶囊三格、首页格激活色 `#17916B`、
+  内容自胶囊下方穿过 ✓；点「日历」格 → `pages/records/Records` ✓（气泡四关键帧取证见 Tabbar.md）
 - 不一致：Leaf 小叶图标略去（贴纸已含装饰）；Goal Pill 日历图标略去（文字保留）；波浪用导出整图

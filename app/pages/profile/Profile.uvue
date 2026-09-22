@@ -1,12 +1,30 @@
 <!--
   [变更日志]
   修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[实施方案A：页底预留高度升级为动态安全区全避让。
+    .page padding-bottom 由固定 78px 改为 92px 并在小程序端结合 calc(82px + env(safe-area-inset-bottom))，
+    消除全面屏下内容滚到底被 Tabbar 遮挡的问题，保持 14px 舒适呼吸间距]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[TabBar 液态玻璃胶囊配套（Boss 拍板第 3/4 条）：删 tabFade（渐显机制废弃，
+    新胶囊恒常可见），Tabbar 调用去 :fade；onPageScroll 保留（pf-st-mask 两态仍依赖它）；
+    .page padding-bottom 40 → 78＝悬浮胶囊实占（高 56 ＋ 离底 22）；
+    goRecords 由 navigateTo 改 redirectTo（Records 升为一级 Tab 页，页内无返回钮）]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
   AI模型：Qoder (Claude)
   修改内容：[#29 配套（Boss 拍板「缩页底预留位」）：.page 的 padding-bottom 由 78 压到 40，
     让内容常态穿到玻璃 Tabbar（高约 76）之下，玻璃才有东西可透;
     2. #29 续（Boss：「我想要的 tabbar 是 scroll-fade-navbar 那种效果」）：onPageScroll 按 0→60px
     线性算 tabFade（0.05 量化）透传给 Tabbar；该监听原包在 #ifdef MP-WEIXIN 内，现去条件编译三端生效
-    （顺带补上 App／Web 端滚动时 pf-st-mask 不响应的既有缺口）]
+    （顺带补上 App／Web 端滚动时 pf-st-mask 不响应的既有缺口）
+    （2026-09-22 胶囊化后 fade 已按 Boss 指令废弃，此条留作追溯）]
 -->
 <!--
   [变更日志]
@@ -284,7 +302,7 @@
     </view>
 
     <!-- 底部 Tab（共享组件，我的激活） -->
-    <Tabbar active="profile" :dark="dk" :fade="tabFade" ></Tabbar>
+    <Tabbar active="profile" :dark="dk" ></Tabbar>
 
     <!-- 滚动防穿透遮罩：页内内联 fixed 视图（StickyTop 组件实测双故障：遮罩不渲染＋宿主内渲染整页幻影副本） -->
     <view v-if="scrolled" class="pf-st-mask" :style="{ height: sbH + 'px', backgroundColor: dk ? '#162924' : '#EEF7F4' }"></view>
@@ -320,18 +338,12 @@ const dk = computed((): boolean => settings.darkMode)
 
 // 滚动防穿透两态：跨阈值才翻一次，避免逐帧 setData
 const scrolled = ref<boolean>(false)
-// TabBar 渐显（scroll-fade，照官方示例「随滚动渐显的透明导航栏」）：0→60px 线性，0.05 量化＝最多 20 次 setData
-// （阈值取 60 而非示例的 100＝实测 Records 页最大滚动只有 70px，100 会让该页永远到不了满玻璃）
-const tabFade = ref<number>(0)
-// 三端生效（原包在 MP-WEIXIN 内，App／Web 端滚动时状态栏遮罩无响应是既有缺口，随 fade 一并补上）
+// 三端生效（原包在 MP-WEIXIN 内，App／Web 端滚动时状态栏遮罩无响应是既有缺口）
+// #29 的 tabFade 渐显已随 2026-09-22 液态玻璃胶囊重构废弃（新胶囊恒常可见）
 onPageScroll((e) => {
   // 遮罩阈值＝头图高 sbH+89 − sbH：内容将穿透状态栏带才盖
   const v = e.scrollTop > 89
   if (v !== scrolled.value) scrolled.value = v
-  let q = e.scrollTop / 60
-  if (q > 1) q = 1
-  const fq = Math.round(q * 20) / 20
-  if (fq !== tabFade.value) tabFade.value = fq
 })
 
 // 设置齿轮位置：默认稿面（右 25、状态栏下 13）；小程序端移到胶囊左侧、与胶囊垂直居中对齐
@@ -378,7 +390,8 @@ const goSettings = () => {
 }
 
 const goRecords = () => {
-  uni.navigateTo({ url: '/pages/records/Records' })
+  // Records 已升级为一级 Tab 页（无返回钮）→ 用 redirectTo 换页，不压栈
+  uni.redirectTo({ url: '/pages/records/Records' })
 }
 
 const remainCal = computed(() => goal.calorieGoal - food.totalCal)
@@ -464,7 +477,10 @@ const records = computed<Rec[]>(() => {
 <style>
 .page {
   background-color: #EEF7F4;
-  padding-bottom: 40px;
+  padding-bottom: 92px;
+  /* #ifdef MP-WEIXIN */
+  padding-bottom: calc(82px + env(safe-area-inset-bottom));
+  /* #endif */
 }
 .header {
   background-color: #39AD95;

@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 # [变更日志]
+# 修改时间：2026-09-22
+# AI模型：Qoder (Claude)
+# 修改内容：[1. 把 icons_v1_visual.yaml（生图槽位）纳入校验＝第六份源，此前它完全不在
+#              校验范围内，导致清单已 353 条而槽位仍 347 条（p348–p353 缺）却一路绿灯;
+#           2. 新增槽位必填项校验（container/content/toppings/state/view 五键齐全，
+#              禁止 gen_visual_spec.py 的 MISSING: true 占位残留）;
+#           3. 反向检查清单外的多余槽位]
+# [变更日志]
 # 修改时间：2026-09-19
 # AI模型：CodeBuddy (DeepSeek-V4.1-Flash)
 # 修改内容：[1. 单源校验改为「多源一致性校验」：icons_v1 / nutrition_v1 / icons_v1_usage
@@ -12,20 +20,22 @@
 
 """validate.py — 食物库数据源校验（多源模式）
 
-五份源文件的分工：
-    icons_v1.yaml         食物清单（id / name / cat）
-    nutrition_v1.yaml     营养数据（cal/protein/carb/fat/unit/piece_weight/basis/confidence）
-    icons_v1_usage.yaml   份量与选项引用（vessel_tpl / opts_tpl）
-    vessel_tpl.yaml       计量器具模板集
-    opts_tpl.yaml         选项模板集
+六份源文件的分工：
+    icons_v1.yaml           食物清单（id / name / cat）
+    nutrition_v1.yaml       营养数据（cal/protein/carb/fat/unit/piece_weight/basis/confidence）
+    icons_v1_usage.yaml     份量与选项引用（vessel_tpl / opts_tpl）
+    icons_v1_visual.yaml    生图视觉槽位（container / content / toppings / state / view）
+    vessel_tpl.yaml         计量器具模板集
+    opts_tpl.yaml           选项模板集
 
 校验项：
     1. 清单无重复 id
-    2. 三源 id 完全对齐（清单 ↔ 营养 ↔ 引用），且无清单外的多余条目
+    2. 四源 id 完全对齐（清单 ↔ 营养 ↔ 引用 ↔ 生图槽位），且无清单外的多余条目
     3. 数值合理性（cal ≥ 0、unit ∈ {g,ml}、confidence ∈ {1,2,3}）
     4. 模板引用合法（vessel_tpl / opts_tpl 的 key 必须存在）
     5. basis 与 confidence 不矛盾（估算不该标权威）
     6. 宏量配平（蛋白×4 + 碳水×4 + 脂肪×9 ≈ 标称热量；酒精类除外）
+    7. 生图槽位五键齐全且无 MISSING 占位
 
 用法：python -X utf8 toolchain/validate.py
 退出码：0 = 通过，1 = 失败，2 = 源文件缺失
@@ -42,9 +52,12 @@ SOURCES = {
     "list": BASE / "sources" / "icons_v1.yaml",
     "nutrition": BASE / "sources" / "nutrition_v1.yaml",
     "usage": BASE / "sources" / "icons_v1_usage.yaml",
+    "visual": BASE / "sources" / "icons_v1_visual.yaml",
     "vessel_tpl": BASE / "sources" / "vessel_tpl.yaml",
     "opts_tpl": BASE / "sources" / "opts_tpl.yaml",
 }
+
+VISUAL_SLOTS = ("container", "content", "toppings", "state", "view")
 
 
 def load_yaml(path) -> dict:
@@ -68,6 +81,7 @@ def validate_sources(src: dict) -> list:
     foods = src["list"]["foods"]
     nutrition = src["nutrition"]
     usage = src["usage"]
+    visual = src["visual"]
     vessel_keys = set(src["vessel_tpl"]["templates"].keys())
     opt_keys = set(src["opts_tpl"]["opt_templates"].keys())
 
@@ -83,7 +97,22 @@ def validate_sources(src: dict) -> list:
         seen.add(fid)
         prefix = f"{fid} {name}"
 
-        # ② 三源对齐
+        # ②-a 生图槽位对齐（放在营养检查之前，避免被 continue 跳过）
+        slot = visual.get(fid)
+        if slot is None:
+            errors.append(f"{prefix}: icons_v1_visual.yaml 缺生图槽位（该条无法生图/重跑生图）")
+        elif not isinstance(slot, dict) or slot.get("MISSING"):
+            errors.append(f"{prefix}: 生图槽位仍是 MISSING 占位")
+        else:
+            lack = [k for k in VISUAL_SLOTS if k not in slot]
+            if lack:
+                errors.append(f"{prefix}: 生图槽位缺字段 {lack}")
+            elif not str(slot.get("content") or "").strip():
+                errors.append(f"{prefix}: 生图槽位 content 为空")
+            elif not isinstance(slot.get("toppings"), list):
+                errors.append(f"{prefix}: 生图槽位 toppings 应为数组")
+
+        # ②-b 三源对齐
         if fid not in nutrition:
             errors.append(f"{prefix}: nutrition_v1.yaml 缺该条")
             continue
@@ -133,13 +162,16 @@ def validate_sources(src: dict) -> list:
                         f"{prefix}: 配平偏差（标称 {cal} kcal / 折算 {round(derived)} kcal）"
                     )
 
-    # 反向检查：营养/引用里有没有清单外的多余条目
+    # 反向检查：营养/引用/槽位里有没有清单外的多余条目
     extra_nut = sorted(set(nutrition) - seen)
     extra_use = sorted(set(usage) - seen)
+    extra_vis = sorted(set(visual) - seen)
     if extra_nut:
         errors.append(f"nutrition_v1.yaml 存在清单外的 id: {extra_nut}")
     if extra_use:
         errors.append(f"icons_v1_usage.yaml 存在清单外的 id: {extra_use}")
+    if extra_vis:
+        errors.append(f"icons_v1_visual.yaml 存在清单外的 id: {extra_vis}")
 
     return errors
 
@@ -165,7 +197,7 @@ def main():
     print(f"   食物      {len(src['list']['foods'])} 条")
     print(f"   器具模板  {len(src['vessel_tpl']['templates'])} 个")
     print(f"   选项模板  {len(src['opts_tpl']['opt_templates'])} 个")
-    print(f"   源文件    {len(SOURCES)} 份，三源 id 完全对齐")
+    print(f"   源文件    {len(SOURCES)} 份，四源 id 完全对齐（清单↔营养↔引用↔生图槽位）")
 
 
 if __name__ == "__main__":

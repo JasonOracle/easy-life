@@ -1,5 +1,12 @@
 # FoodPicker.uvue — 弹层⓪ 食物选择列表
 
+<!--
+[变更日志]
+修改时间：2026-09-22
+AI模型：Qoder (Claude)
+修改内容：[1. 记入本轮类名 `fp-` 全量收口的范围、连带改动的 debug/ 探针脚本与验收脚本；2. 更正遮罩条目——四弹层已迁微信原生 page-container，自研 `.fp-mask` 与「黑 50% vs 墨绿 35%」两套遮罩色对比同时作废；3. 图标张数按实测改准（347+ → 353）]
+-->
+
 > 对应代码：`app/components/FoodPicker.uvue`
 > 设计稿：Pencil 画板 `n3dgv`「弹层⓪ 食物选择列表」（375×812，@2x 导出 `shots/n3dgv.png`）
 
@@ -13,7 +20,7 @@
 - **数据**：`stores/food.ts` 的 `ALL_FOODS`（分类 chips 去重序）、`searchFoods()`（名称/全拼/首字母
   三路匹配，拼音索引 `py` 由 `toolchain/build.py` 生成）、`vesselLabelOf()` / `vesselSizesOf()`（副行
   「一碗约 200g」拼句）
-- **素材**：`/static/icons/<catKey>/<id>.webp`（库内真实食物图标，347+ 张）、
+- **素材**：`/static/icons/<catKey>/<id>.webp`（库内真实食物图标，353 张）、
   `/static/common/search_icon.png`（从 Pencil `SearchIcon` 节点 @4x 导出）
 - **被谁用**：`pages/home/Home.uvue`（FAB → 本弹层 → AddFood；AddFood「更换」→ 本弹层回显）、
   `pages/records/DayDetail.uvue`（dd-add → 本弹层 → AddFood）
@@ -29,6 +36,12 @@
   须绑 `@clickoverlay` 回传 `update:show=false`，`@afterleave` 兜底同步（系统返回路径）
 - **类名 `fp-` 前缀**（2026-09-21）：mp-weixin 端同名类跨组件文件污染（`.sheet{height:560}` 曾强加给
   AddFood/GoalModal 的 sheet，`.mask/.chip` 三家各异互覆），冲突类统一加前缀
+- **类名 `fp-` 全量收口**（2026-09-22 文档审计发现）：上一轮只给「当时已知冲突」的类加了前缀，
+  `.row/.row-text/.row-sub/.row-div` 仍与 **Settings 页**同名类互污（页面 wxss 与组件 wxss 同池，后加载者胜）。
+  现组件内**所有**类一律 `fp-`（row 家族 8 个 + search-box/search-icon/search-input/chip-bar/chip-text/chip-text-on/food-list/radio/radio-on/radio-check），
+  样式数值零改动。滚动定位用的 `id="row-<foodId>"` 是元素 ID 不是类名，保持原样。
+  **连带**：`debug/` 里以 `.page >>> .row` 探首行的脚本（measure_addfood／settle_probe／settle_probe2／settle_probe3／settle_diag）已改 `.page >>> .fp-row`；
+  验收脚本＝`debug/prefix_check.js`（截图 `debug/shots/audit/prefix_*.png`）
 
 | 决策 | 原因 |
 |---|---|
@@ -40,7 +53,7 @@
 | 每次打开重置搜索词与分类（watch show） | 上一轮搜索词残留会让「更换」重开时列表只剩几条，与回显语义冲突 |
 | 列表 `scroll-into-view="row-<selectedId>"` | 验收截图发现重开后残留滚动位、选中行不在视野内；弹层关闭即卸载，挂载时该属性天然生效 |
 | 副行后缀规则：有 opts → 「支持杯型与甜度」；否则器具默认档为 g/ml → 「一{器具}约 {克重}」；计件类（个/片/串）无后缀 | 对齐稿面三种行：珍珠奶茶 / 米饭（熟）/ 香蕉·苹果。稿面鸡胸肉的「· 生」是状态修饰词，数据模型无此字段，**未实现**（待 Boss 定夺是否加 source 后缀字段） |
-| 遮罩 `rgba(0,0,0,0.5)`（比 AddFood 的墨绿 35% 深） | n3dgv 稿 Mask 实测为黑色 50%，两弹层遮罩色稿面本就不一致，以各自稿为准 |
+| 遮罩＝原生 page-container 默认蒙层（不再自绘） | 2026-09-22 校准：本组件与 AddFood 均已迁原生壳，自研 `.fp-mask` 与「黑 50% vs 墨绿 35%」的两套遮罩色对比**同时作废**，蒙层观感由原生统一给 |
 
 ## 边界与降级
 

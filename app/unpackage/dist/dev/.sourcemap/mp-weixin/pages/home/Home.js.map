@@ -1,1 +1,0 @@
-{"version":3,"file":"Home.js","sources":["../../../../soft/HBuilderX/plugins/uniapp-cli-vite/uniPage:/cGFnZXMvaG9tZS9Ib21lLnV2dWU"],"sourcesContent":["import MiniProgramPage from 'D:/project/other-porject/kaluli/app/pages/home/Home.uvue'\nwx.createPage(MiniProgramPage)"],"names":["MiniProgramPage"],"mappings":"kPACA,GAAG,WAAWA,CAAe"}

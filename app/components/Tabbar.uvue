@@ -2,29 +2,51 @@
   [变更日志]
   修改时间：2026-09-22
   AI模型：Qoder (Claude)
-  修改内容：[#29 续（Boss：「我想要的 tabbar 是 scroll-fade-navbar 那种效果」）：玻璃底由「常开」改为
-    「随滚动渐显」——新增 fade prop(0~1)，底 alpha／顶部折光／上缘高光描边／向上柔影／blur 半径
-    全部按 fade 线性抬升（fade=0 时整条栏透明，只剩图标与文字）；
-    配方与满值仍取 DesignTokens（glass-bg .74／card #162924@.72），未自创色；
-    low 档（backdropBlur=false）不参与渐显，恒为不透明底以保证可读；图标与文案未动]
+  修改内容：[浅色态「气泡隐身」定稿修正（Boss 拍板：不接受气泡隐身，要有物理体积感）：
+    1. 胶囊底减负＝#FFFFFF 88% → **60%**（Boss 说明：88% 那条是稿面文字标注漏改）；
+    2. 气泡「雕」出来＝浅色玻璃档新增极细半透明白描边 rgba(255,255,255,.6) 1px（模拟折射亮边）
+       ＋ 向下轻投影 0/4/12 rgba(0,0,0,.06)（悬浮高度差）；气泡底色在 18% 与 25% 之间由 AI 看真机截图自定；
+    3. 暗色态与 low 档降级方案**保持现状不动**（观感正常）。描边/投影走单类 .tb-bub-light
+       （只在 glass 且非暗态时挂），不用后代选择器也不写行内样式，保 App 端可用]
 -->
 <!--
   [变更日志]
   修改时间：2026-09-22
   AI模型：Qoder (Claude)
-  修改内容：[#29 毛玻璃（Boss：「我本来就想做成毛玻璃或者液态玻璃样式」）：底槽改玻璃态＝
-    glass-bg token rgba(255,255,255,.74) ＋ backdrop-filter blur/saturate ＋ 上缘白色高光描边 ＋
-    顶部白色折光渐变 ＋ 向上柔影；暗态同构（卡色 token #162924 加 alpha）；
-    玻璃类只在 backdropBlur 能力开启时挂（useDeviceStore，low 档与 App 端回退不透明底）；
-    切 Tab 补 L1 触觉反馈（vibrateShort，按 device.haptics 降级）；
-    图标与文案（含 Boss 新换的矢量 PNG 路径 home/center ±selected）一律未动]
+  修改内容：[液态玻璃胶囊重构（Pencil gFuXt「Tab 关键帧 (微博标准版)」，Boss 五条拍板）：
+    1. 通栏底槽 → 悬浮胶囊（左右各 16、高 56、r28，底＝#FFFFFF 88% ＋ 顶部折光 ＋ 白 80% 描边
+       ＋ blur24 ＋ 向上投影 0/-4/24 #0A4F3D 14%）；
+    2. 两 Tab → 三 Tab（首页／日历／我的），日历＝Records 升级一级 Tab；
+    3. 新增会跑的选中气泡 96×44 r22（Boss 拍板「文字标注为唯一真理」：纯 backdrop-filter blur(20px)
+       ＋ 实色 #FFFFFF 18%（暗态 13% ＋ blur28），**不做**节点里遗留的三段渐变与手绘内高光）；
+    4. 四关键帧动画：按下 ×0.96／90ms → 移动 ×1.12÷0.94／320ms cubic-bezier(.34,1.56,.64,1)
+       → 落位 ×1.06÷0.97／120ms → 静止；图标弹跳滞后 40ms。CSS transition 只在 MP-WEIXIN 下发
+       （App／Vapor 禁用 transition），App 端 Worklet 原生线程动画留 TODO 未实现；
+    5. 删除 #29 的 fade 渐显 prop 与 barStyle 五属性同驱（Boss：新胶囊前提是恒常可见）；
+    6. 色值全部改用 DesignTokens §7 的 TabBar 语义 token；low 档（backdropBlur=false）按稿面降级
+       ＝胶囊不透明 #F8FCFA ＋ 气泡实色 ＋ #E3EFE8 描边，折光／投影／动画保留；
+    7. 切页起点（气泡从哪一格飞来）改由本地存储 ct_tab_origin 一次性传递。原方案是 components/tabOrigin.uts
+       模块单例，实测产物已正确产出 components/tabOrigin.js，运行时却报
+       `module 'components/tabOrigin.js' is not defined` → Tabbar 渲染中断、整页白屏；
+       cleanCompileCache＋simulator_refresh 跑过仍未见效（包体哈希未变，根因未定案）。
+       改走存储载体后不再依赖新模块文件，且天然满足「换页重挂载后仍读得到」；
+    8. 入场起点改在 setup 内同步读（首帧即画在上一格）——automator 采样实测到原 onMounted 读法
+       会先在目标槽渲染一帧 rest 再跳回起点，出现「闪一下」]
 -->
 <!--
   [变更日志]
-  修改时间：2026-09-21
+  修改时间：2026-09-22
   AI模型：Qoder (Claude)
-  修改内容：[新增 dark prop（默认 false）：个人中心深色模式下由 Profile 传入，
-    根类 tabbar-dark + MP 条件编译后代覆盖（底/分隔线/标签三处换暗色）]
+  修改内容：[#29 续（Boss：「我想要的 tabbar 是 scroll-fade-navbar 那种效果」）：玻璃底由「常开」改为
+    「随滚动渐显」——新增 fade prop(0~1)，底 alpha／顶部折光／上缘高光描边／向上柔影／blur 半径
+    全部按 fade 线性抬升；low 档不参与渐显。
+    （2026-09-22 液态玻璃胶囊重构中该机制已按 Boss 指令整体废弃，此条留作追溯）]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[#29 毛玻璃：底槽改玻璃态＋切 Tab 补 L1 触觉反馈（vibrateShort，按 device.haptics 降级）]
 -->
 <!--
   [变更日志]
@@ -35,71 +57,208 @@
 -->
 
 <template>
-  <view class="tabbar" :class="{ 'tb-glass': glass, 'tabbar-dark': dark, 'tb-glass-dark': glassDark }" :style="barStyle">
-    <view class="tab-item" @click="switchTab('home')">
-      <image class="tab-icon-home" :src="active === 'home'?'/static/home/home-selected.png':'/static/home/home.png'" mode="aspectFit"></image>
-      <text class="tab-label" :class="{ 'tab-label-active': active === 'home' }">首页</text>
+  <view class="tb-bar" :class="barClass" :style="barStyle">
+    <!-- 选中气泡：稿面完全内嵌于胶囊（上下各留 6、左右各留 4），几何由 :style 逐帧下发 -->
+    <view class="tb-bubble" :class="bubbleClass" :style="bubbleStyle"></view>
+    <view class="tb-item" @click="onTap(0)">
+      <image class="tb-ic tb-ic-home" :src="iconSrc(0)" mode="aspectFit"></image>
+      <text class="tb-label" :class="labelClass(0)">首页</text>
     </view>
-    <view class="tab-item" @click="switchTab('profile')">
-      <image class="tab-icon-profile" :src="active === 'profile'?'/static/home/center-selected.png':'/static/home/center.png'" mode="aspectFit"></image>
-      <text class="tab-label" :class="{ 'tab-label-active': active === 'profile' }">我的</text>
+    <view class="tb-item" @click="onTap(1)">
+      <image class="tb-ic tb-ic-rec" :src="iconSrc(1)" mode="aspectFit"></image>
+      <text class="tb-label" :class="labelClass(1)">日历</text>
+    </view>
+    <view class="tb-item" @click="onTap(2)">
+      <image class="tb-ic tb-ic-me" :src="iconSrc(2)" mode="aspectFit"></image>
+      <text class="tb-label" :class="labelClass(2)">我的</text>
     </view>
   </view>
 </template>
 
 <script setup lang="uts">
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useDeviceStore } from '../stores/device'
 
 const props = defineProps<{
-  /** 当前激活页 */
+  /** 当前激活页：home | records | profile */
   active: string
-  /** 深色底（个人中心暗黑主题时由页面传入；默认 false=稿面浅底） */
+  /** 深色底（个人中心／设置暗黑主题时由页面传入；默认 false=稿面浅底） */
   dark?: boolean
-  /** 渐显进度 0~1（scroll-fade：0＝整条栏透明，1＝满玻璃）；不传＝满玻璃 */
-  fade?: number
 }>()
 
-// 玻璃态归属设备能力（low 档关 backdropBlur）；主题归属仍由页面通过 dark prop 决定
+// ── 稿面几何（DesignTokens §7.2，单位 px，基准宽 375）────────────────────────
+const MARGIN = 16      // 胶囊距屏幕左右
+const BAR_H = 56       // 胶囊高
+const BUB_W = 96       // 气泡静止宽
+const BUB_H = 44       // 气泡静止高（＝BAR_H − 上下各 6）
+const S_PRESS = 0.96   // 按下
+const S_TRAVEL_X = 1.12 // 移动：横向拉伸
+const S_TRAVEL_Y = 0.94 // 移动：纵向压扁
+const S_SETTLE_X = 1.06 // 落位：过冲
+const S_SETTLE_Y = 0.97
+
 const device = useDeviceStore()
 const glass = computed((): boolean => device.backdropBlur)
-const glassDark = computed((): boolean => device.backdropBlur && props.dark == true)
 
-/**
- * scroll-fade（照官方示例 pages/template/scroll-fade-navbar「随滚动渐显的透明导航栏」）：
- * fade 线性抬升底／折光／描边／柔影／模糊半径，五项同驱，避免「有线没底」的半成品态。
- * low 档（backdropBlur=false）直接返回空串＝不吃 fade，恒用 .tabbar 不透明底（可读性优先）。
- */
+const KEYS = ['home', 'records', 'profile']
+const PAGES = ['home/Home', 'records/Records', 'profile/Profile']
+/** 气泡飞行起点（上一个 Tab 的下标）跨页载体：redirectTo 会重挂载组件，模块级状态在小程序端不可靠 */
+const ORIGIN_KEY = 'ct_tab_origin'
+const ICONS = [
+  ['/static/home/home.png', '/static/home/home-selected.png'],
+  ['/static/home/rili.png', '/static/home/rili-selected.png'],
+  ['/static/home/center.png', '/static/home/center-selected.png']
+]
+
+function readOrigin(): number {
+  let from = -1
+  try {
+    const raw = uni.getStorageSync(ORIGIN_KEY)
+    if (typeof raw === 'string') {
+      const n = parseInt(raw)
+      if (!isNaN(n)) from = n
+    }
+    // 一次性消费：读完即清，冷启动才不会拿上次会话的残留起点乱飞
+    uni.removeStorageSync(ORIGIN_KEY)
+  } catch (e) {
+    // 存储不可用时不做飞入动画
+  }
+  return from
+}
+
+function writeOrigin(idx: number): void {
+  try {
+    uni.setStorageSync(ORIGIN_KEY, '' + idx)
+  } catch (e) {
+    // 同上，起点丢了只是这一次不飞
+  }
+}
+
+const myIdx = computed((): number => {
+  const i = KEYS.indexOf(props.active)
+  return i < 0 ? 0 : i
+})
+
+// ── 运行时尺寸：胶囊宽＝屏宽 − 2×16，三等分槽；窄屏时气泡收缩保证内嵌 ──────────
+const sys = uni.getSystemInfoSync()
+const slotW = (sys.windowWidth - MARGIN * 2) / 3
+const baseW = Math.min(BUB_W, slotW - 8)
+const safeBottom = sys.safeAreaInsets?.bottom ?? 0
+
+function centerOf(idx: number): number {
+  return slotW * (idx + 0.5)
+}
+
+/** 按下态气泡所在槽（＝上一页的 Tab）；其余阶段气泡恒指向本页槽位 */
+const anchorIdx = ref<number>(myIdx.value)
+/** rest | press | travel | settle —— 与稿面四关键帧一一对应 */
+const phase = ref<string>('rest')
+
+// 入场起点必须在 setup 内同步定：首帧就得画在「上一页那一格」，
+// 放 onMounted 会让气泡先在目标槽闪一帧再跳回起点（automator 采样实测到）
+const enterFrom = readOrigin()
+if (enterFrom >= 0 && enterFrom != myIdx.value) {
+  anchorIdx.value = enterFrom
+  phase.value = 'press'
+}
+
 const barStyle = computed((): Record<string, string> => {
   const st = {} as Record<string, string>
-  if (!device.backdropBlur) return st
-  const f = props.fade ?? 1
+  st['left'] = MARGIN + 'px'
+  st['right'] = MARGIN + 'px'
+  // 有小白条＝贴在安全区上方 12px（稿面「距 Home 指示条 12」）；无小白条＝稿面实测 22px 离底
+  st['bottom'] = (safeBottom > 0 ? safeBottom + 12 : 22) + 'px'
+  st['height'] = BAR_H + 'px'
+  return st
+})
+
+const bubbleStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  let w = baseW
+  let h = BUB_H
+  if (phase.value == 'press') {
+    w = baseW * S_PRESS
+    h = BUB_H * S_PRESS
+  } else if (phase.value == 'travel') {
+    w = baseW * S_TRAVEL_X
+    h = BUB_H * S_TRAVEL_Y
+  } else if (phase.value == 'settle') {
+    w = baseW * S_SETTLE_X
+    h = BUB_H * S_SETTLE_Y
+  }
+  // 左边缘由宽反算＝压扁／拉伸天然居中
+  const at = phase.value == 'press' ? anchorIdx.value : myIdx.value
+  st['left'] = (centerOf(at) - w / 2) + 'px'
+  st['top'] = ((BAR_H - h) / 2) + 'px'
+  st['width'] = w + 'px'
+  st['height'] = h + 'px'
+  // 底色在运行时下发（不写成 .a.b 复合类选择器：App 端只认单类），取值＝DesignTokens §7.2
   const dm = props.dark == true
-  // 满值全部来自 DesignTokens：浅＝glass-bg #FFFFFF@.74；暗＝card #162924@.72
-  const bgA = dm ? 0.72 * f : 0.74 * f
-  const refrA = dm ? 0.10 * f : 0.50 * f
-  const edgeA = dm ? 0.10 * f : 0.80 * f
-  const shadowA = dm ? 0.30 * f : 0.10 * f
-  const blur = Math.round(24 * f)
-  st['background-color'] = dm
-    ? 'rgba(22, 41, 36, ' + bgA.toFixed(3) + ')'
-    : 'rgba(255, 255, 255, ' + bgA.toFixed(3) + ')'
-  st['background-image'] = 'linear-gradient(180deg, rgba(255, 255, 255, ' + refrA.toFixed(3) + ') 0%, rgba(255, 255, 255, 0) 45%)'
-  st['border-top-color'] = 'rgba(255, 255, 255, ' + edgeA.toFixed(3) + ')'
-  st['box-shadow'] = dm
-    ? '0 -6px 20px rgba(0, 0, 0, ' + shadowA.toFixed(3) + ')'
-    : '0 -6px 20px rgba(10, 79, 61, ' + shadowA.toFixed(3) + ')'
+  st['background-color'] = glass.value
+    ? (dm ? 'rgba(255, 255, 255, 0.13)' : 'rgba(255, 255, 255, 0.18)')
+    : 'rgba(255, 255, 255, 0.88)'
   // #ifdef MP-WEIXIN
-  // 模糊半径同驱（fade=0 时 blur(0) 即纯透明，不留磨砂痕迹）；App 端是否支持 backdrop-filter 未真机验证
-  st['backdrop-filter'] = 'blur(' + blur + 'px) saturate(180%)'
-  st['-webkit-backdrop-filter'] = 'blur(' + blur + 'px) saturate(180%)'
+  // App／Vapor 端禁用 CSS transition（见 uni-app x 原生渲染子集），故补间只在小程序端下发；
+  // TODO(App 端 Worklet)：稿面要求「Worklet 原生线程动画保 120fps」，本工程未做真机验证，
+  //   App 端当前退化为「阶段跳变」（气泡瞬移到目标槽，无压扁过程），待 Boss 决定要不要补 JS 补间
+  st['transition-property'] = 'left, width, height'
+  st['transition-timing-function'] = 'cubic-bezier(0.34, 1.56, 0.64, 1)'
+  st['transition-duration'] = phase.value == 'press' ? '90ms'
+    : (phase.value == 'travel' ? '320ms' : (phase.value == 'settle' ? '120ms' : '140ms'))
   // #endif
   return st
 })
 
-function switchTab(target: string): void {
-  if (target === props.active) return
-  // L1 反馈（切 Tab）：轻触觉，low 档无振动马达时静默降级
+const barClass = computed((): string[] => {
+  const c = ['tb-bar'] as string[]
+  c.push(glass.value ? 'tb-glass' : 'tb-flat')
+  if (props.dark == true) c.push('tb-dark')
+  return c
+})
+
+const bubbleClass = computed((): string[] => {
+  const c = ['tb-bubble'] as string[]
+  c.push(glass.value ? 'tb-bub-glass' : 'tb-bub-flat')
+  if (props.dark == true) {
+    c.push('tb-bub-dark')
+  } else if (glass.value) {
+    c.push('tb-bub-light')
+  }
+  return c
+})
+
+function iconSrc(idx: number): string {
+  return idx == myIdx.value ? ICONS[idx][1] : ICONS[idx][0]
+}
+
+function labelClass(idx: number): string {
+  return idx == myIdx.value ? 'tb-label-on' : ''
+}
+
+/** 入场时间线：起点态已在 setup 内就位（press＋anchorIdx），此处只推进 移动→落位→静止 三段 */
+function playEnter(): void {
+  setTimeout(() => {
+    phase.value = 'travel'
+    setTimeout(() => {
+      phase.value = 'settle'
+      setTimeout(() => {
+        phase.value = 'rest'
+      }, 120)
+    }, 320)
+  }, 16)
+}
+
+onMounted(() => {
+  if (phase.value == 'press' && anchorIdx.value != myIdx.value) {
+    playEnter()
+  }
+})
+
+function onTap(idx: number): void {
+  if (idx == myIdx.value) return
+  // L1 反馈（切 Tab）：按下压扁 ＋ 轻触觉，low 档无振动马达时静默降级
+  anchorIdx.value = myIdx.value
+  phase.value = 'press'
   if (device.haptics) {
     try {
       uni.vibrateShort()
@@ -107,82 +266,160 @@ function switchTab(target: string): void {
       // 无触觉设备忽略
     }
   }
-  if (target === 'home') {
-    uni.redirectTo({ url: '/pages/home/Home' })
-  } else {
-    uni.redirectTo({ url: '/pages/profile/Profile' })
-  }
+  writeOrigin(myIdx.value)
+  // 90ms＝稿面「静止→按下」时长，让压扁被看见一瞬再换页（换页后由新页继续飞入→落位）
+  setTimeout(() => {
+    uni.redirectTo({ url: '/pages/' + PAGES[idx] })
+  }, 90)
 }
 </script>
 
 <style>
-.tabbar {
+/* ── 胶囊：悬浮、四周留空气，靠朝上柔影与背景模糊撑起体积 ── */
+.tb-bar {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  z-index: 30;
   flex-direction: row;
-  background-color: #F8FCFA;
-  border-top-width: 1px;
-  border-top-color: #E3EFE8;
-  padding-top: 10px;
-  padding-bottom: 20px;
+  border-radius: 28px;
+  overflow: hidden;
 }
-/* #29 液态玻璃（仅 backdropBlur 能力开启时挂类）：
-   底色＝DesignTokens 的 glass-bg（#FFFFFF@74%，丢 alpha 即退化成白块）；
-   上缘高光描边＋顶部折光渐变＝玻璃厚度错觉；向上柔影＝浮在内容之上。
-   注：scroll-fade 后本类只是「fade=1 满值」的静态兜底，运行时同值由 barStyle 内联覆盖（内联优先级更高） */
+/* 玻璃档（backdropBlur=true）：底 #FFFFFF 60% ＋ 顶部折光 ＋ 白 80% 描边 ＋ 向上柔影
+   ⚠️ 60%＝Boss 2026-09-22 定稿（原稿面文字标注的 88% 漏改，太厚压不住气泡） */
 .tb-glass {
-  background-color: rgba(255, 255, 255, 0.74);
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 45%);
+  background-color: rgba(255, 255, 255, 0.6);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 45%);
+  border-top-width: 1px;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
   border-top-color: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 -6px 20px rgba(10, 79, 61, 0.10);
+  border-right-color: rgba(255, 255, 255, 0.8);
+  border-bottom-color: rgba(255, 255, 255, 0.8);
+  border-left-color: rgba(255, 255, 255, 0.8);
+  border-style: solid;
+  box-shadow: 0 -4px 24px rgba(10, 79, 61, 0.14);
 }
-/* TODO(App 端待验)：backdrop-filter 在 uni-app x 原生渲染大概率不支持（AGENTS.md 已知风险），
-   故模糊只走 MP 条件编译；App/Web 上 .tb-glass 仍为半透无模糊，真机若发糊再决定是否强制不透明 */
 /* #ifdef MP-WEIXIN */
 .tb-glass {
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   backdrop-filter: blur(24px) saturate(180%);
 }
 /* #endif */
-.tab-item {
+/* 降级档（low 机／无模糊能力）：稿面「胶囊改不透明 #F8FCFA」，折光与投影保留 */
+.tb-flat {
+  background-color: #F8FCFA;
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 45%);
+  box-shadow: 0 -4px 24px rgba(10, 79, 61, 0.14);
+}
+/* 暗黑档：卡色 token #162924 加 alpha（玻璃面不丢 alpha），描边白 10%，投影改向下黑 */
+.tb-dark {
+  background-color: rgba(22, 41, 36, 0.72);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 45%);
+  border-top-color: rgba(255, 255, 255, 0.1);
+  border-right-color: rgba(255, 255, 255, 0.1);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+  border-left-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* ── 三颗 Tab：图标在左、文字在右（稿面图标 x=18、文字 x=46，gap 6） ── */
+.tb-item {
   flex: 1;
+  flex-direction: row;
   align-items: center;
+  justify-content: center;
+  height: 56px;
+  position: relative;
+  z-index: 2;
 }
-.tab-icon-home {
-  width: 29px;
-  height: 27px;
+.tb-ic {
+  width: 22px;
+  height: 22px;
 }
-.tab-icon-profile {
-  width: 25px;
-  height: 25px;
+/* 源图留白不等，按稿面逐个回调到视觉等大 */
+.tb-ic-home {
+  width: 22px;
+  height: 22px;
 }
-.tab-label {
-  font-size: 11px;
-  color: #5C7570;
-  margin-top: 4px;
+.tb-ic-rec {
+  width: 23px;
+  height: 23px;
 }
-.tab-label-active {
+.tb-ic-me {
+  width: 23.5px;
+  height: 23.5px;
+}
+.tb-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #8A8A8A;
+  margin-left: 6px;
+}
+.tb-label-on {
   color: #17916B;
 }
+
+/* ── 选中气泡：iOS26 折射全靠 backdrop-filter，无描边、无手绘内高光（Boss 拍板）
+   底色（浅 18%／暗 13%／降级 88%）由 bubbleStyle 运行时下发，此处只挂模糊与阴影 ── */
+.tb-bubble {
+  position: absolute;
+  z-index: 1;
+  border-radius: 22px;
+}
 /* #ifdef MP-WEIXIN */
-.tabbar-dark {
-  background-color: #10201B;
-  border-top-color: #1E352F;
+.tb-bub-glass {
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
 }
-.tabbar-dark .tab-label {
-  color: rgba(234, 249, 243, 0.5);
+/* 图标／文字高亮比气泡晚 40ms（稿面「移动中图标滞后 40ms，被气泡拖着走」） */
+.tb-label {
+  transition-property: color;
+  transition-duration: 120ms;
+  transition-delay: 40ms;
 }
-.tabbar-dark .tab-label-active {
+/* #endif */
+/* 暗黑：模糊半径提到 28 ＋ 气泡投影（DesignTokens §7.2） */
+.tb-bub-dark {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.38);
+}
+/* 浅色玻璃态（Boss 2026-09-22 定稿）：60% 胶囊底上「雕」出气泡＝极细半透明白描边（模拟玻璃折射亮边）
+   ＋ 微弱向下投影（悬浮高度差）。仅浅底玻璃档挂，暗态与 low 降级档不受影响 */
+.tb-bub-light {
+  border-top-width: 1px;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+  border-style: solid;
+  border-top-color: rgba(255, 255, 255, 0.6);
+  border-right-color: rgba(255, 255, 255, 0.6);
+  border-bottom-color: rgba(255, 255, 255, 0.6);
+  border-left-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+/* #ifdef MP-WEIXIN */
+.tb-bub-dark {
+  -webkit-backdrop-filter: blur(28px);
+  backdrop-filter: blur(28px);
+}
+/* #endif */
+/* 降级档：拿不到折射的气泡＝实色 ＋ token 描边，动画照留 */
+.tb-bub-flat {
+  border-top-width: 1px;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+  border-style: solid;
+  border-color: #E3EFE8;
+  box-shadow: 0 4px 14px rgba(10, 79, 61, 0.1);
+}
+
+/* #ifdef MP-WEIXIN */
+/* 暗黑文字（后代选择器只在 MP 端生效；App 端须改逐元素 :class，见 AGENTS 深色模式条款） */
+.tb-dark .tb-label {
+  color: #8B9E94;
+}
+.tb-dark .tb-label-on {
   color: #52D6AC;
-}
-/* 暗态玻璃：底＝卡色 token #162924 加 alpha，高光线改白 10%，向上柔影改黑 */
-.tb-glass-dark {
-  background-color: rgba(22, 41, 36, 0.72);
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 45%);
-  border-top-color: rgba(255, 255, 255, 0.10);
-  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.30);
 }
 /* #endif */
 </style>

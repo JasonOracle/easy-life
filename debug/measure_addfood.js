@@ -1,5 +1,12 @@
 /**
  * [变更日志]
+ * 修改时间：2026-09-22
+ * AI模型：Qoder (Claude)
+ * 修改内容：[FoodPicker 列表行类名去冲突：探针选择器由 .page >>> .row 改 .page >>> .fp-row
+ *   （组件类名统一加 fp- 前缀，避免与 Settings 页同名 .row 在小程序端互相污染）]
+ */
+/**
+ * [变更日志]
  * 修改时间：2026-09-21
  * AI模型：Qoder (Claude)
  * 修改内容：[新建：Boss 反馈三缺陷的几何取证——餐次卡被压扁/光晕成硬边矩形/选中项下绿点。
@@ -18,7 +25,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms))
   const page = await mp.currentPage()
   await (await page.$('.fab')).tap()
   await wait(900)
-  const row0 = await page.$('.page >>> .row')
+  const row0 = await page.$('.page >>> .fp-row')
   console.log('ROW0=' + (row0 ? await row0.text() : 'MISSING'))
   await row0.tap()
   await wait(1200)

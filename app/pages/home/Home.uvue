@@ -1,11 +1,32 @@
 <!--
   [变更日志]
   修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[实施方案A：页底预留高度升级为动态安全区全避让。
+    .page padding-bottom 由固定 78px 改为 92px 并在小程序端结合 calc(82px + env(safe-area-inset-bottom))，
+    消除全面屏下内容滚到底被 Tabbar 遮挡的问题，保持 14px 舒适呼吸间距]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[TabBar 液态玻璃胶囊配套（Boss 拍板第 3/4 条）：
+    1. 删除 #29 的 tabFade 计算与 onPageScroll 监听（新胶囊恒常可见，渐显机制整体废弃），
+       Tabbar 调用去 :fade 属性；本页再无滚动监听（#28 起首页标题块常驻无阈值）；
+    2. .page padding-bottom 由 40 恢复为 78＝悬浮胶囊实占（高 56 ＋ 离底 22，即无小白条机型；
+       带小白条机型离底＝safeBottom+12，实占更高，内容仍穿到栏下——Boss 已接受的既知代价）；
+    3. 目标 Pill 日历图标 .pill-cal 的 openRecords() 由 navigateTo 改 redirectTo——Records 已升级为
+       一级 Tab 页，页内不再有返回钮，必须换页而非压栈]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
   AI模型：Qoder (Claude)
   修改内容：[#29 配套（Boss 拍板「缩页底预留位」）：.page 的 padding-bottom 由 78 压到 40，
     让内容常态穿到玻璃 Tabbar（高约 76）之下，玻璃才有东西可透；末屏约 36px 内容会落在半透栏下;
     2. #29 续（Boss：「我想要的 tabbar 是 scroll-fade-navbar 那种效果」）：重新挂回 onPageScroll
-    （#28 曾删），按 0→60px 线性算 tabFade（0.05 量化）透传给 Tabbar，底槽随滚动渐显]
+    （#28 曾删），按 0→60px 线性算 tabFade（0.05 量化）透传给 Tabbar，底槽随滚动渐显
+    （2026-09-22 胶囊化后该机制已按 Boss 指令整体废弃，此条留作追溯）]
 -->
 <!--
   [变更日志]
@@ -207,8 +228,8 @@
       </view>
     </view>
 
-    <!-- 底部 Tab（共享组件，Tabbar 终案前按 v2 两 Tab 落地） -->
-    <Tabbar active="home" :fade="tabFade" ></Tabbar>
+    <!-- 底部 Tab（共享组件：液态玻璃悬浮胶囊，三 Tab 首页／日历／我的） -->
+    <Tabbar active="home" ></Tabbar>
 
     <!-- 弹层⓪ 食物选择列表 → 弹窗① 添加食物（更换时回到列表并回显） -->
     <FoodPicker v-model:show="pickerShow" :selected-id="addFoodId" @select="onPickFood" ></FoodPicker>
@@ -220,7 +241,6 @@
 
 <script setup lang="uts">
 import { ref } from 'vue'
-import { onPageScroll } from '@dcloudio/uni-app'
 
 /**
  * 演示数据（稿面静态值，store 重建后再接真实数据）。
@@ -236,16 +256,8 @@ try {
   sbH = 0
 }
 
-// TabBar 渐显（scroll-fade，照官方示例「随滚动渐显的透明导航栏」）：0→60px 线性，
-// 按 0.05 量化＝整段渐显最多 20 次 setData，绝不逐帧写；三端生效。
-// 阈值取 60 而非示例的 100＝实测 Records 页最大滚动只有 70px，100 会让该页永远到不了满玻璃
-const tabFade = ref<number>(0)
-onPageScroll((e) => {
-  let q = e.scrollTop / 60
-  if (q > 1) q = 1
-  const fq = Math.round(q * 20) / 20
-  if (fq !== tabFade.value) tabFade.value = fq
-})
+// TabBar 随滚动渐显（#29）已于 2026-09-22 随液态玻璃胶囊重构整体废弃：新胶囊恒常可见，
+// 本页因此不再需要任何滚动监听（#28 定案的常驻标题块 .hm-nav 无阈值）
 
 // 右上加号位置：默认稿面位置；小程序端放到胶囊左侧防遮挡
 const fabRight = ref('14px')
@@ -323,7 +335,8 @@ function openGoal(): void {
 }
 
 function openRecords(): void {
-  uni.navigateTo({ url: '/pages/records/Records' })
+  // Records 已升级为一级 Tab 页（无返回钮）→ 用 redirectTo 换页，不压栈
+  uni.redirectTo({ url: '/pages/records/Records' })
 }
 
 const MEAL_LABELS: Record<string, string> = {
@@ -387,7 +400,10 @@ const meals = computed<Meal[]>(() =>
 <style>
 .page {
   background-color: #F2FAF5;
-  padding-bottom: 40px;
+  padding-bottom: 92px;
+  /* #ifdef MP-WEIXIN */
+  padding-bottom: calc(82px + env(safe-area-inset-bottom));
+  /* #endif */
 }
 /* 常驻标题块导航栏（#28 方案A：Boss 拍板三端固定顶部，替代 P1 hm-st-mask 两态遮罩）：
    z45 全时段置顶，底色同页面底 #F2FAF5（非透明→无状态栏带穿透，也无需滚动阈值） */

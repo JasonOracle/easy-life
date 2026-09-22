@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CalTrack 液态玻璃 Tab Bar · 动效 Demo</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; gap: 28px; align-items: flex-start;
+    justify-content: center; padding: 32px 24px; font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #0A1612; color: #E6F2EC;
+  }
+  .stage {
+    position: relative; width: 375px; height: 812px; border-radius: 40px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,.55); background: #E9F4EF; flex: none;
+  }
+  .scroller { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; }
+  .scroller img { display: block; width: 375px; }
+
+  /* ---------- 胶囊 ---------- */
+  .stage {
+    --bar-bg: rgba(255,255,255,.78);
+    --bar-rim: rgba(255,255,255,.86);
+    --bar-refr: rgba(255,255,255,.45);
+    --bar-shadow: rgba(10,79,61,.14);
+    --bar-blur: 30px;
+    --on: #17916B; --off: #8A8A8A; --indicator: rgba(10,79,61,.28);
+  }
+  .stage.dark {
+    --bar-bg: rgba(22,41,36,.72);
+    --bar-rim: rgba(255,255,255,.10);
+    --bar-refr: rgba(255,255,255,.10);
+    --bar-shadow: rgba(0,0,0,.30);
+    --on: #52D6AC; --off: #8B9E94; --indicator: rgba(255,255,255,.35);
+  }
+
+  /* ---------- 气泡：五层，全部同尺寸（inset:0） ----------
+     L1 背景模糊(纱+芯) · L2 液化效果(外圈13px) · L3 高光 · L4 色散 · L5 暗折射边
+     对应设计稿图层结构：背景模糊 / 液化效果(液化+蒙版) / 高光 / txt
+     关键：中间「糊」、边缘「清」——边缘是压缩后的折射带，越糊越不像玻璃 */
+  .bub { position: absolute; top: -7px; left: 0; width: 112px; height: 64px; border-radius: 32px;
+         transform: translateX(0); will-change: transform; }
+  .bub > i { position: absolute; inset: 0; border-radius: inherit; display: block; }
+  /* 只留外圈 13px */
+  .ring {
+    padding: 13px;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+  /* 只留中间（内容盒） */
+  .core {
+    padding: 13px;
+    -webkit-mask: linear-gradient(#000 0 0) content-box;
+    mask: linear-gradient(#000 0 0) content-box;
+  }
+
+  /* L1a 白纱：半透白 α≈.40→.58。纱要够薄，背后内容的颜色才透得出来 */
+  .bub .veil {
+    background: linear-gradient(180deg,
+      rgba(255,255,255,.34) 0%, rgba(255,255,255,.42) 52%, rgba(255,255,255,.52) 100%);
+    box-shadow: 0 6px 18px rgba(10,79,61,.22), 0 0 9px 2px rgba(255,255,255,.42);
+  }
+  /* L1b 背景模糊：重模糊，边界羽化 → 外圈才真的比中间「清」 */
+  .bub .blur1 {
+    -webkit-mask: url(#softcore); mask: url(#softcore);
+    -webkit-backdrop-filter: blur(26px) saturate(180%) brightness(1.02);
+            backdrop-filter: blur(26px) saturate(180%) brightness(1.02);
+  }
+  /* L2 液化效果：羽化外圈 13px。refract 档用 url() 位移把背景真的掰弯；
+     降级档只加一点饱和，让边缘比中间「浓」一点 */
+  .bub .lens {
+    -webkit-mask: url(#softring); mask: url(#softring);
+    -webkit-backdrop-filter: blur(10px) saturate(200%) brightness(1.04);
+            backdrop-filter: blur(10px) saturate(200%) brightness(1.04);
+  }
+  .refract .bub .lens {
+    -webkit-backdrop-filter: url(#lg-lens) blur(6px) saturate(200%) brightness(1.04);
+            backdrop-filter: url(#lg-lens) blur(6px) saturate(200%) brightness(1.04);
+  }
+  /* L3 高光：贴边 2px 亮线 + 一圈柔光晕 */
+  .bub .f3 {
+    padding: 2px; mix-blend-mode: plus-lighter; filter: blur(1.3px);
+    background: linear-gradient(180deg,
+      rgba(255,255,255,.55) 0%, rgba(255,255,255,.16) 46%, rgba(255,255,255,.48) 100%);
+  }
+  .bub .f3b {
+    padding: 10px; mix-blend-mode: plus-lighter; filter: blur(4px);
+    background: linear-gradient(180deg,
+      rgba(255,255,255,.14) 0%, rgba(255,255,255,.02) 40%, rgba(255,255,255,0) 62%, rgba(255,255,255,.10) 100%);
+  }
+  /* L4 色散：最外 2px 冷暖双色（左冷右暖），压到「刚好看得见」*/
+  .bub .f4 {
+    padding: 2px; mix-blend-mode: plus-lighter; filter: blur(.7px);
+    background: conic-gradient(from 200deg,
+      rgba(120,236,255,.62), rgba(120,236,255,0) 22%,
+      rgba(255,255,255,0) 40%, rgba(255,178,96,0) 50%,
+      rgba(255,176,92,.58) 68%, rgba(255,176,92,0) 88%, rgba(120,236,255,.45));
+  }
+  /* L5 暗折射边：一条很轻的下缘压深，别做成描边 */
+  .bub .edge {
+    padding: 1.2px; mix-blend-mode: multiply;
+    background: linear-gradient(180deg,
+      rgba(10,79,61,.14) 0%, rgba(10,79,61,.04) 45%, rgba(10,79,61,.14) 100%);
+  }
+
+  .stage.dark .bub .veil {
+    background: linear-gradient(180deg,
+      rgba(255,255,255,.06) 0%, rgba(255,255,255,.11) 52%, rgba(255,255,255,.19) 100%);
+    box-shadow: 0 6px 18px rgba(0,0,0,.42), 0 0 9px 2px rgba(255,255,255,.20);
+  }
+  .stage.dark .bub .blur1 {
+    -webkit-backdrop-filter: blur(26px) saturate(170%) brightness(1.02);
+            backdrop-filter: blur(26px) saturate(170%) brightness(1.02);
+  }
+  .stage.dark .bub .lens {
+    -webkit-backdrop-filter: blur(3px) saturate(300%) brightness(1.06);
+            backdrop-filter: blur(3px) saturate(300%) brightness(1.06);
+  }
+  .stage.dark.refract .bub .lens {
+    -webkit-backdrop-filter: url(#lg-lens) blur(3px) saturate(300%) brightness(1.06);
+            backdrop-filter: url(#lg-lens) blur(3px) saturate(300%) brightness(1.06);
+  }
+  .stage.dark .bub .f3 {
+    background: linear-gradient(180deg,
+      rgba(255,255,255,.58) 0%, rgba(255,255,255,.15) 46%, rgba(255,255,255,.50) 100%); }
+  .stage.dark .bub .f3b {
+    background: linear-gradient(180deg,
+      rgba(255,255,255,.26) 0%, rgba(255,255,255,.04) 40%, rgba(255,255,255,0) 62%, rgba(255,255,255,.20) 100%); }
+  .stage.dark .bub .edge {
+    background: linear-gradient(180deg,
+      rgba(0,0,0,.50) 0%, rgba(0,0,0,.16) 45%, rgba(0,0,0,.42) 100%); }
+
+  /* 降级档：device.backdropBlur=false（安卓小程序 / uni-app x 原生） */
+  .flat .bub .veil { background: #FFFFFF; box-shadow: 0 6px 18px rgba(10,79,61,.18); }
+  .flat .bub .blur1, .flat .bub .lens, .flat .bub .f3, .flat .bub .f3b, .flat .bub .f4 { display: none; }
+  .flat .bub .edge { mix-blend-mode: normal; background: none; box-shadow: inset 0 0 0 1px #E3EFE8; }
+  .flat .bar { background-color: #F8FCFA; border-color: #E3EFE8; backdrop-filter: none;
+               background-image: none; }
+  .flat.scrollable .bub .edge { box-shadow: inset 0 0 0 1px #E3EFE8; }
+
+  .bar {
+    position: absolute; left: 16px; right: 16px; bottom: 22px; height: 56px;
+    border-radius: 28px; border: 1px solid var(--bar-rim);
+    background-color: var(--bar-bg);
+    background-image: linear-gradient(180deg, var(--bar-refr) 0%, rgba(255,255,255,0) 45%);
+    box-shadow: 0 8px 24px var(--bar-shadow);
+    -webkit-backdrop-filter: blur(var(--bar-blur)) saturate(180%);
+    backdrop-filter: blur(var(--bar-blur)) saturate(180%);
+  }
+  .indicator {
+    position: absolute; left: 136px; bottom: 9px; width: 103px; height: 4px; border-radius: 2px;
+    background: var(--indicator);
+  }
+  .tabs { position: absolute; inset: 0; display: flex; z-index: 2; }
+  .tab {
+    flex: 1; border: 0; background: none; padding: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    font: 600 12px/1 Inter, "PingFang SC", "Microsoft YaHei", sans-serif; color: var(--off);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tab img { width: 22px; height: 22px; display: block; }
+  .tab.on { color: var(--on); }
+  .tab.on img { animation: pop var(--pop-ms, 260ms) ease-out both; }
+  @keyframes pop { 0% { transform: scale(.90) } 55% { transform: scale(1.08) } 100% { transform: scale(1) } }
+
+  /* ---------- 控制面板 ---------- */
+  .panel { width: 300px; flex: none; display: flex; flex-direction: column; gap: 14px; }
+  h1 { font-size: 17px; margin: 0; letter-spacing: .02em; }
+  .sub { font-size: 12px; color: #8B9E94; margin: -8px 0 0; }
+  .grp { display: flex; flex-direction: column; gap: 7px; }
+  .grp > b { font-size: 11px; color: #8B9E94; font-weight: 600; letter-spacing: .06em; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .row button {
+    font: 500 12px/1 Inter, "PingFang SC", sans-serif; padding: 8px 12px; border-radius: 10px;
+    border: 1px solid #2A4238; background: #162924; color: #8B9E94; cursor: pointer;
+  }
+  .row button.sel { background: #1A3B2F; color: #52D6AC; border-color: #52D6AC; }
+  .read {
+    font: 500 11px/1.7 ui-monospace, Consolas, monospace; background: #162924; border: 1px solid #2A4238;
+    border-radius: 12px; padding: 12px; white-space: pre; color: #8B9E94;
+  }
+  .read span { color: #52D6AC; }
+  .tip { font-size: 11px; line-height: 1.6; color: #6E8079; margin: 0; }
+</style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <mask id="softcore" maskUnits="userSpaceOnUse" x="-12" y="-12" width="136" height="88"
+        maskContentUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="112" height="64" rx="32" fill="#fff" filter="url(#soften2)"/>
+    </mask>
+    <filter id="soften2" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <mask id="softring" maskUnits="userSpaceOnUse" x="-8" y="-8" width="128" height="80"
+        maskContentUnits="userSpaceOnUse">
+      <rect x="6.5" y="6.5" width="99" height="51" rx="25.5" fill="none" stroke="#fff" stroke-width="13"
+            filter="url(#soften)"/>
+    </mask>
+    <filter id="soften" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+  <filter id="lg-lens" x="-30%" y="-60%" width="160%" height="220%">
+      <feImage x="0" y="0" width="112" height="64" preserveAspectRatio="none" href="data:image/png;base64,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" result="lensmap"/>
+      <feDisplacementMap in="SourceGraphic" in2="lensmap" scale="76"
+        xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
+  <div class="stage refract" id="stage">
+    <div class="scroller" id="scroller"><img id="shot" src="assets/home-light.png" alt="首页"></div>
+    <div class="bar" id="bar">
+      <div class="bub" id="bubble">
+        <i class="veil"></i><i class="blur1"></i><i class="lens"></i>
+        <i class="f3b ring"></i><i class="f3 ring"></i><i class="f4 ring"></i><i class="edge ring"></i>
+      </div>
+      <div class="tabs" id="tabs"></div>
+    </div>
+    <div class="indicator"></div>
+  </div>
+
+  <div class="panel">
+    <h1>液态玻璃 Tab Bar</h1>
+    <p class="sub">滚动页面看真实背景模糊；点 Tab 看气泡液态位移。</p>
+    <div class="grp"><b>主题</b><div class="row" id="gTheme">
+      <button data-v="light" class="sel">浅色</button><button data-v="dark">暗黑</button>
+    </div></div>
+    <div class="grp"><b>材质</b><div class="row" id="gMat">
+      <button data-v="glass" class="sel">真玻璃 backdrop-filter</button><button data-v="flat">降级 假玻璃</button>
+    </div></div>
+    <div class="grp"><b>折射</b><div class="row" id="gRefr">
+      <button data-v="on" class="sel">真·液化 位移</button><button data-v="off">分层遮罩（可落地）</button>
+    </div></div>
+    <div class="grp"><b>时长</b><div class="row" id="gSpeed">
+      <button data-v="1" class="sel">1×</button><button data-v="0.25">慢放 0.25×</button>
+    </div></div>
+    <div class="grp"><b>当前状态</b><div class="read" id="read"></div></div>
+    <p class="tip">「真·液化 位移」用 SVG 位移图把背景真正掰弯，只有浏览器能跑；
+    小程序 / uni-app x 原生请用「分层遮罩」，观感接近且性能便宜。</p>
+  </div>
+
+<script>
+const TABS = [
+  { key: 'home',   label: '首页', cx: 57.17 },
+  { key: 'rili',   label: '日历', cx: 171.5 },
+  { key: 'center', label: '我的', cx: 285.83 }
+];
+const BAR_W = 343, BUB_W = 112;  // 气泡 112×64，上下各溢出胶囊 4px
+const stage = document.getElementById('stage');
+const bubble = document.getElementById('bubble');
+const tabsEl = document.getElementById('tabs');
+const read = document.getElementById('read');
+const shot = document.getElementById('shot');
+
+const K = { down: 90, move: 320, settle: 120, lag: 40 };
+let scale = 1, cur = 0, theme = 'light';
+const ms = v => Math.round(v * scale);
+const easeMove = 'cubic-bezier(.34,1.56,.64,1)';
+const xOf = i => TABS[i].cx - BUB_W / 2 + (BAR_W - 343) / 2;
+const icon = i => theme === 'dark'
+  ? `assets/tab_${TABS[i].key}_${i === cur ? 'on_' : ''}dk.png`
+  : `assets/tab_${TABS[i].key}${i === cur ? '_on' : ''}.png`;
+
+TABS.forEach((t, i) => {
+  const b = document.createElement('button');
+  b.className = 'tab' + (i === 0 ? ' on' : '');
+  b.innerHTML = `<img src="${icon(i)}" alt=""><span>${t.label}</span>`;
+  b.addEventListener('pointerdown', () => press(i));
+  b.addEventListener('click', () => go(i));
+  tabsEl.appendChild(b);
+});
+
+function paint() {
+  [...tabsEl.children].forEach((el, i) => {
+    el.classList.toggle('on', i === cur);
+    el.querySelector('img').src = icon(i);
+  });
+}
+function show(state, sx, sy, dur) {
+  read.innerHTML =
+    `state   : <span>${state}</span>\n` +
+    `tab     : <span>${TABS[cur].label}</span>\n` +
+    `scale   : <span>${sx.toFixed(2)} × ${sy.toFixed(2)}</span>\n` +
+    `duration: <span>${dur}ms</span>\n` +
+    `easing  : <span>${dur ? easeMove : '—'}</span>\n` +
+    `blur    : <span>bar 26 / 面 24 / 液化环 13</span>\n` +
+    `面纱 α  : <span>bar .62 / 面 .40→.58</span>\n` +
+    `layers  : <span>背景模糊 · 液化 · 高光 · 色散 · 暗边</span>`;
+}
+
+function press(i) {
+  if (i === cur) return;
+  bubble.style.transition = `transform ${ms(K.down)}ms ease-out`;
+  bubble.style.transform = `translateX(${xOf(cur)}px) scale(.96)`;
+  show('按下 touch-down', .96, .96, ms(K.down));
+}
+
+function go(i) {
+  if (i === cur) return;
+  bubble.style.transition = `transform ${ms(K.move)}ms ${easeMove}`;
+  bubble.style.transform = `translateX(${xOf(i)}px) scale(1.12, .94)`;
+  show('移动中 travel', 1.12, .94, ms(K.move));
+  setTimeout(() => {
+    cur = i; paint();
+    const im = tabsEl.children[i].querySelector('img');
+    im.style.animation = 'none'; void im.offsetWidth; im.style.animation = '';
+  }, ms(K.move) / 2 + ms(K.lag));
+  setTimeout(() => {
+    bubble.style.transition = `transform ${ms(K.settle)}ms cubic-bezier(.3,0,.2,1)`;
+    bubble.style.transform = `translateX(${xOf(i)}px) scale(1.06, .97)`;
+    show('落位 settle', 1.06, .97, ms(K.settle));
+    setTimeout(() => {
+      bubble.style.transition = `transform ${ms(K.settle)}ms ease-out`;
+      bubble.style.transform = `translateX(${xOf(i)}px) scale(1, 1)`;
+      show('静止 idle', 1, 1, 0);
+    }, ms(K.settle));
+  }, ms(K.move));
+  if (navigator.vibrate) navigator.vibrate(8);
+}
+
+document.getElementById('gTheme').onclick = e => {
+  if (e.target.dataset.v) {
+    theme = e.target.dataset.v;
+    stage.classList.toggle('dark', theme === 'dark');
+    shot.src = 'assets/home-' + theme + '.png';
+    paint();
+    [...e.currentTarget.children].forEach(b => b.classList.toggle('sel', b === e.target));
+  }
+};
+document.getElementById('gMat').onclick = e => {
+  if (e.target.dataset.v) {
+    stage.classList.toggle('flat', e.target.dataset.v === 'flat');
+    [...e.currentTarget.children].forEach(b => b.classList.toggle('sel', b === e.target));
+  }
+};
+document.getElementById('gRefr').onclick = e => {
+  if (e.target.dataset.v) {
+    stage.classList.toggle('refract', e.target.dataset.v === 'on');
+    [...e.currentTarget.children].forEach(b => b.classList.toggle('sel', b === e.target));
+  }
+};
+document.getElementById('gSpeed').onclick = e => {
+  if (e.target.dataset.v) {
+    scale = parseFloat(e.target.dataset.v);
+    document.documentElement.style.setProperty('--pop-ms', ms(260) + 'ms');
+    [...e.currentTarget.children].forEach(b => b.classList.toggle('sel', b === e.target));
+  }
+};
+bubble.style.transform = `translateX(${xOf(0)}px)`;
+show('静止 idle', 1, 1, 0);
+
+// 注意：CSS.supports('backdrop-filter','url(#x)') 会误报 false（Chrome/Safari 其实支持），
+// 所以不做能力探测，默认走「真·液化」，跑不动的平台请手动切「分层遮罩」。
+const h = location.hash.slice(1).split(/[.,&]/);
+if (h.includes('dark')) document.querySelector('#gTheme [data-v=dark]').click();
+if (h.includes('flat')) document.querySelector('#gMat [data-v=flat]').click();
+if (h.includes('norefr')) document.querySelector('#gRefr [data-v=off]').click();
+if (h.includes('slow')) document.querySelector('#gSpeed [data-v="0.25"]').click();
+const g = h.find(x => /^go\d$/.test(x));
+if (g) setTimeout(() => go(+g[2]), 60);
+const sc = h.find(x => /^sc=/.test(x));
+if (sc) setTimeout(() => { document.getElementById('scroller').scrollTop = +sc.split('=')[1]; }, 40);
+</script>
+</body>
+</html>

@@ -1,5 +1,12 @@
 /**
  * [变更日志]
+ * 修改时间：2026-09-22
+ * AI模型：Qoder (Claude)
+ * 修改内容：[FoodPicker 列表行类名去冲突：探针选择器由 .page >>> .row 改 .page >>> .fp-row
+ *   （组件类名统一加 fp- 前缀，避免与 Settings 页同名 .row 在小程序端互相污染）]
+ */
+/**
+ * [变更日志]
  * 修改时间：2026-09-21
  * AI模型：Qoder (Claude)
  * 修改内容：[新建：弹层③ 数据层探针——FAB→行→确认 后轮询 page.data() 中
@@ -25,7 +32,7 @@ const pick = (d) => {
   await new Promise(r => setTimeout(r, 1200))
   page = await mp.currentPage()
   console.log('AFTER_FAB=' + pick(await page.data()))
-  const row = await page.$('.page >>> .row')
+  const row = await page.$('.page >>> .fp-row')
   console.log('ROW=' + (row != null))
   await row.tap()
   await new Promise(r => setTimeout(r, 1200))

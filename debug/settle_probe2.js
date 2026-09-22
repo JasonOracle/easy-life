@@ -1,5 +1,12 @@
 /**
  * [变更日志]
+ * 修改时间：2026-09-22
+ * AI模型：Qoder (Claude)
+ * 修改内容：[FoodPicker 列表行类名去冲突：探针选择器由 .page >>> .row 改 .page >>> .fp-row
+ *   （组件类名统一加 fp- 前缀，避免与 Settings 页同名 .row 在小程序端互相污染）]
+ */
+/**
+ * [变更日志]
  * 修改时间：2026-09-21
  * AI模型：Qoder (Claude)
  * 修改内容：[新建：弹层③ 决定性探针——确认点击后读 sb-big-num/sb-budget-text 文本、
@@ -24,10 +31,10 @@ async function txt(page, sel) {
   await (await page.$('.fab')).tap()
   await new Promise(r => setTimeout(r, 1200))
   page = await mp.currentPage()
-  await (await page.$('.page >>> .row')).tap()
+  await (await page.$('.page >>> .fp-row')).tap()
   await new Promise(r => setTimeout(r, 1200))
   page = await mp.currentPage()
-  console.log('AFTER_ROW pickerRow=' + (await page.$('.page >>> .row') != null) + ' confirmBtn=' + (await page.$('.page >>> .confirm-btn') != null))
+  console.log('AFTER_ROW pickerRow=' + (await page.$('.page >>> .fp-row') != null) + ' confirmBtn=' + (await page.$('.page >>> .confirm-btn') != null))
   const t0 = Date.now()
   await (await page.$('.page >>> .confirm-btn')).tap()
   await new Promise(r => setTimeout(r, Math.max(900 - (Date.now() - t0), 50)))

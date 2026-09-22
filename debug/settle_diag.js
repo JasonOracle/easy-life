@@ -1,9 +1,16 @@
 /**
  * [变更日志]
+ * 修改时间：2026-09-22
+ * AI模型：Qoder (Claude)
+ * 修改内容：[FoodPicker 列表行类名去冲突：探针选择器由 .page >>> .row 改 .page >>> .fp-row]
+ */
+
+/**
+ * [变更日志]
  * 修改时间：2026-09-21
  * AI模型：Qoder (Claude)
  * 修改内容：[新建：弹层③ 单连接诊断流——挂 console/exception 钩子后走
- *   FAB→FoodPicker 首行(.page >>> .row)→AddFood 确认钮→连拍徽章三帧＋sb-badge 存在性探针。]
+ *   FAB→FoodPicker 首行(.page >>> .fp-row)→AddFood 确认钮→连拍徽章三帧＋sb-badge 存在性探针。]
  */
 const automator = require('miniprogram-automator')
 const SHOTS = __dirname + '/../.workbuddy/shots/audit/'
@@ -25,7 +32,7 @@ const SHOTS = __dirname + '/../.workbuddy/shots/audit/'
   await new Promise(r => setTimeout(r, 1200))
 
   page = await mp.currentPage()
-  const row = await page.$('.page >>> .row')
+  const row = await page.$('.page >>> .fp-row')
   console.log('ROW found=' + (row != null))
   if (row == null) { console.log('LOGS:\n' + logs.join('\n')); await mp.disconnect(); return }
   await row.tap()

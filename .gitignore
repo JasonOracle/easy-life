@@ -1,19 +1,29 @@
 # ── 生成物：可由 toolchain 重建，不进版本控制 ─────────────────────────────
 #
-# 生图原始 PNG（296MB）：原计划忽略，Boss 决定**保留入库**作为原始素材存档
+# [变更日志] 2026-09-22 Qoder (Claude)：图标双份入库去重（Boss 拍板「只留 App 用的那份入库」）。
+#   实测 assets/icons-final 与 app/static/icons 为 353/353 字节全等（sha256 逐文件比对），
+#   且 icons-final 本身可由 compress_icons.py 从已入库的 icons-gen 原始 PNG 重新压出，故降级为本地缓存。
+#   同时删除失效规则 app/src/static/icons/（该路径不存在；build.py 的真实同步目标是 app/static/icons）。
+# [变更日志] 2026-09-22 Qoder (Claude)：补两条本就该有的规则（此前 AGENTS.md 写着「node_modules 不进 git」
+#   但 .gitignore 里根本没有该规则，结果 debug/node_modules 3373 个文件被入库＝占全仓 tracked 文件的 73%；
+#   app/unpackage 也漏了，混进 35 个编译产物（含推倒重写前的 Bottle/AddSheet/MealIcon sourcemap 残骸）。
+#   两者一律 git rm -r --cached 只清索引、磁盘文件保留（模拟器仍要读 unpackage/dist）。
+#
+# 生图原始 PNG（298MB）：原计划忽略，Boss 决定**保留入库**作为原始素材存档
 #   —— AI 生成有随机性，重跑不会得到同一批图，故原图必须留档
 # assets/icons-gen/    ← 故意不忽略
 
-# App 侧图标副本：由 build.py 从 assets/icons-final/ 增量同步而来
-app/src/static/icons/
+# 压缩中间产物（512 WebP）：与 app/static/icons 内容全等，只留一份入库；
+#   重建＝python toolchain/compress_icons.py assets/icons-gen assets/icons-final --max-size-kb 25
+assets/icons-final/
 
-# 打包中间产物：最终副本在 app/src/data/food_library.json
+# 打包中间产物：App 读取的副本在 app/src/data/food_library.json（旧 app/data/ 目录已删）
 toolchain/dist/
 
 # 注意：以下产物**保留**在版本控制内（体积可控，且是数据可复现的关键）
-#   assets/icons-final/            347 张 512 WebP，5.6MB。AI 生成有随机性，重跑不会得到同一批图
-#   app/src/data/food_library.json 132KB，让人能直接看到数据现状
-#   toolchain/dist/ 之外的 source/*.yaml、schema 等源文件
+#   app/static/icons/              353 张 512 WebP，6.4MB —— 图标唯一入库副本（App 直接引用）
+#   app/src/data/food_library.json 353 条，让人能直接看到数据现状
+#   toolchain/sources/*.yaml、toolchain/schema/ 等源文件
 
 # ── Python ───────────────────────────────────────────────────────────────
 __pycache__/
@@ -22,6 +32,12 @@ __pycache__/
 .venv/
 venv/
 .pytest_cache/
+
+# ── 依赖与编译产物 ───────────────────────────────────────────────────────
+# npm 依赖（debug/ 里的 miniprogram-automator 等）：可由 package.json 重装
+node_modules/
+# HBuilderX 编译产物：每次 watch 重生成，微信工具读的是本地磁盘而非 git
+app/unpackage/
 
 # ── 会话数据与编辑器 ─────────────────────────────────────────────────────
 .workbuddy/

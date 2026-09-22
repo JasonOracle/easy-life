@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 # [变更日志]
+# 修改时间：2026-09-22
+# AI模型：Qoder (Claude)
+# 修改内容：[1. 源文件数由五份变六份（validate.SOURCES 纳入 icons_v1_visual.yaml 生图槽位），
+#              产物 fingerprint.sources 随之多一项——生图槽位现在参与构建期校验;
+#           2. 图标源目录 assets/icons-final/ 已进 .gitignore（与 App 副本内容全等，只留一份入库），
+#              缺失时的提示补上重建命令与「App 副本本身入库、不影响运行」的说明;
+#           3. 文档字符串里的 347 条/五份 陈旧计数改为实际值]
+# [变更日志]
 # 修改时间：2026-09-21
 # AI模型：Qoder (Claude)
 # 修改内容：[食物条目新增 py 拼音索引字段（{"f": 全拼连写, "i": 首字母串}），
@@ -21,7 +29,7 @@
 用法：python -X utf8 toolchain/build.py
 
 流程：
-  1. 读取五份源文件（见 validate.SOURCES）
+  1. 读取六份源文件（见 validate.SOURCES）
   2. 多源一致性校验，任一错误即中止
   3. 合并为列式友好结构 + fingerprint
   4. 写入 toolchain/dist/ 并同步到 app/src/data/
@@ -32,7 +40,7 @@
   fingerprint  版本 + 来源清单 + 条数 + 时间（出事可回溯）
   vesselTpl    计量器具模板集
   optTpl       选项模板集
-  foods        347 条食物条目
+  foods        食物条目（条数以 icons_v1.yaml 清单为准，构建期与 fingerprint.count 对齐）
 """
 
 import json
@@ -117,7 +125,7 @@ def sync_icons():
     """把图标产物增量同步进 App 静态资源目录。
 
     App 打包只会包含 app/ 目录内的文件，所以 assets/ 下的产物图标必须复制一份进去。
-    增量策略：只在目标缺失或源更新时才复制，重复执行不会重复搬运 347 个文件。
+    增量策略：只在目标缺失或源更新时才复制，重复执行不会重复搬运整批图标。
     返回 (本次复制数, 源文件总数)。
     """
     if not ICON_SRC.exists():
@@ -182,7 +190,10 @@ def main():
         print(f"✅ 图标已同步 → {ICON_DEST}")
         print(f"   本次复制 {copied} 个 / 源共 {total} 个")
     else:
-        print(f"⚠️ 图标产物不存在，跳过同步：{ICON_SRC}")
+        print(f"⚠️ 图标源目录不存在，跳过同步：{ICON_SRC}")
+        print(f"   （{ICON_SRC.name}/ 已进 .gitignore，新克隆机器上没有；"
+              f"App 用的 {ICON_DEST.relative_to(BASE.parent.parent)} 本身入库，不影响运行。"
+              f"要重建源目录：python toolchain/compress_icons.py assets/icons-gen {ICON_SRC} --max-size-kb 25）")
 
     # ── 摘要 ──────────────────────────────────────────────────────────────
     by_conf: dict = {}

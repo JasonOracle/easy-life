@@ -1,17 +1,18 @@
 {
   "v": "1.0.0",
-  "generated": "2026-09-21T09:12:12.105958+00:00",
+  "generated": "2026-09-22T07:22:07.502985+00:00",
   "fingerprint": {
     "version": "1.0.0",
     "sources": [
       "icons_v1.yaml",
       "nutrition_v1.yaml",
       "icons_v1_usage.yaml",
+      "icons_v1_visual.yaml",
       "vessel_tpl.yaml",
       "opts_tpl.yaml"
     ],
     "count": 353,
-    "generatedAt": "2026-09-21T09:12:12.105958+00:00"
+    "generatedAt": "2026-09-22T07:22:07.502985+00:00"
   },
   "vesselTpl": {
     "cup": {

@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>液态玻璃 实验台 v3 · 同尺寸五层 / 边缘液化 / 色散</title>
+<style>
+  :root{
+    --bar-w:343px; --bar-h:56px; --bar-r:28px; --slot:114.333px; --edge:13px;
+    --bar-bg:rgba(255,255,255,.78); --bar-blur:30px; --bar-rim:rgba(255,255,255,.86);
+    --veil:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,.42) 52%,rgba(255,255,255,.52));
+    --core-blur:blur(26px) saturate(180%) brightness(1.02);
+    --lens-blur:blur(10px) saturate(200%) brightness(1.04);
+    --hl:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.16) 46%,rgba(255,255,255,.48));
+    --hl2:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.02) 40%,rgba(255,255,255,0) 62%,rgba(255,255,255,.10));
+    --disp:conic-gradient(from 200deg,rgba(120,236,255,.62),rgba(120,236,255,0) 22%,rgba(255,255,255,0) 40%,rgba(255,178,96,0) 50%,rgba(255,176,92,.58) 68%,rgba(255,176,92,0) 88%,rgba(120,236,255,.45));
+    --dark-rim:linear-gradient(180deg,rgba(10,79,61,.14),rgba(10,79,61,.04) 45%,rgba(10,79,61,.14));
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#0E1613;color:#DCE7E1;
+    font:13px/1.55 "Inter","Microsoft YaHei",system-ui,sans-serif}
+  h2{font-size:15px;font-weight:600;margin:26px 0 4px;color:#8FE3C4}
+  .note{color:#7C8B84;font-size:12px;margin:0 0 14px;max-width:1000px}
+  .note b{color:#C9DED4}
+  .row{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+  .cap{font-size:12px;color:#A9BAB2;margin:8px 0 0;letter-spacing:.2px}
+  .cap b{color:#EAF6F0;font-weight:600}
+
+  .stage{position:relative;width:375px;height:150px;border-radius:14px;overflow:hidden;
+    box-shadow:0 0 0 1px #23332C}
+  .chart{position:absolute;inset:0;
+    background:
+      repeating-linear-gradient(90deg,rgba(255,255,255,.5) 0 2px,transparent 2px 16px),
+      repeating-linear-gradient(0deg,rgba(0,0,0,.25) 0 2px,transparent 2px 14px),
+      linear-gradient(90deg,#FF6B3D 0 18%,#FFC93C 18% 36%,#2FD07A 36% 54%,#28A8FF 54% 72%,#B45BFF 72% 90%,#FF4D8D 90% 100%)}
+  .chart.photo img{width:100%;height:100%;object-fit:cover;object-position:50% 40%;display:block}
+  .blob{position:absolute;border-radius:50%}
+  .blob.b1{left:20px;top:-16px;width:76px;height:76px;background:radial-gradient(circle at 34% 30%,#FFE071,#F57A19)}
+  .blob.b2{left:146px;top:40px;width:92px;height:92px;background:radial-gradient(circle at 36% 32%,#7BF5C8,#12A87B)}
+  .blob.b3{left:266px;top:-10px;width:68px;height:68px;background:radial-gradient(circle at 34% 30%,#9BD4FF,#1F63D6)}
+
+  .barshell{position:absolute;left:16px;bottom:12px;width:var(--bar-w);height:var(--bar-h)}
+  .bar{position:absolute;inset:0;border-radius:var(--bar-r);
+    background:var(--bar-bg);border:1px solid var(--bar-rim);
+    backdrop-filter:blur(var(--bar-blur)) saturate(180%);
+    -webkit-backdrop-filter:blur(var(--bar-blur)) saturate(180%);
+    box-shadow:0 8px 24px rgba(10,79,61,.14)}
+  .tab{position:absolute;top:0;height:var(--bar-h);width:var(--slot);display:flex;
+    align-items:center;justify-content:center;gap:6px}
+  .tab .tx{font-size:12px;font-weight:600;color:#5C6B65}
+  .tab .ic{width:22px;height:22px;border-radius:6px;background:linear-gradient(150deg,#8C9B95,#5E6D67)}
+  .tab.on .tx{color:#17916B}
+  .tab.on .ic{background:linear-gradient(150deg,#3FD6A4,#17916B)}
+
+  /* ============ 气泡：五层，全部同尺寸（inset:0），只有遮罩不同 ============ */
+  .bub{position:absolute;left:calc(var(--slot) * .5);transform:translateX(-50%);
+       width:112px;height:64px;border-radius:32px;top:-7px}
+  .L{position:absolute;inset:0;border-radius:inherit}
+  .ring{ padding:var(--edge);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+    mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    mask-composite:exclude}
+
+  .veil{padding:0;background:var(--veil);box-shadow:0 6px 18px rgba(10,79,61,.22)}
+  .blur1{-webkit-mask:url(#softcore);mask:url(#softcore);
+        backdrop-filter:var(--core-blur);-webkit-backdrop-filter:var(--core-blur)}
+  .lens{-webkit-mask:url(#softring);mask:url(#softring);
+        backdrop-filter:var(--lens-blur);-webkit-backdrop-filter:var(--lens-blur)}
+  .refr .lens{backdrop-filter:url(#lg-lens) blur(6px) saturate(200%) brightness(1.04);
+              -webkit-backdrop-filter:url(#lg-lens) blur(6px) saturate(200%) brightness(1.04)}
+  .f3{padding:2px;mix-blend-mode:plus-lighter;background:var(--hl);filter:blur(1.3px)}
+  .f3b{padding:10px;mix-blend-mode:plus-lighter;background:var(--hl2);filter:blur(4px)}
+  .f4{padding:2px;mix-blend-mode:plus-lighter;background:var(--disp);filter:blur(.7px)}
+  .edge{padding:1.2px;mix-blend-mode:multiply;background:var(--dark-rim)}
+
+  /* 暗黑 */
+  .dk{--bar-bg:rgba(22,41,36,.72);--bar-rim:rgba(255,255,255,.10);--bar-blur:30px;
+      --veil:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.11) 52%,rgba(255,255,255,.19));
+      --core-blur:blur(26px) saturate(170%) brightness(1.02);
+      --lens-blur:blur(10px) saturate(190%) brightness(1.03);
+      --hl:linear-gradient(180deg,rgba(255,255,255,.58),rgba(255,255,255,.15) 46%,rgba(255,255,255,.50));
+      --hl2:linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,255,255,.04) 40%,rgba(255,255,255,0) 62%,rgba(255,255,255,.20));
+      --dark-rim:linear-gradient(180deg,rgba(0,0,0,.50),rgba(0,0,0,.16) 45%,rgba(0,0,0,.42))}
+  .dk .tab .tx{color:#8B9E94}
+  .dk .tab.on .tx{color:#52D6AC}
+  .dk .tab .ic{background:linear-gradient(150deg,#4E5F58,#2E3B36)}
+  .dk .tab.on .ic{background:linear-gradient(150deg,#52D6AC,#2E8F72)}
+  .dk .veil{box-shadow:0 6px 18px rgba(0,0,0,.42)}
+
+  /* 降级：纯色药丸 */
+  .flat .blur1,.flat .lens,.flat .f3,.flat .f3b,.flat .f4{display:none}
+  .flat .veil{background:#fff;box-shadow:0 6px 18px rgba(10,79,61,.18)}
+  .flat .edge{mix-blend-mode:normal;background:none;box-shadow:inset 0 0 0 1px #E3EFE8}
+  .flat .bar{background:#F8FCFA;border-color:#E3EFE8;
+    backdrop-filter:none;-webkit-backdrop-filter:none}
+
+  .refshot{position:relative;width:504px;height:234px;border-radius:10px;overflow:hidden;
+    box-shadow:0 0 0 1px #23332C}
+  .refshot img{width:100%;display:block}
+</style>
+</head>
+<body>
+
+<h2>① 五层逐层加料（每张都是「所有图层同一大小」，只差遮罩）</h2>
+<p class="note">左起：白纱 → 加「背景模糊·只糊中间」→ 加「液化效果·只动外圈 13px」→ 加高光 → 加色散 → 加暗边。
+<b>手机竖屏看不清的话，重点看外圈 13px：它应该比中间更「清」而不是更「糊」。</b></p>
+<div class="row" id="row1"></div>
+
+<h2>② 真实内容 + 参考图同尺度比对</h2>
+<p class="note">把同一套材质压到首页食物列表上（浅色/暗黑），右边是 iOS 26 真机里被选中的那个气泡。注意参考图里：
+<b>气泡比胶囊更「透」</b>——背后照片的橙色和肤色都透出来了，而胶囊本身几乎全白。</p>
+<div class="row">
+  <div class="cell">
+    <div class="stage"><div class="chart photo"><img src="assets/cmp_strip.png"></div>
+      <div class="barshell"><div class="bar"></div></div></div>
+    <p class="cap"><b>浅色</b> 压在首页食物列表上</p>
+  </div>
+  <div class="cell">
+    <div class="stage dk"><div class="chart photo"><img src="assets/cmp_strip_dk.png"></div>
+      <div class="barshell"><div class="bar"></div></div></div>
+    <p class="cap"><b>暗黑</b></p>
+  </div>
+  <div class="cell">
+    <div class="refshot"><img src="assets/ref_bubble.png"></div>
+    <p class="cap"><b>参考 · iOS 26 真机</b> 微博那个选中的气泡</p>
+  </div>
+</div>
+
+<h2>③ 液化环强度三档（外圈 13px 的模糊量）</h2>
+<p class="note">中间固定 blur 22。外圈是叠加上去的：太清（4px）会变成一圈「描边」，太糊（18px）等于没有。</p>
+<div class="row" id="rowB"></div>
+
+<h2>④ 两档折射：真·位移 vs 分层遮罩</h2>
+<p class="note"><b>真·液化</b>用 SVG 位移图把外圈的背景真的掰弯（只有浏览器能跑）；
+<b>分层遮罩</b>只用低模糊+高饱和模拟，小程序 / uni-app x 原生也能用，观感接近。</p>
+<div class="row" id="row3"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <mask id="softcore" maskUnits="userSpaceOnUse" x="-12" y="-12" width="136" height="88"
+        maskContentUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="112" height="64" rx="32" fill="#fff" filter="url(#soften2)"/>
+    </mask>
+    <filter id="soften2" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <mask id="softring" maskUnits="userSpaceOnUse" x="-8" y="-8" width="128" height="80"
+        maskContentUnits="userSpaceOnUse">
+      <rect x="6.5" y="6.5" width="99" height="51" rx="25.5" fill="none" stroke="#fff" stroke-width="13"
+            filter="url(#soften)"/>
+    </mask>
+    <filter id="soften" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+  <filter id="lg-lens" x="-30%" y="-60%" width="160%" height="220%">
+    <feImage x="0" y="0" width="112" height="64" preserveAspectRatio="none" href="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" result="lensmap"/>
+    <feDisplacementMap in="SourceGraphic" in2="lensmap" scale="76"
+      xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<script>
+const EDGE = 13;
+const bub = (cls, layers) => `<div class="bub">` + layers.map(l => `<i class="L ${l}"></i>`).join('') + `</div>`;
+const BASE = ['veil cast'];
+const build = (opts) => {
+  const L = [];
+  L.push('veil');
+  if (opts.core) L.push('blur1');
+  if (opts.lens) L.push('lens ring');
+  if (opts.hl2)  L.push('f3b ring');
+  if (opts.hl)   L.push('f3 ring');
+  if (opts.disp) L.push('f4 ring');
+  if (opts.edge) L.push('edge ring');
+  return bub('', L);
+};
+const TABS = ['首页','日历','我的'];
+const tabs = on => `<div class="tab" style="left:0"><span class="ic"></span><span class="tx">首页</span></div>
+  <div class="tab" style="left:114.333px"><span class="ic"></span><span class="tx">日历</span></div>
+  <div class="tab" style="left:228.666px"><span class="ic"></span><span class="tx">我的</span></div>`;
+
+function cell(caption, noteHtml, html, cls) {
+  const el = document.createElement('div');
+  el.className = 'cell';
+  el.innerHTML = html;
+  const p = document.createElement('p');
+  p.className = 'cap';
+  p.innerHTML = `<b>${caption}</b> ${noteHtml}`;
+  el.appendChild(p);
+  return el;
+}
+const stageHTML = (bubbleHTML, cls) => `
+  <div class="stage ${cls||''}">
+    <div class="chart"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+    <div class="barshell"><div class="bar"></div>${bubbleHTML}
+      <div class="tab on" style="left:0"><span class="ic"></span><span class="tx">首页</span></div>
+    </div>
+  </div>`;
+
+const steps = [
+  ['0 白纱',            '半透白纱（α .34→.52），还没任何模糊',        {}],
+  ['1 +背景模糊',        '整块 blur 22 / sat 180',                     {core:1}],
+  ['2 +液化效果',        '羽化外圈 13px，叠在模糊之上',                {core:1,lens:1}],
+  ['3 +高光',           '贴边 2px 亮线 + 一圈柔光晕',                 {core:1,lens:1,hl:1,hl2:1}],
+  ['4 +色散',           '最外 2px 冷暖双色（角向渐变）',               {core:1,lens:1,hl:1,hl2:1,disp:1}],
+  ['5 +暗折射边',        '下缘一条很轻的压深，别做成描边',              {core:1,lens:1,hl:1,hl2:1,disp:1,edge:1}]
+];
+const r1 = document.getElementById('row1');
+steps.forEach(([c,n,o]) => r1.appendChild(cell(c,n,stageHTML(build(o)))));
+
+const r3 = document.getElementById('row3');
+const full = {core:1,lens:1,hl:1,hl2:1,disp:1,edge:1};
+const rb = document.getElementById('rowB');
+[[4,'4px 偏清（会像描边）'],[10,'10px 折中'],[18,'18px 偏糊（几乎看不见）']].forEach(([b,n])=>{
+  const st=document.createElement('div');
+  st.innerHTML = `<div class="stage" style="--lens-blur:blur(${b}px) saturate(200%) brightness(1.04)">`
+    + `<div class="chart"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>`
+    + `<div class="barshell"><div class="bar"></div>`+build({core:1,lens:1,hl:1,hl2:1,disp:1,edge:1})
+    + `<div class="tab on" style="left:0"><span class="ic"></span><span class="tx">首页</span></div></div></div>`;
+  rb.appendChild(cell('外圈 blur '+b, n, st.innerHTML));
+});
+r3.appendChild(cell('真·位移 浅色','外圈用 SVG 位移图掰弯背景', stageHTML(build(full),'refr')));
+r3.appendChild(cell('分层遮罩 浅色','同一套值，去掉位移', stageHTML(build(full))));
+r3.appendChild(cell('真·位移 暗黑','', stageHTML(build(full),'dk refr')));
+r3.appendChild(cell('分层遮罩 暗黑','', stageHTML(build(full),'dk')));
+r3.appendChild(cell('降级 假玻璃','安卓小程序 / uni-app x 原生', stageHTML(build(full),'flat')));
+</script>
+</body>
+</html>

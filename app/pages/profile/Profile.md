@@ -1,5 +1,27 @@
 # Profile.uvue — 个人中心（v2 稿 P2 还原）
 
+<!--
+[变更日志]
+修改时间：2026-09-22
+AI模型：Gemini 系列
+修改内容：[实施方案A：页底预留高度升级为动态安全区全避让。
+.page padding-bottom 升级为动态避让 `92px / calc(82px + env(safe-area-inset-bottom))`，消除全面屏下内容滚到底被悬浮胶囊遮挡的问题，保持 14px 呼吸间距]
+-->
+<!--
+[变更日志]
+修改时间：2026-09-22
+AI模型：Qoder (Claude)
+修改内容：[TabBar 液态玻璃胶囊配套：①Tabbar 调用去 `:fade`（渐显废弃），`onPageScroll` 只留 `.pf-st-mask` 的 >89 两态；
+②`.page padding-bottom` 40 → 78（按胶囊实占重算）；③「最近记录·查看全部」goRecords 由 navigateTo 改 redirectTo；
+④补暗态胶囊验收截图口径]
+-->
+<!--
+[变更日志]
+修改时间：2026-09-22
+AI模型：Qoder (Claude)
+修改内容：[校准四处与代码不符：①②滚动监听 onPageScroll 已由 #ifdef MP-WEIXIN 去条件编译、三端生效（Profile.uvue line 327 及注释 line 326；原「与 onShow 同处条件编译块」「已知代价：仍包在 MP-WEIXIN 内」两条已过期，且与本页「边界与降级」的「TabBar 随滚动渐显」条自相矛盾）；③趋势日期由「只标前 4 柱」更正为 7 柱全标（模板 v-for bars 内每柱渲染 bar-date，bars 源自 food.weekTotals 每日 fmtMD，代码变更日志 line 91）；④头图由「渐变 #5BC4AC→#39AD95」更正为实色 #39AD95＋导出波浪（.header background-color 实为纯色，#5BC4AC 全代码无出处）。]
+-->
+
 ## 💡 核心思想
 
 按 Ardot v2 稿（727788215940571 · 10:6）1:1 还原个人中心静态结构：渐变头图／今日热量卡／
@@ -16,14 +38,14 @@
 - user／goal／food store；`app/static/profile/*.png`（12 张设计稿导出）＋ Tab 图复用 `app/static/home/`
 
 ## 设计决策
-- **滚动防穿透（2026-09-22 P1，Boss 拍板 B-lite）**：页末内联 fixed 遮罩 `.pf-st-mask`（`v-if="scrolled"`、高 `sbH`、色随暗黑 `dk ? '#162924' : '#EEF7F4'`、z40），`onPageScroll` 两态 `scrollTop>89`（=头图高−sbH 穿透点，与 onShow 同处 MP-WEIXIN 条件编译块）；**不做组件**（StickyTop 实测宿主幻影副本＋遮罩不渲染，已删）
-- **为什么本页不参与 #28 常驻导航栏（2026-09-22）**：#28 的动机是 Boss「子页面向下滑动后左上角的**返回按钮＋页面标题**必须常驻」，而本页是 Tab 页——稿面（Pencil Vtp9C）既无返回钮也无页面标题，只有一条状态栏带需要遮色，**没有「栏」可做**，故保留 `.pf-st-mask`（z40）。**已知代价**：`onPageScroll` 仍包在 `#ifdef MP-WEIXIN` 内，App／Web 端滚动时状态栏带无遮罩（与其余三页去条件编译后的口径不一致），待暗色稿到位后统一处理。
+- **滚动防穿透（2026-09-22 P1，Boss 拍板 B-lite）**：页末内联 fixed 遮罩 `.pf-st-mask`（`v-if="scrolled"`、高 `sbH`、色随暗黑 `dk ? '#162924' : '#EEF7F4'`、z40），`onPageScroll` 两态 `scrollTop>89`（=头图高−sbH 穿透点；该监听已去条件编译、三端生效，与仍在 `MP-WEIXIN` 块内的 onShow 分离）（2026-09-22 校准）；**不做组件**（StickyTop 实测宿主幻影副本＋遮罩不渲染，已删）
+- **为什么本页不参与 #28 常驻导航栏（2026-09-22）**：#28 的动机是 Boss「子页面向下滑动后左上角的**返回按钮＋页面标题**必须常驻」，而本页是 Tab 页——稿面（Pencil Vtp9C）既无返回钮也无页面标题，只有一条状态栏带需要遮色，**没有「栏」可做**，故保留 `.pf-st-mask`（z40）。**原「已知代价」（onPageScroll 包在 `#ifdef MP-WEIXIN` 内、App／Web 端无遮罩）已消除**：`onPageScroll` 现已去条件编译、三端生效（见本页「TabBar 随滚动渐显」条），与其余三页口径一致（2026-09-22 校准）。
 
-- 页底 `#EEF7F4`（稿面 10:6 实测，非首页的 `#F2FAF5`）；头图渐变 `#5BC4AC→#39AD95`＋导出波浪
+- 页底 `#EEF7F4`（稿面 10:6 实测，非首页的 `#F2FAF5`）；头图为实色 `#39AD95`＋导出波浪 `.header-wave`（CSS `background-color` 是纯色，稿面渐变色以实色底＋波浪图近似；`#5BC4AC` 全代码无出处，不作实现口径）（2026-09-22 校准）
 - 今日热量卡 `#F7FCFA`；其余白卡 `#FBFDFD`；**达标 Banner＝白卡内嵌件**（真实嵌套进 `.cal-card`，
   卡内水平缩进 10px＋margin-top 13px，卡片在 Banner 下方仍留 14px 白底），非叠加悬浮件
 - 进度条 1270/1800＝58.6%；柱 1-6 薄荷渐变（CSS 纯色近似）、柱 7 珊瑚渐变（近似）
-- 趋势日期只标前 4 柱（9/12-9/15），与稿面一致
+- 趋势 7 柱全标日期（模板在 `v-for="barItem in bars"` 内对每柱渲染 `.bar-date`；`bars` 源自 `food.weekTotals`，日期取每日 `fmtMD`）（2026-09-22 校准）
 - **深色模式（2026-09-21 Boss 指令第 5 项）**：根节点 `:class="{ 'page-dark': dk }"`（dk＝`settings.darkMode`），
   Tabbar 传 `:dark="dk"`；覆盖样式全部写在 `/* #ifdef MP-WEIXIN */` 块内用后代选择器——
   uvue 原生端不支持后代选择器，App 端适配时须改逐元素 :class。色板为薄荷深色**临时方案**
@@ -47,11 +69,12 @@
 
 - v-for 语义化命名（dayItem／barItem／recItem）；系统字体降级
 - 趋势图为静态 view 柱，非 canvas，后续接真实数据时重算柱高即可
-- **页底预留 40px（2026-09-22 #29 配套，Boss 拍板「缩页底预留位」）**：原 78px → 40，让最近记录列表末行常态穿到玻璃 Tabbar 之下，
-  玻璃才有东西可透（浅色页底近白，透感弱；暗态透感明显）。取舍与像素取证见 `components/Tabbar.md`
-- **TabBar 随滚动渐显（2026-09-22 #29 续，Boss 点名 scroll-fade-navbar 效果）**：`onPageScroll` 里除 `scrolled` 外再算 `tabFade`
-  （`scrollTop/60` 夹 0~1、0.05 量化）透传给 Tabbar；**该监听原包在 `#ifdef MP-WEIXIN` 内，现去条件编译三端生效**，
-  顺带补上 App／Web 端滚动时 `pf-st-mask` 不响应的既有缺口（该缺口此前记在案，未真机验证）
+- **页底预留（2026-09-22 方案A动态避让）**：`.page padding-bottom` 升级为动态安全区全避让：无小白条基准 92px，带小白条机型（MP-WEIXIN）自动叠加 `calc(82px + env(safe-area-inset-bottom))`（实测 116px）。确保最近记录列表末行滚到底时完整展示于 Tabbar 悬浮胶囊上方，并留出 14px 呼吸间距。
+- **~~TabBar 随滚动渐显（#29 续）~~ 已废弃（2026-09-22，Boss 拍板第 3 条）**：`tabFade` 删除，Tabbar 调用只留
+  `active` 与 `:dark`；**`onPageScroll` 本页仍保留**，但只剩 `.pf-st-mask` 的 `scrollTop>89` 两态用途
+  （去条件编译、三端生效这一事实不变，故上方「为什么本页不参与 #28」条里指向『TabBar 随滚动渐显』的引用改指本条）
+- 暗态胶囊验收（2026-09-22 零窗口 automator）：`debug/shots/tab10_profile.png`（浅态，我的格激活 `#17916B`）
+  ＋ `tab13_profile_dark.png`（暗态胶囊 `rgba(22,41,36,.72)` ＋ 气泡白 13%，验收后 `darkMode` 已还原 false）
 
 ## 与设计稿的对应
 

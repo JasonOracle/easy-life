@@ -2,6 +2,12 @@
   [变更日志]
   修改时间：2026-09-22
   AI模型：Qoder (Claude)
+  修改内容：[组件类名全量加 fp- 前缀（row/row-on/row-thumb/row-text/row-name/row-sub/row-sub-on/row-div/search-box/search-icon/search-input/chip-bar/chip-text/chip-text-on/food-list/radio/radio-on/radio-check）：其中 .row/.row-text/.row-sub/.row-div 与 Settings 页同名类在 mp-weixin 全局命中互污（AGENTS 类名前缀铁律），其余为同族一致性收敛；滚动定位 id 前缀 row- 与 scroll-into-view 为元素 ID 非类名，保持不变；样式数值与结构零改动]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
   修改内容：[弹层壳迁移到原生 page-container（参考官方示例 pages/component/page-container）：
     自研 .fp-mask 固定层＋点蒙层关闭＋z900 全部退役，改 position=bottom 原生滑入滑出＋原生蒙层＋
     拦截系统返回＋afterleave 回传 update:show；MP 端按官方写法 v-if 与 :show 双条件（条件编译内嵌标签）；
@@ -48,17 +54,17 @@
     <view class="fp-sheet">
       <view class="fp-handle"></view>
 
-      <view class="search-box">
-        <image class="search-icon" :src="'/static/common/search_icon.png'" mode="aspectFit"></image>
+      <view class="fp-search-box">
+        <image class="fp-search-icon" :src="'/static/common/search_icon.png'" mode="aspectFit"></image>
         <input
-          class="search-input"
+          class="fp-search-input"
           v-model="keyword"
           placeholder="搜索食物 · 支持拼音 / 别名"
           placeholder-style="color:#9CB8B0;font-size:13.5px;"
         />
       </view>
 
-      <scroll-view class="chip-bar" direction="horizontal" :show-scrollbar="false">
+      <scroll-view class="fp-chip-bar" direction="horizontal" :show-scrollbar="false">
         <view
           class="fp-chip"
           :class="{ 'fp-chip-on': catItem === cat }"
@@ -66,28 +72,28 @@
           :key="catIdx"
           @click="pickCat(catItem)"
         >
-          <text class="chip-text" :class="{ 'chip-text-on': catItem === cat }">{{ catItem }}</text>
+          <text class="fp-chip-text" :class="{ 'fp-chip-text-on': catItem === cat }">{{ catItem }}</text>
         </view>
       </scroll-view>
 
-      <scroll-view class="food-list" direction="vertical" :show-scrollbar="false" :scroll-into-view="intoView">
+      <scroll-view class="fp-food-list" direction="vertical" :show-scrollbar="false" :scroll-into-view="intoView">
         <view
-          class="row"
-          :class="{ 'row-on': item.id === selectedId }"
+          class="fp-row"
+          :class="{ 'fp-row-on': item.id === selectedId }"
           :id="'row-' + item.id"
           v-for="(item, rowIdx) in results"
           :key="item.id"
           @click="pickFood(item.id)"
         >
-          <image class="row-thumb" :src="'/static/icons/' + item.img" mode="aspectFill"></image>
-          <view class="row-text">
-            <text class="row-name">{{ item.name }}</text>
-            <text class="row-sub" :class="{ 'row-sub-on': item.id === selectedId }">{{ subLine(item) }}</text>
+          <image class="fp-row-thumb" :src="'/static/icons/' + item.img" mode="aspectFill"></image>
+          <view class="fp-row-text">
+            <text class="fp-row-name">{{ item.name }}</text>
+            <text class="fp-row-sub" :class="{ 'fp-row-sub-on': item.id === selectedId }">{{ subLine(item) }}</text>
           </view>
-          <view class="radio" :class="{ 'radio-on': item.id === selectedId }">
-            <text class="radio-check" v-if="item.id === selectedId">✓</text>
+          <view class="fp-radio" :class="{ 'fp-radio-on': item.id === selectedId }">
+            <text class="fp-radio-check" v-if="item.id === selectedId">✓</text>
           </view>
-          <view class="row-div" v-if="rowIdx < results.length - 1"></view>
+          <view class="fp-row-div" v-if="rowIdx < results.length - 1"></view>
         </view>
       </scroll-view>
     </view>
@@ -215,7 +221,7 @@ watch(
   background-color: #DCEDE6;
   align-self: center;
 }
-.search-box {
+.fp-search-box {
   flex-direction: row;
   align-items: center;
   height: 46px;
@@ -227,17 +233,17 @@ watch(
   padding-left: 18px;
   padding-right: 14px;
 }
-.search-icon {
+.fp-search-icon {
   width: 18px;
   height: 18px;
 }
-.search-input {
+.fp-search-input {
   flex: 1;
   font-size: 13.5px;
   color: #0A4F3D;
   margin-left: 8px;
 }
-.chip-bar {
+.fp-chip-bar {
   height: 34px;
   margin-top: 16px;
   flex-direction: row;
@@ -256,54 +262,54 @@ watch(
 .fp-chip-on {
   background-color: #1FBF8F;
 }
-.chip-text {
+.fp-chip-text {
   font-size: 13px;
   font-weight: 500;
   color: #8FAEAF;
 }
-.chip-text-on {
+.fp-chip-text-on {
   color: #FFFFFF;
   font-weight: 600;
 }
-.food-list {
+.fp-food-list {
   flex: 1;
   margin-top: 16px;
 }
-.row {
+.fp-row {
   position: relative;
   flex-direction: row;
   align-items: center;
   height: 76px;
   border-radius: 16px;
 }
-.row-on {
+.fp-row-on {
   background-color: #F2FAF5;
 }
-.row-thumb {
+.fp-row-thumb {
   width: 48px;
   height: 48px;
   border-radius: 16px;
   background-color: #EAF9F3;
 }
-.row-text {
+.fp-row-text {
   flex: 1;
   margin-left: 12px;
 }
-.row-name {
+.fp-row-name {
   font-size: 15.5px;
   font-weight: bold;
   color: #0A4F3D;
 }
-.row-sub {
+.fp-row-sub {
   font-size: 12px;
   color: #8FAEAF;
   margin-top: 4px;
 }
-.row-sub-on {
+.fp-row-sub-on {
   color: #0F4F3D;
   font-weight: 600;
 }
-.radio {
+.fp-radio {
   width: 22px;
   height: 22px;
   border-radius: 11px;
@@ -314,15 +320,15 @@ watch(
   margin-left: 10px;
   margin-right: 10px;
 }
-.radio-on {
+.fp-radio-on {
   background-color: #1FBF8F;
   border-color: #1FBF8F;
 }
-.radio-check {
+.fp-radio-check {
   font-size: 12px;
   color: #FFFFFF;
 }
-.row-div {
+.fp-row-div {
   position: absolute;
   left: 60px;
   right: 0;

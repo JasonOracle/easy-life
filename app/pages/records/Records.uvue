@@ -1,11 +1,33 @@
 <!--
   [变更日志]
   修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[实施方案A：页底预留高度升级为动态安全区全避让。
+    .lr-bottom-space 由固定 78px 改为 92px 并在小程序端结合 calc(82px + env(safe-area-inset-bottom))，
+    消除全面屏下 24px~38px 的内容遮挡，确保「主要食物」卡片滚到底后完整外露于 Tabbar 上方并保留 14px 呼吸间距]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[升级为一「日历」一级 Tab 页（Boss 拍板第 4 条）：
+    1. Tabbar 由 active="home" 改 active="records"，本页成为三槽胶囊的中间 Tab；
+    2. 删头图左上返回箭（lr-back ＋ goBack）与常驻导航栏的返回热区（rec-nav-back），
+       跨阈出栏只保留标题「最近记录」——一级 Tab 页无返回语义（稿面标题不动，Tab 文案用「日历」）；
+    3. 删 #29 tabFade（渐显废弃），onPageScroll 仅保留 rec-nav 两态阈值；
+    4. .lr-bottom-space 由 40 恢复 78＝悬浮胶囊实占（高 56 ＋ 离底 22，即无小白条机型）；
+       带小白条机型离底＝safeBottom+12（iPhone 模拟器实测 46 → 实占 102），内容仍会穿到栏下，
+       属 Boss 拍板「常态穿到栏下」取舍的既知代价，勿据此再改预留值]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
   AI模型：Qoder (Claude)
   修改内容：[#29 配套（Boss 拍板「缩页底预留位」）：.lr-bottom-space 高由 90 压到 40，
     让内容常态穿到玻璃 Tabbar（高约 76）之下，玻璃才有东西可透;
     2. #29 续（Boss：「我想要的 tabbar 是 scroll-fade-navbar 那种效果」）：onPageScroll 内按 0→60px
-    线性算 tabFade（0.05 量化）并透传给 Tabbar，底槽由常开玻璃改为随滚动渐显]
+    线性算 tabFade（0.05 量化）并透传给 Tabbar，底槽由常开玻璃改为随滚动渐显
+    （2026-09-22 胶囊化后 fade 已按 Boss 指令废弃，此条留作追溯）]
 -->
 <!--
   [变更日志]
@@ -55,7 +77,6 @@
       <view class="lr-arc lr-arc1"></view>
       <view class="lr-arc lr-arc2"></view>
       <view class="lr-nav">
-        <image class="lr-back" :src="'/static/records/lr_back.png'" mode="aspectFit" @click="goBack"></image>
         <view class="lr-navtxt">
           <text class="lr-title">最近记录</text>
           <text class="lr-sub">查看过去的饮食记录与热量摄入</text>
@@ -157,13 +178,10 @@
     </view>
 
     <view class="lr-bottom-space"></view>
-    <Tabbar active="home" :fade="tabFade" ></Tabbar>
+    <Tabbar active="records" ></Tabbar>
 
-    <!-- 常驻导航栏（#28：替代 P1 遮罩＋fx-back 两件套）：滚动跨阈后整栏出现＝末色底＋返回箭＋标题，三端生效 -->
+    <!-- 常驻导航栏（#28）：本页已升为一级 Tab 页，跨阈出栏只留标题，无返回钮（Boss 拍板第 4 条） -->
     <view v-if="scrolled" class="rec-nav" :style="{ height: (sbH + 58) + 'px', paddingTop: sbH + 'px' }">
-      <view class="rec-nav-back" @click="goBack">
-        <image class="rec-nav-icon" :src="'/static/records/lr_back.png'" mode="aspectFit"></image>
-      </view>
       <text class="rec-nav-title">最近记录</text>
     </view>
   </view>
@@ -189,19 +207,12 @@ const sbH = ref(0)
 sbH.value = uni.getSystemInfoSync().statusBarHeight ?? 0
 
 // 常驻导航栏两态（#28，三端生效；跨阈值才写 ref 避免逐帧 setData）：>40 整栏出现＝
-// 头图渐变末色 #39AD95 实底＋返回箭＋标题，与滚动中的头图无缝接续
+// 头图渐变末色 #39AD95 实底＋标题，与滚动中的头图无缝接续
 const scrolled = ref<boolean>(false)
-// TabBar 渐显（scroll-fade，照官方示例「随滚动渐显的透明导航栏」）：0→60px 线性抬升，
-// 按 0.05 量化＝整段渐显最多 20 次 setData，绝不逐帧写。
-// 阈值取 60 而非示例的 100＝本页实测最大滚动只有 70px，用 100 会永远到不了满玻璃
-const tabFade = ref<number>(0)
+// #29 的 tabFade 渐显已随 2026-09-22 液态玻璃胶囊重构废弃（新胶囊恒常可见，Boss 拍板第 3 条）
 onPageScroll((e) => {
   const v = e.scrollTop > 40
   if (v !== scrolled.value) scrolled.value = v
-  let q = e.scrollTop / 60
-  if (q > 1) q = 1
-  const fq = Math.round(q * 20) / 20
-  if (fq !== tabFade.value) tabFade.value = fq
 })
 
 const weekNames = ['一', '二', '三', '四', '五', '六', '日']
@@ -412,10 +423,6 @@ const foodCards = computed<FoodCard[]>(() => {
   return out
 })
 
-function goBack(): void {
-  uni.navigateBack()
-}
-
 function goDetail(): void {
   food.viewDay = selKey.value
   uni.navigateTo({ url: '/pages/records/DayDetail' })
@@ -466,13 +473,9 @@ function goDetail(): void {
   height: 46px;
   padding-left: 16px;
 }
-.lr-back {
-  width: 18px;
-  height: 18px;
-  margin-top: 6px;
-}
+/* 一级 Tab 页无返回箭（2026-09-22）：标题直接吃 .lr-nav 的 16 左边距 */
 .lr-navtxt {
-  margin-left: 12px;
+  margin-left: 0;
 }
 .lr-title {
   font-size: 18px;
@@ -852,9 +855,12 @@ function goDetail(): void {
   color: rgba(15, 79, 61, 0.34);
 }
 .lr-bottom-space {
-  height: 40px;
+  height: 92px;
+  /* #ifdef MP-WEIXIN */
+  height: calc(82px + env(safe-area-inset-bottom));
+  /* #endif */
 }
-/* 常驻导航栏（#28：替代 P1 顶遮罩＋fx-back 两件套）：z45 在 Tabbar（z30）之上 */
+/* 常驻导航栏（#28）：z45 在 Tabbar（z30）之上；本页升为一级 Tab 页后栏内无返回钮，只剩标题 */
 .rec-nav {
   position: fixed;
   top: 0;
@@ -866,20 +872,10 @@ function goDetail(): void {
   background-color: #39AD95;
   box-shadow: 0 2px 10px rgba(10, 79, 61, 0.10);
 }
-.rec-nav-back {
-  width: 44px;
-  height: 44px;
-  margin-left: 3px;
-  justify-content: center;
-  align-items: center;
-}
-.rec-nav-icon {
-  width: 18px;
-  height: 18px;
-}
 .rec-nav-title {
   font-size: 17px;
   font-weight: bold;
   color: #FFFFFF;
+  margin-left: 16px;
 }
 </style>

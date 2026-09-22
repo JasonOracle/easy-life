@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>气泡材质对照 · 液态玻璃 Tabbar</title>
+<style>
+  :root{ --on:#17916B; --off:#8A8A8A; --on-dk:#52D6AC; --off-dk:#8B9E94; }
+  *{box-sizing:border-box;margin:0}
+  body{background:#E7F2EC;font:400 12px/1.4 Inter,"PingFang SC","Microsoft YaHei",sans-serif;padding:22px 0 30px;color:#0A4F3D}
+  h1{font-size:15px;font-weight:700;text-align:center;margin-bottom:4px}
+  .sub{font-size:11px;text-align:center;color:#5C7570;margin-bottom:18px;max-width:423px;margin-left:auto;margin-right:auto}
+  .grid{display:flex;flex-direction:column;gap:14px;align-items:center}
+  .cell{width:423px}
+  .cap{font-size:12px;font-weight:700;color:#0A5A40;margin-bottom:5px}
+  .cap em{font-style:normal;font-weight:400;color:#5C7570;margin-left:6px}
+  .stage{position:relative;width:423px;height:156px}
+  .win{position:absolute;left:24px;top:18px;width:375px;height:120px;border-radius:20px;overflow:hidden;background:#F2FAF5}
+  .win img{position:absolute;left:0;top:0;width:375px;height:120px;object-fit:cover}
+  .bar{position:absolute;left:40px;top:50px;width:343px;height:56px;border-radius:28px}
+  .bar.lt{background-color:rgba(255,255,255,.55);
+    background-image:linear-gradient(180deg,rgba(255,255,255,.60) 0%,rgba(255,255,255,0) 45%);
+    border:1px solid rgba(255,255,255,.80);box-shadow:0 8px 24px rgba(10,79,61,.14);
+    -webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%)}
+  .bar.dk{background-color:rgba(22,41,36,.72);
+    background-image:linear-gradient(180deg,rgba(255,255,255,.10) 0%,rgba(255,255,255,0) 45%);
+    border:1px solid rgba(255,255,255,.10);box-shadow:0 8px 24px rgba(0,0,0,.30);
+    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%)}
+  .slot{position:absolute;top:var(--st,6px);left:var(--x);width:var(--w,88px);height:var(--h,44px);
+        display:flex;align-items:center;justify-content:center;gap:6px}
+  .slot img{height:var(--s)}
+  .slot span{font-size:12px;font-weight:600;color:var(--off)}
+  .bar.dk .slot span{color:var(--off-dk)}
+  .bub{position:absolute;top:var(--st,6px);left:var(--x);width:var(--w,88px);height:var(--h,44px);
+       border-radius:var(--r,22px);display:flex;align-items:center;justify-content:center;gap:6px}
+  .bub img{height:var(--s)}
+  .bub span{font-size:12px;font-weight:600;color:var(--on)}
+  .bar.dk .bub span{color:var(--on-dk)}
+
+  /* A 现状：92% 白，包在条内 */
+  .A{background-color:rgba(255,255,255,.92);
+     background-image:linear-gradient(180deg,rgba(255,255,255,.60) 0%,rgba(255,255,255,0) 50%);
+     border:1px solid rgba(255,255,255,.90);
+     box-shadow:0 4px 14px rgba(10,79,61,.16), inset 0 1px 2px rgba(255,255,255,.50);
+     -webkit-backdrop-filter:blur(32px) saturate(180%);backdrop-filter:blur(32px) saturate(180%)}
+  /* B 只改材质：降到 42% + 补边缘，但仍包在条内 */
+  .B{background-color:rgba(255,255,255,.42);
+     background-image:linear-gradient(180deg,rgba(255,255,255,.85) 0%,rgba(255,255,255,.10) 34%,rgba(255,255,255,.55) 100%);
+     border:1px solid rgba(10,79,61,.13);
+     box-shadow:0 4px 14px rgba(10,79,61,.16),
+                inset 0 0 0 1.5px rgba(255,255,255,.95),
+                inset 0 3px 7px rgba(255,255,255,.85),
+                inset 0 -3px 7px rgba(255,255,255,.75);
+     -webkit-backdrop-filter:blur(36px) saturate(210%);backdrop-filter:blur(36px) saturate(210%)}
+  /* C 溢出 + 中等透（推荐） */
+  .C{background-color:rgba(255,255,255,.34);
+     background-image:linear-gradient(180deg,rgba(255,255,255,.80) 0%,rgba(255,255,255,.06) 36%,rgba(255,255,255,.50) 100%);
+     border:1px solid rgba(10,79,61,.15);
+     box-shadow:0 6px 18px rgba(10,79,61,.18),
+                inset 0 0 0 1.5px rgba(255,255,255,.98),
+                inset 0 4px 9px rgba(255,255,255,.90),
+                inset 0 -4px 9px rgba(255,255,255,.80);
+     -webkit-backdrop-filter:blur(40px) saturate(220%);backdrop-filter:blur(40px) saturate(220%)}
+  /* D 溢出 + 全透（照抄参考图 15%） */
+  .D{background-color:rgba(255,255,255,.15);
+     background-image:linear-gradient(180deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.03) 36%,rgba(255,255,255,.38) 100%);
+     border:1px solid rgba(10,79,61,.17);
+     box-shadow:0 6px 18px rgba(10,79,61,.16),
+                inset 0 0 0 1.5px rgba(255,255,255,1),
+                inset 0 4px 10px rgba(255,255,255,.95),
+                inset 0 -5px 11px rgba(255,255,255,.88);
+     -webkit-backdrop-filter:blur(46px) saturate(240%);backdrop-filter:blur(46px) saturate(240%)}
+  /* E 暗黑：溢出 + 折射边 */
+  .E{background-color:rgba(255,255,255,.13);
+     background-image:linear-gradient(180deg,rgba(255,255,255,.30) 0%,rgba(255,255,255,.02) 36%,rgba(255,255,255,.18) 100%);
+     border:1px solid rgba(0,0,0,.24);
+     box-shadow:0 6px 18px rgba(0,0,0,.38),
+                inset 0 0 0 1.5px rgba(255,255,255,.36),
+                inset 0 4px 10px rgba(255,255,255,.22),
+                inset 0 -5px 11px rgba(255,255,255,.16);
+     -webkit-backdrop-filter:blur(42px) saturate(190%);backdrop-filter:blur(42px) saturate(190%)}
+  /* F 暗黑现状 */
+  .F{background-color:rgba(255,255,255,.16);
+     background-image:linear-gradient(180deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,0) 50%);
+     border:1px solid rgba(255,255,255,.14);
+     box-shadow:0 4px 14px rgba(0,0,0,.35), inset 0 1px 2px rgba(255,255,255,.10);
+     -webkit-backdrop-filter:blur(32px) saturate(160%);backdrop-filter:blur(32px) saturate(160%)}
+</style>
+</head>
+<body>
+<h1>选中气泡材质对照 · 同一张首页滚动态底</h1>
+<div class="sub">A/B 气泡包在条内（透出来的是"条的白模糊"，所以 B→C 只差几何）；C/D/E 让气泡溢出条顶，直接压在原始内容上</div>
+<div class="grid" id="g"></div>
+<script>
+const TABS=[['tab_home','首页',22],['tab_rili','日历',23],['tab_center','我的',23.5]];
+const XS=[13.17,128,242.5];
+const dk = location.hash.indexOf('dark')>=0;
+// geo: in=包在条内(88x44,y6)  out=溢出条顶(96x58,y-1)
+const ROWS = dk
+  ? [{k:'F',t:'F 暗黑现状',d:'88×44 包在条内 · 白 16%',g:'in'},
+     {k:'E',t:'E 暗黑 溢出 + 折射边（推荐）',d:'96×66 上下溢出条 5px · 白 13% · blur 42',g:'out'}]
+  : [{k:'A',t:'A 现状',d:'88×44 包在条内 · 白覆盖 92%',g:'in'},
+     {k:'B',t:'B 只改材质（证明无效）',d:'88×44 包在条内 · 白 42% + 边缘',g:'in'},
+     {k:'C',t:'C 溢出 + 半透（推荐）',d:'96×66 上下溢出条 5px · 白 34% · blur 40',g:'out'},
+     {k:'D',t:'D 溢出 + 全透（照抄参考图）',d:'96×66 上下溢出条 5px · 白 15% · blur 46',g:'out'}];
+
+const GEO={in:{w:88,h:44,st:6,r:22,dx:0}, out:{w:96,h:66,st:-5,r:33,dx:-4}};
+function bar(r){
+  const on=0, g=GEO[r.g];
+  let h=`<div class="bar ${dk?'dk':'lt'}">`;
+  TABS.forEach((t,i)=>{
+    if(i===on) return;
+    const sfx=dk?'_dk':'';
+    h+=`<div class="slot" style="--x:${XS[i]}px;--s:${t[2]}px"><img src="assets/${t[0]}${sfx}.png"><span>${t[1]}</span></div>`;
+  });
+  const sfx=dk?'_on_dk':'_on';
+  h+=`<div class="bub ${r.k}" style="--x:${XS[on]+g.dx}px;--w:${g.w}px;--h:${g.h}px;--st:${g.st}px;--r:${g.r}px;--s:${TABS[on][2]}px"><img src="assets/${TABS[on][0]}${sfx}.png"><span>${TABS[on][1]}</span></div>`;
+  return h+'</div>';
+}
+document.getElementById('g').innerHTML = ROWS.map(r=>`
+  <div class="cell">
+    <div class="cap">${r.t}<em>${r.d}</em></div>
+    <div class="stage">
+      <div class="win"><img src="assets/${dk?'cmp_strip_dk':'cmp_strip'}.png"></div>
+      ${bar(r)}
+    </div>
+  </div>`).join('');
+</script>
+</body>
+</html>

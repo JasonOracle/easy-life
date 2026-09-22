@@ -1,5 +1,11 @@
 <!--
   [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[组件类名加 ft- 前缀（pill/pill-text/toast/toast-card/cup-circle/cup-glyph/plus-num/plus-unit）：.pill/.pill-text 与 Profile 页目标胶囊同名，按铁律消除跨文件污染；样式数值零改动]
+-->
+<!--
+  [变更日志]
   修改时间：2026-09-21
   AI模型：Qoder (Claude)
   修改内容：[mp-weixin 组件样式平铺导致跨组件类名冲突（.mask/.sub 与 AddFood/FoodPicker/GoalModal 互相污染），
@@ -15,17 +21,17 @@
 
 <template>
   <view class="ft-mask" v-if="show" @click="dismiss">
-    <view class="toast">
-      <view class="cup-circle">
-        <text class="cup-glyph">✓</text>
+    <view class="ft-toast">
+      <view class="ft-cup-circle">
+        <text class="ft-cup-glyph">✓</text>
       </view>
-      <view class="toast-card">
-        <text class="plus-num">+{{ kcal }}</text>
-        <text class="plus-unit">kcal</text>
+      <view class="ft-toast-card">
+        <text class="ft-plus-num">+{{ kcal }}</text>
+        <text class="ft-plus-unit">kcal</text>
         <text class="ft-sub">已加入{{ mealLabel }}</text>
       </view>
-      <view class="pill">
-        <text class="pill-text">已添加</text>
+      <view class="ft-pill">
+        <text class="ft-pill-text">已添加</text>
       </view>
     </view>
   </view>
@@ -103,10 +109,10 @@ onUnmounted(() => {
   justify-content: center;
   align-items: center;
 }
-.toast {
+.ft-toast {
   align-items: center;
 }
-.cup-circle {
+.ft-cup-circle {
   width: 72px;
   height: 72px;
   border-radius: 36px;
@@ -115,11 +121,11 @@ onUnmounted(() => {
   align-items: center;
   box-shadow: 0 8px 20px rgba(31, 191, 143, 0.4);
 }
-.cup-glyph {
+.ft-cup-glyph {
   font-size: 34px;
   color: #FFFFFF;
 }
-.toast-card {
+.ft-toast-card {
   flex-direction: row;
   align-items: baseline;
   background-color: #FFFFFF;
@@ -127,12 +133,12 @@ onUnmounted(() => {
   padding: 14px 22px;
   margin-top: 14px;
 }
-.plus-num {
+.ft-plus-num {
   font-size: 30px;
   font-weight: bold;
   color: #0A4F3D;
 }
-.plus-unit {
+.ft-plus-unit {
   font-size: 14px;
   color: #0A4F3D;
   margin-left: 4px;
@@ -142,7 +148,7 @@ onUnmounted(() => {
   color: #73918B;
   margin-left: 10px;
 }
-.pill {
+.ft-pill {
   background-color: #1FBF8F;
   border-radius: 14px;
   padding-left: 18px;
@@ -151,7 +157,7 @@ onUnmounted(() => {
   justify-content: center;
   margin-top: 12px;
 }
-.pill-text {
+.ft-pill-text {
   font-size: 13px;
   color: #FFFFFF;
 }

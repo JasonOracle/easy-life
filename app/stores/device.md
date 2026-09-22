@@ -1,5 +1,12 @@
 # device.ts — 设备能力 store
 
+<!--
+[变更日志]
+修改时间：2026-09-22
+AI模型：Qoder (Claude)
+修改内容：[校准「与设计稿的对应」：标注「液体晃动衰减 0.955」为设计参数、晃动动效尚未落地（全代码 grep 无 0.955、无液体晃动实现，本 store 仅暴露 liquidWave 能力开关）。]
+-->
+
 ## 💡 核心思想
 
 App 启动检测一次设备分档，全局 getter 供所有组件读取（tier／haptics／liquidWave／sound／backdropBlur／platform）。
@@ -26,4 +33,4 @@ if (device.haptics) uni.vibrateShort()
 
 ## 与设计稿的对应
 
-- 反馈三级矩阵（L1/L2/L3）的总开关；液体晃动衰减 0.955 不变
+- 反馈三级矩阵（L1/L2/L3）的总开关；液体晃动衰减 0.955 为设计参数（晃动动效尚未落地，本 store 仅提供 `liquidWave` 能力开关）（2026-09-22 校准）
