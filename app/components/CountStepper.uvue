@@ -1,6 +1,14 @@
 <!--
   [变更日志]
   修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[按「计数步进器·规格」板补齐：能量条改三段静态渐变类（mint 渐变/amber/coral，
+    阈值不变），条宽 240ms ease-out-back 过渡；数字变化 scale 1→1.12→1 160ms 弹跳；
+    2026-09-21 Boss 实拍修复：.block 加 flex-shrink:0 防被 sheet 压扁]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
   AI模型：Muse Spark
   修改内容：[新建：计数步进器（默认 3，上限 100，对数能量条＋阈值三色＋键入态＋截界抖动）；
     算法与阈值来自 food store（portionRatio/portionLevel/MAX_COUNT）]
@@ -21,7 +29,7 @@
         :class="{ 'capsule-editing': editing, 'capsule-w2': digitCount === 2, 'capsule-w3': digitCount === 3 }"
         @click="beginInput"
       >
-        <text class="capsule-num" :class="{ 'capsule-num-small': digitCount === 3 }" v-if="!editing">{{ count }}</text>
+        <text class="capsule-num" :class="{ 'capsule-num-small': digitCount === 3, 'capsule-num-pop': popping }" v-if="!editing">{{ count }}</text>
         <text class="capsule-unit" v-if="!editing">{{ unitLabel }}</text>
         <input
           v-if="editing"
@@ -43,7 +51,7 @@
       </view>
     </view>
     <view class="track" :class="{ 'track-shake': shaking }">
-      <view class="fill" :style="{ width: fillPct + '%', backgroundColor: barColor }"></view>
+      <view class="fill" :class="barClass" :style="{ width: fillPct + '%' }"></view>
       <text class="tick" :style="{ left: '15%' }">1</text>
       <text class="tick" :style="{ left: '39%' }">5</text>
       <text class="tick" :style="{ left: '70%' }">25</text>
@@ -56,6 +64,7 @@
 <script setup lang="uts">
 import { ref } from 'vue'
 import { computed } from 'vue'
+import { watch } from 'vue'
 import { onUnmounted } from 'vue'
 import { MAX_COUNT, portionRatio, portionLevel } from '../stores/food'
 
@@ -82,16 +91,28 @@ const count = computed(() => props.modelValue)
 const editing = ref(false)
 const inputText = ref('')
 const shaking = ref(false)
+const popping = ref(false)
 let shakeTimer = 0
+let popTimer = 0
 let dismissTimer = 0
 
 const digitCount = computed(() => count.value.toString().length)
 const fillPct = computed(() => Math.round(portionRatio(count.value) * 1000) / 10)
-const barColor = computed(() => {
+const barClass = computed(() => {
   const lv = portionLevel(count.value)
-  if (lv === 1) return '#E8B54D'
-  if (lv === 2) return '#FF9E7D'
-  return '#1FBF8F'
+  if (lv === 1) return 'fill-amber'
+  if (lv === 2) return 'fill-coral'
+  return 'fill-mint'
+})
+
+watch(count, () => {
+  popping.value = false
+  if (popTimer > 0) clearTimeout(popTimer)
+  popping.value = true
+  popTimer = setTimeout(() => {
+    popping.value = false
+    popTimer = 0
+  }, 170) as unknown as number
 })
 
 function clamp(n: number): number {
@@ -162,6 +183,7 @@ function commitInput(): void {
 
 onUnmounted(() => {
   if (shakeTimer > 0) clearTimeout(shakeTimer)
+  if (popTimer > 0) clearTimeout(popTimer)
   if (dismissTimer > 0) clearTimeout(dismissTimer)
 })
 </script>
@@ -171,6 +193,7 @@ onUnmounted(() => {
   background-color: #F2FAF5;
   border-radius: 20px;
   padding: 16px 14px 12px 14px;
+  flex-shrink: 0;
 }
 .row1 {
   flex-direction: row;
@@ -225,6 +248,14 @@ onUnmounted(() => {
 .capsule-num-small {
   font-size: 30px;
 }
+.capsule-num-pop {
+  animation: numPop 160ms ease-out;
+}
+@keyframes numPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
 .capsule-unit {
   font-size: 13px;
   color: #8FAEAF;
@@ -246,6 +277,18 @@ onUnmounted(() => {
 .fill {
   height: 8px;
   border-radius: 4px;
+  transition-property: width;
+  transition-duration: 240ms;
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.fill-mint {
+  background-image: linear-gradient(to right, #7DEBC7, #1FBF8F);
+}
+.fill-amber {
+  background-color: #E8B54D;
+}
+.fill-coral {
+  background-color: #FF9E7D;
 }
 .tick {
   position: absolute;

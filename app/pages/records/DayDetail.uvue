@@ -1,0 +1,759 @@
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[#28 常驻导航栏（Boss 拍板三端固定顶部）：删除 P1 两件套（dd-st-mask 顶遮罩＋dd-fx-back 常驻返回钮），
+    合并为单个 fixed 导航栏 dd-nav-fixed（z45，滚动 >40 出现＝渐变末色 #39AD95 实底＋返回箭＋白色粗体动态日期标题＋下投影）；
+    onPageScroll 去 MP-WEIXIN 条件编译改三端生效，仍跨阈值才写 ref]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[滚动遮罩弃 StickyTop 组件改页内内联 fixed 视图：该组件实测双故障——其 v-if 遮罩视图在 mp-weixin
+    端不渲染，且其宿主节点内会再渲染一份整页模板的幻影副本（插值全空、页高虚增）；内联视图与 fx-back 同机制已验证]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[组件标签一律成对书写（禁自闭合）＋StickyTop 置模板最末：实测本工程 mp-weixin VDOM 产物中任一自闭合
+    组件标签会在该宿主内以空作用域重渲染整页模板（幻影副本：插值全空、wx:for 空、页高虚增，首个自闭合标签决定幻影位置）；
+    fixed 遮罩与文档序无关，末位安全]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[P1 滚动防穿透（Boss 拍板 B-lite：头部随内容滚走＋返回钮常驻）：
+    接 StickyTop 两态遮罩（scrollTop>80 显示，色取 Header 渐变末色 #39AD95，高 sbH+58）；
+    新增常驻返回钮 dd-fx-back（fixed z45，44×44 热区中心对准稿面 dd-back 图标中心 (25, sbH+20)）；
+    onPageScroll 走 MP-WEIXIN 条件编译，仅跨阈值写 ref]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[新建：还原 Pencil「单日详情」页 VEWYt（绿色渐变 Header 日期标题 + 今日热量大卡〔火焰标题/超标 pill/
+    大数字/进度环 conic/能量条/营养分布三列〕+ 餐次记录四卡（记录行长按 → uni.showActionSheet 删除，
+    Boss 拍板交互）+ 今日饮食总结条）；查看日＝food.viewDay（Records 跳转前写入）；
+    「添加食物」复用 FoodPicker→AddFood→SettleBadge 链路。]
+-->
+<template>
+  <view class="page">
+    <!-- Header（稿面 P1xTZv 375×152 渐变；Card 上叠 56） -->
+    <view class="dd-header" :style="{ paddingTop: sbH + 'px', height: (108 + sbH) + 'px' }">
+      <view class="dd-nav">
+        <image class="dd-back" :src="'/static/records/lr_back.png'" mode="aspectFit" @click="goBack"></image>
+        <text class="dd-title">{{ headerTitle }}</text>
+      </view>
+    </view>
+
+    <!-- 今日热量卡 -->
+    <view class="dd-card">
+      <view class="dd-card-head">
+        <image class="dd-flame" :src="'/static/profile/flame.png'" mode="aspectFit"></image>
+        <text class="dd-card-title">今日热量</text>
+        <view class="dd-overpill" v-if="dayOver > 0">
+          <text class="dd-overtxt">超标 {{ dayOver }} kcal</text>
+        </view>
+      </view>
+      <view class="dd-ring" :style="ringStyle">
+        <view class="dd-ring-hole"></view>
+        <text class="dd-ring-pct">{{ ringPct }}%</text>
+        <text class="dd-ring-label">已摄入</text>
+      </view>
+      <view class="dd-bignum-row">
+        <text class="dd-bignum">{{ dayTotal }}</text>
+        <text class="dd-bigunit">kcal</text>
+      </view>
+      <view class="dd-track">
+        <view class="dd-fill" :style="{ width: fillW + 'px' }"></view>
+      </view>
+      <view class="dd-prog-foot">
+        <view class="dd-prog-left">
+          <text class="dd-plabel">已摄入</text>
+          <text class="dd-pnum">{{ dayTotal }}</text>
+          <text class="dd-punit">kcal</text>
+        </view>
+        <view class="dd-prog-right">
+          <text class="dd-plabel">目标</text>
+          <text class="dd-pnum">{{ goalVal }}</text>
+          <text class="dd-punit">kcal</text>
+        </view>
+      </view>
+      <view class="dd-stat">
+        <text class="dd-stat-title">营养分布</text>
+        <view class="dd-stat-row">
+          <view class="dd-stat-col">
+            <image class="dd-mg" :src="'/static/home/macro_protein.png'" mode="aspectFit"></image>
+            <view class="dd-stat-txt">
+              <text class="dd-stat-num">{{ dayProtein }}g</text>
+              <text class="dd-stat-lbl">蛋白质</text>
+            </view>
+          </view>
+          <view class="dd-stat-div"></view>
+          <view class="dd-stat-col">
+            <image class="dd-mg" :src="'/static/home/macro_carb.png'" mode="aspectFit"></image>
+            <view class="dd-stat-txt">
+              <text class="dd-stat-num">{{ dayCarb }}g</text>
+              <text class="dd-stat-lbl">碳水</text>
+            </view>
+          </view>
+          <view class="dd-stat-div"></view>
+          <view class="dd-stat-col">
+            <image class="dd-mg" :src="'/static/home/macro_fat.png'" mode="aspectFit"></image>
+            <view class="dd-stat-txt">
+              <text class="dd-stat-num">{{ dayFat }}g</text>
+              <text class="dd-stat-lbl">脂肪</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 餐次记录 -->
+    <view class="dd-secrow">
+      <view class="dd-acc"></view>
+      <text class="dd-sec">餐次记录</text>
+      <view class="dd-add" @click="openPicker">
+        <image class="dd-add-ic" :src="'/static/records/dd_add.png'" mode="aspectFit"></image>
+        <text class="dd-add-txt">添加食物</text>
+      </view>
+    </view>
+    <view class="dd-meal" v-for="(mealItem, mealIdx) in mealGroups" :key="mealIdx">
+      <view class="dd-meal-head">
+        <view class="dd-meal-circ">
+          <image class="dd-meal-ic" :src="mealItem.icon" mode="aspectFit"></image>
+        </view>
+        <text class="dd-meal-name">{{ mealItem.name }}</text>
+        <text class="dd-meal-time">{{ mealItem.time }}</text>
+        <view class="dd-meal-cal">
+          <text class="dd-meal-num">{{ mealItem.cal }}</text>
+          <text class="dd-meal-unit">kcal</text>
+        </view>
+      </view>
+      <view
+        class="dd-row"
+        v-for="(rowItem, rowIdx) in mealItem.rows"
+        :key="rowIdx"
+        @longpress="confirmDelete(rowItem)"
+      >
+        <image class="dd-row-ph" :src="rowItem.img" mode="aspectFill"></image>
+        <text class="dd-row-name">{{ rowItem.name }}</text>
+        <text class="dd-row-portion">{{ rowItem.portion }}</text>
+        <text class="dd-row-kcal">{{ rowItem.kcal }} kcal</text>
+      </view>
+    </view>
+
+    <!-- 今日饮食总结 -->
+    <view class="dd-band">
+      <view class="dd-band-circ">
+        <image class="dd-band-ic" :src="'/static/records/dd_sum.png'" mode="aspectFit"></image>
+      </view>
+      <view class="dd-band-txt">
+        <text class="dd-band-title">今日饮食总结</text>
+        <text class="dd-band-sub">继续保持，明天会更好！</text>
+      </view>
+    </view>
+
+    <view class="dd-bottom-space"></view>
+
+    <FoodPicker v-model:show="pickerShow" :selected-id="addFoodId" @select="onPickFood" ></FoodPicker>
+    <AddFood v-model:show="addShow" :food-id="addFoodId" @confirm="onAddConfirm" @change="onAddChange" ></AddFood>
+    <SettleBadge v-model:show="settleShow" :kcal="settleKcal" :after="settleAfter" :goal="goal.calorieGoal" :meal="settleMeal" ></SettleBadge>
+
+    <!-- 常驻导航栏（#28：替代 P1 遮罩＋fx-back 两件套）：滚动跨阈后整栏出现＝末色底＋返回箭＋日期标题，三端生效 -->
+    <view v-if="scrolled" class="dd-nav-fixed" :style="{ height: (sbH + 58) + 'px', paddingTop: sbH + 'px' }">
+      <view class="dd-nav-back" @click="goBack">
+        <image class="dd-nav-icon" :src="'/static/records/lr_back.png'" mode="aspectFit"></image>
+      </view>
+      <text class="dd-nav-title">{{ headerTitle }}</text>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed } from 'vue'
+import { onPageScroll } from '@dcloudio/uni-app'
+import { useFoodStore, dayKeyOf, dayRange, amountText, getFoodById, computeEntry, MEAL_KEYS, MEAL_LABELS } from '../../stores/food'
+import type { FoodEntry } from '../../stores/food'
+import { useGoalStore } from '../../stores/goal'
+import AddFood from '../../components/AddFood.uvue'
+import type { AddPayload } from '../../components/AddFood.uvue'
+import FoodPicker from '../../components/FoodPicker.uvue'
+import SettleBadge from '../../components/SettleBadge.uvue'
+
+/**
+ * 单日详情（Pencil VEWYt 逐节点量取）。
+ * 查看日＝food.viewDay（Records 跳转前写入，空则今日）；
+ * 记录行长按 → uni.showActionSheet「删除这条记录」→ removeEntry（Boss 拍板）。
+ */
+
+const food = useFoodStore()
+const goal = useGoalStore()
+
+const sbH = ref(0)
+sbH.value = uni.getSystemInfoSync().statusBarHeight ?? 0
+
+// 常驻导航栏两态（#28，三端生效；跨阈值才写 ref 避免逐帧 setData）：>40 整栏出现＝
+// 头图渐变末色 #39AD95 实底＋返回箭＋日期标题，与滚动中的头图无缝接续
+const scrolled = ref<boolean>(false)
+onPageScroll((e) => {
+  const v = e.scrollTop > 40
+  if (v !== scrolled.value) scrolled.value = v
+})
+
+const weekNames = ['一', '二', '三', '四', '五', '六', '日']
+
+const dayKey = computed<string>(() => {
+  const v = food.viewDay
+  return v != null && v.length === 10 ? v : dayKeyOf(Date.now())
+})
+
+const dayEntries = computed<FoodEntry[]>(() => {
+  const range = dayRange(dayKey.value)
+  const list = food.entries.filter((e: FoodEntry): boolean => e.ts >= range[0] && e.ts < range[1])
+  list.sort((a: FoodEntry, b: FoodEntry): number => a.ts - b.ts)
+  return list
+})
+
+const headerTitle = computed<string>(() => {
+  const parts = dayKey.value.split('-')
+  const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]))
+  return parseInt(parts[1]) + '月' + parseInt(parts[2]) + '日 · 周' + weekNames[(d.getDay() + 6) % 7]
+})
+
+const goalVal = computed<number>(() => goal.calorieGoal)
+const dayTotal = computed<number>(() => dayEntries.value.reduce((s: number, e: FoodEntry): number => s + e.kcal, 0))
+const dayOver = computed<number>(() => {
+  const o = dayTotal.value - goalVal.value
+  return o > 0 ? o : 0
+})
+const ringPct = computed<number>(() => {
+  if (goalVal.value <= 0) return 0
+  return Math.round(dayTotal.value / goalVal.value * 100)
+})
+
+/** 进度环：MP 端 conic-gradient（SettleBadge 同款通路），App 端 canvas 未接（真机待验，见 DayDetail.md） */
+const ringStyle = computed<any>(() => {
+  const turn = (dayTotal.value > goalVal.value ? 1 : dayTotal.value / (goalVal.value > 0 ? goalVal.value : 1))
+  return {
+    backgroundImage: 'conic-gradient(from -90deg, #3AC39A 0turn, #009B7A ' + (turn * 0.9999).toString() + 'turn, #E5F1F0 ' + (turn * 0.9999).toString() + 'turn)',
+  }
+})
+
+const fillW = computed<number>(() => {
+  const scale = dayTotal.value > goalVal.value ? dayTotal.value : goalVal.value
+  if (scale <= 0) return 0
+  return Math.round(Math.min(dayTotal.value, goalVal.value) / scale * 319 * 10) / 10
+})
+
+const dayProtein = computed<number>(() => Math.round(dayEntries.value.reduce((s: number, e: FoodEntry): number => s + e.protein, 0)))
+const dayCarb = computed<number>(() => Math.round(dayEntries.value.reduce((s: number, e: FoodEntry): number => s + e.carb, 0)))
+const dayFat = computed<number>(() => Math.round(dayEntries.value.reduce((s: number, e: FoodEntry): number => s + e.fat, 0)))
+
+interface Row {
+  id: string
+  img: string
+  name: string
+  portion: string
+  kcal: number
+}
+
+interface MealGroup {
+  icon: string
+  name: string
+  time: string
+  cal: number
+  rows: Row[]
+}
+
+const MEAL_ICONS: Record<string, string> = {
+  breakfast: '/static/records/lr_meal_breakfast.png',
+  lunch: '/static/records/lr_meal_lunch.png',
+  dinner: '/static/records/lr_meal_dinner.png',
+  snack: '/static/records/lr_meal_snack.png',
+}
+
+const mealGroups = computed<MealGroup[]>(() => {
+  const out: MealGroup[] = []
+  for (const mk of MEAL_KEYS) {
+    const entries = dayEntries.value.filter((e: FoodEntry): boolean => e.meal === mk)
+    if (entries.length === 0) continue
+    let cal = 0
+    for (const e of entries) cal += e.kcal
+    const d = new Date(entries[0].ts)
+    const hh = d.getHours() < 10 ? '0' + d.getHours().toString() : d.getHours().toString()
+    const mm = d.getMinutes() < 10 ? '0' + d.getMinutes().toString() : d.getMinutes().toString()
+    const rows: Row[] = []
+    for (const e of entries) {
+      rows.push({
+        id: e.id,
+        img: e.img != null && e.img !== '' ? '/static/icons/' + e.img : '',
+        name: e.name,
+        portion: amountText(e),
+        kcal: e.kcal,
+      })
+    }
+    out.push({
+      icon: MEAL_ICONS[mk] ?? '',
+      name: MEAL_LABELS[mk] ?? mk,
+      time: hh + ':' + mm,
+      cal,
+      rows,
+    })
+  }
+  return out
+})
+
+/** 长按删除（Boss 拍板：uni.showActionSheet 底部菜单加删除项） */
+function confirmDelete(row: Row): void {
+  uni.showActionSheet({
+    itemList: ['删除这条记录'],
+    success: () => {
+      food.removeEntry(row.id)
+      try { uni.vibrateShort() } catch (e) {}
+    },
+    fail: () => {},
+  })
+}
+
+// ===== 添加食物链路（复用 Home 同款三弹窗） =====
+const pickerShow = ref(false)
+const addShow = ref(false)
+const addFoodId = ref('')
+const settleShow = ref(false)
+const settleKcal = ref(0)
+const settleAfter = ref(0)
+const settleMeal = ref('')
+
+function openPicker(): void {
+  pickerShow.value = true
+}
+
+function onPickFood(id: string): void {
+  addFoodId.value = id
+  addShow.value = true
+}
+
+function onAddChange(): void {
+  addShow.value = false
+  pickerShow.value = true
+}
+
+function onAddConfirm(payload: AddPayload): void {
+  addShow.value = false
+  const f = getFoodById(payload.foodId)
+  if (f != null) {
+    food.addEntry(computeEntry(f, payload.amount, payload.unit, payload.meal, payload.extraKcal))
+  }
+  settleKcal.value = payload.kcal
+  settleAfter.value = food.totalCal
+  settleMeal.value = MEAL_LABELS[payload.meal] ?? ''
+  settleShow.value = true
+}
+
+function goBack(): void {
+  uni.navigateBack()
+}
+</script>
+
+<style>
+.page {
+  background-image: linear-gradient(180deg, #E2F5EC, #F6FCF9);
+  min-height: 100%;
+}
+
+/* ===== Header（375×152 渐变，Card 上叠 56） ===== */
+.dd-header {
+  background-image: linear-gradient(180deg, #5CC4AC, #39AD95);
+}
+.dd-nav {
+  flex-direction: row;
+  align-items: center;
+  height: 40px;
+  padding-left: 16px;
+}
+.dd-back {
+  width: 18px;
+  height: 18px;
+}
+.dd-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #FFFFFF;
+  height: 26px;
+  line-height: 26px;
+  margin-left: 12px;
+}
+
+/* ===== 今日热量卡 348×229 r16 ===== */
+.dd-card {
+  margin: -56px 14px 0 14px;
+  height: 229px;
+  background-color: #FFFFFF;
+  border-radius: 16px;
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: 0 4px 16px rgba(10, 79, 61, 0.06);
+}
+.dd-card-head {
+  flex-direction: row;
+  align-items: center;
+  padding: 13px 0 0 15px;
+}
+.dd-flame {
+  width: 12px;
+  height: 14px;
+}
+.dd-card-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #002920;
+  margin-left: 8px;
+}
+.dd-overpill {
+  height: 14px;
+  padding: 0 7px 0 8px;
+  border-radius: 7px;
+  background-color: #FDF0ED;
+  justify-content: center;
+  margin-left: 8px;
+}
+.dd-overtxt {
+  font-size: 8.3px;
+  font-weight: 500;
+  color: #FA543A;
+}
+.dd-ring {
+  position: absolute;
+  right: 20px;
+  top: 13px;
+  width: 72px;
+  height: 72px;
+  border-radius: 36px;
+  background-color: #E5F1F0;
+  align-items: center;
+}
+.dd-ring-hole {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  right: 4px;
+  bottom: 4px;
+  border-radius: 32px;
+  background-color: #FFFFFF;
+}
+.dd-ring-pct {
+  font-size: 14.3px;
+  font-weight: 700;
+  color: #003826;
+  margin-top: 18px;
+  z-index: 1;
+}
+.dd-ring-label {
+  font-size: 7.9px;
+  color: #16A880;
+  margin-top: 1px;
+  z-index: 1;
+}
+.dd-bignum-row {
+  flex-direction: row;
+  align-items: flex-end;
+  padding: 0 0 0 13px;
+}
+.dd-bignum {
+  font-size: 45.3px;
+  font-weight: 700;
+  color: #003428;
+  line-height: 55px;
+}
+.dd-bigunit {
+  font-size: 14.3px;
+  font-weight: 700;
+  color: #00835F;
+  margin-left: 5px;
+  margin-bottom: 6px;
+}
+.dd-track {
+  margin: 14px 15px 0 14px;
+  height: 9px;
+  border-radius: 4.5px;
+  background-color: #E5F1F0;
+}
+.dd-fill {
+  height: 9px;
+  border-radius: 4.5px;
+  background-image: linear-gradient(90deg, #12A581, #23B391);
+}
+.dd-prog-foot {
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 5px 0 0 15px;
+  width: 319px;
+}
+.dd-prog-left {
+  flex-direction: row;
+  align-items: flex-end;
+}
+.dd-prog-right {
+  flex-direction: row;
+  align-items: flex-end;
+  margin-right: 16px;
+}
+.dd-plabel {
+  font-size: 9.5px;
+  font-weight: 500;
+  color: #4A6171;
+}
+.dd-pnum {
+  font-size: 11.1px;
+  font-weight: 700;
+  color: #00222B;
+  margin-left: 6px;
+}
+.dd-prog-right .dd-pnum {
+  font-weight: 400;
+  color: #1C4455;
+}
+.dd-punit {
+  font-size: 9.5px;
+  color: #465F69;
+  margin-left: 2px;
+}
+.dd-stat {
+  margin: 12px 10px 0 10px;
+  height: 76px;
+  border-radius: 11px;
+  background-color: #F2F8F9;
+  padding: 7px 12px 0 12px;
+}
+.dd-stat-title {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #0A7A5C;
+}
+.dd-stat-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+.dd-stat-col {
+  flex-direction: row;
+  align-items: center;
+}
+.dd-mg {
+  width: 22px;
+  height: 17px;
+  margin-right: 6px;
+}
+.dd-stat-txt {
+  align-items: flex-start;
+}
+.dd-stat-num {
+  font-size: 17.5px;
+  font-weight: 700;
+  color: #082731;
+}
+.dd-stat-lbl {
+  font-size: 8.6px;
+  font-weight: 500;
+  color: #5A7380;
+  margin-top: 1px;
+}
+.dd-stat-div {
+  width: 1px;
+  height: 36px;
+  background-color: #E3EAEB;
+}
+
+/* ===== 餐次记录分区 ===== */
+.dd-secrow {
+  flex-direction: row;
+  align-items: center;
+  margin: 22px 14px 0 14px;
+  height: 22px;
+}
+.dd-acc {
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  background-color: #0A7A5C;
+}
+.dd-sec {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0F5B44;
+  margin-left: 6px;
+  flex: 1;
+}
+.dd-add {
+  flex-direction: row;
+  align-items: center;
+}
+.dd-add-ic {
+  width: 12px;
+  height: 12px;
+}
+.dd-add-txt {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #0A7A5C;
+  margin-left: 3px;
+}
+
+/* ===== 餐次卡 347 r16（高随行数：122 + 46*(n-1)） ===== */
+.dd-meal {
+  margin: 16px 14px 0 14px;
+  background-color: #FFFFFF;
+  border-radius: 16px;
+  padding-bottom: 21px;
+  flex-shrink: 0;
+}
+.dd-meal-head {
+  flex-direction: row;
+  align-items: center;
+  padding: 14px 14px 0 14px;
+  height: 55px;
+}
+.dd-meal-circ {
+  width: 34px;
+  height: 34px;
+  border-radius: 17px;
+  background-color: #E7F7EF;
+  justify-content: center;
+  align-items: center;
+}
+.dd-meal-ic {
+  width: 16px;
+  height: 16px;
+}
+.dd-meal-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0F5B44;
+  margin-left: 10px;
+}
+.dd-meal-time {
+  font-size: 11.5px;
+  color: #8FAEAF;
+  margin-left: 8px;
+  flex: 1;
+}
+.dd-meal-cal {
+  flex-direction: row;
+  align-items: flex-end;
+}
+.dd-meal-num {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0A5A40;
+}
+.dd-meal-unit {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #8FAEAF;
+  margin-left: 3px;
+  margin-bottom: 2px;
+}
+.dd-row {
+  flex-direction: row;
+  align-items: center;
+  height: 32px;
+  margin-top: 14px;
+  padding-left: 44px;
+}
+.dd-row-ph {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+}
+.dd-row-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0F5B44;
+  margin-left: 10px;
+}
+.dd-row-portion {
+  font-size: 11px;
+  color: #8FAEAF;
+  margin-left: 14px;
+  flex: 1;
+}
+.dd-row-kcal {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #12A87B;
+  margin-right: 14px;
+}
+
+/* ===== 今日饮食总结 347×76 r16 ===== */
+.dd-band {
+  margin: 20px 14px 0 14px;
+  height: 76px;
+  background-color: #FFFFFF;
+  border-radius: 16px;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 14px 0 16px;
+  flex-shrink: 0;
+}
+.dd-band-circ {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background-color: #E7F7EF;
+  justify-content: center;
+  align-items: center;
+}
+.dd-band-ic {
+  width: 16px;
+  height: 16px;
+}
+.dd-band-txt {
+  margin-left: 12px;
+}
+.dd-band-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0A7A5C;
+}
+.dd-band-sub {
+  font-size: 11px;
+  color: #46706B;
+  margin-top: 3px;
+}
+.dd-bottom-space {
+  height: 40px;
+}
+/* 常驻导航栏（#28：替代 P1 顶遮罩＋fx-back 两件套）：z45；标题动态＝日期·星期（headerTitle） */
+.dd-nav-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 45;
+  flex-direction: row;
+  align-items: center;
+  background-color: #39AD95;
+  box-shadow: 0 2px 10px rgba(10, 79, 61, 0.10);
+}
+.dd-nav-back {
+  width: 44px;
+  height: 44px;
+  margin-left: 3px;
+  justify-content: center;
+  align-items: center;
+}
+.dd-nav-icon {
+  width: 18px;
+  height: 18px;
+}
+.dd-nav-title {
+  font-size: 17px;
+  font-weight: bold;
+  color: #FFFFFF;
+}
+</style>

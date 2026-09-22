@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 # [变更日志]
+# 修改时间：2026-09-21
+# AI模型：Qoder (Claude)
+# 修改内容：[食物条目新增 py 拼音索引字段（{"f": 全拼连写, "i": 首字母串}），
+#            由 pypinyin 词级转换、非汉字字符剔除；供弹层⓪ 食物选择列表的
+#            「支持拼音」搜索使用。schema v1.0 同步补 py 属性。]
+# [变更日志]
 # 修改时间：2026-09-19
 # AI模型：CodeBuddy (DeepSeek-V4.1-Flash)
 # 修改内容：[1. 由「单 YAML 源」重写为「多源合并」：
@@ -35,6 +41,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from pypinyin import pinyin, Style
 from validate import SOURCES, load_sources, validate_sources
 
 BASE = Path(__file__).resolve().parent
@@ -45,6 +52,13 @@ LIB_VERSION = "1.0.0"
 ICON_BASE_DIR = "icons-final"
 ICON_SRC = BASE.parent / "assets" / ICON_BASE_DIR          # 产物：<catKey>/<id>.webp
 ICON_DEST = BASE.parent / "app" / "static" / "icons"  # App 静态资源目录（uni-app x 以 app/ 为项目根，static 常驻）
+
+
+def pinyin_index(name: str) -> dict:
+    """名称 → 搜索拼音索引。pypinyin 词级转换（多音字按词取音），非汉字剔除。
+    如「米饭（熟）」→ {"f": "mifanshu", "i": "mfs"}。"""
+    syl = [s[0] for s in pinyin(name, style=Style.NORMAL, errors="ignore")]
+    return {"f": "".join(syl), "i": "".join(s[0] for s in syl if s)}
 
 
 def build(src: dict) -> dict:
@@ -80,6 +94,7 @@ def build(src: dict) -> dict:
             "conf": nut["confidence"],
             "editable": True,                     # v1.0 全部允许记录级覆盖
             "source": nut["basis"],
+            "py": pinyin_index(food["name"]),     # 弹层⓪ 搜索：全拼 + 首字母
         })
 
     now = datetime.now(timezone.utc)

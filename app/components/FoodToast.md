@@ -17,6 +17,7 @@
 
 ## 设计决策
 
+- **类名 `ft-` 前缀**（2026-09-21）：`.mask/.sub` 与 AddFood/FoodPicker/GoalModal 同名异值互覆，冲突类加前缀
 - 音效资产（`assets/sound/`）缺失，L3 只落触觉＋动画，音效待补
 - 定时器在 unmount／重入时清理，不野留
 

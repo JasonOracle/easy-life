@@ -1,5 +1,76 @@
 <!--
   [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[#28 常驻导航栏：P1 遮罩（set-st-mask z40）＋独立返回钮（set-fx-back z45）两件套合并为整栏
+    .set-nav（末色底 #39AD95／暗 #162924＋返回箭＋白标题 17/700＋轻阴影，z45，模板最末）；
+    onPageScroll 去 MP-only 条件编译（三端通用），阈值 >40 两态不变]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[P2 设置页暗黑＋状态栏字色反转（Boss 指令）：根节点 page-dark 绑 settings.darkMode，MP-WEIXIN 后代
+    覆盖块按薄荷深色板（底 #0E211C/卡 #162924/chip #1E3B33/主字 #EAF9F3/强调 #52D6AC·#8FE8CB/危 #3A221C+#FF8266）；
+    暗里头图改实色 #162924＋隐光晕（配状态栏白字，setNavigationBarColor 于 onShow 与切换后同步；App 端 plus.navigator 待实测）；
+    滚动遮罩色随暗黑 #162924]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[滚动遮罩弃 StickyTop 组件改页内内联 fixed 视图：该组件实测双故障——其 v-if 遮罩视图在 mp-weixin
+    端不渲染，且其宿主节点内会再渲染一份整页模板的幻影副本（插值全空、页高虚增）；内联视图与 fx-back 同机制已验证]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[组件标签一律成对书写（禁自闭合）＋StickyTop 置模板最末：实测本工程 mp-weixin VDOM 产物中任一自闭合
+    组件标签会在该宿主内以空作用域重渲染整页模板（幻影副本：插值全空、wx:for 空、页高虚增，首个自闭合标签决定幻影位置）；
+    fixed 遮罩与文档序无关，末位安全]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[P1 滚动防穿透（Boss 拍板 B-lite：头部随内容滚走＋返回钮常驻）：
+    接入 StickyTop 两态遮罩（scrollTop>80 显示，色取头图实色 #39AD95，高 sbH+58 盖到状态栏＋导航带）；
+    新增常驻返回钮 fx-back（fixed，z 45 在遮罩之上，滚过阈值才 v-if 出现，点击 goBack）；
+    onPageScroll 仅 MP-WEIXIN 条件编译，只在跨阈值时改 ref 不做逐帧透明度]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[头图按 Pencil 最新稿 T0IUr 重建（Boss：设置页顶部还原度不够）：
+    竖渐变 #5CC4AC→#39AD95 ＋ 径向光晕椭圆 ＋ 双白弧 ＋ 388×159 大波浪（白10%，新资产 dbWL6@4x 覆写 header_wave.png）；
+    返回钮 41px 白圆＋8×14 箭 改为 44px 透明热区＋6×10.5 裸白箭（新资产 jWqeB@4x 覆写 chev_back.png）；
+    标题 19→18/700 @(36,46)、副题改白80% @(36,74)（原 x=69）；头图高改 sbH+113（稿 140 含 27 状态栏）；
+    首组标题距头图 19→10（稿 150-140）；
+    波浪资产改名 header_wave.png→settings_wave.png（模拟器对同路径旧图有强缓存，覆写后仍渲染旧字节，改名破缓存）；
+    终案：弃用波浪贴图（模拟器端该 image 恒渲染为不透明薄荷色帽、遮盖渐变），稿面底部波浪带即双白弧椭圆，纯 CSS 实现]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[「深色模式」行开关由稿面静态改接 settings.darkMode：点击 toggleDark →
+    settings.setDarkMode + vibrateShort（Boss 指令第 5 项：点击切换个人中心暗黑主题）]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[页面无法滚动修复：删除 .page 的 flex:1（uni-app x 运行时强制 page{height:100%}，
+    flex:1 把根节点钉为视口高＋view 默认 overflow:hidden 裁切 → 文档永不超屏原生滚动不触发；
+    删后内容自然撑高恢复滚动）。未引入 scroll-view。]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[还原度修复（对照 Ardot 画板 11:3 ×0.794 换算）：
+    返回钮按稿回滚为半透明白圆+白箭（chev_back.png）；头图收窄（波浪资产裁掉顶部透明区，
+    高度 80→49，行底距 52→42）；深色模式行标题包 row-text 修复与开关重叠；
+    分隔线对齐稿面从卡边起；箭头 6×11；即将上线 pill 61×21 比例；危险区 chip 34/行高 52]
   修改时间：2026-09-21
   AI模型：Muse Spark
   修改内容：[目标管理行开 GoalModal（保存调 setGoal）；开关保持稿面静态]
@@ -13,31 +84,31 @@
 -->
 
 <template>
-  <view class="page">
-    <!-- 头图 -->
-    <view class="header" :style="{ paddingTop: sbH + 'px' }">
-      <view class="header-row">
-        <view class="back-btn" @click="goBack">
-          <text class="chev-back-glyph">‹</text>
-        </view>
-        <view class="header-text">
-          <text class="title">设置</text>
-          <text class="subtitle">管理你的饮食记录与偏好</text>
-        </view>
+  <view class="page" :class="{ 'page-dark': dk }">
+    <!-- 头图（稿 T0IUr：140 高含 27 状态栏；渐变＋光晕＋双弧＋大波浪，返回箭/标题/副题绝对定位对齐稿面坐标） -->
+    <view class="header" :style="{ height: (113 + sbH) + 'px' }">
+      <view class="hd-glow" :style="{ top: (sbH - 170) + 'px' }"></view>
+      <view class="hd-arc1" :style="{ top: (sbH + 69) + 'px' }"></view>
+      <view class="hd-arc2" :style="{ top: (sbH + 91) + 'px' }"></view>
+      <view class="hd-back" :style="{ top: (sbH + 10) + 'px' }" @click="goBack">
+        <image class="hd-back-icon" :src="'/static/settings/chev_back.png'" mode="aspectFit"></image>
       </view>
-      <image class="header-wave" :src="'/static/settings/header_wave.png'" mode="widthFix"></image>
+      <text class="hd-title" :style="{ top: (sbH + 19) + 'px' }">设置</text>
+      <text class="hd-sub" :style="{ top: (sbH + 47) + 'px' }">管理你的饮食记录与偏好</text>
     </view>
 
     <!-- 偏好 -->
-    <text class="sec-title">偏好</text>
+    <text class="sec-title sec-first">偏好</text>
     <view class="card">
       <view class="row">
         <view class="chip">
           <image class="chip-icon" :src="'/static/settings/icon_moon.png'" mode="aspectFit"></image>
         </view>
-        <text class="row-title">深色模式</text>
-        <view class="toggle toggle-on">
-          <view class="knob knob-on"></view>
+        <view class="row-text">
+          <text class="row-title">深色模式</text>
+        </view>
+        <view class="toggle" :class="{ 'toggle-on': settings.darkMode }" @click="toggleDark">
+          <view class="knob" :class="{ 'knob-on': settings.darkMode }"></view>
         </view>
       </view>
       <view class="row-div"></view>
@@ -130,25 +201,67 @@
     </view>
 
     <!-- 每日热量目标弹窗 -->
-    <GoalModal v-model:show="goalShow" :initial="goal.calorieGoal" @save="goal.setGoal" />
+    <GoalModal v-model:show="goalShow" :initial="goal.calorieGoal" @save="goal.setGoal" ></GoalModal>
+
+    <!-- 常驻导航栏（#28：替代 P1 遮罩＋fx-back 两件套）：滚动跨阈后整栏出现＝末色底＋返回箭＋标题，三端生效 -->
+    <view v-if="scrolled" class="set-nav" :style="{ height: (sbH + 58) + 'px', paddingTop: sbH + 'px', backgroundColor: dk ? '#162924' : '#39AD95' }">
+      <view class="set-nav-back" @click="goBack">
+        <image class="set-nav-icon" :src="'/static/settings/chev_back.png'" mode="aspectFit"></image>
+      </view>
+      <text class="set-nav-title">设置</text>
+    </view>
   </view>
 </template>
 
 <script setup lang="uts">
 /**
- * 接 store 读数：目标管理行读 goal；开关暂为稿面静态（v1.0 深色模式不做，store 恒关，
- * 若绑定会把 ON 画成 OFF，与稿面漂移，故展示层保持稿面）。
+ * 接 store 读数：目标管理行读 goal；深色模式开关接 settings.setDarkMode（Boss 拍板：
+ * 点击切换，个人中心按该值渲染暗黑主题）。
  * 缩放系数 0.794：v2 画布 472px → 应用 375px。
  */
 import { useGoalStore } from '../../stores/goal'
-import { ref } from 'vue'
+import { useSettingsStore } from '../../stores/settings'
+import { ref, computed } from 'vue'
+import { onPageScroll } from '@dcloudio/uni-app'
+// #ifdef MP-WEIXIN
+import { onShow } from '@dcloudio/uni-app'
+// #endif
 import GoalModal from '../../components/GoalModal.uvue'
 
 const goal = useGoalStore()
+const settings = useSettingsStore()
 const goalShow = ref(false)
+const dk = computed((): boolean => settings.darkMode)
+
+// 状态栏字色随暗黑反转（Boss P2 指令）：小程序走 setNavigationBarColor；
+// TODO App 原生端改 plus.navigator.setStatusBarStyle 实测后补
+function syncBar(): void {
+  // #ifdef MP-WEIXIN
+  uni.setNavigationBarColor({ frontColor: dk.value ? '#ffffff' : '#000000', backgroundColor: '#000000' })
+  // #endif
+}
+// #ifdef MP-WEIXIN
+onShow(() => {
+  syncBar()
+})
+// #endif
+
+// 常驻导航栏两态（跨阈值才写 ref，避免逐帧触发 setData）：>40 即整栏出现——
+// 该滚位头图渐变已近末色 #39AD95，栏底实色与稿面无缝；onPageScroll 三端通用（#28 去 MP-only）
+const scrolled = ref<boolean>(false)
+onPageScroll((e) => {
+  const v = e.scrollTop > 40
+  if (v !== scrolled.value) scrolled.value = v
+})
 
 function openGoal(): void {
   goalShow.value = true
+}
+
+function toggleDark(): void {
+  settings.setDarkMode(!settings.darkMode)
+  syncBar()
+  try { uni.vibrateShort() } catch (e) {}
 }
 
 let sbH = 0
@@ -165,65 +278,102 @@ const goBack = () => {
 
 <style>
 .page {
-  flex: 1;
   background-color: #F2FAF5;
   padding-bottom: 30px;
 }
 .header {
-  background-color: #1FBD90;
+  background-image: linear-gradient(#5CC4AC, #39AD95);
   position: relative;
+  overflow: hidden;
 }
-.header-row {
-  flex-direction: row;
-  align-items: center;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 10px;
-  padding-bottom: 52px;
+.hd-glow {
+  position: absolute;
+  left: 24px;
+  width: 445px;
+  height: 238px;
+  border-radius: 50%;
+  background-image: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.42) 20%, rgba(255, 255, 255, 0.3) 40%, rgba(255, 255, 255, 0.17) 50%, rgba(255, 255, 255, 0.06) 70%, rgba(255, 255, 255, 0) 80%);
 }
-.back-btn {
-  width: 41px;
-  height: 41px;
-  border-radius: 21px;
-  background-color: #FFFFFF;
-  border-width: 1px;
-  border-color: #86E6C6;
+.hd-arc1 {
+  position: absolute;
+  left: -112px;
+  width: 600px;
+  height: 260px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+.hd-arc2 {
+  position: absolute;
+  left: 196px;
+  width: 300px;
+  height: 150px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.06);
+}
+.hd-back {
+  position: absolute;
+  left: 3px;
+  width: 44px;
+  height: 44px;
   justify-content: center;
   align-items: center;
 }
-.chev-back-glyph {
-  font-size: 22px;
-  color: #0A7A5C;
-  margin-top: -2px;
+.hd-back-icon {
+  width: 6px;
+  height: 10.5px;
 }
-.header-text {
-  margin-left: 12px;
+/* 常驻导航栏（#28）：滚动后整栏出现，返回箭＋标题，z45 压顶遮罩档与 Tabbar */
+.set-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 45;
+  flex-direction: row;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(10, 79, 61, 0.10);
 }
-.title {
-  font-size: 19px;
+.set-nav-back {
+  width: 44px;
+  height: 44px;
+  margin-left: 3px;
+  justify-content: center;
+  align-items: center;
+}
+.set-nav-icon {
+  width: 6px;
+  height: 10.5px;
+}
+.set-nav-title {
+  font-size: 17px;
   font-weight: bold;
   color: #FFFFFF;
 }
-.subtitle {
-  font-size: 11px;
-  color: #EBFBF5;
-  margin-top: 3px;
-}
-.header-wave {
+.hd-title {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 80px;
+  left: 36px;
+  height: 26px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #FFFFFF;
+}
+.hd-sub {
+  position: absolute;
+  left: 36px;
+  height: 16px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
 }
 .sec-title {
   font-size: 15px;
   font-weight: bold;
   color: #245E58;
   margin-left: 25px;
-  margin-top: 16px;
-  margin-bottom: 8px;
+  margin-top: 20px;
+  margin-bottom: 7px;
+}
+.sec-first {
+  margin-top: 10px;
 }
 .card {
   background-color: #FCFFFF;
@@ -267,11 +417,10 @@ const goBack = () => {
 .row-div {
   height: 1px;
   background-color: #EAF3EF;
-  margin-left: 48px;
 }
 .chev {
-  width: 10px;
-  height: 16px;
+  width: 6px;
+  height: 11px;
 }
 .toggle {
   width: 47px;
@@ -295,10 +444,10 @@ const goBack = () => {
 }
 .soon-pill {
   background-color: #EFF4F2;
-  border-radius: 9px;
+  border-radius: 11px;
   padding-left: 9px;
   padding-right: 9px;
-  height: 18px;
+  height: 21px;
   justify-content: center;
 }
 .soon-pill-text {
@@ -330,12 +479,15 @@ const goBack = () => {
   margin-left: 21px;
   margin-right: 21px;
   margin-top: 12px;
-  padding: 14px;
+  padding-top: 9px;
+  padding-bottom: 9px;
+  padding-left: 14px;
+  padding-right: 14px;
 }
 .chip-danger {
-  width: 38px;
-  height: 38px;
-  border-radius: 19px;
+  width: 34px;
+  height: 34px;
+  border-radius: 17px;
   background-color: #FDE9E4;
   justify-content: center;
   align-items: center;
@@ -368,4 +520,55 @@ const goBack = () => {
   color: #8FAEAF;
   margin-top: 3px;
 }
+/* ===== 深色模式（Boss P2：与个人中心同薄荷深色板；后代选择器仅 mp 端生效，App 端须改逐元素 :class） ===== */
+/* #ifdef MP-WEIXIN */
+.page-dark {
+  background-color: #0E211C;
+}
+.page-dark .header {
+  background-image: none;
+  background-color: #162924;
+}
+.page-dark .hd-glow {
+  display: none;
+}
+.page-dark .sec-title {
+  color: #8FE8CB;
+}
+.page-dark .card {
+  background-color: #162924;
+}
+.page-dark .chip {
+  background-color: #1E3B33;
+}
+.page-dark .row-title,
+.page-dark .brand {
+  color: #EAF9F3;
+}
+.page-dark .row-sub,
+.page-dark .soon-pill-text,
+.page-dark .shield-note,
+.page-dark .ver,
+.page-dark .footnote {
+  color: rgba(234, 249, 243, 0.5);
+}
+.page-dark .row-div {
+  background-color: #1E352F;
+}
+.page-dark .toggle {
+  background-color: #23443B;
+}
+.page-dark .soon-pill {
+  background-color: #1E3B33;
+}
+.page-dark .card-danger {
+  background-color: #162924;
+}
+.page-dark .chip-danger {
+  background-color: #3A221C;
+}
+.page-dark .danger-text {
+  color: #FF8266;
+}
+/* #endif */
 </style>

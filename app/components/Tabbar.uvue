@@ -1,5 +1,33 @@
 <!--
   [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[#29 续（Boss：「我想要的 tabbar 是 scroll-fade-navbar 那种效果」）：玻璃底由「常开」改为
+    「随滚动渐显」——新增 fade prop(0~1)，底 alpha／顶部折光／上缘高光描边／向上柔影／blur 半径
+    全部按 fade 线性抬升（fade=0 时整条栏透明，只剩图标与文字）；
+    配方与满值仍取 DesignTokens（glass-bg .74／card #162924@.72），未自创色；
+    low 档（backdropBlur=false）不参与渐显，恒为不透明底以保证可读；图标与文案未动]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[#29 毛玻璃（Boss：「我本来就想做成毛玻璃或者液态玻璃样式」）：底槽改玻璃态＝
+    glass-bg token rgba(255,255,255,.74) ＋ backdrop-filter blur/saturate ＋ 上缘白色高光描边 ＋
+    顶部白色折光渐变 ＋ 向上柔影；暗态同构（卡色 token #162924 加 alpha）；
+    玻璃类只在 backdropBlur 能力开启时挂（useDeviceStore，low 档与 App 端回退不透明底）；
+    切 Tab 补 L1 触觉反馈（vibrateShort，按 device.haptics 降级）；
+    图标与文案（含 Boss 新换的矢量 PNG 路径 home/center ±selected）一律未动]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[新增 dark prop（默认 false）：个人中心深色模式下由 Profile 传入，
+    根类 tabbar-dark + MP 条件编译后代覆盖（底/分隔线/标签三处换暗色）]
+-->
+<!--
+  [变更日志]
   修改时间：2026-09-21
   AI模型：Muse Spark
   修改内容：[新建：共享底部 Tab（首页/我的），v2 稿 10:333 规格；redirectTo 切换防栈堆积；
@@ -7,26 +35,78 @@
 -->
 
 <template>
-  <view class="tabbar">
+  <view class="tabbar" :class="{ 'tb-glass': glass, 'tabbar-dark': dark, 'tb-glass-dark': glassDark }" :style="barStyle">
     <view class="tab-item" @click="switchTab('home')">
-      <image class="tab-icon-home" :src="'/static/home/tab_home.png'" mode="aspectFit"></image>
+      <image class="tab-icon-home" :src="active === 'home'?'/static/home/home-selected.png':'/static/home/home.png'" mode="aspectFit"></image>
       <text class="tab-label" :class="{ 'tab-label-active': active === 'home' }">首页</text>
     </view>
     <view class="tab-item" @click="switchTab('profile')">
-      <image class="tab-icon-profile" :src="'/static/home/tab_profile.png'" mode="aspectFit"></image>
+      <image class="tab-icon-profile" :src="active === 'profile'?'/static/home/center-selected.png':'/static/home/center.png'" mode="aspectFit"></image>
       <text class="tab-label" :class="{ 'tab-label-active': active === 'profile' }">我的</text>
     </view>
   </view>
 </template>
 
 <script setup lang="uts">
+import { computed } from 'vue'
+import { useDeviceStore } from '../stores/device'
+
 const props = defineProps<{
   /** 当前激活页 */
   active: string
+  /** 深色底（个人中心暗黑主题时由页面传入；默认 false=稿面浅底） */
+  dark?: boolean
+  /** 渐显进度 0~1（scroll-fade：0＝整条栏透明，1＝满玻璃）；不传＝满玻璃 */
+  fade?: number
 }>()
+
+// 玻璃态归属设备能力（low 档关 backdropBlur）；主题归属仍由页面通过 dark prop 决定
+const device = useDeviceStore()
+const glass = computed((): boolean => device.backdropBlur)
+const glassDark = computed((): boolean => device.backdropBlur && props.dark == true)
+
+/**
+ * scroll-fade（照官方示例 pages/template/scroll-fade-navbar「随滚动渐显的透明导航栏」）：
+ * fade 线性抬升底／折光／描边／柔影／模糊半径，五项同驱，避免「有线没底」的半成品态。
+ * low 档（backdropBlur=false）直接返回空串＝不吃 fade，恒用 .tabbar 不透明底（可读性优先）。
+ */
+const barStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  if (!device.backdropBlur) return st
+  const f = props.fade ?? 1
+  const dm = props.dark == true
+  // 满值全部来自 DesignTokens：浅＝glass-bg #FFFFFF@.74；暗＝card #162924@.72
+  const bgA = dm ? 0.72 * f : 0.74 * f
+  const refrA = dm ? 0.10 * f : 0.50 * f
+  const edgeA = dm ? 0.10 * f : 0.80 * f
+  const shadowA = dm ? 0.30 * f : 0.10 * f
+  const blur = Math.round(24 * f)
+  st['background-color'] = dm
+    ? 'rgba(22, 41, 36, ' + bgA.toFixed(3) + ')'
+    : 'rgba(255, 255, 255, ' + bgA.toFixed(3) + ')'
+  st['background-image'] = 'linear-gradient(180deg, rgba(255, 255, 255, ' + refrA.toFixed(3) + ') 0%, rgba(255, 255, 255, 0) 45%)'
+  st['border-top-color'] = 'rgba(255, 255, 255, ' + edgeA.toFixed(3) + ')'
+  st['box-shadow'] = dm
+    ? '0 -6px 20px rgba(0, 0, 0, ' + shadowA.toFixed(3) + ')'
+    : '0 -6px 20px rgba(10, 79, 61, ' + shadowA.toFixed(3) + ')'
+  // #ifdef MP-WEIXIN
+  // 模糊半径同驱（fade=0 时 blur(0) 即纯透明，不留磨砂痕迹）；App 端是否支持 backdrop-filter 未真机验证
+  st['backdrop-filter'] = 'blur(' + blur + 'px) saturate(180%)'
+  st['-webkit-backdrop-filter'] = 'blur(' + blur + 'px) saturate(180%)'
+  // #endif
+  return st
+})
 
 function switchTab(target: string): void {
   if (target === props.active) return
+  // L1 反馈（切 Tab）：轻触觉，low 档无振动马达时静默降级
+  if (device.haptics) {
+    try {
+      uni.vibrateShort()
+    } catch (e) {
+      // 无触觉设备忽略
+    }
+  }
   if (target === 'home') {
     uni.redirectTo({ url: '/pages/home/Home' })
   } else {
@@ -48,6 +128,24 @@ function switchTab(target: string): void {
   padding-top: 10px;
   padding-bottom: 20px;
 }
+/* #29 液态玻璃（仅 backdropBlur 能力开启时挂类）：
+   底色＝DesignTokens 的 glass-bg（#FFFFFF@74%，丢 alpha 即退化成白块）；
+   上缘高光描边＋顶部折光渐变＝玻璃厚度错觉；向上柔影＝浮在内容之上。
+   注：scroll-fade 后本类只是「fade=1 满值」的静态兜底，运行时同值由 barStyle 内联覆盖（内联优先级更高） */
+.tb-glass {
+  background-color: rgba(255, 255, 255, 0.74);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 45%);
+  border-top-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 -6px 20px rgba(10, 79, 61, 0.10);
+}
+/* TODO(App 端待验)：backdrop-filter 在 uni-app x 原生渲染大概率不支持（AGENTS.md 已知风险），
+   故模糊只走 MP 条件编译；App/Web 上 .tb-glass 仍为半透无模糊，真机若发糊再决定是否强制不透明 */
+/* #ifdef MP-WEIXIN */
+.tb-glass {
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+}
+/* #endif */
 .tab-item {
   flex: 1;
   align-items: center;
@@ -68,4 +166,23 @@ function switchTab(target: string): void {
 .tab-label-active {
   color: #17916B;
 }
+/* #ifdef MP-WEIXIN */
+.tabbar-dark {
+  background-color: #10201B;
+  border-top-color: #1E352F;
+}
+.tabbar-dark .tab-label {
+  color: rgba(234, 249, 243, 0.5);
+}
+.tabbar-dark .tab-label-active {
+  color: #52D6AC;
+}
+/* 暗态玻璃：底＝卡色 token #162924 加 alpha，高光线改白 10%，向上柔影改黑 */
+.tb-glass-dark {
+  background-color: rgba(22, 41, 36, 0.72);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 45%);
+  border-top-color: rgba(255, 255, 255, 0.10);
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.30);
+}
+/* #endif */
 </style>

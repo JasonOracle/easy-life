@@ -1,6 +1,10 @@
 {
   "pages": [
-    "pages/home/Home"
+    "pages/home/Home",
+    "pages/profile/Profile",
+    "pages/settings/Settings",
+    "pages/records/Records",
+    "pages/records/DayDetail"
   ],
   "window": {
     "navigationStyle": "custom",

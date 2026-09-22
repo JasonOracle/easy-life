@@ -1,5 +1,11 @@
 {
   "navigationStyle": "custom",
   "backgroundColorContent": "#F2FAF5",
-  "usingComponents": {}
+  "usingComponents": {
+    "tabbar": "../../components/Tabbar",
+    "add-food": "../../components/AddFood",
+    "food-picker": "../../components/FoodPicker",
+    "settle-badge": "../../components/SettleBadge",
+    "goal-modal": "../../components/GoalModal"
+  }
 }

@@ -1,6 +1,13 @@
 /**
  * [变更日志]
  * 修改时间：2026-09-21
+ * AI模型：Qoder (Claude)
+ * 修改内容：[darkMode 解除「v1.0 恒关」锁定：加载时不再强制 false（Boss 拍板个人中心深色模式），
+ *   新增 setDarkMode()（持久化 + 供 Settings 开关点击）。]
+ */
+/**
+ * [变更日志]
+ * 修改时间：2026-09-21
  * AI模型：Muse Spark
  * 修改内容：[新建：设置 store——偏好开关（深色模式 v1.0 置灰、用餐提醒）/ 音效 / 触觉，
  *   本地存储持久化；USER_FOOD_ENABLED=false 集中在此，不散落各处 if]
@@ -32,7 +39,7 @@ function loadSettings(): SettingsState {
     const raw = uni.getStorageSync(STORAGE_KEY)
     if (typeof raw === 'string' && raw.length > 2) {
       const parsed = JSON.parse(raw) as Partial<SettingsState>
-      return { ...def, ...parsed, darkMode: false }
+      return { ...def, ...parsed }
     }
   } catch (e) {
     // 存储不可用时用默认值
@@ -75,6 +82,11 @@ export const useSettingsStore = defineStore('settings', () => {
     persist()
   }
 
+  function setDarkMode(v: boolean): void {
+    darkMode.value = v
+    persist()
+  }
+
   return {
     darkMode,
     mealReminders,
@@ -83,5 +95,6 @@ export const useSettingsStore = defineStore('settings', () => {
     setMealReminders,
     setSoundEnabled,
     setHapticsEnabled,
+    setDarkMode,
   }
 })

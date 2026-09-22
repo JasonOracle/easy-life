@@ -20,6 +20,20 @@
         "navigationStyle": "custom",
         "backgroundColorContent": "#F2FAF5"
       }
+    },
+    {
+      "path": "pages/records/Records",
+      "style": {
+        "navigationStyle": "custom",
+        "backgroundColorContent": "#F2FAF5"
+      }
+    },
+    {
+      "path": "pages/records/DayDetail",
+      "style": {
+        "navigationStyle": "custom",
+        "backgroundColorContent": "#F2FAF5"
+      }
     }
   ],
   "globalStyle": {

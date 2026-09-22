@@ -1,5 +1,94 @@
 <!--
   [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[#29 配套（Boss 拍板「缩页底预留位」）：.page 的 padding-bottom 由 78 压到 40，
+    让内容常态穿到玻璃 Tabbar（高约 76）之下，玻璃才有东西可透;
+    2. #29 续（Boss：「我想要的 tabbar 是 scroll-fade-navbar 那种效果」）：onPageScroll 按 0→60px
+    线性算 tabFade（0.05 量化）透传给 Tabbar；该监听原包在 #ifdef MP-WEIXIN 内，现去条件编译三端生效
+    （顺带补上 App／Web 端滚动时 pf-st-mask 不响应的既有缺口）]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[P2 暗黑收尾：①头部薄荷渐变在暗色下改实色 #162924（深色卡面色，Pencil 无暗色稿的临时方案）；
+    ②滚动遮罩暗色同步 #0E211C→#162924；③状态栏字色随暗黑反转——onShow 与切换后调 uni.setNavigationBarColor
+    （深色白字/浅色黑字），App 原生端 plus.navigator 方案留 TODO 待实测]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[滚动遮罩弃 StickyTop 组件改页内内联 fixed 视图：该组件实测双故障——其 v-if 遮罩视图在 mp-weixin
+    端不渲染，且其宿主节点内会再渲染一份整页模板的幻影副本（插值全空、页高虚增）；内联视图与 fx-back 同机制已验证]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[组件标签一律成对书写（禁自闭合）＋StickyTop 置模板最末：实测本工程 mp-weixin VDOM 产物中任一自闭合
+    组件标签会在该宿主内以空作用域重渲染整页模板（幻影副本：插值全空、wx:for 空、页高虚增，首个自闭合标签决定幻影位置）；
+    fixed 遮罩与文档序无关，末位安全]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[接 StickyTop 防穿透遮罩（Boss 拍板 P1）：onPageScroll 两态 scrollTop>80；
+    遮罩色随暗黑切换（浅 #EEF7F4 / 深 #0E211C）]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[深色模式适配（Boss 指令第 5 项）：根节点 :class page-dark 绑 settings.darkMode，
+    样式末尾追加 MP-WEIXIN 条件编译的后代覆盖块（薄荷深色临时色板，Pencil 暂无暗色稿）]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[最近记录卡「查看全部」接 goRecords → navigateTo /pages/records/Records
+    （Boss 指令：个人中心「查看详情」→最近记录页）]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[达标 Banner「未被今日热量卡包裹」返工修复（Boss 多次反馈的同一缺陷）：
+    根因＝Banner 一直是 .cal-card 的**兄弟节点**，靠 margin-top:-28px 上提叠在卡片底缘，
+    Banner 实际高约 47px → 下半截必然悬在白色卡片之外，负 margin 方案在结构上就不可能「被包裹」；
+    上一轮补 .cal-card padding-bottom:30px 只是让它少露一点，方向即错。
+    本次＝按设计稿把 Banner 真实嵌套进 .cal-card（stat-panel 之后），删负 margin，
+    改卡片内水平缩进 10px + margin-top:13px，并撤销 padding-bottom:30px 补丁恢复 padding:14px。]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[①页面无法滚动修复：删除 .page 的 flex:1（uni-app x 运行时强制 page{height:100%}，
+    flex:1 把根节点钉为视口高＋overflow:hidden 裁切 → 原生滚动不触发；删后内容自然撑高可滚）。
+    ②达标 Banner 压住统计标签修复：.banner 负 margin -28px 是稿面叠压效果应保留，
+    真正缺口是 .cal-card 底部留白仅 14px，补 padding-bottom:30px 使 Banner 只叠在留白区。]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[第二轮还原度修复（设计源改为 Pencil，Ardot 废止）：最近记录超标徽章按 Pencil「个人中心」稿
+    补回超出值文字（badge = 「超标 N kcal」，N=当日总量-目标），撤销上一轮基于 Ardot 的删除；
+    经清编译缓存+关窗重开验证徽章渲染为「超标 150 kcal」。]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[设置齿轮修复：白底圆圈改设计稿的 25% 半透明白（原白底+白图标导致不可见）；
+    改为绝对定位，小程序端条件编译按 getMenuButtonBoundingClientRect 放到胶囊左侧、与胶囊垂直居中，
+    其他端保持稿面位置（右 25、状态栏下 13）]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[复核抛光：趋势图「目标」标签按设计稿改为右端两行灰字（绑定 store 真实目标值），
+    柱状区右侧让出 32px 标签位、虚线止于标签前（消除与末柱数值重叠）；
+    删除设计稿没有的最近记录「+N kcal」超标文字及其数据字段]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[还原度修复（对照 Ardot 画板 10:6 ×0.794 换算）：
+    今日热量卡重建（火焰标题行+还可以吃 pill、右上 71% conic 圆环、进度条下移已摄入/目标行、
+    三列统计补图标底座 chip+分隔线）；周概览液滴三态（白勾/白!/灰圈）；
+    趋势目标线改虚线、7 柱全标日期；头图底部留白收窄]
   修改时间：2026-09-21
   AI模型：Muse Spark
   修改内容：[接 store 读数：头图/数字/进度/周点/趋势/历史走 user＋goal＋food；Banner 达标态与真值一致]
@@ -13,7 +102,7 @@
 -->
 
 <template>
-  <view class="page">
+  <view class="page" :class="{ 'page-dark': dk }">
     <!-- 头图 -->
     <view class="header" :style="{ paddingTop: sbH + 'px' }">
       <view class="header-row">
@@ -24,59 +113,90 @@
           <text class="name">{{ user.name }}</text>
           <text class="sub">已连续记录  {{ user.streakDays }} 天  ·  每日目标  {{ goal.calorieGoal }} kcal</text>
         </view>
-        <view class="gear-circle" @click="goSettings">
-          <image class="gear" :src="'/static/profile/gear.png'" mode="aspectFit"></image>
-        </view>
       </view>
       <image class="header-wave" :src="'/static/profile/header_wave.png'" mode="widthFix"></image>
+    </view>
+    <!-- 设置齿轮：挂在页面根上相对 .page 定位（小程序端 .header 内的 absolute 基准实测会偏移一个状态栏高度） -->
+    <view class="gear-circle" :style="{ right: gearRight, top: gearTop }" @click="goSettings">
+      <image class="gear" :src="'/static/profile/gear.png'" mode="aspectFit"></image>
     </view>
 
     <!-- 今日热量卡 -->
     <view class="cal-card">
-      <view class="pill">
-        <text class="pill-text">还可以吃</text>
+      <view class="cal-head">
+        <image class="cal-flame" :src="'/static/profile/flame.png'" mode="aspectFit"></image>
+        <text class="cal-title">今日热量</text>
+        <view class="pill">
+          <text class="pill-text">还可以吃</text>
+        </view>
+      </view>
+      <view class="ring" :style="{ backgroundImage: ringGrad }">
+        <view class="ring-inner">
+          <text class="ring-pct">{{ progPct }}%</text>
+          <text class="ring-lbl">已摄入</text>
+        </view>
       </view>
       <view class="bignum-row">
         <text class="bignum">{{ remainCal }}</text>
         <text class="bignum-unit">kcal</text>
       </view>
-      <view class="prog-row">
-        <text class="cons-num">{{ food.totalCal }}</text>
-        <text class="cons-unit">kcal 已摄入</text>
-        <view class="goal-right">
-          <text class="goal-label">目标</text>
-          <text class="goal-num">{{ goal.calorieGoal }}</text>
-        </view>
-      </view>
       <view class="prog-track">
         <view class="prog-fill" :style="{ width: progPct + '%' }"></view>
       </view>
+      <view class="prog-row">
+        <view class="pl-side">
+          <text class="pl-txt">已摄入</text>
+          <text class="pl-num">{{ food.totalCal }}</text>
+          <text class="pl-txt pl-txt2">kcal</text>
+        </view>
+        <view class="pl-side pl-right">
+          <text class="pl-txt">目标</text>
+          <text class="pl-num">{{ goal.calorieGoal }}</text>
+          <text class="pl-txt pl-txt2">kcal</text>
+        </view>
+      </view>
       <view class="stat-panel">
         <view class="stat-col">
-          <text class="stat-num">{{ goal.calorieGoal }}</text>
+          <view class="stat-top">
+            <view class="stat-chip">
+              <image class="stat-ico" :src="'/static/profile/stat_target.png'" mode="aspectFit"></image>
+            </view>
+            <text class="stat-num">{{ goal.calorieGoal }}</text>
+          </view>
           <text class="stat-lbl">目标热量 / kcal</text>
         </view>
+        <view class="stat-div"></view>
         <view class="stat-col">
-          <text class="stat-num">{{ food.totalCal }}</text>
+          <view class="stat-top">
+            <view class="stat-chip">
+              <image class="stat-ico" :src="'/static/profile/stat_consumed.png'" mode="aspectFit"></image>
+            </view>
+            <text class="stat-num">{{ food.totalCal }}</text>
+          </view>
           <text class="stat-lbl">已摄入 / kcal</text>
         </view>
+        <view class="stat-div"></view>
         <view class="stat-col">
-          <text class="stat-num-green">{{ remainCal }}</text>
+          <view class="stat-top">
+            <view class="stat-chip">
+              <image class="stat-ico" :src="'/static/profile/stat_remain.png'" mode="aspectFit"></image>
+            </view>
+            <text class="stat-num-green">{{ remainCal }}</text>
+          </view>
           <text class="stat-lbl">还能吃 / kcal</text>
         </view>
       </view>
-    </view>
-
-    <!-- 达标 Banner -->
-    <view class="banner">
-      <view class="check-circle">
-        <image class="check" :src="'/static/profile/check.png'" mode="aspectFit"></image>
+      <!-- 达标 Banner：设计稿为白卡内嵌件（卡片在 Banner 下方仍有留白），必须真实嵌套进 .cal-card -->
+      <view class="banner">
+        <view class="check-circle">
+          <image class="check" :src="'/static/profile/check.png'" mode="aspectFit"></image>
+        </view>
+        <view class="banner-text">
+          <text class="banner-title">今日已达标</text>
+          <text class="banner-sub">继续保持，做得很好！</text>
+        </view>
+        <image class="banner-chev" :src="'/static/profile/chev_banner.png'" mode="aspectFit"></image>
       </view>
-      <view class="banner-text">
-        <text class="banner-title">今日已达标</text>
-        <text class="banner-sub">继续保持，做得很好！</text>
-      </view>
-      <image class="banner-chev" :src="'/static/profile/chev_banner.png'" mode="aspectFit"></image>
     </view>
 
     <!-- 本周概览 -->
@@ -91,7 +211,10 @@
       </view>
       <view class="dots-row">
         <view class="dot-col" v-for="(dayItem, dayIdx) in weekDots" :key="dayIdx">
-          <view class="dot" :style="{ backgroundColor: dayItem.color }"></view>
+          <view class="dot" :class="{ 'dot-empty': dayItem.state === 'none' }" :style="{ backgroundColor: dayItem.bg }">
+            <image v-if="dayItem.state === 'ok'" class="dot-check" :src="'/static/profile/check.png'" mode="aspectFit"></image>
+            <text v-else-if="dayItem.state === 'over'" class="dot-excl">!</text>
+          </view>
           <text class="dot-lbl">{{ dayItem.lbl }}</text>
         </view>
       </view>
@@ -125,7 +248,8 @@
             </view>
           </view>
           <view class="target-tag">
-            <text class="target-tag-text">目标 1800</text>
+            <text class="target-tag-text">目标</text>
+            <text class="target-tag-text">{{ goal.calorieGoal }}</text>
           </view>
         </view>
       </view>
@@ -135,7 +259,7 @@
     <view class="card rec-card">
       <view class="card-head">
         <text class="card-title">最近记录</text>
-        <view class="head-right">
+        <view class="head-right" @click="goRecords">
           <text class="view-all">查看全部</text>
           <image class="chev-mini" :src="'/static/profile/chev_rec.png'" mode="aspectFit"></image>
         </view>
@@ -152,7 +276,6 @@
             <view class="rec-badge" :class="{ 'rec-badge-over': recItem.over }">
               <text class="rec-badge-text" :class="{ 'rec-badge-text-over': recItem.over }">{{ recItem.badge }}</text>
             </view>
-            <text class="rec-over" v-if="recItem.over">+{{ recItem.overKcal }} kcal</text>
           </view>
           <image class="chev-row" :src="recItem.chev" mode="aspectFit"></image>
         </view>
@@ -161,17 +284,24 @@
     </view>
 
     <!-- 底部 Tab（共享组件，我的激活） -->
-    <Tabbar active="profile" />
+    <Tabbar active="profile" :dark="dk" :fade="tabFade" ></Tabbar>
+
+    <!-- 滚动防穿透遮罩：页内内联 fixed 视图（StickyTop 组件实测双故障：遮罩不渲染＋宿主内渲染整页幻影副本） -->
+    <view v-if="scrolled" class="pf-st-mask" :style="{ height: sbH + 'px', backgroundColor: dk ? '#162924' : '#EEF7F4' }"></view>
   </view>
 </template>
 
 <script setup lang="uts">
-import { ref } from 'vue'
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
+import { onPageScroll } from '@dcloudio/uni-app'
+// #ifdef MP-WEIXIN
+import { onShow } from '@dcloudio/uni-app'
+// #endif
 import Tabbar from '../../components/Tabbar.uvue'
 import { useFoodStore } from '../../stores/food'
 import { useGoalStore } from '../../stores/goal'
 import { useUserStore } from '../../stores/user'
+import { useSettingsStore } from '../../stores/settings'
 
 /**
  * 接 store 读数（种子精确还原：历史 1950超+150/1720达/1580达；趋势 1580…1950/1368；
@@ -185,6 +315,60 @@ try {
   sbH = 0
 }
 
+const settings = useSettingsStore()
+const dk = computed((): boolean => settings.darkMode)
+
+// 滚动防穿透两态：跨阈值才翻一次，避免逐帧 setData
+const scrolled = ref<boolean>(false)
+// TabBar 渐显（scroll-fade，照官方示例「随滚动渐显的透明导航栏」）：0→60px 线性，0.05 量化＝最多 20 次 setData
+// （阈值取 60 而非示例的 100＝实测 Records 页最大滚动只有 70px，100 会让该页永远到不了满玻璃）
+const tabFade = ref<number>(0)
+// 三端生效（原包在 MP-WEIXIN 内，App／Web 端滚动时状态栏遮罩无响应是既有缺口，随 fade 一并补上）
+onPageScroll((e) => {
+  // 遮罩阈值＝头图高 sbH+89 − sbH：内容将穿透状态栏带才盖
+  const v = e.scrollTop > 89
+  if (v !== scrolled.value) scrolled.value = v
+  let q = e.scrollTop / 60
+  if (q > 1) q = 1
+  const fq = Math.round(q * 20) / 20
+  if (fq !== tabFade.value) tabFade.value = fq
+})
+
+// 设置齿轮位置：默认稿面（右 25、状态栏下 13）；小程序端移到胶囊左侧、与胶囊垂直居中对齐
+const gearRight = ref('25px')
+const gearTop = ref((sbH + 13) + 'px')
+// #ifdef MP-WEIXIN
+const placeGear = () => {
+  try {
+    const sys = uni.getSystemInfoSync()
+    const capsule = uni.getMenuButtonBoundingClientRect()
+    // 窗口尺寸切换瞬间胶囊 rect 可能越界（left≥窗宽），校验后再用；onShow 重算兜底
+    if (capsule != null && capsule.left > 0 && capsule.left < sys.windowWidth - 40) {
+      gearRight.value = (sys.windowWidth - capsule.left + 10) + 'px'
+      // 齿轮挂在页面根上，页面坐标系即屏幕坐标；模拟器/真机对胶囊 top 的基准不一致，
+      // 小于半个状态栏高度视为「状态栏下相对值」，补回 sbH 再定位
+      let capTop = capsule.top
+      if (capTop < sbH / 2) {
+        capTop = capTop + sbH
+      }
+      gearTop.value = (capTop + (capsule.height - 24) / 2) + 'px'
+    }
+  } catch (e) {
+    // 取不到胶囊信息时保持默认位置
+  }
+}
+placeGear()
+// 状态栏字色随暗黑反转（Boss P2 指令）：小程序走 setNavigationBarColor；
+// TODO App 原生端改 plus.navigator.setStatusBarStyle 实测后补
+function syncBar(): void {
+  uni.setNavigationBarColor({ frontColor: dk.value ? '#ffffff' : '#000000', backgroundColor: '#000000' })
+}
+onShow(() => {
+  placeGear()
+  syncBar()
+})
+// #endif
+
 const food = useFoodStore()
 const goal = useGoalStore()
 const user = useUserStore()
@@ -193,12 +377,20 @@ const goSettings = () => {
   uni.navigateTo({ url: '/pages/settings/Settings' })
 }
 
+const goRecords = () => {
+  uni.navigateTo({ url: '/pages/records/Records' })
+}
+
 const remainCal = computed(() => goal.calorieGoal - food.totalCal)
 const progPct = computed(() => {
   if (goal.calorieGoal <= 0) return 0
   const p = Math.round(food.totalCal / goal.calorieGoal * 100)
   return p > 100 ? 100 : p
 })
+/** 71% 圆环：conic-gradient 按真实进度着色（模拟器验证渲染兼容性） */
+const ringGrad = computed(() =>
+  'conic-gradient(#23B391 0% ' + progPct.value + '%, #E5F0EC ' + progPct.value + '% 100%)'
+)
 
 const WEEKDAY = ['日', '一', '二', '三', '四', '五', '六']
 
@@ -212,12 +404,13 @@ function fmtMDLong(ts: number): string {
   return (d.getMonth() + 1).toString() + '月' + d.getDate().toString() + '日'
 }
 
-type WeekDot = { color: string; lbl: string }
-// 连续 7 天位置标签一..日；颜色按目标判定（绿达标/珊瑚超标）
+type WeekDot = { state: string; bg: string; lbl: string }
+// 连续 7 天位置标签一..日；三态：绿底白勾达标 / 珊瑚底白「!」超标 / 灰圈空缺
 const weekDots = computed<WeekDot[]>(() => {
   const labels = ['一', '二', '三', '四', '五', '六', '日']
   return food.weekTotals.map((d, i) => ({
-    color: d.total <= goal.calorieGoal ? '#25AE8C' : '#FD6E4D',
+    state: d.total === 0 ? 'none' : (d.total <= goal.calorieGoal ? 'ok' : 'over'),
+    bg: d.total === 0 ? '#00000000' : (d.total <= goal.calorieGoal ? '#25AE8C' : '#FD6E4D'),
     lbl: labels[i] ?? '',
   }))
 })
@@ -232,7 +425,7 @@ const bars = computed<Bar[]>(() =>
   food.weekTotals.map((d, i) => ({
     val: d.total,
     h: Math.round(d.total / 2400 * 100),
-    date: i < 4 ? fmtMD(d.ts) : '',
+    date: fmtMD(d.ts),
     over: d.total > goal.calorieGoal,
   }))
 )
@@ -243,7 +436,6 @@ type Rec = {
   num: number
   badge: string
   over: boolean
-  overKcal: number
   chev: string
 }
 const REC_CHEVS = [
@@ -251,7 +443,7 @@ const REC_CHEVS = [
   '/static/profile/chev_r2.png',
   '/static/profile/chev_r3.png',
 ]
-// 最近 3 天（不含今天）：日期/周几/总量/达标态
+// 最近 3 天（不含今天）：日期/周几/总量/达标态（超标态徽章内含超出值，按 Pencil 稿「超标 150 kcal」）
 const records = computed<Rec[]>(() => {
   const days = food.weekTotals.slice(-4, -1)
   return days.map((d, i) => {
@@ -261,9 +453,8 @@ const records = computed<Rec[]>(() => {
       date: fmtMDLong(d.ts),
       wday: '周' + WEEKDAY[dt.getDay()],
       num: d.total,
-      badge: over ? '超标' : '达标',
+      badge: over ? '超标 ' + (d.total - goal.calorieGoal) + ' kcal' : '达标',
       over,
-      overKcal: over ? d.total - goal.calorieGoal : 0,
       chev: REC_CHEVS[i] ?? REC_CHEVS[0],
     }
   }).reverse()
@@ -272,9 +463,8 @@ const records = computed<Rec[]>(() => {
 
 <style>
 .page {
-  flex: 1;
   background-color: #EEF7F4;
-  padding-bottom: 78px;
+  padding-bottom: 40px;
 }
 .header {
   background-color: #39AD95;
@@ -286,7 +476,7 @@ const records = computed<Rec[]>(() => {
   padding-left: 16px;
   padding-right: 16px;
   padding-top: 12px;
-  padding-bottom: 34px;
+  padding-bottom: 26px;
 }
 .avatar-ring {
   width: 51px;
@@ -316,10 +506,11 @@ const records = computed<Rec[]>(() => {
   margin-top: 3px;
 }
 .gear-circle {
+  position: absolute;
   width: 24px;
   height: 24px;
   border-radius: 12px;
-  background-color: #FFFFFF;
+  background-color: rgba(255, 255, 255, 0.25);
   justify-content: center;
   align-items: center;
 }
@@ -336,6 +527,7 @@ const records = computed<Rec[]>(() => {
   height: 37px;
 }
 .cal-card {
+  position: relative;
   background-color: #F7FCFA;
   border-radius: 16px;
   margin-left: 13px;
@@ -344,6 +536,20 @@ const records = computed<Rec[]>(() => {
   padding: 14px;
   box-shadow: 0 3px 10px rgba(0, 51, 40, 0.08);
 }
+.cal-head {
+  flex-direction: row;
+  align-items: center;
+}
+.cal-flame {
+  width: 10px;
+  height: 14px;
+}
+.cal-title {
+  font-size: 12px;
+  font-weight: bold;
+  color: #003528;
+  margin-left: 6px;
+}
 .pill {
   background-color: #E7F2ED;
   border-radius: 7px;
@@ -351,100 +557,152 @@ const records = computed<Rec[]>(() => {
   padding-right: 8px;
   height: 14px;
   justify-content: center;
-  align-self: flex-start;
+  align-items: center;
+  margin-left: 8px;
 }
 .pill-text {
   font-size: 8px;
   color: #009465;
 }
+.ring {
+  position: absolute;
+  right: 14px;
+  top: 12px;
+  width: 72px;
+  height: 72px;
+  border-radius: 36px;
+  justify-content: center;
+  align-items: center;
+}
+.ring-inner {
+  width: 52px;
+  height: 52px;
+  border-radius: 26px;
+  background-color: #F7FCFA;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.ring-pct {
+  font-size: 14px;
+  font-weight: bold;
+  color: #003528;
+}
+.ring-lbl {
+  font-size: 8px;
+  color: #617B85;
+  margin-top: 1px;
+}
 .bignum-row {
   flex-direction: row;
-  align-items: baseline;
+  align-items: flex-end;
   margin-top: 6px;
 }
 .bignum {
   font-size: 45px;
   font-weight: bold;
   color: #003528;
+  line-height: 50px;
 }
 .bignum-unit {
   font-size: 14px;
   color: #003528;
   margin-left: 4px;
-}
-.prog-row {
-  flex-direction: row;
-  align-items: baseline;
-  margin-top: 8px;
-}
-.cons-num {
-  font-size: 11px;
-  font-weight: bold;
-  color: #00222B;
-}
-.cons-unit {
-  font-size: 10px;
-  color: #617B85;
-  margin-left: 3px;
-}
-.goal-right {
-  flex: 1;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: baseline;
-}
-.goal-label {
-  font-size: 10px;
-  color: #62767F;
-}
-.goal-num {
-  font-size: 11px;
-  color: #1C4455;
-  margin-left: 3px;
+  margin-bottom: 5px;
 }
 .prog-track {
   height: 9px;
   border-radius: 5px;
   background-color: #E5F0EC;
-  margin-top: 6px;
+  margin-top: 4px;
   overflow: hidden;
 }
 .prog-fill {
-  width: 58.6%;
   height: 9px;
   border-radius: 5px;
   background-color: #23B391;
 }
+.prog-row {
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 5px;
+}
+.pl-side {
+  flex-direction: row;
+  align-items: baseline;
+}
+.pl-txt {
+  font-size: 10px;
+  color: #617B85;
+}
+.pl-num {
+  font-size: 11px;
+  font-weight: bold;
+  color: #00222B;
+  margin-left: 3px;
+}
+.pl-txt2 {
+  margin-left: 3px;
+}
 .stat-panel {
   flex-direction: row;
-  margin-top: 14px;
+  align-items: center;
+  background-color: #FFFFFF;
+  border-radius: 11px;
+  margin-top: 13px;
+  padding-top: 12px;
+  padding-bottom: 12px;
 }
 .stat-col {
   flex: 1;
+  align-items: center;
+}
+.stat-top {
+  flex-direction: row;
+  align-items: center;
+}
+.stat-chip {
+  width: 21px;
+  height: 21px;
+  border-radius: 6px;
+  background-color: #E7F2ED;
+  justify-content: center;
+  align-items: center;
+}
+.stat-ico {
+  width: 14px;
+  height: 14px;
 }
 .stat-num {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: bold;
   color: #082731;
+  margin-left: 8px;
 }
 .stat-num-green {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: bold;
   color: #008561;
+  margin-left: 8px;
 }
 .stat-lbl {
   font-size: 9px;
   color: #5A737D;
-  margin-top: 3px;
+  margin-top: 6px;
+}
+.stat-div {
+  width: 1px;
+  height: 36px;
+  background-color: #E5EFEA;
 }
 .banner {
   flex-direction: row;
   align-items: center;
   background-color: #EBF8F5;
   border-radius: 13px;
-  margin-left: 24px;
-  margin-right: 24px;
-  margin-top: -28px;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-top: 13px;
   padding: 10px 12px;
 }
 .check-circle {
@@ -528,6 +786,22 @@ const records = computed<Rec[]>(() => {
   width: 19px;
   height: 19px;
   border-radius: 10px;
+  justify-content: center;
+  align-items: center;
+}
+.dot-empty {
+  border-width: 1.5px;
+  border-style: solid;
+  border-color: #C9D9D4;
+}
+.dot-check {
+  width: 9px;
+  height: 7px;
+}
+.dot-excl {
+  font-size: 12px;
+  font-weight: bold;
+  color: #FFFFFF;
 }
 .dot-lbl {
   font-size: 9px;
@@ -565,15 +839,18 @@ const records = computed<Rec[]>(() => {
 .target-line {
   position: absolute;
   left: 0;
-  right: 0;
+  right: 32px;
   top: 37px;
-  height: 1px;
-  background-color: #BFE3D6;
+  height: 0;
+  border-top-width: 1px;
+  border-top-style: dashed;
+  border-top-color: #BFE3D6;
 }
 .bars-row {
   flex-direction: row;
   align-items: flex-end;
   height: 114px;
+  padding-right: 32px;
 }
 .bar-col {
   flex: 1;
@@ -607,10 +884,12 @@ const records = computed<Rec[]>(() => {
 .target-tag {
   position: absolute;
   right: 0;
-  top: 24px;
+  top: 25px;
+  align-items: center;
 }
 .target-tag-text {
   font-size: 7px;
+  line-height: 11px;
   color: #647B87;
 }
 .rec-row {
@@ -664,11 +943,6 @@ const records = computed<Rec[]>(() => {
 .rec-badge-text-over {
   color: #FA543A;
 }
-.rec-over {
-  font-size: 8px;
-  color: #FA543A;
-  margin-left: 4px;
-}
 .chev-row {
   width: 10px;
   height: 16px;
@@ -677,5 +951,106 @@ const records = computed<Rec[]>(() => {
 .rec-div {
   height: 1px;
   background-color: #F0F5F2;
+}
+
+/* ===== 深色模式（Boss 拍板：Settings 开关点击切换；色板为薄荷深色临时方案，Pencil 暂无暗色稿） =====
+   后代选择器仅 mp 端生效——uvue 原生端不支持，App 端适配时须改逐元素 :class 方案 */
+/* #ifdef MP-WEIXIN */
+.page-dark {
+  background-color: #0E211C;
+}
+.page-dark .cal-card {
+  background-color: #162924;
+}
+.page-dark .ring-inner {
+  background-color: #162924;
+}
+.page-dark .cal-title,
+.page-dark .ring-pct,
+.page-dark .bignum,
+.page-dark .bignum-unit,
+.page-dark .pl-num,
+.page-dark .stat-num,
+.page-dark .card-title,
+.page-dark .rec-date,
+.page-dark .rec-num {
+  color: #EAF9F3;
+}
+.page-dark .pill {
+  background-color: #1E3B33;
+}
+.page-dark .pill-text,
+.page-dark .stat-num-green,
+.page-dark .week-num,
+.page-dark .ax-green,
+.page-dark .bar-val,
+.page-dark .banner-title {
+  color: #52D6AC;
+}
+.page-dark .prog-track {
+  background-color: #23443B;
+}
+.page-dark .ring-lbl,
+.page-dark .pl-txt,
+.page-dark .stat-lbl,
+.page-dark .banner-sub,
+.page-dark .view-all,
+.page-dark .dot-lbl,
+.page-dark .ax,
+.page-dark .bar-date,
+.page-dark .rec-wday,
+.page-dark .rec-unit,
+.page-dark .target-tag-text {
+  color: rgba(234, 249, 243, 0.5);
+}
+.page-dark .stat-panel {
+  background-color: #10201B;
+}
+.page-dark .stat-chip {
+  background-color: #1E3B33;
+}
+.page-dark .stat-div {
+  background-color: #23443B;
+}
+.page-dark .banner {
+  background-color: #12332B;
+}
+.page-dark .card {
+  background-color: #162924;
+}
+.page-dark .week-lbl {
+  color: #8FE8CB;
+}
+.page-dark .dot-empty {
+  border-color: #35564C;
+}
+.page-dark .target-line {
+  border-top-color: #2E5A4C;
+}
+.page-dark .rec-badge {
+  background-color: #1E3B33;
+}
+.page-dark .rec-badge-text {
+  color: #52D6AC;
+}
+.page-dark .rec-badge-over {
+  background-color: #3A221C;
+}
+.page-dark .rec-badge-text-over {
+  color: #FF8266;
+}
+.page-dark .rec-div {
+  background-color: #1E352F;
+}
+.page-dark .header {
+  background-color: #162924;
+}
+/* #endif */
+.pf-st-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
 }
 </style>

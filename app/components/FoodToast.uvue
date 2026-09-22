@@ -1,13 +1,20 @@
 <!--
   [变更日志]
   修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[mp-weixin 组件样式平铺导致跨组件类名冲突（.mask/.sub 与 AddFood/FoodPicker/GoalModal 互相污染），
+    本组件冲突类统一加 ft- 前缀]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
   AI模型：Muse Spark
   修改内容：[新建：添加成功 toast（+N kcal／已加入X／已添加 pill），2s 自动＋点按关闭；
     L3 反馈（成就触觉，长按型）；定时器销毁清理]
 -->
 
 <template>
-  <view class="mask" v-if="show" @click="dismiss">
+  <view class="ft-mask" v-if="show" @click="dismiss">
     <view class="toast">
       <view class="cup-circle">
         <text class="cup-glyph">✓</text>
@@ -15,7 +22,7 @@
       <view class="toast-card">
         <text class="plus-num">+{{ kcal }}</text>
         <text class="plus-unit">kcal</text>
-        <text class="sub">已加入{{ mealLabel }}</text>
+        <text class="ft-sub">已加入{{ mealLabel }}</text>
       </view>
       <view class="pill">
         <text class="pill-text">已添加</text>
@@ -86,7 +93,7 @@ onUnmounted(() => {
 </script>
 
 <style>
-.mask {
+.ft-mask {
   position: fixed;
   left: 0;
   right: 0;
@@ -130,7 +137,7 @@ onUnmounted(() => {
   color: #0A4F3D;
   margin-left: 4px;
 }
-.sub {
+.ft-sub {
   font-size: 13px;
   color: #73918B;
   margin-left: 10px;

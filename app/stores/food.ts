@@ -1,6 +1,25 @@
 /**
  * [变更日志]
  * 修改时间：2026-09-21
+ * AI模型：Qoder (Claude)
+ * 修改内容：[「最近记录/单日详情」两页数据支撑：新增导出 dayKeyOf(ts)（YYYY-MM-DD 日键）与
+ *           dayRange(key)（该日 [起,止) 毫秒区间）；store 新增 getter dayTotals
+ *           （日键→当日总 kcal，供月历圆点/超标判定一次遍历）；state 新增 viewDay
+ *           （Records→DayDetail 跳转传日，免 URL options 兼容问题）；
+ *           amountText 改为导出（单日详情行份量用）；MEAL_LABELS.snack 修正为「夜宵」
+ *           （对齐 Pencil 稿 MC_夜宵/Meal_夜宵 命名，原「加餐」与稿不符）。]
+ */
+/**
+ * [变更日志]
+ * 修改时间：2026-09-21
+ * AI模型：Qoder (Claude)
+ * 修改内容：[1. FoodBase 增 py 拼音索引（build.py 新产物字段）；searchFoods 支持
+ *            名称子串 / 全拼 / 首字母三种匹配，供弹层⓪ 食物选择列表搜索。
+ *          2. 新增导出 vesselLabelOf()：取器具模板中文名（碗/杯/盘…），
+ *            供 FoodPicker 副行「一碗约 200g」拼句。]
+/**
+ * [变更日志]
+ * 修改时间：2026-09-21
  * AI模型：Muse Spark
  * 修改内容：[增补计数步进器三件套 MAX_COUNT/DEFAULT_COUNT/portionRatio/portionLevel（设计稿规格）]
 ﻿/**
@@ -54,6 +73,12 @@ import { defineStore } from 'pinia'
 import foodLibraryJson from '../src/data/food_library.json'
 
 // ===== 类型定义 =====
+/** 搜索拼音索引（build.py 生成）：f=全拼连写，i=首字母串 */
+export interface FoodPinyin {
+  f: string
+  i: string
+}
+
 export interface FoodBase {
   id: string
   name: string
@@ -70,6 +95,8 @@ export interface FoodBase {
   conf?: number
   /** 数据来源标识（composition_table / recipe_estimate / rough_estimate），记录快照用 */
   source?: string
+  /** 搜索拼音索引（全拼 f + 首字母 i），build.py 生成 */
+  py?: FoodPinyin
 }
 
 export interface VesselTplEntry {
@@ -189,7 +216,7 @@ export const MEAL_LABELS: Record<string, string> = {
   breakfast: '早餐',
   lunch: '午餐',
   dinner: '晚餐',
-  snack: '加餐',
+  snack: '夜宵',
 }
 
 // ===== 库数据（模块级缓存） =====
@@ -208,6 +235,7 @@ function loadLibrary(): { foods: FoodBase[]; vessels: Record<string, VesselTpl>;
       opts?: string[]
       img?: string
       conf?: number
+      py?: FoodPinyin
     }>
     vesselTpl: Record<string, { label: string; sizes: VesselTplEntry[] }>
     optTpl?: Record<string, {
@@ -237,6 +265,7 @@ function loadLibrary(): { foods: FoodBase[]; vessels: Record<string, VesselTpl>;
     img: f.img,
     conf: f.conf,
     source: (f as { source?: string }).source ?? '',
+    py: f.py,
   }))
 
   // 从 vesselTpl 构建 vessels 索引（key → { label, sizes }）
@@ -286,6 +315,12 @@ export function vesselSizesOf(vesselKey: string): VesselTplEntry[] {
   return lib.vessels[vesselKey]?.sizes ?? []
 }
 
+/** 器具模板中文名（碗/杯/盘/瓶…），无模板返回空串 */
+export function vesselLabelOf(vesselKey: string): string {
+  const lib = loadLibrary()
+  return lib.vessels[vesselKey]?.label ?? ''
+}
+
 /**
  * 按食物条目的 opts 字段真实取选项模板组（替换原硬返回 [] 的 sweetOptsOf）。
  * 例：珍珠奶茶 opts=['sweet','topping'] → 返回甜度组 + 加料组；米饭 opts 为空 → 返回 []。
@@ -323,11 +358,14 @@ export function foodsByCat(cat: string): FoodBase[] {
   return ALL_FOODS.filter((f) => f.cat === cat)
 }
 
-/** 搜索食物（按名称） */
+/** 搜索食物（名称子串 / 全拼 / 首字母，均不区分大小写） */
 export function searchFoods(query: string): FoodBase[] {
   const q = query.trim().toLowerCase()
   if (!q) return ALL_FOODS
-  return ALL_FOODS.filter((f) => f.name.toLowerCase().includes(q))
+  return ALL_FOODS.filter((f) =>
+    f.name.toLowerCase().includes(q) ||
+    (f.py != null && (f.py.f.includes(q) || f.py.i.includes(q)))
+  )
 }
 
 /**
@@ -431,6 +469,30 @@ function isSameDay(a: number, b: number): boolean {
   return da.getFullYear() === db.getFullYear() && da.getMonth() === db.getMonth() && da.getDate() === db.getDate()
 }
 
+/** 日键 YYYY-MM-DD（最近记录月历 / 单日详情共用） */
+export function dayKeyOf(ts: number): string {
+  const d = new Date(ts)
+  const m = d.getMonth() + 1
+  const day = d.getDate()
+  return (
+    d.getFullYear() +
+    '-' +
+    (m < 10 ? '0' + m.toString() : m.toString()) +
+    '-' +
+    (day < 10 ? '0' + day.toString() : day.toString())
+  )
+}
+
+/** 日键 → 该日 [起, 止) 毫秒区间 */
+export function dayRange(key: string): number[] {
+  const parts = key.split('-')
+  const y = parseInt(parts[0])
+  const mo = parseInt(parts[1])
+  const da = parseInt(parts[2])
+  const start = new Date(y, mo - 1, da).getTime()
+  return [start, start + 24 * 60 * 60 * 1000]
+}
+
 /** 按 SEED_PLAN 生成 7 天记录（ts 落在对应日期的对应餐点时刻） */
 function seedEntries(): FoodEntry[] {
   const out: FoodEntry[] = []
@@ -459,13 +521,15 @@ function hhmmss(ts: number): string {
 }
 
 /** 份量展示文案：g/ml 紧贴数值，计数单位留空格（设计稿「水煮蛋 1 个」格式） */
-function amountText(e: FoodEntry): string {
+export function amountText(e: FoodEntry): string {
   if (e.amount == null || e.unit == null || e.unit === '') return ''
   return `${e.amount}${e.unit}`
 }
 
 interface FoodState {
   entries: FoodEntry[]
+  /** 单日详情页查看日（YYYY-MM-DD）：Records 跳转前写入，页面间传参走 store 免 URL options 兼容问题 */
+  viewDay: string
 }
 
 const STORAGE_KEY = 'ct_food_entries_v1'
@@ -494,6 +558,7 @@ function saveEntries(entries: FoodEntry[]): void {
 
 const state = (): FoodState => ({
   entries: loadEntries(),
+  viewDay: '',
 })
 
 export const useFoodStore = defineStore('food', {
@@ -577,6 +642,16 @@ export const useFoodStore = defineStore('food', {
         out.push({ ts: dayStart, total })
       }
       return out
+    },
+
+    /** 日键 → 当日总 kcal（全部历史一次遍历；月历圆点 / 超标判定共用） */
+    dayTotals(state): Record<string, number> {
+      const map: Record<string, number> = {}
+      for (const e of state.entries) {
+        const k = dayKeyOf(e.ts)
+        map[k] = (map[k] ?? 0) + e.kcal
+      }
+      return map
     },
   },
   actions: {

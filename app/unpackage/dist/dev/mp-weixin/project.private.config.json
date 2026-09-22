@@ -7,8 +7,15 @@
     "miniprogram": {
       "list": [
         {
+          "name": "pages/settings/Settings",
+          "pathName": "pages/settings/Settings",
+          "query": "",
+          "scene": null,
+          "launchMode": "default"
+        },
+        {
           "name": "pages/home/Home",
-          "pathName": "pages/home/Home",
+          "pathName": "pages/profile/Profile",
           "query": "",
           "scene": null,
           "launchMode": "default"

@@ -157,6 +157,15 @@
           "source": {
             "type": "string",
             "description": "数据来源标识"
+          },
+          "py": {
+            "type": "object",
+            "required": ["f", "i"],
+            "properties": {
+              "f": { "type": "string", "description": "名称汉字的全拼连写（无声调、非汉字字符剔除）。如 苹果→pingguo" },
+              "i": { "type": "string", "description": "首字母串。如 苹果→pg" }
+            },
+            "description": "搜索用拼音索引（build.py 由 pypinyin 生成，2026-09-21 弹层⓪ 搜索需求）"
           }
         }
       }

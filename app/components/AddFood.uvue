@@ -1,5 +1,103 @@
 <!--
   [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[弹层壳迁移到原生 page-container（同 FoodPicker 模式）：自研 .af-mask 固定层＋点蒙层关闭＋z900 退役；
+    容器改透明（本弹窗内容为动态高度：甜度组/步进器有无不定，白卡圆角仍由 .af-sheet 自带，容器不写死 height）；
+    MP 端 v-if 与 :show 双条件（条件编译内嵌标签）；@clickoverlay 回传 update:show=false＋@afterleave 兜底同步]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[组件标签一律成对书写（禁自闭合）：CountStepper/OptionTray 三处自闭合改配对——实测本工程 mp-weixin
+    VDOM 产物中任一自闭合组件标签会在该宿主内以空作用域重渲染整页模板（幻影副本：插值全空、wx:for 空、页高虚增）]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[.af-mask 补 z-index:900——接入 StickyTop 滚动遮罩（z40）后统一全局层级：
+    弹层蒙层 900 ＞ 常驻返回钮 45 ＞ 滚动遮罩 40 ＞ Tabbar 30，防弹层被遮罩压住]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[Boss 反馈三项：①餐次卡照片改用 Pencil 设计稿实拍图——从设计文档目录拷入
+    sky_breakfast/lunch/dinner/night.png（弹窗② nURQn 四卡 fill 与「餐次图标设计」ZL2sa 同源），
+    替换旧自生成 meal_*.png 占位图；②「X餐」名称水平居中（稿面 text w25 居 77 宽卡正中），
+    .af-meal-name 由 left:10 改 left:0;right:0;text-align:center；③时间段行删除——Boss 拍板
+    稿面无此行（重测 nURQn/NUEJF 卡内仅 Photo→Dim→Scrim→名称四层），
+    .af-meal-time 样式与 MEAL_CARDS.time 字段移除，名称回归稿面 top:65.5]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[Boss 两项反馈：①奶茶甜度标题删「· 10 格电量」提示文字（只留「甜度」，
+    合并 v-if/v-else 两分支为单一 form-label）；②餐次区按 Pencil「弹窗② 米饭」稿量取重建——
+    补每卡第二行时间段（07:00-09:00 等，9px，选中 85%/未选中 50% 白）、名称改 12px
+    （选中 700 纯白／未选中 500 白72%，位置由 bottom:10 改稿面 top:60/77）、
+    选中卡补薄荷外描边 #1FBF8F 1px（稿面 MC_午餐 stroke）、印章改 $mint 底+白描边 2.5
+    并悬出右上外侧（top:-10/right:-12，旧 #2ECFA0/2px/-9）、
+    新增全卡底部衬度渐变 .af-meal-shade（稿面 Scrim 180° #0A4F3D 0%@32→85%@100）、
+    卡宽 76→77（稿面 4×77+3×9=335 恰满内容宽）；
+    实拍复核后补修：.af-meal-row 加 overflow:visible + 上/右 14px 内衬负 margin 双保险
+    ——全局 view{overflow:hidden} 实测把悬出卡上缘的印章裁掉上半]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[奶茶用例实拍修复：甜度电量条白胶囊 top+bottom 拉伸在小程序端失效（撑出底槽）——
+    改 .sweet-seg 固定高 66 + .sweet-pill 显式 height:70 top:6]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[修复餐次卡仍被压扁的真因：uni-app x 小程序端把组件样式平铺进同一页 wxss，
+    组件类名跨文件全局生效——Home 的 .meal-row{height:40px}/.meal-name 污染本组件餐次区。
+    将冲突类统一加 af- 前缀（mask/sheet/handle/meal-row/meal-card/meal-card-on/meal-photo/meal-scrim/meal-name），
+    .af-meal-photo 补 position:absolute；FoodPicker(fp-)/GoalModal(gm-)/FoodToast(ft-) 同步去冲突]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[Boss 实拍反馈修复：mp-weixin 端 sheet 子项被 flex-shrink 压扁（餐次卡 96→40、确认钮 52→43），
+    对 sheet/food-row/form-label/sweet-tray/meal-row/meal-card/meal-photo/confirm-btn/CountStepper.block
+    统一加 flex-shrink:0；餐次卡加 overflow:visible 使右上角印章不被裁；
+    OptionTray 光晕溢出被全局 view overflow:hidden 裁成硬边矩形——.opt/.float/.art-wrap 改 overflow:visible；
+    落地影贴图 aspectFit 把方形软影缩成「绿点」——改 scaleToFill]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[按 pencil 弹窗①–⑧ + 选择态 pOYw3 板还原：蒙层改中性黑 50%（Boss 拍板）；
+    头部副行改「N kcal / 100单位」（计件类为每单位）；「按所选分量与选项估算」改右对齐「已按 X 计算」
+    （步进器变体含「约 Ng」）；计件分支去「分量」标题（弹窗⑧无标题）；餐次卡去时间文案（Boss 拍板：
+    餐次无时间概念，时间由端上注入）、去选中边框、未选中盖 0.72 黑蒙版、印章移到卡片右上角外侧；
+    确认钮改「添加到X餐 · N kcal」；砝码(份)类改多颗渲染（单颗 33×30 固定，小份/一份/大份=1/2/3 颗）；
+    sweet 甜度组改「10 格电量」条＋滑动白胶囊（数据核查：仅 6 条茶饮有 sweet，咖啡的糖包/糖浆走通用底槽）]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[修复蒙层点击不关闭 bug：mask 加 @click closeMask（L1 轻触觉），sheet @click.stop 阻断冒泡]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[按弹窗① 设计稿补「更换」胶囊钮（food-row 右侧，#EAF9F3 r13 + arrow-left-right 图标），
+    点击 emit change，由宿主页唤起弹层⓪ FoodPicker 回显当前食物]
+-->
+<!--
+  [变更日志]
   修改时间：2026-09-21
   AI模型：Muse Spark
   修改内容：[新建：公共添加食物弹层（分量底槽/计数步进器/甜度底槽/餐次照片卡/确认 emit）；
@@ -7,48 +105,84 @@
 -->
 
 <template>
-  <view class="mask" v-if="show">
-    <view class="sheet" v-if="food != null">
-      <view class="handle"></view>
+  <page-container <!-- #ifdef MP -->
+    v-if="show"
+    <!-- #endif -->
+    :show="show" position="bottom" :overlay="true" :duration="300"
+    custom-style="background-color:transparent;"
+    @clickoverlay="onOverlayTap" @afterleave="onAfterLeave">
+    <view class="af-sheet" v-if="food != null">
+      <view class="af-handle"></view>
       <view class="food-row">
         <image class="food-thumb" :src="'/static/icons/' + food.img" mode="aspectFill"></image>
         <view class="food-text">
           <text class="food-name">{{ food.name }}</text>
-          <text class="food-unit">{{ vesselLabel }}</text>
+          <text class="food-unit">{{ unitLine }}</text>
         </view>
         <text class="big-kcal">{{ totalKcal }}</text>
         <text class="kcal-unit">kcal</text>
+        <view class="change-btn" @click="onChange">
+          <image class="change-icon" :src="'/static/common/change_icon.png'" mode="aspectFit"></image>
+          <text class="change-text">更换</text>
+        </view>
       </view>
-      <text class="sub-row">按所选分量与选项估算</text>
+      <view class="sub-row">
+        <text class="sub-plain">已按 </text>
+        <text class="sub-bold">{{ calcBold }}</text>
+        <text class="sub-plain">{{ calcTail }}</text>
+      </view>
 
-      <text class="form-label">分量</text>
+      <text class="form-label" v-if="!isCountUnit">分量</text>
       <CountStepper
         v-if="isCountUnit"
         v-model="count"
         :unit-label="vesselLabel"
         :grams-per-unit="pieceWeight"
         :kcal-per-unit="kcalPerUnit"
-      />
-      <OptionTray v-else :options="sizeOpts" v-model="sizeKey" />
+      ></CountStepper>
+      <OptionTray v-else :options="sizeOpts" v-model="sizeKey" ></OptionTray>
 
       <template v-for="(grpItem, grpIdx) in singleGroups" :key="grpIdx">
         <text class="form-label">{{ grpItem.label }}</text>
-        <OptionTray :options="sweetOpts(grpItem)" :model-value="sweetPick(grpItem.key)" @update:modelValue="(v) => setSweet(grpItem.key, v)" />
+        <view class="sweet-tray" v-if="grpItem.key === 'sweet'">
+          <view
+            class="sweet-pill"
+            :style="{ left: sweetPillLeft(grpItem) }"
+          ></view>
+          <view
+            class="sweet-seg"
+            v-for="(optItem, optIdx) in sweetOpts(grpItem)"
+            :key="optIdx"
+            @click="pickSweet(grpItem.key, optItem.key)"
+          >
+            <view class="batt" :class="{ 'batt-on': sweetPick(grpItem.key) === optItem.key }">
+              <view
+                class="batt-bar"
+                :class="{ 'batt-bar-fill': barIdx < sweetFill(optItem.key), 'batt-bar-on': sweetPick(grpItem.key) === optItem.key }"
+                v-for="barIdx in 10"
+                :key="barIdx"
+              ></view>
+            </view>
+            <text class="sweet-name" :class="{ 'sweet-name-on': sweetPick(grpItem.key) === optItem.key }">{{ optItem.label }}</text>
+            <text class="sweet-frac">{{ sweetFill(optItem.key) }}/10</text>
+          </view>
+        </view>
+        <OptionTray v-else :options="sweetOpts(grpItem)" :model-value="sweetPick(grpItem.key)" @update:modelValue="(v) => setSweet(grpItem.key, v)" ></OptionTray>
       </template>
 
       <text class="form-label">餐次</text>
-      <view class="meal-row">
+      <view class="af-meal-row">
         <view
-          class="meal-card"
-          :class="{ 'meal-card-on': mealItem.key === meal }"
+          class="af-meal-card"
+          :class="{ 'af-meal-card-on': mealItem.key === meal }"
           v-for="(mealItem, mealIdx) in mealCards"
           :key="mealIdx"
           @click="pickMeal(mealItem.key)"
         >
-          <image class="meal-photo" :src="mealItem.photo" mode="aspectFill"></image>
-          <view class="meal-scrim"></view>
-          <text class="meal-name" :class="{ 'meal-name-on': mealItem.key === meal }">{{ mealItem.label }}</text>
-          <text class="meal-time">{{ mealItem.time }}</text>
+          <image class="af-meal-photo" :src="mealItem.photo" mode="aspectFill"></image>
+          <view class="af-meal-scrim" v-if="mealItem.key !== meal"></view>
+          <view class="af-meal-shade"></view>
+          <text class="af-meal-name" :class="{ 'af-meal-name-on': mealItem.key === meal }">{{ mealItem.label }}</text>
           <view class="seal" v-if="mealItem.key === meal">
             <text class="seal-glyph">✓</text>
           </view>
@@ -56,10 +190,10 @@
       </view>
 
       <view class="confirm-btn" @click="confirm">
-        <text class="confirm-text">确认添加 · {{ totalKcal }} kcal</text>
+        <text class="confirm-text">添加到{{ mealLabel }} · {{ totalKcal }} kcal</text>
       </view>
     </view>
-  </view>
+  </page-container>
 </template>
 
 <script setup lang="uts">
@@ -95,6 +229,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:show', v: boolean): void
   (e: 'confirm', v: AddPayload): void
+  (e: 'change'): void
 }>()
 
 export type AddPayload = {
@@ -107,29 +242,51 @@ export type AddPayload = {
   kcal: number
 }
 
-const VESSEL_ART: Record<string, string> = {
-  cup: '/static/vessels/v3_cup.png',
-  cup_coffee: '/static/vessels/v3_cup.png',
-  cup_soda: '/static/vessels/v3_cup.png',
-  mug: '/static/vessels/v3_mug.png',
-  glass: '/static/vessels/v3_glass.png',
-  glass_wine: '/static/vessels/v3_glass_wine.png',
-  shot: '/static/vessels/v3_shot.png',
-  bottle: '/static/vessels/v3_bottle.png',
-  can: '/static/vessels/v3_can.png',
-  bowl_rice: '/static/vessels/v3_bowl.png',
-  bowl_noodle: '/static/vessels/v3_bowl.png',
-  bowl_soup: '/static/vessels/v3_bowl.png',
-  pot: '/static/vessels/v3_pot.png',
-  plate: '/static/vessels/v3_plate.png',
-  bag: '/static/vessels/v3_bag.png',
+/**
+ * 器皿素材元数据（pencil 对照A/B/C/D 定案）：
+ * natW/natH = 素材原始像素比；contact = 接触宽（设计稿实测仅 瓶0.93/罐0.93/碗0.64/盘0.49/杯0.64/串0.13，
+ * 未实测器形取 0.64 保守值）；solid = 实心不透明素材（金属砝码，未选中压暗 0.85 而非 0.62）；
+ * unitFixed = 按份计数类（单颗尺寸固定 33×30，只变颗数不变单体）。
+ */
+type VesselArtMeta = {
+  src: string
+  natW: number
+  natH: number
+  contact: number
+  solid: boolean
+  unitFixed: boolean
 }
 
+const VESSEL_ART: Record<string, VesselArtMeta> = {
+  cup: { src: '/static/vessels/v3_cup.png', natW: 157, natH: 300, contact: 0.64, solid: false, unitFixed: false },
+  cup_coffee: { src: '/static/vessels/v3_cup.png', natW: 157, natH: 300, contact: 0.64, solid: false, unitFixed: false },
+  cup_soda: { src: '/static/vessels/v3_cup.png', natW: 157, natH: 300, contact: 0.64, solid: false, unitFixed: false },
+  mug: { src: '/static/vessels/v3_mug.png', natW: 300, natH: 260, contact: 0.64, solid: false, unitFixed: false },
+  glass: { src: '/static/vessels/v3_glass.png', natW: 154, natH: 300, contact: 0.64, solid: false, unitFixed: false },
+  glass_wine: { src: '/static/vessels/v3_glass_wine.png', natW: 119, natH: 300, contact: 0.64, solid: false, unitFixed: false },
+  shot: { src: '/static/vessels/v3_shot.png', natW: 179, natH: 300, contact: 0.64, solid: false, unitFixed: false },
+  bottle: { src: '/static/vessels/v3_bottle.png', natW: 102, natH: 300, contact: 0.93, solid: false, unitFixed: false },
+  can: { src: '/static/vessels/v3_can.png', natW: 170, natH: 300, contact: 0.93, solid: false, unitFixed: false },
+  bowl_rice: { src: '/static/vessels/v3_bowl.png', natW: 300, natH: 269, contact: 0.64, solid: false, unitFixed: false },
+  bowl_noodle: { src: '/static/vessels/v3_bowl.png', natW: 300, natH: 269, contact: 0.64, solid: false, unitFixed: false },
+  bowl_soup: { src: '/static/vessels/v3_bowl.png', natW: 300, natH: 269, contact: 0.64, solid: false, unitFixed: false },
+  pot: { src: '/static/vessels/v3_weight.png', natW: 300, natH: 271, contact: 0.93, solid: true, unitFixed: true },
+  plate: { src: '/static/vessels/v3_plate.png', natW: 300, natH: 119, contact: 0.49, solid: false, unitFixed: false },
+  bag: { src: '/static/vessels/v3_bag.png', natW: 209, natH: 300, contact: 0.64, solid: false, unitFixed: false },
+}
+
+/** 设计定案：三档=同一张图 scale 0.60/0.80/1.00；两档按容量立方根；单档 1.0 */
+const TIER_SCALES = [0.60, 0.80, 1.00]
+const ART_BOX_W = 96
+const ART_BOX_H = 72
+/** 甜度电量格数映射（展示层：三分/五分/七分/全糖 = 3/5/7/10 格） */
+const SWEET_BARS: Record<string, number> = { none: 0, light: 3, half: 5, less: 7, full: 10 }
+
 const MEAL_CARDS = [
-  { key: 'breakfast', label: '早餐', time: '07:30', photo: '/static/meals/meal_breakfast.png' },
-  { key: 'lunch', label: '午餐', time: '12:10', photo: '/static/meals/meal_lunch.png' },
-  { key: 'dinner', label: '晚餐', time: '18:20', photo: '/static/meals/meal_dinner.png' },
-  { key: 'snack', label: '夜宵', time: '21:00', photo: '/static/meals/meal_night.png' },
+  { key: 'breakfast', label: '早餐', photo: '/static/meals/sky_breakfast.png' },
+  { key: 'lunch', label: '午餐', photo: '/static/meals/sky_lunch.png' },
+  { key: 'dinner', label: '晚餐', photo: '/static/meals/sky_dinner.png' },
+  { key: 'snack', label: '夜宵', photo: '/static/meals/sky_night.png' },
 ]
 
 function defaultMeal(): string {
@@ -221,17 +378,34 @@ const sizeOpts = computed<TrayOption[]>(() => {
   if (f == null) return []
   const sizes = vesselSizesOf(f.vessel ?? '')
   const maxAmt = sizes.reduce((m, s) => (s.amount > m ? s.amount : m), 1)
-  const art = VESSEL_ART[f.vessel ?? ''] ?? ''
-  return sizes.map((s) => {
-    const scale = Math.cbrt(s.amount / maxAmt)
-    const k = scale < 0.7 ? 0.7 : scale
+  const art = VESSEL_ART[f.vessel ?? '']
+  return sizes.map((s, idx): TrayOption => {
+    const label = s.name + ' ' + s.amount.toString() + s.unit
+    const sub = Math.round(f.kcal * s.amount / 100).toString() + ' kcal'
+    if (art == null) {
+      return { key: s.k, label, sub, art: '', artW: 0, artH: 0, count: 1, contact: 0.64, solid: false }
+    }
+    if (art.unitFixed) {
+      // 砝码类：单颗固定 33×30，小份/一份/大份 = 1/2/3 颗
+      return { key: s.k, label, sub, art: art.src, artW: 33, artH: 30, count: idx + 1, contact: art.contact, solid: true }
+    }
+    let scale = 1.0
+    if (sizes.length === 3) {
+      scale = TIER_SCALES[idx]
+    } else if (sizes.length > 1) {
+      scale = Math.cbrt(s.amount / maxAmt)
+    }
+    const fit = Math.min(ART_BOX_W / art.natW, ART_BOX_H / art.natH) * scale
     return {
       key: s.k,
-      label: s.name,
-      sub: s.amount.toString() + s.unit,
-      art,
-      artW: Math.round(56 * k),
-      artH: Math.round(48 * k),
+      label,
+      sub,
+      art: art.src,
+      artW: Math.round(art.natW * fit),
+      artH: Math.round(art.natH * fit),
+      count: 1,
+      contact: art.contact,
+      solid: art.solid,
     }
   })
 })
@@ -247,9 +421,69 @@ function sweetOpts(grp: OptGroup): TrayOption[] {
       art: '',
       artW: 0,
       artH: 0,
+      count: 1,
+      contact: 0.64,
+      solid: false,
     }
   })
 }
+
+function sweetFill(k: string): number {
+  return SWEET_BARS[k] ?? 10
+}
+
+/** 白胶囊在 5 等分段间做 x 位移（段不动只动胶囊） */
+function sweetPillLeft(grp: OptGroup): string {
+  const sel = sweetPick(grp.key)
+  let idx = 0
+  for (let i = 0; i < grp.items.length; i++) {
+    if (grp.items[i].k === sel) idx = i
+  }
+  return (idx * 20).toString() + '%'
+}
+
+function pickSweet(key: string, v: string): void {
+  if (sweetPick(key) === v) return
+  try {
+    uni.vibrateShort()
+  } catch (e) {
+    // 无触觉设备忽略
+  }
+  setSweet(key, v)
+}
+
+/** 头部副行：计件类=每单位热量，其余=每100单位热量 */
+const unitLine = computed<string>(() => {
+  const f = food.value
+  if (f == null) return ''
+  if (isCountUnit.value) return kcalPerUnit.value.toString() + ' kcal / ' + vesselLabel.value
+  return f.kcal.toString() + ' kcal / 100' + f.unit
+})
+
+/** 「已按 X 计算」：器皿档名+克量；步进器带「约 Ng」 */
+const calcBold = computed<string>(() => {
+  const f = food.value
+  if (f == null) return ''
+  if (isCountUnit.value) return count.value.toString() + vesselLabel.value
+  const sizes = vesselSizesOf(f.vessel ?? '')
+  const hit = sizes.find((s) => s.k === sizeKey.value)
+  if (hit == null) return ''
+  return hit.name + ' ' + hit.amount.toString() + hit.unit
+})
+
+const calcTail = computed<string>(() => {
+  const f = food.value
+  if (f == null) return ' 计算'
+  if (isCountUnit.value && pieceWeight.value > 0) {
+    return '（约 ' + (count.value * pieceWeight.value).toString() + 'g） 计算'
+  }
+  return ' 计算'
+})
+
+const mealLabel = computed<string>(() => {
+  const hit = MEAL_CARDS.find((m) => m.key === meal.value)
+  return hit != null ? hit.label : ''
+})
 
 function currentGrams(): number {
   const f = food.value
@@ -290,6 +524,30 @@ function pickMeal(key: string): void {
   }
 }
 
+function onChange(): void {
+  try {
+    uni.vibrateShort()
+  } catch (e) {
+    // 无触觉设备忽略
+  }
+  emit('change')
+}
+
+/** 原生蒙层不自动关闭，点按时回传 show=false 触发离场动画 */
+function onOverlayTap(): void {
+  try {
+    uni.vibrateShort()
+  } catch (e) {
+    // 无触觉设备忽略
+  }
+  emit('update:show', false)
+}
+
+/** page-container 离场结束（系统返回/confirm 关闭等），回传关闭态保持父级同步 */
+function onAfterLeave(): void {
+  emit('update:show', false)
+}
+
 function confirm(): void {
   const f = food.value
   if (f == null) return
@@ -313,22 +571,14 @@ function confirm(): void {
 </script>
 
 <style>
-.mask {
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background-color: rgba(10, 79, 61, 0.35);
-  justify-content: flex-end;
-}
-.sheet {
+.af-sheet {
   background-color: #FFFFFF;
   border-top-left-radius: 34px;
   border-top-right-radius: 34px;
   padding: 12px 18px 24px 18px;
+  flex-shrink: 0;
 }
-.handle {
+.af-handle {
   width: 44px;
   height: 5px;
   border-radius: 3px;
@@ -339,128 +589,255 @@ function confirm(): void {
   flex-direction: row;
   align-items: center;
   margin-top: 12px;
+  flex-shrink: 0;
 }
 .food-thumb {
-  width: 46px;
-  height: 46px;
-  border-radius: 10px;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background-color: #EAF9F3;
 }
 .food-text {
   flex: 1;
   margin-left: 10px;
 }
 .food-name {
-  font-size: 16px;
+  font-size: 17px;
+  font-weight: bold;
   color: #0A4F3D;
 }
 .food-unit {
-  font-size: 12px;
+  font-size: 12.5px;
   color: #8FAEAF;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 .big-kcal {
-  font-size: 30px;
+  font-size: 36px;
   font-weight: bold;
   color: #0A4F3D;
 }
 .kcal-unit {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0A7A5C;
+  margin-left: 3px;
+}
+.change-btn {
+  flex-direction: row;
+  align-items: center;
+  height: 26px;
+  border-radius: 13px;
+  background-color: #EAF9F3;
+  padding-left: 9px;
+  padding-right: 9px;
+  margin-left: 8px;
+}
+.change-icon {
+  width: 12px;
+  height: 12px;
+}
+.change-text {
   font-size: 12px;
-  color: #73918B;
-  margin-left: 2px;
+  font-weight: 600;
+  color: #0F4F3D;
+  margin-left: 3px;
 }
 .sub-row {
-  font-size: 11px;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+.sub-plain {
+  font-size: 12px;
   color: #8FAEAF;
-  margin-top: 6px;
+}
+.sub-bold {
+  font-size: 12px;
+  font-weight: bold;
+  color: #0A7A5C;
 }
 .form-label {
-  font-size: 13px;
+  font-size: 15.5px;
+  font-weight: bold;
   color: #0A4F3D;
-  margin-top: 14px;
-  margin-bottom: 8px;
+  margin-top: 16px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
 }
-.meal-row {
+.sweet-tray {
+  position: relative;
+  flex-direction: row;
+  background-color: #F2FAF5;
+  border-radius: 20px;
+  padding: 8px 0;
+  flex-shrink: 0;
+}
+.sweet-pill {
+  position: absolute;
+  top: 6px;
+  height: 70px;
+  width: 20%;
+  background-color: #FFFFFF;
+  border-radius: 16px;
+  border-width: 1px;
+  border-color: #DCEDE6;
+  box-shadow: 0 4px 10px rgba(10, 79, 61, 0.12);
+  transition-property: left;
+  transition-duration: 240ms;
+}
+.sweet-seg {
+  flex: 1;
+  align-items: center;
+  height: 66px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+.batt {
+  flex-direction: row;
+  align-items: flex-end;
+  height: 15px;
+}
+.batt-bar {
+  width: 3px;
+  height: 13px;
+  border-radius: 1.5px;
+  background-color: #DCEDE6;
+  margin-left: 1px;
+  margin-right: 1px;
+  transition-property: height;
+  transition-duration: 240ms;
+}
+.batt-bar-fill {
+  background-color: #1FBF8F;
+}
+.batt-bar-on {
+  height: 15px;
+}
+.sweet-name {
+  font-size: 13px;
+  color: #73918B;
+  margin-top: 6px;
+}
+.sweet-name-on {
+  color: #0A4F3D;
+  font-weight: bold;
+}
+.sweet-frac {
+  font-size: 11px;
+  color: #8FAEAF;
+  margin-top: 2px;
+}
+.af-meal-row {
   flex-direction: row;
   justify-content: space-between;
+  flex-shrink: 0;
+  overflow: visible; /* 期望态：印章悬出卡外不被裁 */
+  /* 结构保险（与 overflow:visible 双保险）：上/右各扩 14px 内衬把印章纳入 row 裁切框，
+     再用负 margin 拉回原位——即使运行时 overflow 不生效，卡位与稿面间距也不变 */
+  padding-top: 14px;
+  padding-right: 14px;
+  margin-top: -14px;
+  margin-right: -14px;
 }
-.meal-card {
+.af-meal-card {
   position: relative;
-  width: 76px;
+  width: 77px;
+  height: 96px;
+  flex-shrink: 0;
+  overflow: visible;
+  border-radius: 16px;
+  transition-property: transform, box-shadow;
+  transition-duration: 220ms;
+}
+/* 稿面选中卡：薄荷外描边（Pencil MC_午餐 stroke #1FBF8F）＋抬升 4px */
+.af-meal-card-on {
+  transform: translateY(-4px);
+  border-width: 1px;
+  border-style: solid;
+  border-color: #1FBF8F;
+  box-shadow: 0 8px 12px rgba(10, 79, 61, 0.35);
+}
+.af-meal-photo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 77px;
   height: 96px;
   border-radius: 16px;
-  overflow: hidden;
-  border-width: 2px;
-  border-color: transparent;
+  flex-shrink: 0;
 }
-.meal-card-on {
-  border-color: #1FBF8F;
-  transform: translateY(-4px);
-}
-.meal-photo {
+/* 未选中黑 72% 压暗（稿面 Dim #000000 op .72） */
+.af-meal-scrim {
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
-  width: 76px;
-  height: 96px;
+  border-radius: 16px;
+  background-color: rgba(0, 0, 0, 0.72);
 }
-.meal-scrim {
+/* 底部文字衬度渐变（稿面 Scrim 180°：#0A4F3D 0%@32 → 85%@100，选中/未选中均有） */
+.af-meal-shade {
   position: absolute;
   left: 0;
   right: 0;
+  top: 0;
   bottom: 0;
-  height: 44px;
-  background-color: rgba(10, 79, 61, 0.45);
+  border-radius: 16px;
+  background-image: linear-gradient(180deg, rgba(10, 79, 61, 0) 32%, rgba(10, 79, 61, 0.85) 100%);
 }
-.meal-name {
+.af-meal-name {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 20px;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.72);
+  top: 65.5px;
   text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.72);
 }
-.meal-name-on {
+.af-meal-name-on {
+  font-weight: 700;
   color: #FFFFFF;
-  font-weight: bold;
 }
-.meal-time {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 6px;
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.72);
-  text-align: center;
-}
+/* 印章（稿面 Seal：$mint 底、白描边 2.5，悬于选中卡右上角外侧） */
 .seal {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 20px;
-  height: 20px;
-  border-radius: 10px;
+  top: -10px;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
   background-color: #1FBF8F;
+  border-width: 2.5px;
+  border-style: solid; /* mp-weixin 端 border 缺 style 不渲染（uvue 默认 solid 不迁移） */
+  border-color: #FFFFFF;
   justify-content: center;
   align-items: center;
+  animation: sealPop 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .seal-glyph {
   font-size: 12px;
+  font-weight: bold;
   color: #FFFFFF;
+}
+@keyframes sealPop {
+  0% { transform: scale(0.6); }
+  100% { transform: scale(1); }
 }
 .confirm-btn {
   height: 52px;
   border-radius: 26px;
-  background-color: #1FBF8F;
+  background-image: linear-gradient(to right, #7DEBC7, #1FBF8F);
   justify-content: center;
   align-items: center;
-  margin-top: 16px;
+  margin-top: 18px;
+  flex-shrink: 0;
   box-shadow: 0 8px 18px rgba(31, 191, 143, 0.34);
 }
 .confirm-text {
   font-size: 15px;
+  font-weight: 600;
   color: #FFFFFF;
 }
 </style>

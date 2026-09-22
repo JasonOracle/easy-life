@@ -1,6 +1,31 @@
 <!--
   [变更日志]
   修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[落地影改挂进 .art-wrap 绝对定位在素材底部（原为 .float 后置流内节点，影被挤到文字下方）]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[Boss 实拍反馈修复：光晕/抬升溢出部分被运行时全局 view{overflow:hidden} 裁成硬边矩形色块——
+    .opt/.float/.art-wrap 显式 overflow:visible；.tray/.float 加 flex-shrink:0 防压扁；
+    落地影 shadow512.png 为方形软斑贴图，aspectFit 在 55×10 盒里只画出中间小圆点（「绿点」bug）——改 scaleToFill 拉成扁影]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[按 pencil 选择态 pOYw3 板还原：TrayOption 增 count/contact/solid 字段；
+    光晕/落地影改按公式动态计算（haloW=objW×1.5，haloH=max(objH×1.35,objW×0.45)，
+    shadowW=objW×接触宽×1.35（ar≥1.6 时 ×1.5），blur=shadowW×0.16）；
+    砝码类多颗渲染（单颗固定尺寸只变颗数）；未选中压暗分档（透明/浅色素材 0.62、实心不透明 0.85）；
+    器皿类选中去白卡（设计「去卡片、用体积与光」），选中件加 scale 0.94→1 弹性入场；
+    文本类选项（糖包/糖浆）保留白卡样式]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
   AI模型：Muse Spark
   修改内容：[新建：方案 B 单选底槽——共用底槽＋悬浮选中件（光晕＋落地影＋抬升＋提亮）；
     图片 :src 运行时绑定（绕开编译器 assets 跨页碰撞铁律）]
@@ -14,34 +39,45 @@
       :key="optIdx"
       @click="select(optItem.key)"
     >
-      <view class="halo" v-if="optItem.key === modelValue"></view>
-      <view class="float" :class="{ 'float-on': optItem.key === modelValue }">
-        <image
-          v-if="optItem.art !== ''"
-          class="opt-art"
-          :src="optItem.art"
-          mode="aspectFit"
-          :style="{ width: optItem.artW + 'px', height: optItem.artH + 'px', opacity: optItem.key === modelValue ? 1 : 0.62 }"
-        ></image>
+      <view class="float" :class="{ 'float-on': optItem.key === modelValue, 'float-card': optItem.key === modelValue && optItem.art === '' }">
+        <view class="art-wrap" v-if="optItem.art !== ''">
+          <view
+            class="halo"
+            v-if="optItem.key === modelValue"
+            :style="{ width: haloW(optItem) + 'px', height: haloH(optItem) + 'px', marginLeft: (-haloW(optItem) / 2) + 'px', top: (optItem.artH - haloH(optItem)) / 2 + 'px' }"
+          ></view>
+          <view class="art-row">
+            <image
+              class="opt-art"
+              v-for="(unitNum, unitIdx) in optItem.count"
+              :key="unitIdx"
+              :src="optItem.art"
+              mode="aspectFit"
+              :style="{ width: optItem.artW + 'px', height: optItem.artH + 'px', opacity: optItem.key === modelValue ? 1 : (optItem.solid ? 0.85 : 0.62) }"
+            ></image>
+          </view>
+          <image
+            v-if="optItem.key === modelValue"
+            class="opt-shadow"
+            :src="'/static/common/shadow512.png'"
+            mode="scaleToFill"
+            :style="{ width: shadowW(optItem) + 'px', height: shadowH(optItem) + 'px', marginLeft: (-shadowW(optItem) / 2) + 'px', bottom: (2 - shadowH(optItem) / 2) + 'px' }"
+          ></image>
+        </view>
         <text class="opt-name" :class="{ 'opt-name-on': optItem.key === modelValue }">{{ optItem.label }}</text>
         <text class="opt-sub" :class="{ 'opt-sub-on': optItem.key === modelValue }" v-if="optItem.sub !== ''">{{ optItem.sub }}</text>
       </view>
-      <image
-        v-if="optItem.key === modelValue"
-        class="opt-shadow"
-        :src="'/static/common/shadow512.png'"
-        mode="aspectFit"
-      ></image>
     </view>
   </view>
 </template>
 
 <script setup lang="uts">
 /**
- * 方案 B 单选底槽（分量/甜度/糖包等单选组通用）。
- * 选中态＝悬浮件（白底＋影＋抬升 4px＋物件 ×1.12 等效）＋径向光晕；
- * 未选中＝物件 opacity .62＋名 muted。
- * 动效：220ms cubic-bezier(.22,1,.36,1) 的位移/透明/阴影过渡。
+ * 单选底槽（分量/糖包等单选组通用）。
+ * 设计哲学（pOYw3）：「去卡片、用体积与光」——选中件不套白卡，靠 抬升＋光晕＋落地影＋文字加粗 表达；
+ * 光晕/落地影按素材体积公式动态算（接触宽逐素材，由调用方随 TrayOption.contact 传入）。
+ * 未选中压暗：透明/浅色素材 0.62，实心不透明素材（金属砝码）0.85。
+ * 动效：220ms 位移/透明过渡；选中 scale 0.94→1 弹性入场。
  */
 
 export type TrayOption = {
@@ -51,6 +87,12 @@ export type TrayOption = {
   art: string
   artW: number
   artH: number
+  /** 并排颗数（砝码类 1/2/3 颗；常规为 1） */
+  count: number
+  /** 接触宽系数（设计实测：瓶0.93/罐0.93/碗0.64/盘0.49/杯0.64/串0.13） */
+  contact: number
+  /** 实心不透明素材（未选中压暗 0.85 而非 0.62） */
+  solid: boolean
 }
 
 const props = defineProps<{
@@ -61,6 +103,29 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', v: string): void
 }>()
+
+/** 组宽：多颗砝码按整排算（颗间 4px） */
+function groupW(opt: TrayOption): number {
+  return opt.artW * opt.count + 4 * (opt.count - 1)
+}
+
+function haloW(opt: TrayOption): number {
+  return Math.round(groupW(opt) * 1.5)
+}
+
+function haloH(opt: TrayOption): number {
+  return Math.round(Math.max(opt.artH * 1.35, groupW(opt) * 0.45))
+}
+
+function shadowW(opt: TrayOption): number {
+  const ar = groupW(opt) / opt.artH
+  const k = ar >= 1.6 ? 1.5 : 1.35
+  return Math.round(groupW(opt) * opt.contact * k)
+}
+
+function shadowH(opt: TrayOption): number {
+  return Math.max(10, Math.round(shadowW(opt) * 0.16))
+}
 
 function select(key: string): void {
   if (key === props.modelValue) return
@@ -79,6 +144,7 @@ function select(key: string): void {
   background-color: #F2FAF5;
   border-radius: 20px;
   padding: 12px 10px;
+  flex-shrink: 0;
 }
 .opt {
   flex: 1;
@@ -87,30 +153,48 @@ function select(key: string): void {
   position: relative;
   padding-top: 10px;
   padding-bottom: 6px;
+  overflow: visible;
+}
+.art-wrap {
+  position: relative;
+  align-items: center;
+  overflow: visible;
 }
 .halo {
   position: absolute;
-  top: 0px;
-  width: 90px;
-  height: 80px;
+  left: 50%;
   border-radius: 45px;
-  background-color: rgba(31, 191, 143, 0.22);
+  background-color: rgba(46, 207, 160, 0.22);
+}
+.art-row {
+  flex-direction: row;
+  align-items: flex-end;
 }
 .float {
   align-items: center;
-  background-color: transparent;
   border-radius: 14px;
   padding: 8px 6px;
+  overflow: visible;
+  flex-shrink: 0;
   transform: translateY(0px);
   transition-property: transform, background-color, box-shadow;
   transition-duration: 220ms;
 }
 .float-on {
-  background-color: #FFFFFF;
   transform: translateY(-4px);
+  animation: optPop 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.float-card {
+  background-color: #FFFFFF;
   box-shadow: 0 5px 12px rgba(10, 79, 61, 0.25);
 }
+@keyframes optPop {
+  0% { transform: translateY(-4px) scale(0.94); }
+  100% { transform: translateY(-4px) scale(1); }
+}
 .opt-art {
+  margin-left: 2px;
+  margin-right: 2px;
   transition-property: opacity;
   transition-duration: 220ms;
 }
@@ -132,8 +216,7 @@ function select(key: string): void {
   color: #0A7A5C;
 }
 .opt-shadow {
-  width: 64px;
-  height: 12px;
-  margin-top: 2px;
+  position: absolute;
+  left: 50%;
 }
 </style>

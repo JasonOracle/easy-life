@@ -22,6 +22,10 @@ food.totalCal // 今日总热量
 - 记录存冗余快照（foodName＋source＋schemaVersion），不存纯 foodId
 - 本地存储持久化（`ct_food_entries_v1`），读失败回落 Boss 授权演示种子
 - 用 `.ts` 而非 `.uts`（UTS 编译器破坏中文字符串）
+- 搜索三路匹配（名称子串 / 全拼 / 首字母）：拼音索引 `py{f,i}` 是 build.py 产物字段，
+  store 不手算拼音；弹层⓪ FoodPicker 复用 `searchFoods()` 保持单一匹配口径
+- `vesselLabelOf()`（碗/杯/盘…）与 `vesselSizesOf()` 同源于 vesselTpl，供列表副行拼
+  「一碗约 200g」，避免组件里再抄一份器具中文映射
 
 ## 边界与降级
 

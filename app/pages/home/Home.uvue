@@ -1,5 +1,83 @@
 <!--
   [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[#29 配套（Boss 拍板「缩页底预留位」）：.page 的 padding-bottom 由 78 压到 40，
+    让内容常态穿到玻璃 Tabbar（高约 76）之下，玻璃才有东西可透；末屏约 36px 内容会落在半透栏下;
+    2. #29 续（Boss：「我想要的 tabbar 是 scroll-fade-navbar 那种效果」）：重新挂回 onPageScroll
+    （#28 曾删），按 0→60px 线性算 tabFade（0.05 量化）透传给 Tabbar，底槽随滚动渐显]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[#28 常驻标题块导航栏（Boss 拍板 Home 标题块三端固定顶部）：标题＋副标题＋FAB 从文档流顶栏抽出，
+    合并为全时段 fixed 的 hm-nav（z45，底色同页面底 #F2FAF5，高 sbH+64）；文档流仅留日期行，
+    由 .header 的 paddingTop=sbH+64 承担整栏避让（Hero 保持原 -18 上叠，勿重复加 sbH，否则出现空带）；
+    删除 P1 hm-st-mask 两态遮罩与 onPageScroll 监听（非透明常驻栏无穿透）]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[滚动遮罩弃 StickyTop 组件改页内内联 fixed 视图：该组件实测双故障——其 v-if 遮罩视图在 mp-weixin
+    端不渲染，且其宿主节点内会再渲染一份整页模板的幻影副本（插值全空、页高虚增）；内联视图与 fx-back 同机制已验证]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[组件标签一律成对书写（禁自闭合）＋StickyTop 置模板最末：实测本工程 mp-weixin VDOM 产物中任一自闭合
+    组件标签会在该宿主内以空作用域重渲染整页模板（幻影副本：插值全空、wx:for 空、页高虚增，首个自闭合标签决定幻影位置）；
+    fixed 遮罩与文档序无关，末位安全]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[接 StickyTop 防穿透遮罩（Boss 拍板 P1）：onPageScroll 两态 scrollTop>80 →
+    遮罩以页面底色 #F2FAF5 盖住状态栏带，白卡上滚不再穿透时间/WiFi/电量区]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[目标 Pill 日历图标 .pill-cal 接 openRecords → navigateTo /pages/records/Records
+    （Boss 指令：首页顶部日历图标点击跳转最近记录页）]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[①AddFood 确认链路补落库：onAddConfirm 调 food.addEntry(computeEntry(...)) 写真实记录
+    （Boss 拍板，为最近记录/单日详情页供数；settleAfter 改取落库后的 food.totalCal）；
+    ②每日目标 Pill 铅笔图标接 GoalModal（qnNST 重建版），保存直连 goal.setGoal]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[添加成功反馈由 FoodToast（旧横排 toast，设计稿 §0 已否决）替换为弹层③ SettleBadge 结算徽章；
+    confirm 后传 kcal／加入后今日总量（food.totalCal+本次，当前不写库）／goal／餐次中文标签]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[接入弹层⓪ FoodPicker：FAB 改为先开食物选择列表 → 选中后开 AddFood；
+    AddFood「更换」→ 关自身、重开 FoodPicker 并回显当前 addFoodId]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[页面无法滚动修复：删除 .page 的 flex:1。根因＝uni-app x 运行时 uvue.wxss 强制
+    page{height:100%;display:flex}，而 flex:1 简写把根节点钉死为视口高度＋view 默认 overflow:hidden
+    裁掉超出内容 → 文档高度永不超屏 → 微信原生页面滚动不触发；删后根节点随内容自然撑高，恢复原生滚动。
+    未引入 scroll-view（Boss 否决：多一层滚动容器且非必要）。]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[第二轮还原度修复（设计源改为 Pencil，Ardot 废止）：
+    每日目标 Pill 右侧按 Pencil「Home 首页」稿补回铅笔图标（pill_edit.png，深绿 #0C9569，
+    13×13，左距 10）——撤销上一轮基于 Ardot 的「删铅笔」，以 Pencil 稿为唯一视觉准绳。]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[还原度修复（对照 Ardot 画板 10:223 ×0.794 换算）：
+    餐次明细行增「份量」列（store amountText）；「还能吃」右侧补叶图标；
+    kcal 单位改为贴数字底部上提对齐；Goal Pill 改为左侧日历图标结构（删铅笔）；
+    宏量卡按稿面 98 高重排（padding/分隔线 47.6）；FAB 改双色渐变；时间轴加粗为 2px 稿面色；
+    hero 文本块下移至稿面基线；行高 40]
   修改时间：2026-09-21
   AI模型：Muse Spark
   修改内容：[FAB 接 AddFood 弹窗（演示珍珠奶茶），确认弹 FoodToast（不写库）]
@@ -23,10 +101,11 @@
 
 <template>
   <view class="page">
-    <!-- 顶栏 -->
-    <view class="header" :style="{ paddingTop: sbH + 'px' }">
-      <view class="title-row">
-        <view class="title-left">
+    <!-- 常驻标题块导航栏（#28 方案A：Boss 拍板 Home 标题块三端固定顶部）：页内内联 fixed（禁组件——幻影副本），
+         z45 常驻置顶；内容以 margin-top 避让整栏，无透明态故不存在点击穿透问题 -->
+    <view class="hm-nav" :style="{ height: (sbH + 64) + 'px', paddingTop: sbH + 'px' }">
+      <view class="hm-nav-inner">
+        <view class="hm-nav-left">
           <text class="title">轻律生活</text>
           <text class="subtitle">让健康饮食成为一种习惯</text>
         </view>
@@ -34,27 +113,35 @@
           <text class="fab-plus">＋</text>
         </view>
       </view>
+    </view>
+
+    <!-- 顶栏文档流占位（随内容滚走）：日期行 -->
+    <view class="header" :style="{ paddingTop: (sbH + 64) + 'px' }">
       <view class="date-row">
         <image class="date-icon" :src="'/static/home/date_icon.png'" mode="aspectFit"></image>
         <text class="date-text">9月19日 · 周五</text>
       </view>
     </view>
 
-    <!-- Hero -->
+    <!-- Hero（常驻标题块 #28：避让已由 .header 的 paddingTop 完成，此处保持原 -18 上叠，勿重复加 sbH） -->
     <view class="hero">
       <image class="hero-wave" :src="'/static/home/hero_wave.png'" mode="widthFix"></image>
       <image class="bottle" :src="'/static/home/bottle.png'" mode="aspectFit"></image>
       <image class="sticker" :src="'/static/home/sticker.png'" mode="aspectFit"></image>
       <view class="hero-text">
-        <text class="remain-label">还能吃</text>
+        <view class="remain-head">
+          <text class="remain-label">还能吃</text>
+          <image class="remain-leaf" :src="'/static/home/leaf.png'" mode="aspectFit"></image>
+        </view>
         <view class="remain-num-row">
           <text class="remain-num">{{ remainCal }}</text>
           <text class="remain-unit">kcal</text>
         </view>
         <text class="consumed">已摄入 {{ food.totalCal }} / {{ goal.calorieGoal }} kcal</text>
         <view class="goal-pill">
+          <image class="pill-cal" :src="'/static/home/pill_calendar.png'" mode="aspectFit" @click="openRecords"></image>
           <text class="goal-pill-text">每日目标 {{ goal.calorieGoal }} kcal</text>
-          <image class="pill-edit" :src="'/static/home/pill_edit.png'" mode="aspectFit"></image>
+          <image class="pill-edit" :src="'/static/home/pill_edit.png'" mode="aspectFit" @click="openGoal"></image>
         </view>
       </view>
     </view>
@@ -106,6 +193,7 @@
             <view class="meal-row">
               <image class="meal-thumb" :src="rowItem.img" mode="aspectFill"></image>
               <text class="meal-row-name">{{ rowItem.name }}</text>
+              <text class="meal-row-portion">{{ rowItem.portion }}</text>
               <text class="meal-row-kcal">{{ rowItem.kcal }} kcal</text>
             </view>
             <view class="meal-row-div" v-if="rowIdx < meal.rows.length - 1"></view>
@@ -120,16 +208,19 @@
     </view>
 
     <!-- 底部 Tab（共享组件，Tabbar 终案前按 v2 两 Tab 落地） -->
-    <Tabbar active="home" />
+    <Tabbar active="home" :fade="tabFade" ></Tabbar>
 
-    <!-- 添加食物弹窗（演示珍珠奶茶；确认只弹 Toast，不写库） -->
-    <AddFood v-model:show="addShow" :food-id="addFoodId" @confirm="onAddConfirm" />
-    <FoodToast v-model:show="toastShow" :kcal="toastKcal" :meal-label="toastMeal" />
+    <!-- 弹层⓪ 食物选择列表 → 弹窗① 添加食物（更换时回到列表并回显） -->
+    <FoodPicker v-model:show="pickerShow" :selected-id="addFoodId" @select="onPickFood" ></FoodPicker>
+    <AddFood v-model:show="addShow" :food-id="addFoodId" @confirm="onAddConfirm" @change="onAddChange" ></AddFood>
+    <SettleBadge v-model:show="settleShow" :kcal="settleKcal" :after="settleAfter" :goal="goal.calorieGoal" :meal="settleMeal" ></SettleBadge>
+    <GoalModal v-model:show="goalShow" :initial="goal.calorieGoal" @save="goal.setGoal" ></GoalModal>
   </view>
 </template>
 
 <script setup lang="uts">
 import { ref } from 'vue'
+import { onPageScroll } from '@dcloudio/uni-app'
 
 /**
  * 演示数据（稿面静态值，store 重建后再接真实数据）。
@@ -144,6 +235,17 @@ try {
 } catch (e) {
   sbH = 0
 }
+
+// TabBar 渐显（scroll-fade，照官方示例「随滚动渐显的透明导航栏」）：0→60px 线性，
+// 按 0.05 量化＝整段渐显最多 20 次 setData，绝不逐帧写；三端生效。
+// 阈值取 60 而非示例的 100＝实测 Records 页最大滚动只有 70px，100 会让该页永远到不了满玻璃
+const tabFade = ref<number>(0)
+onPageScroll((e) => {
+  let q = e.scrollTop / 60
+  if (q > 1) q = 1
+  const fq = Math.round(q * 20) / 20
+  if (fq !== tabFade.value) tabFade.value = fq
+})
 
 // 右上加号位置：默认稿面位置；小程序端放到胶囊左侧防遮挡
 const fabRight = ref('14px')
@@ -165,9 +267,12 @@ import Tabbar from '../../components/Tabbar.uvue'
 import { computed } from 'vue'
 import AddFood from '../../components/AddFood.uvue'
 import type { AddPayload } from '../../components/AddFood.uvue'
-import FoodToast from '../../components/FoodToast.uvue'
+import FoodPicker from '../../components/FoodPicker.uvue'
+import SettleBadge from '../../components/SettleBadge.uvue'
+import GoalModal from '../../components/GoalModal.uvue'
 import { useFoodStore } from '../../stores/food'
 import { useGoalStore } from '../../stores/goal'
+import { getFoodById, computeEntry } from '../../stores/food'
 
 /**
  * 接 store 读数（今日种子精确还原 v2 行：早 420 / 午 560 / 晚 390，宏量 68/156/42）。
@@ -184,6 +289,7 @@ const macroF = computed(() => Math.round(food.totalFat))
 type MealRow = {
   img: string
   name: string
+  portion: string
   kcal: number
 }
 
@@ -202,12 +308,23 @@ const MEAL_ICONS: Record<string, string> = {
   dinner: '/static/home/meal_moon.png',
 }
 
-/** 添加弹窗＋Toast（确认不写库，只反馈） */
+/** 弹层⓪ 选择食物 → 弹窗① 添加（确认写库＋弹弹层③ 结算徽章）；Pill 铅笔 → GoalModal */
+const pickerShow = ref(false)
 const addShow = ref(false)
-const addFoodId = ref('p054')
-const toastShow = ref(false)
-const toastKcal = ref(0)
-const toastMeal = ref('')
+const addFoodId = ref('')
+const settleShow = ref(false)
+const settleKcal = ref(0)
+const settleAfter = ref(0)
+const settleMeal = ref('')
+const goalShow = ref(false)
+
+function openGoal(): void {
+  goalShow.value = true
+}
+
+function openRecords(): void {
+  uni.navigateTo({ url: '/pages/records/Records' })
+}
 
 const MEAL_LABELS: Record<string, string> = {
   breakfast: '早餐',
@@ -217,14 +334,28 @@ const MEAL_LABELS: Record<string, string> = {
 }
 
 function openAdd(): void {
+  pickerShow.value = true
+}
+
+function onPickFood(id: string): void {
+  addFoodId.value = id
   addShow.value = true
+}
+
+function onAddChange(): void {
+  addShow.value = false
+  pickerShow.value = true
 }
 
 function onAddConfirm(payload: AddPayload): void {
   addShow.value = false
-  toastKcal.value = payload.kcal
-  toastMeal.value = MEAL_LABELS[payload.meal] ?? ''
-  toastShow.value = true
+  // 落库（2026-09-21 Boss 拍板：确认即写真实记录，供首页/最近记录/单日详情消费）
+  const f = getFoodById(payload.foodId)
+  if (f != null) food.addEntry(computeEntry(f, payload.amount, payload.unit, payload.meal, payload.extraKcal))
+  settleKcal.value = payload.kcal
+  settleAfter.value = food.totalCal
+  settleMeal.value = MEAL_LABELS[payload.meal] ?? ''
+  settleShow.value = true
 }
 
 /** 晚餐按稿面默认收起（点展开钮可看明细） */
@@ -246,6 +377,7 @@ const meals = computed<Meal[]>(() =>
       rows: m.details.map((d) => ({
         img: '/static/icons/' + d.img,
         name: d.name,
+        portion: d.amountText,
         kcal: d.kcal,
       })),
     }))
@@ -254,22 +386,29 @@ const meals = computed<Meal[]>(() =>
 
 <style>
 .page {
-  flex: 1;
   background-color: #F2FAF5;
-  padding-bottom: 78px;
+  padding-bottom: 40px;
 }
-.header {
+/* 常驻标题块导航栏（#28 方案A：Boss 拍板三端固定顶部，替代 P1 hm-st-mask 两态遮罩）：
+   z45 全时段置顶，底色同页面底 #F2FAF5（非透明→无状态栏带穿透，也无需滚动阈值） */
+.hm-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 45;
+  background-color: #F2FAF5;
   padding-left: 17px;
   padding-right: 14px;
 }
-.title-row {
+.hm-nav-inner {
   position: relative;
+  margin-top: 6px;
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;
-  margin-top: 6px;
 }
-.title-left {
+.hm-nav-left {
   flex-direction: column;
 }
 .title {
@@ -287,7 +426,7 @@ const meals = computed<Meal[]>(() =>
   width: 40px;
   height: 40px;
   border-radius: 20px;
-  background-color: #2EB886;
+  background-image: linear-gradient(180deg, #5CD9A6, #2EB889);
   justify-content: center;
   align-items: center;
   box-shadow: 0 5px 13px rgba(31, 140, 97, 0.28);
@@ -295,6 +434,11 @@ const meals = computed<Meal[]>(() =>
 .fab-plus {
   font-size: 20px;
   color: #FFFFFF;
+}
+/* 顶栏文档流带（随内容滚走）：仅剩日期行，paddingTop 避开常驻栏整高 */
+.header {
+  padding-left: 17px;
+  padding-right: 14px;
 }
 .date-row {
   flex-direction: row;
@@ -313,7 +457,7 @@ const meals = computed<Meal[]>(() =>
 .hero {
   position: relative;
   height: 235px;
-  margin-top: 4px;
+  margin-top: -18px;
 }
 .hero-wave {
   position: absolute;
@@ -340,7 +484,17 @@ const meals = computed<Meal[]>(() =>
 .hero-text {
   position: absolute;
   left: 173px;
-  top: 56px;
+  bottom: 15px;
+}
+.remain-head {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 110px;
+}
+.remain-leaf {
+  width: 19px;
+  height: 18px;
 }
 .remain-label {
   font-size: 19px;
@@ -349,18 +503,20 @@ const meals = computed<Meal[]>(() =>
 }
 .remain-num-row {
   flex-direction: row;
-  align-items: baseline;
+  align-items: flex-end;
 }
 .remain-num {
   font-size: 52px;
   font-weight: bold;
   color: #0A5A40;
+  line-height: 58px;
 }
 .remain-unit {
   font-size: 19px;
   font-weight: bold;
   color: #0A5A40;
-  margin-left: 2px;
+  margin-left: 6px;
+  margin-bottom: 10px;
 }
 .consumed {
   font-size: 13px;
@@ -374,18 +530,23 @@ const meals = computed<Meal[]>(() =>
   border-radius: 18px;
   padding-left: 14px;
   padding-right: 12px;
-  height: 37px;
+  height: 36px;
   margin-top: 8px;
   box-shadow: 0 3px 10px rgba(26, 102, 77, 0.08);
+}
+.pill-cal {
+  width: 16px;
+  height: 14px;
 }
 .goal-pill-text {
   font-size: 12px;
   color: #0B7954;
+  margin-left: 12px;
 }
 .pill-edit {
-  width: 11px;
+  width: 13px;
   height: 13px;
-  margin-left: 6px;
+  margin-left: 10px;
 }
 .macro-card {
   flex-direction: row;
@@ -394,8 +555,8 @@ const meals = computed<Meal[]>(() =>
   margin-left: 14px;
   margin-right: 14px;
   margin-top: 6px;
-  padding-top: 12px;
-  padding-bottom: 12px;
+  padding-top: 19px;
+  padding-bottom: 14px;
   box-shadow: 0 5px 13px rgba(26, 102, 77, 0.07);
 }
 .macro-col {
@@ -404,24 +565,24 @@ const meals = computed<Meal[]>(() =>
 }
 .macro-icon {
   width: 27px;
-  height: 22px;
+  height: 21px;
 }
 .macro-num {
   font-size: 21px;
   font-weight: bold;
   color: #0A5A40;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 .macro-label {
   font-size: 12px;
   color: #73918B;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 .macro-div {
   width: 1px;
   background-color: #E3F0EA;
-  margin-top: 8px;
-  margin-bottom: 8px;
+  margin-top: 25px;
+  margin-bottom: 25px;
 }
 .meal-section-head {
   flex-direction: row;
@@ -429,7 +590,7 @@ const meals = computed<Meal[]>(() =>
   align-items: center;
   margin-left: 17px;
   margin-right: 14px;
-  margin-top: 16px;
+  margin-top: 19px;
 }
 .meal-section-title {
   font-size: 17px;
@@ -453,7 +614,7 @@ const meals = computed<Meal[]>(() =>
   flex-direction: row;
   margin-left: 17px;
   margin-right: 14px;
-  margin-top: 12px;
+  margin-top: 18px;
 }
 .meal-rail {
   width: 42px;
@@ -474,10 +635,10 @@ const meals = computed<Meal[]>(() =>
 }
 .rail-line {
   flex: 1;
-  width: 1px;
-  background-color: #DCEDE6;
+  width: 2px;
+  background-color: #BFE8D6;
   margin-top: 6px;
-  margin-bottom: -12px;
+  margin-bottom: -18px;
 }
 .meal-main {
   flex: 1;
@@ -516,7 +677,7 @@ const meals = computed<Meal[]>(() =>
 .meal-row {
   flex-direction: row;
   align-items: center;
-  height: 41px;
+  height: 40px;
 }
 .meal-thumb {
   width: 37px;
@@ -524,19 +685,26 @@ const meals = computed<Meal[]>(() =>
   border-radius: 8px;
 }
 .meal-row-name {
-  flex: 1;
   font-size: 13px;
   color: #14584A;
   margin-left: 8px;
+  margin-right: 10px;
+}
+.meal-row-portion {
+  flex: 1;
+  font-size: 12px;
+  color: #8FAEAF;
 }
 .meal-row-kcal {
+  width: 79px;
   font-size: 13px;
   color: #0B7954;
+  text-align: right;
 }
 .meal-row-div {
   height: 1px;
   background-color: #F0F5F2;
-  margin-left: 45px;
+  margin-right: 18px;
 }
 .meal-expand {
   flex-direction: row;

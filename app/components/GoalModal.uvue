@@ -1,97 +1,137 @@
 <!--
   [变更日志]
+  修改时间：2026-09-22
+  AI模型：Qoder (Claude)
+  修改内容：[弹层壳迁移到原生 page-container（同 FoodPicker 模式）：自研 .gm-mask 固定层＋点蒙层关闭＋z900 退役；
+    position=bottom 原生滑入滑出＋原生蒙层＋拦截系统返回；容器外观（560 高/白底/顶圆角 34）走 custom-style，
+    .gm-sheet 改 flex:1 只留内边距；MP 端 v-if 与 :show 双条件（条件编译内嵌标签）；
+    @clickoverlay 回传 update:show=false＋@afterleave 兜底同步]
+-->
+<!--
+  [变更日志]
   修改时间：2026-09-21
-  AI模型：Muse Spark
-  修改内容：[重写：设置每日热量目标弹窗（Dial 可拖拽+减/加按钮+Thumb+Track/Fill+Ticks+快捷选择+保存 emit）；
-    Dial canvas 2d arc+lineCap:round，Thumb 圆心=fill右端，拖拽交互；conic-gradient 降级；
-    快捷选择 chips；保存 emit 给父调 setGoal]
+  AI模型：Qoder (Claude)
+  修改内容：[Boss 拍板整卡重建：按 Pencil qnNST 量稿把「圆环表盘」改为「横向滑条卡」——
+    删除 canvas/conic 环、编造的 createCanvasContext().then() API、模板重复的 BigNum/unit 节点；
+    新结构＝handle 41×4＋头部(44 徽章 target 图标/标题17·700/副标12/32 白圆关闭钮)＋
+    Dial 卡 335×150 $bg r20(左右 44 白圆 −/＋钮、BigNum 46+unit 13.5 底部对齐、
+    Track 239×8 r4 $line＋渐变 Fill＋20 白 Thumb($mint 描边3)、5 档刻度 26..287 当前档加粗)＋
+    快速选择 335×64 $bg r18 内 5 槽 63×56(选中＝白底+阴影，非旧薄荷实底)＋
+    提示卡 335×76 $mintsoft r18(bulb+两行+chevron)＋保存钮 335×54 渐变 r27；
+    蒙层改黑 50%（旧绿 35%，与四弹窗统一）；拖拽＝touch clientX→Track 比例→吸附 100 步长；
+    图标 6 枚 Pencil @4x 导出入 static/goal/；对外 props/emits 不变（Settings 零改动，Home Pill 铅笔新增接入）]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[mp-weixin 组件样式平铺导致跨组件类名冲突（与 Home/AddFood/FoodPicker/FoodToast/CountStepper 的
+    .mask/.sheet/.handle/.chip/.chip-on/.title/.sub/.tick 互相污染），本组件冲突类统一加 gm- 前缀]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-21
+  AI模型：Qoder (Claude)
+  修改内容：[修复蒙层点击不关闭 bug：mask 加 @click close，sheet @click.stop 阻断冒泡]
 -->
 
 <template>
-  <view class="mask" v-if="show">
-    <view class="sheet">
-      <view class="handle"></view>
-      <view class="head-row">
-        <view class="head-text">
-          <text class="title">设置每日热量目标</text>
-          <text class="sub">根据你的目标，调整每日摄入热量</text>
+  <page-container <!-- #ifdef MP -->
+    v-if="show"
+    <!-- #endif -->
+    :show="show" position="bottom" :overlay="true" :duration="300"
+    custom-style="height:560px;background-color:#FFFFFF;border-top-left-radius:34px;border-top-right-radius:34px;"
+    @clickoverlay="onOverlayTap" @afterleave="onAfterLeave">
+    <view class="gm-sheet">
+      <view class="gm-handle"></view>
+
+      <view class="gm-head">
+        <view class="gm-badge">
+          <image class="gm-badge-ic" :src="'/static/goal/gm_target.png'" mode="aspectFit"></image>
         </view>
-        <view class="close-btn" @click="close">
-          <text class="close-glyph">×</text>
+        <view class="gm-headtxt">
+          <text class="gm-title">设置每日热量目标</text>
+          <text class="gm-sub">根据你的目标，调整每日摄入热量</text>
+        </view>
+        <view class="gm-closebtn" @click="close">
+          <image class="gm-close-ic" :src="'/static/goal/gm_close.png'" mode="aspectFit"></image>
         </view>
       </view>
-      <view class="dial">
-        <text class="bignum">{{ picked }}</text>
-        <text class="unit">kcal</text>
-        <view class="dial-track">
-          <canvas
-            v-if="isApp"
-            class="dial-canvas"
-            canvas-id="dial-ring"
-            type="2d"
-            :style="{ position: 'absolute', left: '0px', top: '0px', width: '264px', height: '264px' }"
-            @touchstart="onDialTouchStart"
-            @touchmove="onDialTouchMove"
-            @touchend="onDialTouchEnd"
-            @touchcancel="onDialTouchEnd"
-          ></canvas>
-          <view
-            v-else
-            class="dial-ring-conic"
-            :style="conicRingStyle"
-          ></view>
-          <view class="dial-thumb" :style="thumbStyle"></view>
-          <text class="bignum">{{ picked }}</text>
-          <text class="unit">kcal</text>
-          <view class="ticks">
-            <text class="tick" v-for="(tickItem, tickIdx) in ticks" :key="tickIdx">{{ tickItem }}</text>
-          </view>
+
+      <view class="gm-dial" id="gm-dial">
+        <view class="gm-stepbtn" :class="{ 'gm-stepbtn-off': picked <= MIN }" @click="step(-1)">
+          <image class="gm-step-ic" :src="'/static/goal/gm_minus.png'" mode="aspectFit"></image>
         </view>
-        <view class="controls">
-          <view class="control-btn" @click="step(-1)" :class="{ disabled: picked <= minVal }">
-            <text>−</text>
-          </view>
-          <view class="control-btn" @click="step(1)" :class="{ disabled: picked >= maxVal }">
-            <text>＋</text>
-          </view>
+        <view class="gm-stepbtn gm-stepbtn-r" :class="{ 'gm-stepbtn-off': picked >= MAX }" @click="step(1)">
+          <image class="gm-step-ic" :src="'/static/goal/gm_plus.png'" mode="aspectFit"></image>
         </view>
-        <text class="quick-label">快速选择</text>
-        <view class="quick-tray">
-          <view
-            class="chip"
-            :class="{ 'chip-on': chipItem === picked }"
-            v-for="(chipItem, chipIdx) in ticks"
-            :key="chipIdx"
-            @click="pick(chipItem)"
-          >
-            <text class="chip-num" :class="{ 'chip-num-on': chipItem === picked }">{{ chipItem }}</text>
-            <text class="chip-unit">kcal</text>
-          </view>
+        <view class="gm-numrow">
+          <text class="gm-bignum">{{ picked }}</text>
+          <text class="gm-unit">kcal</text>
         </view>
-        <view class="tip">
-          <text class="tip-title">合理的热量目标有助于健康减重</text>
-          <text class="tip-sub">建议根据你的性别、年龄、身高、体重和运动量进行设置</text>
+        <view
+          class="gm-dragzone"
+          @touchstart="onDragStart"
+          @touchmove="onDragMove"
+          @touchend="onDragEnd"
+          @touchcancel="onDragEnd"
+        >
+          <view class="gm-track"></view>
+          <view class="gm-fill" :style="{ width: fillW + 'px' }"></view>
+          <view class="gm-thumb" :style="{ left: (TRACK_X + fillW - 10) + 'px' }"></view>
         </view>
-        <view class="save-btn" @click="save">
-          <text class="save-text">保存设置</text>
+        <view class="gm-ticks">
+          <text
+            class="gm-tick"
+            :class="{ 'gm-tick-on': tickItem === picked }"
+            v-for="(tickItem, tickIdx) in TICKS"
+            :key="tickIdx"
+          >{{ tickItem }}</text>
         </view>
+      </view>
+
+      <text class="gm-qlabel">快速选择</text>
+      <view class="gm-qtray">
+        <view
+          class="gm-qslot"
+          :class="{ 'gm-qslot-on': quickItem === picked }"
+          v-for="(quickItem, quickIdx) in TICKS"
+          :key="quickIdx"
+          @click="pick(quickItem)"
+        >
+          <text class="gm-qnum" :class="{ 'gm-qnum-on': quickItem === picked }">{{ quickItem }}</text>
+          <text class="gm-qunit" :class="{ 'gm-qunit-on': quickItem === picked }">kcal</text>
+        </view>
+      </view>
+
+      <view class="gm-tip">
+        <image class="gm-tip-ic" :src="'/static/goal/gm_bulb.png'" mode="aspectFit"></image>
+        <view class="gm-tip-txt">
+          <text class="gm-tip-title">合理的热量目标有助于健康减重</text>
+          <text class="gm-tip-sub">建议根据你的性别、年龄、身高、体重和运动量进行设置</text>
+        </view>
+        <image class="gm-tip-arrow" :src="'/static/goal/gm_chev.png'" mode="aspectFit"></image>
+      </view>
+
+      <view class="gm-save" @click="save">
+        <text class="gm-save-txt">保存设置</text>
       </view>
     </view>
-  </view>
+  </page-container>
 </template>
 
 <script setup lang="uts">
 import { ref } from 'vue'
 import { computed } from 'vue'
 import { watch } from 'vue'
-import { onMounted } from 'vue'
-import { onUnmounted } from 'vue'
+import { nextTick } from 'vue'
+import { getCurrentInstance } from 'vue'
 
 /**
- * 设置每日热量目标（pencil 设置每日热量目标）。
- * Dial 可拖拽 + 减/加按钮 + Thumb + Track/Fill + Ticks + 快捷选择 chips；
- * Dial canvas 2d arc+lineCap:round，Thumb 圆心=fill右端，拖拽交互；
- * 快捷选择 chips；保存 emit 给父调 setGoal
+ * 设置每日热量目标（Pencil qnNST 整卡量取重建）。
+ * 横向滑条：Track x48 宽 239（值域 1200–2400 吸附 100），Fill/Thumb 由 ratio 驱动；
+ * 拖拽用 touch clientX − Dial 卡页面左偏移换算，Dial 左偏移在弹窗打开时查询一次，
+ * 查询失败仅禁用拖拽（−/＋钮与快速选择始终可用）。保存 emit 给父调 setGoal。
  */
 
 const props = defineProps<{
@@ -104,143 +144,105 @@ const emit = defineEmits<{
   (e: 'save', v: number): void
 }>()
 
-const MIN_VAL = 1200
-const MAX_VAL = 2400
+const MIN = 1200
+const MAX = 2400
 const STEP = 100
-const START_ANGLE = -Math.PI / 2
+/** 稿面 Dial 卡内：Track 左缘 x48、宽 239 */
+const TRACK_X = 48
+const TRACK_W = 239
+const TICKS = [1200, 1500, 1800, 2100, 2400]
 
-const ticks = [1200, 1500, 1800, 2100, 2400]
-const picked = ref(props.initial)
-const dialRatio = ref(0)
-const isDragging = ref(false)
-const dialCtx = ref<UniCanvasContext | null>(null)
+const picked = ref(clamp(props.initial))
+/** Dial 卡相对页面的左偏移；-1 = 未取到，拖拽禁用 */
+const dialLeft = ref(-1)
+const inst = getCurrentInstance()
 
-const minVal = MIN_VAL
-const maxVal = MAX_VAL
-const stepVal = STEP
+function clamp(v: number): number {
+  const snapped = Math.round((v - MIN) / STEP) * STEP + MIN
+  return Math.min(Math.max(snapped, MIN), MAX)
+}
 
-const isApp = computed(() => {
-  try {
-    const info = uni.getSystemInfoSync()
-    return info.platform === 'android' || info.platform === 'ios'
-  } catch (e) {
-    return false
-  }
-})
-
-const dialRatioComputed = computed(() => {
-  return (picked.value - minVal) / (maxVal - minVal)
-})
-
-const conicRingStyle = computed(() => {
-  const ratio = dialRatioComputed.value
-  return {
-    position: 'absolute',
-    left: '0px',
-    top: '0px',
-    width: '264px',
-    height: '264px',
-    borderRadius: '50%',
-    backgroundColor: '#F2FAF5',
-    backgroundImage: `conic-gradient(from -90deg, #1FBF8F 0turn, #1FBF8F ${ratio}turn, #E0E7E4 ${ratio}turn)`,
-  }
-})
-
-const thumbStyle = computed(() => {
-  const ratio = dialRatioComputed.value
-  const angle = START_ANGLE + ratio * Math.PI * 2
-  const cx = 132
-  const cy = 132
-  const radius = 132 - 8 // thumb center radius
-  const x = cx + radius * Math.cos(angle)
-  const y = cy + radius * Math.sin(angle)
-  return {
-    position: 'absolute',
-    left: `${Math.round(x - 16)}px`,
-    top: `${Math.round(y - 16)}px`,
-    width: '32px',
-    height: '32px',
-    borderRadius: '16px',
-    backgroundColor: '#FFFFFF',
-    boxShadow: '0 2px 8px rgba(10, 79, 61, 0.2)',
-    borderWidth: '2px',
-    borderColor: '#1FBF8F',
-    zIndex: 10,
-  }
-})
+const ratio = computed<number>(() => (picked.value - MIN) / (MAX - MIN))
+const fillW = computed<number>(() => Math.round(ratio.value * TRACK_W * 10) / 10)
 
 watch(
   () => props.show,
   (v) => {
-    if (v) picked.value = props.initial
+    if (v) {
+      picked.value = clamp(props.initial)
+      nextTick(() => {
+        try {
+          uni
+            .createSelectorQuery()
+            .in(inst != null ? inst.proxy : null)
+            .select('#gm-dial')
+            .boundingClientRect((rect) => {
+              if (rect != null) dialLeft.value = rect.left
+            })
+            .exec()
+        } catch (e) {
+          dialLeft.value = -1
+        }
+      })
+    }
   }
 )
 
-onMounted(() => {
-  if (isApp.value) {
-    uni.createCanvasContext('dial-ring', null)
-      .then(ctx => { dialCtx.value = ctx })
-      .catch(() => { /* ignore */ })
+function bump(): void {
+  try {
+    uni.vibrateShort()
+  } catch (e) {
+    // 无触觉设备忽略
   }
-})
-
-onUnmounted(() => {
-  // cleanup if needed
-})
-
-function drawDial(): void {
-  if (!isApp.value || !dialCtx.value) return
-  const ratio = dialRatioComputed.value
-  const cx = 132
-  const cy = 132
-  const radius = 132 - 8
-  const lineWidth = 16
-  const startAngle = START_ANGLE
-  const endAngle = startAngle + ratio * Math.PI * 2
-  
-  const ctx = dialCtx.value
-  ctx.clearRect(0, 0, 264, 264)
-  
-  // Background track
-  ctx.beginPath()
-  ctx.arc(cx, cy, radius, 0, Math.PI * 2)
-  ctx.lineWidth = lineWidth
-  ctx.strokeStyle = '#E0E7E4'
-  ctx.stroke()
-  
-  // Progress arc
-  ctx.beginPath()
-  ctx.arc(cx, cy, radius, startAngle, endAngle)
-  ctx.lineWidth = lineWidth
-  ctx.lineCap = 'round'
-  ctx.strokeStyle = '#1FBF8F'
-  ctx.stroke()
 }
 
 function pick(v: number): void {
-  if (v === picked.value) return
-  picked.value = Math.min(Math.max(v, MIN_VAL), MAX_VAL)
-  if (isApp.value) drawDial()
-  try {
-    uni.vibrateShort()
-  } catch (e) {
-    // 无触觉设备忽略
-  }
+  const next = clamp(v)
+  if (next === picked.value) return
+  picked.value = next
+  bump()
 }
 
-function step(d: number): void {
-  const next = picked.value + d * STEP
-  if (next < MIN_VAL || next > MAX_VAL) return
+function step(dir: number): void {
+  const next = picked.value + dir * STEP
+  if (next < MIN || next > MAX) return
   picked.value = next
-  if (isApp.value) drawDial()
-  try {
-    uni.vibrateShort()
-  } catch (e) {
-    // 无触觉设备忽略
-  }
+  bump()
+}
+
+function onDragStart(e: any): void {
+  updateFromTouch(e)
+}
+
+function onDragMove(e: any): void {
+  updateFromTouch(e)
+}
+
+function onDragEnd(): void {
+  bump()
+}
+
+function updateFromTouch(e: any): void {
+  if (dialLeft.value < 0) return
+  const list = e.touches.length > 0 ? e.touches : e.changedTouches
+  if (list.length === 0) return
+  const x = list[0].clientX - dialLeft.value - TRACK_X
+  const r = Math.min(Math.max(x / TRACK_W, 0), 1)
+  const next = clamp(MIN + r * (MAX - MIN))
+  if (next !== picked.value) picked.value = next
 }
 
 function close(): void {
+  emit('update:show', false)
+}
+
+/** 原生蒙层不自动关闭，点按时回传 show=false 触发离场动画 */
+function onOverlayTap(): void {
+  emit('update:show', false)
+}
+
+/** page-container 离场结束（含系统返回拦截），兜底同步父级关闭态 */
+function onAfterLeave(): void {
   emit('update:show', false)
 }
 
@@ -248,263 +250,293 @@ function save(): void {
   emit('save', picked.value)
   emit('update:show', false)
 }
-
-function onDialTouchStart(e: any): void {
-  isDragging.value = true
-  updateDialFromTouch(e)
-}
-
-function onDialTouchMove(e: any): void {
-  if (!isDragging.value) return
-  updateDialFromTouch(e)
-}
-
-function onDialTouchEnd(): void {
-  isDragging.value = false
-}
-
-function updateDialFromTouch(e: any): void {
-  const touches = e.touches || e.changedTouches
-  if (!touches || touches.length === 0) return
-  
-  const touch = touches[0]
-  // In uni-app, touch coordinates are in clientX/clientY
-  const x = touch.clientX || touch.x || 0
-  const y = touch.clientY || touch.y || 0
-  
-  // Calculate angle from center
-  const cx = 132
-  const cy = 132
-  const dx = x - cx
-  const dy = y - cy
-  
-  let angle = Math.atan2(dy, dx)
-  if (angle < START_ANGLE) angle += Math.PI * 2
-  if (angle > START_ANGLE + Math.PI * 2) angle = START_ANGLE + Math.PI * 2
-  
-  let ratio = (angle - START_ANGLE) / (Math.PI * 2)
-  ratio = Math.min(Math.max(ratio, 0), 1)
-  
-  const newVal = Math.round(MIN_VAL + ratio * (MAX_VAL - MIN_VAL))
-  const clamped = Math.min(Math.max(newVal, MIN_VAL), MAX_VAL)
-  
-  // Snap to step
-  const stepped = Math.round((clamped - MIN_VAL) / STEP) * STEP + MIN_VAL
-  const finalVal = Math.min(Math.max(stepped, MIN_VAL), MAX_VAL)
-  
-  if (finalVal !== picked.value) {
-    picked.value = finalVal
-    if (isApp.value) drawDial()
-    try {
-      uni.vibrateShort()
-    } catch (e) {}
-  }
-}
 </script>
 
 <style>
-.mask {
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background-color: rgba(10, 79, 61, 0.35);
-  justify-content: flex-end;
+/* 稿面 D3308：高 560 顶部圆角 34（容器外观已迁 page-container custom-style） */
+.gm-sheet {
+  flex: 1;
+  padding: 12px 20px 24px 20px;
 }
-.sheet {
-  background-color: #FFFFFF;
-  border-top-left-radius: 34px;
-  border-top-right-radius: 34px;
-  padding: 12px 18px 24px 18px;
-}
-.handle {
-  width: 44px;
-  height: 5px;
-  border-radius: 3px;
+/* 稿面 EYi92：41×4 $line */
+.gm-handle {
+  width: 41px;
+  height: 4px;
+  border-radius: 2px;
   background-color: #DCEDE6;
   align-self: center;
+  flex-shrink: 0;
 }
-.head-row {
+/* 头部：徽章 y34（handle 底 16 + 18） */
+.gm-head {
   flex-direction: row;
   align-items: flex-start;
-  margin-top: 12px;
+  margin-top: 18px;
+  flex-shrink: 0;
 }
-.head-text {
-  flex: 1;
-}
-.title {
-  font-size: 17px;
-  font-weight: bold;
-  color: #0A4F3D;
-}
-.sub {
-  font-size: 12px;
-  color: #73918B;
-  margin-top: 4px;
-}
-.close-btn {
-  width: 28px;
-  height: 28px;
+/* 稿面 qhjRQ：44×44 $mintsoft r14，target 图标 22 居中 */
+.gm-badge {
+  width: 44px;
+  height: 44px;
   border-radius: 14px;
-  background-color: #F2FAF5;
+  background-color: #EAF9F3;
   justify-content: center;
   align-items: center;
+  flex-shrink: 0;
 }
-.close-glyph {
-  font-size: 18px;
-  color: #73918B;
+.gm-badge-ic {
+  width: 22px;
+  height: 22px;
 }
-.dial {
-  align-items: center;
-  margin-top: 10px;
-  position: relative;
+.gm-headtxt {
+  flex: 1;
+  margin-left: 12px;
+  margin-top: 2px;
 }
-.dial-track {
-  position: relative;
-  width: 264px;
-  height: 264px;
+/* 稿面 q0iCfa：17/700 $ink */
+.gm-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0A4F3D;
 }
-.dial-canvas {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 264px;
-  height: 264px;
+/* 稿面 e2vUw：12 $muted */
+.gm-sub {
+  font-size: 12px;
+  color: rgba(15, 79, 61, 0.6);
+  margin-top: 5px;
 }
-.dial-ring-conic {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 264px;
-  height: 264px;
-  border-radius: 50%;
-}
-.dial-thumb {
-  position: absolute;
+/* 稿面 cPaDA：32 白圆 r16 阴影 #0A4F3D24，x 图标 16 */
+.gm-closebtn {
   width: 32px;
   height: 32px;
   border-radius: 16px;
   background-color: #FFFFFF;
-  box-shadow: 0 2px 8px rgba(10, 79, 61, 0.2);
-  border-width: 2px;
-  border-color: #1FBF8F;
-}
-.bignum {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 60px;
-  text-align: center;
-  font-size: 46px;
-  font-weight: bold;
-  color: #0A4F3D;
-  z-index: 5;
-}
-.unit {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 116px;
-  text-align: center;
-  font-size: 13px;
-  color: #73918B;
-  z-index: 5;
-}
-.ticks {
-  position: absolute;
-  left: 10px;
-  right: 10px;
-  top: 150px;
-  flex-direction: row;
-  justify-content: space-between;
-  z-index: 5;
-}
-.tick {
-  font-size: 11px;
-  color: #8FAEAF;
-}
-.controls {
-  flex-direction: row;
   justify-content: center;
-  gap: 24px;
-  margin-top: 20px;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(10, 79, 61, 0.14);
+  flex-shrink: 0;
 }
-.control-btn {
+.gm-close-ic {
+  width: 16px;
+  height: 16px;
+}
+/* 稿面 V5LOp：335×150 $bg r20（页宽 375−左右 20＝自然满宽） */
+.gm-dial {
+  position: relative;
+  height: 150px;
+  margin-top: 18px;
+  background-color: #F2FAF5;
+  border-radius: 20px;
+  overflow: visible;
+  flex-shrink: 0;
+}
+/* 稿面 uI0Rz/E72bQ：44×44 白圆 r22，x44 / x287（卡内），y14 */
+.gm-stepbtn {
+  position: absolute;
+  left: 44px;
+  top: 14px;
   width: 44px;
   height: 44px;
   border-radius: 22px;
   background-color: #FFFFFF;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(10, 79, 61, 0.1);
-  font-size: 20px;
-  color: #0A7A5C;
+  box-shadow: 0 2px 6px rgba(10, 79, 61, 0.1);
 }
-.control-btn.disabled {
-  color: #A9BAB3;
-  box-shadow: none;
+.gm-stepbtn-r {
+  left: 243px;
 }
-.quick-label {
-  font-size: 13px;
+.gm-step-ic {
+  width: 20px;
+  height: 20px;
+}
+.gm-stepbtn-off {
+  opacity: 0.4;
+}
+/* 稿面 DUI7r：整卡宽居中，BigNum 46/700 与 unit 13.5/600 底部对齐，gap6；
+   左右让开 −/＋钮（各占 44..88 / 243..287） */
+.gm-numrow {
+  position: absolute;
+  left: 88px;
+  right: 88px;
+  top: 16px;
+  height: 56px;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-end;
+}
+.gm-bignum {
+  font-size: 46px;
+  font-weight: 700;
   color: #0A4F3D;
-  margin-top: 14px;
+  line-height: 56px;
 }
-.quick-tray {
+.gm-unit {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: rgba(15, 79, 61, 0.6);
+  margin-left: 6px;
+  margin-bottom: 6px;
+}
+/* 拖拽热区：覆盖 Track 上下留白，宽整卡 */
+.gm-dragzone {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 82px;
+  height: 36px;
+}
+/* 稿面 BvkEj：x48 y96 239×8 r4 $line */
+.gm-track {
+  position: absolute;
+  left: 48px;
+  top: 14px;
+  width: 239px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: #DCEDE6;
+}
+/* 稿面 RFYeq：渐变 #7DEBC7→#1FBF8F，宽=ratio*239 */
+.gm-fill {
+  position: absolute;
+  left: 48px;
+  top: 14px;
+  height: 8px;
+  border-radius: 4px;
+  background-image: linear-gradient(90deg, #7DEBC7, #1FBF8F);
+}
+/* 稿面 WKknG：20 白圆 $mint 描边 3，圆心=Fill 右端 */
+.gm-thumb {
+  position: absolute;
+  top: 8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background-color: #FFFFFF;
+  border-width: 3px;
+  border-style: solid;
+  border-color: #1FBF8F;
+}
+/* 稿面 sAGAr：刻度行 y112（卡内），5 标签 w44 中心 48..287 → 容器 left/right 26 space-between */
+.gm-ticks {
+  position: absolute;
+  left: 26px;
+  right: 26px;
+  top: 112px;
+  height: 16px;
   flex-direction: row;
   justify-content: space-between;
-  margin-top: 8px;
 }
-.chip {
+.gm-tick {
+  width: 44px;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(15, 79, 61, 0.34);
+}
+.gm-tick-on {
+  font-weight: 700;
+  color: #0F4F3D;
+}
+/* 稿面 PEczn：13.5/700 $ink，y268 */
+.gm-qlabel {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0A4F3D;
+  margin-top: 22px;
+  flex-shrink: 0;
+}
+/* 稿面 Oq3w4：335×64 $bg r18，槽 63×56 y4 */
+.gm-qtray {
+  height: 64px;
+  margin-top: 6px;
+  background-color: #F2FAF5;
+  border-radius: 18px;
+  flex-direction: row;
+  justify-content: space-between;
   align-items: center;
-  background-color: #F2FAF5;
+  padding-left: 3px;
+  padding-right: 3px;
+  flex-shrink: 0;
+}
+.gm-qslot {
+  width: 63px;
+  height: 56px;
   border-radius: 14px;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  min-width: 58px;
-}
-.chip-on {
-  background-color: #1FBF8F;
-}
-.chip-num {
-  font-size: 15px;
-  font-weight: bold;
-  color: #0A4F3D;
-}
-.chip-num-on {
-  color: #FFFFFF;
-}
-.chip-unit {
-  font-size: 10px;
-  color: #8FAEAF;
-  margin-top: 2px;
-}
-.tip {
-  background-color: #F2FAF5;
-  border-radius: 14px;
-  padding: 12px 14px;
-  margin-top: 14px;
-}
-.tip-title {
-  font-size: 13px;
-  color: #0A4F3D;
-}
-.tip-sub {
-  font-size: 11px;
-  color: #73918B;
-  margin-top: 4px;
-}
-.save-btn {
-  height: 48px;
-  border-radius: 24px;
-  background-color: #1FBF8F;
   justify-content: center;
   align-items: center;
-  margin-top: 14px;
-  box-shadow: 0 8px 18px rgba(31, 191, 143, 0.34);
 }
-.save-text {
+/* 稿面 XnSqJ：选中＝白底＋阴影 #0A4F3D2E */
+.gm-qslot-on {
+  background-color: #FFFFFF;
+  box-shadow: 0 3px 8px rgba(10, 79, 61, 0.18);
+}
+.gm-qnum {
   font-size: 15px;
+  font-weight: 500;
+  color: rgba(15, 79, 61, 0.6);
+}
+.gm-qnum-on {
+  font-weight: 700;
+  color: #0A4F3D;
+}
+.gm-qunit {
+  font-size: 11px;
+  color: rgba(15, 79, 61, 0.34);
+  margin-top: 2px;
+}
+.gm-qunit-on {
+  color: #0F4F3D;
+}
+/* 稿面 PvWdr：335×76 $mintsoft r18 */
+.gm-tip {
+  height: 76px;
+  margin-top: 18px;
+  background-color: #EAF9F3;
+  border-radius: 18px;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 16px;
+  padding-right: 16px;
+  flex-shrink: 0;
+}
+.gm-tip-ic {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.gm-tip-txt {
+  flex: 1;
+  margin-left: 12px;
+}
+.gm-tip-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0A4F3D;
+}
+.gm-tip-sub {
+  font-size: 12px;
+  color: rgba(15, 79, 61, 0.6);
+  margin-top: 4px;
+}
+.gm-tip-arrow {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+/* 稿面 PBvp9：335×54 渐变 r27 阴影 #1FBF8F55 y6 b16 */
+.gm-save {
+  height: 54px;
+  margin-top: 34px;
+  border-radius: 27px;
+  background-image: linear-gradient(90deg, #7DEBC7, #1FBF8F);
+  box-shadow: 0 6px 16px rgba(31, 191, 143, 0.33);
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+.gm-save-txt {
+  font-size: 15.5px;
+  font-weight: 700;
   color: #FFFFFF;
 }
 </style>
