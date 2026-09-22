@@ -1,5 +1,35 @@
 <!--
   [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[接入方案A单流程架构：点击添加食物拉起整合版 FoodPicker，移除 addShow/addFoodId/onPickFood/onAddChange 等冗余状态机，消除双弹窗 1500ms 延迟]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[1. 修复 Android 端顶部渐变异常：.dd-header 补充 background-color: #39AD95 兜底实色；2. 遵循 uni-app x 原生规范，将 font-weight: 500/600 统一为 bold；3. openPicker 与 onAddConfirm 时清空 addFoodId，防止二次打开残留旧选中]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[营养分布卡（蛋白质、碳水、脂肪）图标同步更新为矢量 SVG 素材引用（macro_protein.svg / macro_carb.svg / macro_fat.svg），并微调 .dd-mg 为 20x20 正方比例]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[按指令清除长按删除单条饮食记录时的 vibrateShort 触觉震动，避免微信模拟器窗口剧烈抖动，待后续按需开启]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[将 getCalorieStatus 改为从 goal store 直接引入，消除独立 utils 模块在小程序运行期 module is not defined 导致页面崩溃的严重Bug]
+-->
+<!--
+  [变更日志]
   修改时间：2026-09-22
   AI模型：Qoder (Claude)
   修改内容：[#28 常驻导航栏（Boss 拍板三端固定顶部）：删除 P1 两件套（dd-st-mask 顶遮罩＋dd-fx-back 常驻返回钮），
@@ -64,11 +94,11 @@
         <text class="dd-ring-label">已摄入</text>
       </view>
       <view class="dd-bignum-row">
-        <text class="dd-bignum">{{ dayTotal }}</text>
-        <text class="dd-bigunit">kcal</text>
+        <text class="dd-bignum" :class="calStatus.textClass">{{ dayTotal }}</text>
+        <text class="dd-bigunit" :class="calStatus.textClass">kcal</text>
       </view>
       <view class="dd-track">
-        <view class="dd-fill" :style="{ width: fillW + 'px' }"></view>
+        <view class="dd-fill" :class="calStatus.bgClass" :style="{ width: fillW + 'px' }"></view>
       </view>
       <view class="dd-prog-foot">
         <view class="dd-prog-left">
@@ -86,7 +116,7 @@
         <text class="dd-stat-title">营养分布</text>
         <view class="dd-stat-row">
           <view class="dd-stat-col">
-            <image class="dd-mg" :src="'/static/home/macro_protein.png'" mode="aspectFit"></image>
+            <image class="dd-mg" :src="'/static/home/macro_protein.svg'" mode="aspectFit"></image>
             <view class="dd-stat-txt">
               <text class="dd-stat-num">{{ dayProtein }}g</text>
               <text class="dd-stat-lbl">蛋白质</text>
@@ -94,7 +124,7 @@
           </view>
           <view class="dd-stat-div"></view>
           <view class="dd-stat-col">
-            <image class="dd-mg" :src="'/static/home/macro_carb.png'" mode="aspectFit"></image>
+            <image class="dd-mg" :src="'/static/home/macro_carb.svg'" mode="aspectFit"></image>
             <view class="dd-stat-txt">
               <text class="dd-stat-num">{{ dayCarb }}g</text>
               <text class="dd-stat-lbl">碳水</text>
@@ -102,7 +132,7 @@
           </view>
           <view class="dd-stat-div"></view>
           <view class="dd-stat-col">
-            <image class="dd-mg" :src="'/static/home/macro_fat.png'" mode="aspectFit"></image>
+            <image class="dd-mg" :src="'/static/home/macro_fat.svg'" mode="aspectFit"></image>
             <view class="dd-stat-txt">
               <text class="dd-stat-num">{{ dayFat }}g</text>
               <text class="dd-stat-lbl">脂肪</text>
@@ -159,8 +189,7 @@
 
     <view class="dd-bottom-space"></view>
 
-    <FoodPicker v-model:show="pickerShow" :selected-id="addFoodId" @select="onPickFood" ></FoodPicker>
-    <AddFood v-model:show="addShow" :food-id="addFoodId" @confirm="onAddConfirm" @change="onAddChange" ></AddFood>
+    <FoodPicker v-model:show="pickerShow" @confirm="onAddConfirm" ></FoodPicker>
     <SettleBadge v-model:show="settleShow" :kcal="settleKcal" :after="settleAfter" :goal="goal.calorieGoal" :meal="settleMeal" ></SettleBadge>
 
     <!-- 常驻导航栏（#28：替代 P1 遮罩＋fx-back 两件套）：滚动跨阈后整栏出现＝末色底＋返回箭＋日期标题，三端生效 -->
@@ -178,10 +207,9 @@ import { ref, computed } from 'vue'
 import { onPageScroll } from '@dcloudio/uni-app'
 import { useFoodStore, dayKeyOf, dayRange, amountText, getFoodById, computeEntry, MEAL_KEYS, MEAL_LABELS } from '../../stores/food'
 import type { FoodEntry } from '../../stores/food'
-import { useGoalStore } from '../../stores/goal'
-import AddFood from '../../components/AddFood.uvue'
-import type { AddPayload } from '../../components/AddFood.uvue'
+import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import FoodPicker from '../../components/FoodPicker.uvue'
+import type { AddPayload } from '../../components/FoodPicker.uvue'
 import SettleBadge from '../../components/SettleBadge.uvue'
 
 /**
@@ -235,11 +263,13 @@ const ringPct = computed<number>(() => {
   return Math.round(dayTotal.value / goalVal.value * 100)
 })
 
+const calStatus = computed(() => getCalorieStatus(dayTotal.value, goalVal.value))
+
 /** 进度环：MP 端 conic-gradient（SettleBadge 同款通路），App 端 canvas 未接（真机待验，见 DayDetail.md） */
 const ringStyle = computed<any>(() => {
   const turn = (dayTotal.value > goalVal.value ? 1 : dayTotal.value / (goalVal.value > 0 ? goalVal.value : 1))
   return {
-    backgroundImage: 'conic-gradient(from -90deg, #3AC39A 0turn, #009B7A ' + (turn * 0.9999).toString() + 'turn, #E5F1F0 ' + (turn * 0.9999).toString() + 'turn)',
+    backgroundImage: `conic-gradient(from -90deg, ${calStatus.value.hex} 0turn, ${calStatus.value.hex} ${(turn * 0.9999).toString()}turn, #E5F1F0 ${(turn * 0.9999).toString()}turn)`,
   }
 })
 
@@ -313,16 +343,13 @@ function confirmDelete(row: Row): void {
     itemList: ['删除这条记录'],
     success: () => {
       food.removeEntry(row.id)
-      try { uni.vibrateShort() } catch (e) {}
     },
     fail: () => {},
   })
 }
 
-// ===== 添加食物链路（复用 Home 同款三弹窗） =====
+// ===== 添加食物链路（方案 A 单流程） =====
 const pickerShow = ref(false)
-const addShow = ref(false)
-const addFoodId = ref('')
 const settleShow = ref(false)
 const settleKcal = ref(0)
 const settleAfter = ref(0)
@@ -332,18 +359,7 @@ function openPicker(): void {
   pickerShow.value = true
 }
 
-function onPickFood(id: string): void {
-  addFoodId.value = id
-  addShow.value = true
-}
-
-function onAddChange(): void {
-  addShow.value = false
-  pickerShow.value = true
-}
-
 function onAddConfirm(payload: AddPayload): void {
-  addShow.value = false
   const f = getFoodById(payload.foodId)
   if (f != null) {
     food.addEntry(computeEntry(f, payload.amount, payload.unit, payload.meal, payload.extraKcal))
@@ -367,6 +383,7 @@ function goBack(): void {
 
 /* ===== Header（375×152 渐变，Card 上叠 56） ===== */
 .dd-header {
+  background-color: #39AD95;
   background-image: linear-gradient(180deg, #5CC4AC, #39AD95);
 }
 .dd-nav {
@@ -423,7 +440,7 @@ function goBack(): void {
 }
 .dd-overtxt {
   font-size: 8.3px;
-  font-weight: 500;
+  font-weight: bold;
   color: #FA543A;
 }
 .dd-ring {
@@ -504,7 +521,7 @@ function goBack(): void {
 }
 .dd-plabel {
   font-size: 9.5px;
-  font-weight: 500;
+  font-weight: bold;
   color: #4A6171;
 }
 .dd-pnum {
@@ -545,8 +562,8 @@ function goBack(): void {
   align-items: center;
 }
 .dd-mg {
-  width: 22px;
-  height: 17px;
+  width: 20px;
+  height: 20px;
   margin-right: 6px;
 }
 .dd-stat-txt {
@@ -559,7 +576,7 @@ function goBack(): void {
 }
 .dd-stat-lbl {
   font-size: 8.6px;
-  font-weight: 500;
+  font-weight: bold;
   color: #5A7380;
   margin-top: 1px;
 }
@@ -599,7 +616,7 @@ function goBack(): void {
 }
 .dd-add-txt {
   font-size: 11.5px;
-  font-weight: 600;
+  font-weight: bold;
   color: #0A7A5C;
   margin-left: 3px;
 }
@@ -653,7 +670,7 @@ function goBack(): void {
 }
 .dd-meal-unit {
   font-size: 9.5px;
-  font-weight: 600;
+  font-weight: bold;
   color: #8FAEAF;
   margin-left: 3px;
   margin-bottom: 2px;
@@ -672,7 +689,7 @@ function goBack(): void {
 }
 .dd-row-name {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: bold;
   color: #0F5B44;
   margin-left: 10px;
 }
@@ -684,7 +701,7 @@ function goBack(): void {
 }
 .dd-row-kcal {
   font-size: 12.5px;
-  font-weight: 600;
+  font-weight: bold;
   color: #12A87B;
   margin-right: 14px;
 }

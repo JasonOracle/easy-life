@@ -2,6 +2,24 @@
 
 <!--
 [变更日志]
+修改时间：2026-09-23
+AI模型：OpenCode / Gemini 底层
+修改内容：[个人中心三项热量卡（目标热量、已摄入、还能吃）图标全面升级引用高保真矢量 SVG 素材（stat_target.svg / stat_consumed.svg / stat_remain.svg），调整合适比例规整展示]
+-->
+<!--
+[变更日志]
+修改时间：2026-09-22
+AI模型：Gemini 系列
+修改内容：[解决 uni-app x 编译器将 BannerState 泛型编译为运行时 new BannerState 导致 setup 崩溃白屏的致命Bug，改用纯对象推导；修正 calStatus.color 取值]
+-->
+<!--
+[变更日志]
+修改时间：2026-09-22
+AI模型：Gemini 系列
+修改内容：[今日热量卡与达标Banner业务状态机深度重构：①修复 100% 满额时 conic-gradient 解析异常导致外圆环隐身消失的问题，改用实色与渐变自适应兼容；②解决进度条写死 #23B391 导致全局超标珊瑚色失效的问题；③修复「还能吃」数值超标时显示负数的Bug，超标归零并切换标签；④重构「今日达标/不达标」Banner 状态机：当日吃满 2 餐及以上且未超标显示「今日已达标（绿）」，超额转为「今日不达标（橙色 + 请减少进食，加油啊）」]
+-->
+<!--
+[变更日志]
 修改时间：2026-09-22
 AI模型：Gemini 系列
 修改内容：[实施方案A：页底预留高度升级为动态安全区全避让。
@@ -35,7 +53,7 @@ AI模型：Qoder (Claude)
 
 ## 依赖
 
-- user／goal／food store；`app/static/profile/*.png`（12 张设计稿导出）＋ Tab 图复用 `app/static/home/`
+- user／goal／food store；`app/static/profile/*.png` ＋ 三项统计卡图标 `stat_target.svg / stat_consumed.svg / stat_remain.svg` ＋ Tab 图复用 `app/static/home/`
 
 ## 设计决策
 - **滚动防穿透（2026-09-22 P1，Boss 拍板 B-lite）**：页末内联 fixed 遮罩 `.pf-st-mask`（`v-if="scrolled"`、高 `sbH`、色随暗黑 `dk ? '#162924' : '#EEF7F4'`、z40），`onPageScroll` 两态 `scrollTop>89`（=头图高−sbH 穿透点；该监听已去条件编译、三端生效，与仍在 `MP-WEIXIN` 块内的 onShow 分离）（2026-09-22 校准）；**不做组件**（StickyTop 实测宿主幻影副本＋遮罩不渲染，已删）

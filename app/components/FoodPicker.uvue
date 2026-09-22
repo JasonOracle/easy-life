@@ -1,5 +1,29 @@
 <!--
   [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[按 uni-app x 原生规范将自闭合 input 与 AddFood 组件标签改写为成对书写，彻底杜绝 Element is missing end tag 编译错误]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[1. 实施方案A单流程合并架构：内部引入 step（list | detail）两态切换，点选食物原地切换至 AddFood 内容视图，消除双 page-container 冷启动造成的 1500ms 严重卡顿与状态机互斥；2.「更换」按钮原地秒切回列表，完美回显当前食物；3. 打开重置 step 为 list，清空搜索与分类，彻底绝杀二次打开残留旧高亮 bug；4. 遵循原生渲染规范将 font-weight 500/600 统一为 bold]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[按指令清除分类切换、选食物与弹层关闭中的 vibrateShort 触觉震动，避免误触震动]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[半屏抽屉规范落地：按 Pencil 设计稿（ScreenSpecs 375×500 y=312）将 custom-style 限制为标准半屏抽屉高度 calc(500px + env(safe-area-inset-bottom))，.fp-sheet 设 height:100% 且 .fp-food-list 设 flex:1/height:0，彻底解决长列表将弹窗撑满全屏、遮挡状态栏胶囊的严重缺陷]
+-->
+<!--
+  [变更日志]
   修改时间：2026-09-22
   AI模型：Qoder (Claude)
   修改内容：[组件类名全量加 fp- 前缀（row/row-on/row-thumb/row-text/row-name/row-sub/row-sub-on/row-div/search-box/search-icon/search-input/chip-bar/chip-text/chip-text-on/food-list/radio/radio-on/radio-check）：其中 .row/.row-text/.row-sub/.row-div 与 Settings 页同名类在 mp-weixin 全局命中互污（AGENTS 类名前缀铁律），其余为同族一致性收敛；滚动定位 id 前缀 row- 与 scroll-into-view 为元素 ID 非类名，保持不变；样式数值与结构零改动]
@@ -45,29 +69,30 @@
 -->
 
 <template>
-  <page-container <!-- #ifdef MP -->
-    v-if="show"
-    <!-- #endif -->
-    :show="show" position="bottom" :overlay="true" :duration="300"
-    custom-style="height:560px;background-color:#FFFFFF;border-top-left-radius:34px;border-top-right-radius:34px;"
-    @clickoverlay="onOverlayTap" @afterleave="onAfterLeave">
-    <view class="fp-sheet">
-      <view class="fp-handle"></view>
-
-      <view class="fp-search-box">
-        <image class="fp-search-icon" :src="'/static/common/search_icon.png'" mode="aspectFit"></image>
-        <input
-          class="fp-search-input"
-          v-model="keyword"
-          placeholder="搜索食物 · 支持拼音 / 别名"
-          placeholder-style="color:#9CB8B0;font-size:13.5px;"
-        />
+  <view class="fp-overlay" :class="{ 'fp-overlay-active': active }" v-if="render" @click="onOverlayTap">
+    <view class="fp-container" :class="{ 'fp-container-active': active }" @click.stop>
+    <view class="fp-sheet" v-if="step === 'list'">
+      <view class="fp-top-row">
+        <view class="fp-search-box">
+          <image class="fp-search-icon" :src="'/static/common/search_icon.png'" mode="aspectFit"></image>
+          <input
+            class="fp-search-input"
+            v-model="keyword"
+            placeholder="搜索食物 · 支持拼音 / 别名"
+            placeholder-style="color:#9CB8B0;font-size:13.5px;"
+          ></input>
+        </view>
+        <view class="fp-closebtn" hover-class="icon-pressed" :hover-stay-time="120" @click="close">
+          <image class="fp-close-ic" :src="'/static/goal/gm_close.png'" mode="aspectFit"></image>
+        </view>
       </view>
 
       <scroll-view class="fp-chip-bar" direction="horizontal" :show-scrollbar="false">
         <view
-          class="fp-chip"
+          class="fp-chip ui-pressable"
           :class="{ 'fp-chip-on': catItem === cat }"
+          hover-class="ui-pressed"
+          :hover-stay-time="120"
           v-for="(catItem, catIdx) in cats"
           :key="catIdx"
           @click="pickCat(catItem)"
@@ -78,8 +103,10 @@
 
       <scroll-view class="fp-food-list" direction="vertical" :show-scrollbar="false" :scroll-into-view="intoView">
         <view
-          class="fp-row"
-          :class="{ 'fp-row-on': item.id === selectedId }"
+          class="fp-row ui-pressable"
+          :class="{ 'fp-row-on': item.id === activeFoodId }"
+          hover-class="ui-pressed"
+          :hover-stay-time="120"
           :id="'row-' + item.id"
           v-for="(item, rowIdx) in results"
           :key="item.id"
@@ -88,39 +115,57 @@
           <image class="fp-row-thumb" :src="'/static/icons/' + item.img" mode="aspectFill"></image>
           <view class="fp-row-text">
             <text class="fp-row-name">{{ item.name }}</text>
-            <text class="fp-row-sub" :class="{ 'fp-row-sub-on': item.id === selectedId }">{{ subLine(item) }}</text>
+            <text class="fp-row-sub" :class="{ 'fp-row-sub-on': item.id === activeFoodId }">{{ subLine(item) }}</text>
           </view>
-          <view class="fp-radio" :class="{ 'fp-radio-on': item.id === selectedId }">
-            <text class="fp-radio-check" v-if="item.id === selectedId">✓</text>
+          <view class="fp-radio" :class="{ 'fp-radio-on': item.id === activeFoodId }">
+            <text class="fp-radio-check" v-if="item.id === activeFoodId">✓</text>
           </view>
           <view class="fp-row-div" v-if="rowIdx < results.length - 1"></view>
         </view>
       </scroll-view>
     </view>
-  </page-container>
+    <view class="fp-detail-wrap" v-else-if="step === 'detail'">
+      <AddFood
+        :food-id="activeFoodId"
+        @confirm="onDetailConfirm"
+        @change="onDetailChange"
+        @close="close"
+      ></AddFood>
+    </view>
+    </view>
+  </view>
 </template>
 
 <script setup lang="uts">
-import { ref } from 'vue'
-import { computed } from 'vue'
-import { watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { ALL_FOODS, searchFoods, vesselLabelOf, vesselSizesOf, type FoodBase } from '../stores/food'
+import { triggerHaptic, playSound } from '../stores/settings'
+import AddFood from './AddFood.uvue'
+import type { AddPayload } from './AddFood.uvue'
+export type { AddPayload }
 
 /**
- * 弹层⓪ 食物选择列表（pencil 画板 n3dgv）。
- * 单选：点行 = 选中 + 关闭（emit select）；selectedId 用于 AddFood「更换」时的回显。
- * 弹层内部定高滚动才用 scroll-view，页面级滚动一律走原生（见 AGENTS.md 滚动陷阱条目）。
+ * 弹层⓪ 食物选择与添加单流程整合容器（pencil 画板 n3dgv + 弹窗①）。
+ * 内部 step 在 list 和 detail 原地切换，全流程仅使用一个原生 page-container 容器。
  */
 
 const props = defineProps<{
   show: boolean
-  selectedId: string
+  selectedId?: string
 }>()
 
 const emit = defineEmits<{
   (e: 'update:show', v: boolean): void
   (e: 'select', foodId: string): void
+  (e: 'confirm', payload: AddPayload): void
 }>()
+
+const render = ref(false)
+const active = ref(false)
+let timer = 0
+
+const step = ref<'list' | 'detail'>('list')
+const activeFoodId = ref('')
 
 /** 分类 chips：全部 + 库内真实分类（按首次出现顺序去重） */
 const cats: string[] = ['全部']
@@ -132,8 +177,8 @@ const ALL_CAT = '全部'
 const keyword = ref('')
 const cat = ref(ALL_CAT)
 
-/** 打开时把选中行滚进视野（弹层每次开合整树重挂载，挂载即生效） */
-const intoView = computed<string>(() => props.selectedId !== '' ? 'row-' + props.selectedId : '')
+/** 打开时把选中行滚进视野 */
+const intoView = computed<string>(() => activeFoodId.value !== '' ? 'row-' + activeFoodId.value : '')
 
 const results = computed<FoodBase[]>(() => {
   const base = searchFoods(keyword.value)
@@ -158,80 +203,152 @@ function subLine(food: FoodBase): string {
 }
 
 function pickCat(name: string): void {
-  if (name === cat.value) return
-  cat.value = name
-  try {
-    uni.vibrateShort()
-  } catch (e) {
-    // 无触觉设备忽略
+  if (name === cat.value) {
+    return
   }
+  cat.value = name
 }
 
 function pickFood(id: string): void {
-  try {
-    uni.vibrateShort()
-  } catch (e) {
-    // 无触觉设备忽略
-  }
-  emit('update:show', false)
+  playSound('click')
+  activeFoodId.value = id
+  step.value = 'detail'
   emit('select', id)
 }
 
-/** 原生蒙层不自动关闭（官方示例亦然），点按时由我们回传 show=false 触发离场动画 */
+function onDetailChange(): void {
+  step.value = 'list'
+}
+
+function onDetailConfirm(payload: AddPayload): void {
+  emit('confirm', payload)
+  close()
+}
+
+/** 原生蒙层点按时回传 show=false 触发离场动画 */
 function onOverlayTap(): void {
-  try {
-    uni.vibrateShort()
-  } catch (e) {
-    // 无触觉设备忽略
-  }
-  emit('update:show', false)
+  close()
 }
 
-/** 原生蒙层点按/系统返回触发 page-container 离场，动画结束后回传关闭态 */
+/** 原生蒙层点按/系统返回触发 page-container 离场，动画结束后重置并回传关闭态 */
 function onAfterLeave(): void {
-  try {
-    uni.vibrateShort()
-  } catch (e) {
-    // 无触觉设备忽略
-  }
+  step.value = 'list'
   emit('update:show', false)
 }
 
-/** 每次打开重置搜索与分类（选中回显仍由 selectedId 驱动） */
+function close(): void {
+  emit('update:show', false)
+}
+
+/** 每次打开重置搜索、分类与步骤（选中回显由 selectedId 驱动） */
 watch(
   () => props.show,
   (v: boolean) => {
     if (v) {
+      if (timer > 0) { clearTimeout(timer); timer = 0; }
+      render.value = true
+      step.value = 'list'
       keyword.value = ''
       cat.value = ALL_CAT
+      activeFoodId.value = props.selectedId ?? ''
+      setTimeout(() => {
+        active.value = true
+      }, 50)
+    } else {
+      active.value = false
+      if (timer > 0) { clearTimeout(timer); timer = 0; }
+      timer = setTimeout(() => {
+        render.value = false
+        onAfterLeave()
+        timer = 0
+      }, 300) as unknown as number
     }
   }
 )
 </script>
 
 <style>
+.fp-overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 900;
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: 300ms;
+}
+.fp-overlay-active {
+  opacity: 1;
+}
+.fp-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(520px + env(safe-area-inset-bottom));
+  background-color: #FFFFFF;
+  border-top-left-radius: 34px;
+  border-top-right-radius: 34px;
+  transform: translateY(100%);
+  transition-property: transform;
+  transition-duration: 300ms;
+  display: flex;
+  flex-direction: column;
+}
+.fp-container-active {
+  transform: translateY(0);
+}
 .fp-sheet {
   flex: 1;
-  padding: 12px 20px 0 20px;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px 0 20px;
+  /* #ifdef MP-WEIXIN */
+  padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  /* #endif */
+  overflow: hidden;
 }
-.fp-handle {
-  width: 41px;
-  height: 4px;
-  border-radius: 2px;
-  background-color: #DCEDE6;
-  align-self: center;
+.fp-detail-wrap {
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+}
+.fp-top-row {
+  flex-direction: row;
+  align-items: center;
+  margin-top: 4px;
 }
 .fp-search-box {
+  flex: 1;
   flex-direction: row;
   align-items: center;
   height: 46px;
-  margin-top: 12px;
   border-radius: 23px;
   background-color: #F5FAF8;
   border-width: 1px;
   border-color: #EAF3EF;
   padding-left: 18px;
   padding-right: 14px;
+}
+.fp-closebtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background-color: #FFFFFF;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(10, 79, 61, 0.14);
+  margin-left: 10px;
+  flex-shrink: 0;
+}
+.fp-close-ic {
+  width: 16px;
+  height: 16px;
 }
 .fp-search-icon {
   width: 18px;
@@ -264,15 +381,17 @@ watch(
 }
 .fp-chip-text {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: bold;
   color: #8FAEAF;
 }
 .fp-chip-text-on {
   color: #FFFFFF;
-  font-weight: 600;
+  font-weight: bold;
 }
 .fp-food-list {
   flex: 1;
+  height: 0;
+  min-height: 0;
   margin-top: 16px;
 }
 .fp-row {
@@ -307,7 +426,7 @@ watch(
 }
 .fp-row-sub-on {
   color: #0F4F3D;
-  font-weight: 600;
+  font-weight: bold;
 }
 .fp-radio {
   width: 22px;

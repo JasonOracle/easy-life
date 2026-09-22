@@ -1,5 +1,11 @@
+/*
+ * [变更日志]
+ * 修改时间：2026-09-23
+ * AI模型：Gemini 系列
+ * 修改内容：[启用 vapor-render-target 字节码目标、配置 Android 图标与启动屏、补充震动权限与微信隐私授权检查]
+ */
 {
-	"name": "CalTrack",
+	"name": "情律健康",
 	"appid": "__UNI__F70225F",
 	"description": "轻量级卡路里追踪 App",
 	"versionName": "1.0.0",
@@ -7,7 +13,8 @@
 	"uni-app-x": {
 		"flex-direction": "column",
 		"vapor": true,
-		"styleIsolationVersion": "2"
+		"styleIsolationVersion": "2",
+		"vapor-render-target": "bytecode"
 	},
 	"app": {
 		"defaultAppTheme": "light",
@@ -40,11 +47,28 @@
 				"arm64-v8a"
 			],
 			"modules": {},
-			"icons": {},
+			"icons": {
+				"hdpi": "D:/User/Downloads/Gemini_Generated_Image_xqqzslxqqzslxqqz (1) (1).png",
+				"xhdpi": "D:/User/Downloads/Gemini_Generated_Image_xqqzslxqqzslxqqz (1) (1).png",
+				"xxhdpi": "D:/User/Downloads/Gemini_Generated_Image_xqqzslxqqzslxqqz (1) (1).png",
+				"xxxhdpi": "D:/User/Downloads/Gemini_Generated_Image_xqqzslxqqzslxqqz (1) (1).png"
+			},
 			"splashScreens": {
-				"default": {}
+				"default": {
+					"xhdpi": "D:/User/Downloads/Gemini_Generated_Image_2wa49f2wa49f2wa4.png",
+					"xxhdpi": "D:/User/Downloads/Gemini_Generated_Image_2wa49f2wa49f2wa4.png",
+					"xxxhdpi": "D:/User/Downloads/Gemini_Generated_Image_2wa49f2wa49f2wa4.png"
+				},
+				"brand": {
+					"xhdpi": "D:/User/Downloads/Gemini_Generated_Image_xqqzslxqqzslxqqz (1) (1).png",
+					"xxhdpi": "D:/User/Downloads/Gemini_Generated_Image_xqqzslxqqzslxqqz (1) (1).png",
+					"xxxhdpi": "D:/User/Downloads/Gemini_Generated_Image_xqqzslxqqzslxqqz (1) (1).png"
+				}
 			}
-		}
+		},
+		"permissions": [
+			"<uses-permission android:name=\"android.permission.VIBRATE\"/>"
+		]
 	},
 	"app-ios": {
 		"defaultAppTheme": "light",
@@ -56,6 +80,7 @@
 		}
 	},
 	"mp-weixin": {
-		"appid": "wx2ca7eecc03bd5d09"
+		"appid": "wx2ca7eecc03bd5d09",
+		"__usePrivacyCheck__": true
 	}
 }

@@ -1,0 +1,29 @@
+{
+  "__comment__": "[变更日志] 2026-09-23 Gemini 系列：Android 原生隐私政策与权限授权指引配置",
+  "version": "1",
+  "prompt": "template",
+  "title": "个人信息保护指引",
+  "message": "　　欢迎使用 轻律生活。我们将通过<a href=\"https://www.example.com/agreement\">《用户服务协议》</a>及<a href=\"https://www.example.com/privacy\">《隐私政策》</a>帮助您了解我们如何收集、处理个人信息。<br/><br/>　　为了向您提供食物热量记录服务，本应用将在征得您同意后使用震动反馈功能，并将数据存储在您的本地设备中。您可以在设置中随时调整相关权限。<br/><br/>　　如您同意，请点击“同意”按钮接受我们的服务。",
+  "buttonAccept": "同意",
+  "buttonRefuse": "不同意",
+  "hrefLoader": "system",
+  "disagreeMode": {
+    "support": false,
+    "loadNativePlugins": false,
+    "visitorEntry": false,
+    "showAlways": false
+  },
+  "styles": {
+    "backgroundColor": "#FFFFFF",
+    "borderRadius": "12px",
+    "title": {
+      "color": "#333333"
+    },
+    "buttonAccept": {
+      "color": "#1FBF8F"
+    },
+    "buttonRefuse": {
+      "color": "#999999"
+    }
+  }
+}

@@ -1,5 +1,23 @@
 /**
  * [变更日志]
+ * 修改时间：2026-09-22
+ * AI模型：Gemini 系列
+ * 修改内容：[1. 新增 shake（水瓶晃动）、slide（拖动滑块）、card（切换卡片/选项）音效类型与音频路径映射；2. 增加倒水音频 pour 配合动画在 2 秒后自动停止机制]
+ */
+/**
+ * [变更日志]
+ * 修改时间：2026-09-22
+ * AI模型：Gemini 系列
+ * 修改内容：[新增 pour 倒水音效类型与 /static/audio/pour.mp3 映射，支撑食物结算后水瓶注水物理动效]
+ */
+/**
+ * [变更日志]
+ * 修改时间：2026-09-22
+ * AI模型：Gemini 系列
+ * 修改内容：[将 playSound 音效逻辑集中集成在 settings store 中，彻底解决独立 composables 文件在小程序运行期 module is not defined 导致页面崩溃不加载的致命Bug]
+ */
+/**
+ * [变更日志]
  * 修改时间：2026-09-21
  * AI模型：Qoder (Claude)
  * 修改内容：[darkMode 解除「v1.0 恒关」锁定：加载时不再强制 false（Boss 拍板个人中心深色模式），
@@ -87,6 +105,65 @@ export const useSettingsStore = defineStore('settings', () => {
     persist()
   }
 
+  let pourStopTimer: any = null
+
+  function playSound(type: SoundType, maxDurationMs?: number): void {
+    if (!soundEnabled.value) return
+    const src = AUDIO_FILES[type]
+    if (!src) return
+    try {
+      if (pourStopTimer) {
+        clearTimeout(pourStopTimer)
+        pourStopTimer = null
+      }
+      if (!audioCtx) {
+        audioCtx = uni.createInnerAudioContext()
+      }
+      audioCtx.src = src
+      audioCtx.stop()
+      audioCtx.play()
+      // 倒水音频配合动画默认 2 秒停止，或由调用方指定最大播放时长
+      if (type === 'pour' || (maxDurationMs != null && maxDurationMs > 0)) {
+        const dur = maxDurationMs != null && maxDurationMs > 0 ? maxDurationMs : 2000
+        pourStopTimer = setTimeout(() => {
+          try {
+            if (audioCtx && audioCtx.src && audioCtx.src.indexOf('pour') !== -1) {
+              audioCtx.stop()
+            }
+          } catch (e) {}
+        }, dur)
+      }
+    } catch (e) {}
+  }
+
+  function triggerHaptic(type: 'light' | 'medium' | 'heavy'): void {
+    if (!hapticsEnabled.value) return
+    
+    // PC 开发工具环境拦截：防止模拟器窗口剧烈抖动
+    try {
+      const info = uni.getSystemInfoSync()
+      if (info.platform === 'windows' || info.platform === 'mac') {
+        return
+      }
+    } catch (e) {}
+
+    try {
+      if (type === 'light') {
+        uni.vibrateShort({ type: 'light' } as any) // 类型声明可能缺失
+      } else if (type === 'medium') {
+        uni.vibrateShort({ type: 'medium' } as any)
+      } else if (type === 'heavy') {
+        uni.vibrateShort({ type: 'heavy' } as any)
+        setTimeout(() => {
+          uni.vibrateShort({ type: 'heavy' } as any)
+        }, 100)
+      }
+    } catch (e) {
+      // 兜底不带参数的调用
+      uni.vibrateShort()
+    }
+  }
+
   return {
     darkMode,
     mealReminders,
@@ -96,5 +173,38 @@ export const useSettingsStore = defineStore('settings', () => {
     setSoundEnabled,
     setHapticsEnabled,
     setDarkMode,
+    playSound,
+    triggerHaptic,
   }
 })
+
+export type SoundType = 'click' | 'switch' | 'change' | 'success' | 'pour' | 'shake' | 'slide' | 'card' | 'delete'
+
+const AUDIO_FILES: Record<string, string> = {
+  click: '/static/audio/click.mp3',
+  switch: '/static/audio/switch.mp3',
+  change: '/static/audio/change.mp3',
+  success: '/static/audio/success.mp3',
+  pour: '/static/audio/pour.mp3',
+  shake: '/static/audio/shake.mp3',
+  slide: '/static/audio/slide.mp3',
+  card: '/static/audio/selected-card.mp3',
+  delete: '/static/audio/delete.mp3',
+}
+
+let audioCtx: any = null
+
+export function playSound(type: SoundType, maxDurationMs?: number): void {
+  try {
+    const s = useSettingsStore()
+    s.playSound(type, maxDurationMs)
+  } catch (e) {}
+}
+
+export function triggerHaptic(type: 'light' | 'medium' | 'heavy'): void {
+  try {
+    const s = useSettingsStore()
+    s.triggerHaptic(type)
+  } catch (e) {}
+}
+

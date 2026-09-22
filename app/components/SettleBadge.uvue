@@ -1,5 +1,23 @@
 <!--
   [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[1. 遵循 uni-app x 原生规范，将 font-weight: 600 统一为 bold；2. 清理 Android 端不支持的 @keyframes 动画（sbFadeIn, sbBadgeIn, sbBadgeOut, sbRise, sbIcoPop）及相关 animation 属性，保持静态直出规范]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[按指令清除结算徽章进度环扫完时的 vibrateShort 触觉震动，避免微信模拟器窗口剧烈抖动，待后续按需开启]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[在 defineEmits 中新增 close 事件定义，并在退场完成与关闭时派发 close，供首页监听以触发倒水物理动效]
+-->
+<!--
+  [变更日志]
   修改时间：2026-09-22
   AI模型：Qoder (Claude)
   修改内容：[弹层壳迁移到原生 page-container（position=center，同 FoodPicker 模式）：自研 .sb-mask 压暗层＋z900 退役，
@@ -32,25 +50,12 @@
 -->
 
 <template>
-  <page-container <!-- #ifdef MP -->
-    v-if="show"
-    <!-- #endif -->
-    :show="show" position="center" :overlay="true" :duration="220"
-    overlay-style="background-color: rgba(0, 0, 0, 0.5);"
-    custom-style="width:100%;height:100%;background-color:transparent;display:flex;align-items:center;justify-content:center;"
-    @afterleave="onAfterLeave">
-    <view class="sb-badge" :class="{ 'sb-badge-out': exiting, 'sb-badge-low': lowMode }">
-      <!-- #ifdef MP-WEIXIN -->
-      <!-- 环＝轨道圆 + conic 进度 + 中心盖孔 + 两端圆头帽（单一 progress 驱动） -->
+  <view class="sb-overlay" :class="{ 'sb-overlay-active': active }" v-if="render">
+    <view class="sb-badge" :class="{ 'sb-badge-active': active, 'sb-badge-out': exiting, 'sb-badge-low': lowMode }">
+      <!-- 环：轨道圆 + 中心盖孔 + canvas绘制进度与双头帽 -->
       <view class="sb-track"></view>
-      <view class="sb-prog" :style="progStyle"></view>
+      <canvas class="sb-canvas" type="2d" id="sb-ring" @ready="onCanvasReady"></canvas>
       <view class="sb-hole"></view>
-      <view class="sb-cap" :style="capStartStyle"></view>
-      <view class="sb-cap" :style="capEndStyle"></view>
-      <!-- #endif -->
-      <!-- #ifdef APP -->
-      <canvas class="sb-canvas" id="sb-ring" @ready="onCanvasReady"></canvas>
-      <!-- #endif -->
       <view class="sb-num-stack">
         <text class="sb-big-num">{{ shownText }}</text>
         <text class="sb-unit">kcal</text>
@@ -63,12 +68,11 @@
         <text class="sb-meal-text">{{ mealText }}</text>
       </view>
     </view>
-  </page-container>
+  </view>
 </template>
 
 <script setup lang="uts">
-import { ref, computed, watch } from 'vue'
-import { onUnmounted } from 'vue'
+import { ref, computed, watch, getCurrentInstance, onUnmounted, nextTick } from 'vue'
 import { useDeviceStore } from '../stores/device'
 import { useSettingsStore } from '../stores/settings'
 
@@ -88,8 +92,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:show', v: boolean): void
+  (e: 'close'): void
 }>()
 
+const inst = getCurrentInstance()
 const device = useDeviceStore()
 const settings = useSettingsStore()
 
@@ -107,10 +113,13 @@ const BAND_MID_R = 62
 const progress = ref(0)
 const exiting = ref(false)
 const lowMode = ref(false)
+const render = ref(false)
+const active = ref(false)
 
 let ringTimer = 0
 let exitTimer = 0
 let closeTimer = 0
+let activeTimer = 0
 let animStart = 0
 
 const overBudget = computed<boolean>(() => props.after > props.goal)
@@ -142,57 +151,54 @@ const shownText = computed<string>(() => '' + Math.round(props.kcal * progress.v
 const budgetText = computed<string>(() => '今日 ' + fmt(props.after) + ' / ' + fmt(props.goal) + ' kcal')
 const mealText = computed<string>(() => props.meal + ' · 已加入')
 
-// —— MP 端环样式 ——
-const progStyle = computed<Record<string, string>>(() => {
-  const pct = (sweep.value * 100).toFixed(2) + '%'
-  return {
-    backgroundImage: 'conic-gradient(' + ringColor.value + ' 0% ' + pct + ', rgba(0,0,0,0) ' + pct + ' 100%)',
-  } as Record<string, string>
-})
-
-const capStartStyle = computed<Record<string, string>>(() => {
-  return {
-    left: (CX - 8) + 'px',
-    top: (CY - BAND_MID_R - 8) + 'px',
-    backgroundColor: ringColor.value,
-  } as Record<string, string>
-})
-
-const capEndStyle = computed<Record<string, string>>(() => {
-  const ang = -Math.PI / 2 + sweep.value * Math.PI * 2
-  const x = CX + BAND_MID_R * Math.cos(ang)
-  const y = CY + BAND_MID_R * Math.sin(ang)
-  return {
-    left: Math.round(x - 8) + 'px',
-    top: Math.round(y - 8) + 'px',
-    backgroundColor: ringColor.value,
-    opacity: sweep.value > 0.001 ? '1' : '0',
-  } as Record<string, string>
-})
-
-// —— App 端 canvas 环（uni-app x 原生渲染不支持 conic-gradient） ——
-// #ifdef APP
-let ringCtx: CanvasRenderingContext2D | null = null
+// —— Canvas 绘制逻辑（双端通用） ——
+let ringCtx: any | null = null
 
 function onCanvasReady(): void {
+  // #ifdef APP
   try {
     const el = uni.getElementById('sb-ring') as UniCanvasElement | null
     if (el != null) ringCtx = el.getContext('2d')
   } catch (e) {
     ringCtx = null
   }
+  // #endif
+}
+
+function initCanvasMp(): void {
+  // #ifdef MP-WEIXIN
+  if (inst != null && inst.proxy != null) {
+    uni.createSelectorQuery()
+      .in(inst.proxy)
+      .select('#sb-ring')
+      .node((res: any) => {
+        if (res != null && res.node != null) {
+          const canvas = res.node
+          // 适配高分屏
+          const sys = uni.getSystemInfoSync()
+          const dpr = sys.pixelRatio
+          canvas.width = 264 * dpr
+          canvas.height = 256 * dpr
+          ringCtx = canvas.getContext('2d')
+          ringCtx.scale(dpr, dpr)
+        }
+      })
+      .exec()
+  }
+  // #endif
 }
 
 function drawRing(): void {
   const ctx = ringCtx
   if (ctx == null) return
-  ctx.clearRect(0, 0, 264, 256)
-  // 轨道
-  ctx.beginPath()
-  ctx.arc(CX, CY, BAND_MID_R, 0, Math.PI * 2)
-  ctx.lineWidth = 16
-  ctx.strokeStyle = 'rgba(31,191,143,0.15)'
-  ctx.stroke()
+  
+  // App 与微信的 CanvasRenderingContext2D 在清除方法上基本一致
+  try {
+    ctx.clearRect(0, 0, 264, 256)
+  } catch (e) {}
+
+  // 轨道 (仅通过 view 渲染，或这里再补一层保险？不，使用 sb-track view 即可)
+  
   // 进度（圆头由 lineCap round 天然给出）
   if (sweep.value > 0.001) {
     ctx.beginPath()
@@ -203,21 +209,14 @@ function drawRing(): void {
     ctx.stroke()
   }
 }
-// #endif
 
 function tick(): void {
   const p = easeOutCubic((Date.now() - animStart) / RING_MS)
   progress.value = p
-  // #ifdef APP
   drawRing()
-  // #endif
   if (p >= 1) {
     clearInterval(ringTimer)
     ringTimer = 0
-    // L7 触感：环到位那一帧
-    if (device.haptics && settings.hapticsEnabled) {
-      try { uni.vibrateShort({ success: () => {}, fail: () => {} }) } catch (e) {}
-    }
   }
 }
 
@@ -225,11 +224,13 @@ function clearTimers(): void {
   if (ringTimer != 0) { clearInterval(ringTimer); ringTimer = 0 }
   if (exitTimer != 0) { clearInterval(exitTimer); exitTimer = 0 }
   if (closeTimer != 0) { clearInterval(closeTimer); closeTimer = 0 }
+  if (activeTimer != 0) { clearTimeout(activeTimer); activeTimer = 0 }
 }
 
-/** page-container 离场结束（2160ms 自动关/系统返回），兜底同步父级关闭态 */
+/** 离场结束，兜底同步父级关闭态 */
 function onAfterLeave(): void {
   emit('update:show', false)
+  emit('close')
 }
 
 function open(): void {
@@ -237,9 +238,7 @@ function open(): void {
   lowMode.value = device.tier === 'low'
   if (lowMode.value) {
     progress.value = 1
-    // #ifdef APP
     drawRing()
-    // #endif
   } else {
     progress.value = 0
     animStart = Date.now() + RING_DELAY
@@ -254,6 +253,7 @@ function open(): void {
     clearInterval(closeTimer)
     closeTimer = 0
     emit('update:show', false)
+    emit('close')
   }, CLOSE_AT)
 }
 
@@ -262,10 +262,20 @@ watch(
   (v: boolean) => {
     clearTimers()
     if (v) {
+      render.value = true
+      nextTick(() => {
+        initCanvasMp()
+      })
+      activeTimer = setTimeout(() => {
+        active.value = true
+        activeTimer = 0
+      }, 50) as unknown as number
       open()
     } else {
       progress.value = 0
       exiting.value = false
+      active.value = false
+      render.value = false
     }
   }
 )
@@ -274,10 +284,26 @@ onUnmounted(() => { clearTimers() })
 </script>
 
 <style>
-/* 压暗层已迁 page-container 原生蒙层（overlay-style 黑 50%），容器透明、徽章自带外观 */
-@keyframes sbFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.sb-overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 900;
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: 220ms;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sb-overlay-active {
+  opacity: 1;
+}
 
-/* —— L2 徽章：264×256 r28，scale 0.86→1 + opacity 360ms out-expo；阴影静态不动画 —— */
+/* —— L2 徽章：264×256 r28 —— */
 .sb-badge {
   width: 264px;
   height: 256px;
@@ -285,22 +311,23 @@ onUnmounted(() => { clearTimers() })
   background-color: #F2FAF5;
   position: relative;
   box-shadow: 0 14px 36px rgba(10, 79, 61, 0.14);
-  animation: sbBadgeIn 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
   flex-shrink: 0;
+  transform: scale(0.9);
+  opacity: 0;
+  transition-property: transform, opacity;
+  transition-duration: 400ms, 220ms;
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1), ease;
+}
+.sb-badge-active {
+  transform: scale(1);
+  opacity: 1;
 }
 .sb-badge-out {
-  animation: sbBadgeOut 220ms cubic-bezier(0.4, 0, 1, 1) both;
-}
-.sb-badge-low {
-  animation: sbFadeIn 200ms linear both;
-}
-@keyframes sbBadgeIn {
-  from { transform: scale(0.86); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-@keyframes sbBadgeOut {
-  from { transform: scale(1); opacity: 1; }
-  to { transform: scale(0.94); opacity: 0; }
+  transform: scale(0.94);
+  opacity: 0;
+  transition-property: transform, opacity;
+  transition-duration: 220ms;
+  transition-timing-function: ease;
 }
 
 /* —— 环（MP：轨道 + conic 进度 + 盖孔 + 双圆头帽） —— */
@@ -313,14 +340,6 @@ onUnmounted(() => { clearTimers() })
   border-radius: 70px;
   background-color: rgba(31, 191, 143, 0.15);
 }
-.sb-prog {
-  position: absolute;
-  left: 62px;
-  top: 30px;
-  width: 140px;
-  height: 140px;
-  border-radius: 70px;
-}
 .sb-hole {
   position: absolute;
   left: 78px;
@@ -329,12 +348,6 @@ onUnmounted(() => { clearTimers() })
   height: 108px;
   border-radius: 54px;
   background-color: #F2FAF5;
-}
-.sb-cap {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  border-radius: 8px;
 }
 .sb-canvas {
   position: absolute;
@@ -363,12 +376,12 @@ onUnmounted(() => { clearTimers() })
 }
 .sb-unit {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: bold;
   color: rgba(15, 79, 61, 0.6);
   line-height: 16px;
 }
 
-/* —— L4 今日行：480ms 起，opacity + 上移 8px，240ms ease-out —— */
+/* —— L4 今日行 —— */
 .sb-budget-row {
   position: absolute;
   left: 0;
@@ -377,22 +390,17 @@ onUnmounted(() => { clearTimers() })
   height: 20px;
   justify-content: center;
   align-items: center;
-  animation: sbRise 240ms ease-out 480ms both;
-}
-@keyframes sbRise {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 .sb-budget-text {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: bold;
   color: #0A7A5C;
 }
 .sb-budget-text-over {
   color: #FF9E7D;
 }
 
-/* —— L5 夜宵行 600ms 淡入；L6 图标 620ms 起 scale 0.4→1 弹入 —— */
+/* —— L5 夜宵行与图标 —— */
 .sb-meal-row {
   position: absolute;
   left: 0;
@@ -402,27 +410,14 @@ onUnmounted(() => { clearTimers() })
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  animation: sbFadeIn 200ms ease-out 600ms both;
 }
 .sb-meal-ico {
   width: 12px;
   height: 12px;
   margin-right: 4px;
-  animation: sbIcoPop 260ms cubic-bezier(0.34, 1.56, 0.64, 1) 620ms both;
-}
-@keyframes sbIcoPop {
-  from { transform: scale(0.4); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
 }
 .sb-meal-text {
   font-size: 12px;
   color: #73918B;
-}
-
-/* —— low 档：只留淡入淡出，行/图标不再各自入场 —— */
-.sb-badge-low .sb-budget-row,
-.sb-badge-low .sb-meal-row,
-.sb-badge-low .sb-meal-ico {
-  animation: none;
 }
 </style>

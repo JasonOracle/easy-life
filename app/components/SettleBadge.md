@@ -1,12 +1,17 @@
 # SettleBadge — 结算徽章（弹层③）
 
+> 变更记录：
+> - 2026-09-23（Gemini 系列）：统一字重为 bold；清理 Android 端不支持的 @keyframes 动画。
+> - 2026-09-23（OpenCode / Gemini 底层）：按指令清除结算徽章进度环扫完时的 vibrateShort 触觉震动，避免微信模拟器窗口剧烈抖动，待后续按需开启。
+
 ## 用途
 添加食物成功后的结算弹层：264×256 居中徽章，进度环扫角与中心数字滚动由**单一 progress 变量**同驱（620ms easeOutCubic），严格 2160ms 自动关闭，无任何点按关闭。
 
 ## 依赖
 - **Store**：`useDeviceStore`（`tier`/`haptics` 降级判断）、`useSettingsStore`（`hapticsEnabled` 开关）
 - **Props**：`show`（v-model:show）· `kcal`（本次加入热量）· `after`（加入后今日总量）· `goal`（每日目标）· `meal`（餐次中文名，Home 侧 `MEAL_LABELS` 映射）
-- **父组件**：`Home.uvue`（`onAddConfirm` 写入四值后置 `settleShow=true`）
+- **Emits**：`update:show`（同步显隐）· `close`（结算弹层退场完成时派发，供父级触发倒水物理效果与音效）
+- **父组件**：`Home.uvue`（`onAddConfirm` 写入四值后置 `settleShow=true`，并监听 `@close="onSettleClose"`）
 - **静态资产**：`/static/settle/sb_check.png`（薄荷 ✓）· `/static/settle/sb_alert.png`（珊瑚感叹圈），均从 Pencil 稿导出
 - **替代了** `FoodToast.uvue` 的链路位（FoodToast 文件保留但未接线）
 
@@ -24,7 +29,7 @@
 
 ## 边界与降级
 - low 档（`device.tier==='low'`）：`progress` 直落 1，行/图标不再各自入场（`.sb-badge-low` 关子动画），只留淡入淡出
-- 触感：`device.haptics && settings.hapticsEnabled` 双门才 `vibrateShort`（L7 环到位帧）
+- 触感：触觉震动已按指令全量下线，避免微信模拟器窗口剧烈抖动，待后续按需开启。保留单进度同驱环与数字展示。
 - `goal<=0` 兜底：`finalRatio=1`，不除零
 - 重复打开：`watch(show)` 先 `clearTimers()` 再 `open()`，无定时器泄漏；`onUnmounted` 兜底清理
 - 音效：Boss 拍板暂缓，全链路跑通后统一接

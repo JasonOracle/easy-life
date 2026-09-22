@@ -1,5 +1,11 @@
 <!--
   [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[按指令清除切换深色模式开关(toggleDark)时的 vibrateShort 触觉震动，避免微信模拟器窗口剧烈抖动，待后续按需开启]
+-->
+<!--
+  [变更日志]
   修改时间：2026-09-22
   AI模型：Qoder (Claude)
   修改内容：[#28 常驻导航栏：P1 遮罩（set-st-mask z40）＋独立返回钮（set-fx-back z45）两件套合并为整栏
@@ -261,7 +267,6 @@ function openGoal(): void {
 function toggleDark(): void {
   settings.setDarkMode(!settings.darkMode)
   syncBar()
-  try { uni.vibrateShort() } catch (e) {}
 }
 
 let sbH = 0

@@ -1,5 +1,11 @@
 /**
  * [变更日志]
+ * 修改时间：2026-09-22
+ * AI模型：Gemini 系列
+ * 修改内容：[将 getCalorieStatus 函数收拢至 goal store，彻底解决独立 utils 文件在小程序运行期 module is not defined 导致页面崩溃不加载的致命Bug]
+ */
+/**
+ * [变更日志]
  * 修改时间：2026-09-21
  * AI模型：Muse Spark
  * 修改内容：[手脚架重建后恢复：从 git 历史取回实现并接线（新文件头；food.ts 数据源路径改为 src/data；其余逻辑原样）]
@@ -47,3 +53,52 @@ export const useGoalStore = defineStore('goal', () => {
 
   return { calorieGoal, setGoal }
 })
+
+export type CalorieStatusType = 'green' | 'amber' | 'coral'
+
+export interface CalorieStatus {
+  type: CalorieStatusType
+  textClass: string
+  bgClass: string
+  ringClass: string
+  color: string
+}
+
+export function getCalorieStatus(current: number, goalVal: number): CalorieStatus {
+  if (goalVal <= 0) {
+    return {
+      type: 'green',
+      textClass: 'status-text-green',
+      bgClass: 'status-bg-green',
+      ringClass: 'status-ring-green',
+      color: '#1FBF8F'
+    }
+  }
+  const ratio = current / goalVal
+  if (ratio > 1.15) {
+    return {
+      type: 'coral',
+      textClass: 'status-text-coral',
+      bgClass: 'status-bg-coral',
+      ringClass: 'status-ring-coral',
+      color: '#FF9E7D'
+    }
+  } else if (ratio > 1.0) {
+    return {
+      type: 'amber',
+      textClass: 'status-text-amber',
+      bgClass: 'status-bg-amber',
+      ringClass: 'status-ring-amber',
+      color: '#E8B54D'
+    }
+  } else {
+    return {
+      type: 'green',
+      textClass: 'status-text-green',
+      bgClass: 'status-bg-green',
+      ringClass: 'status-ring-green',
+      color: '#1FBF8F'
+    }
+  }
+}
+

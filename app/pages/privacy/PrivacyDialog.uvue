@@ -1,0 +1,138 @@
+<template>
+  <view class="dialog-container">
+    <view class="dialog-content">
+      <view class="dialog-header">
+        <text class="dialog-title">个人信息保护指引</text>
+      </view>
+      <scroll-view class="dialog-scroll" direction="vertical">
+        <text class="dialog-text">
+          <text>欢迎使用 轻律生活。我们将通过</text>
+          <text class="dialog-href" @click="hrefClick('https://www.example.com/agreement')">《用户服务协议》</text>
+          <text>及</text>
+          <text class="dialog-href" @click="hrefClick('https://www.example.com/privacy')">《隐私政策》</text>
+          <text>帮助您了解我们如何收集、处理个人信息。本应用将在征得您同意后使用震动反馈功能，并数据存本地设备上。</text>
+          <text>\n\n如您同意，请点击“同意”按钮接受我们的服务。</text>
+        </text>
+      </scroll-view>
+      <view class="dialog-actions">
+        <button class="btn btn-reject" @click="reject">不同意</button>
+        <!-- #ifdef MP-WEIXIN -->
+        <button class="btn btn-agree" type="primary" open-type="agreePrivacyAuthorization" @agreeprivacyauthorization="agree">同意</button>
+        <!-- #endif -->
+        <!-- #ifndef MP-WEIXIN -->
+        <button class="btn btn-agree" type="primary" @click="agree">同意</button>
+        <!-- #endif -->
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * [变更日志]
+ * 修改时间：2026-09-23
+ * AI模型：Gemini 系列
+ * 修改内容：[新建隐私政策授权弹窗页面，支持双端同意逻辑与链接点击]
+ */
+
+const currentPage = getCurrentInstance()?.proxy?.$page
+
+function agree() {
+  if (currentPage != null) {
+    uni.closeDialogPage({
+      dialogPage: currentPage
+    })
+  }
+}
+
+function reject() {
+  uni.resetPrivacyAuthorization()
+  if (currentPage != null) {
+    uni.closeDialogPage({
+      dialogPage: currentPage
+    })
+  }
+}
+
+function hrefClick(href : string) {
+  uni.showToast({
+    title: '请在外部浏览器访问: ' + href,
+    icon: 'none'
+  })
+}
+</script>
+
+<style>
+.dialog-container {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dialog-content {
+  width: 280px;
+  background-color: #FFFFFF;
+  border-radius: 20px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-header {
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.dialog-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #0A4F3D;
+}
+
+.dialog-scroll {
+  height: 220px;
+  margin-bottom: 24px;
+}
+
+.dialog-text {
+  font-size: 14px;
+  color: #333333;
+  line-height: 1.6;
+}
+
+.dialog-href {
+  color: #1FBF8F;
+  font-weight: bold;
+}
+
+.dialog-actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.btn {
+  width: 110px;
+  height: 44px;
+  border-radius: 22px;
+  font-size: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-reject {
+  background-color: #F2FAF5;
+  color: #0A4F3D;
+  border: none;
+}
+
+.btn-agree {
+  background-color: #1FBF8F;
+  color: #FFFFFF;
+  border: none;
+}
+</style>

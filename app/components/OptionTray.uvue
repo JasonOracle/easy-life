@@ -1,5 +1,23 @@
 <!--
   [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[清理 Android 原生不支持的 @keyframes optPop 及其相关动画属性，避免控制台报警并保持静态直出规范]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[按指令清除器皿/分量选项切换时的 vibrateShort 触觉震动，避免微信模拟器窗口剧烈抖动，待后续按需开启]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[音效接入升级：分量切换（select）接入 selected-card.mp3 卡片选项切换音效]
+-->
+<!--
+  [变更日志]
   修改时间：2026-09-21
   AI模型：Qoder (Claude)
   修改内容：[落地影改挂进 .art-wrap 绝对定位在素材底部（原为 .float 后置流内节点，影被挤到文字下方）]
@@ -34,7 +52,9 @@
 <template>
   <view class="tray">
     <view
-      class="opt"
+      class="opt ui-pressable"
+      hover-class="ui-pressed"
+      :hover-stay-time="120"
       v-for="(optItem, optIdx) in options"
       :key="optIdx"
       @click="select(optItem.key)"
@@ -79,6 +99,8 @@
  * 未选中压暗：透明/浅色素材 0.62，实心不透明素材（金属砝码）0.85。
  * 动效：220ms 位移/透明过渡；选中 scale 0.94→1 弹性入场。
  */
+
+import { playSound, triggerHaptic } from '../stores/settings'
 
 export type TrayOption = {
   key: string
@@ -128,20 +150,19 @@ function shadowH(opt: TrayOption): number {
 }
 
 function select(key: string): void {
-  if (key === props.modelValue) return
-  try {
-    uni.vibrateShort()
-  } catch (e) {
-    // 无触觉设备忽略
+  if (key === props.modelValue) {
+    triggerHaptic('light')
+    return
   }
+  playSound('card')
   emit('update:modelValue', key)
+  triggerHaptic('light')
 }
 </script>
 
 <style>
 .tray {
   flex-direction: row;
-  background-color: #F2FAF5;
   border-radius: 20px;
   padding: 12px 10px;
   flex-shrink: 0;
@@ -182,15 +203,10 @@ function select(key: string): void {
 }
 .float-on {
   transform: translateY(-4px);
-  animation: optPop 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .float-card {
   background-color: #FFFFFF;
   box-shadow: 0 5px 12px rgba(10, 79, 61, 0.25);
-}
-@keyframes optPop {
-  0% { transform: translateY(-4px) scale(0.94); }
-  100% { transform: translateY(-4px) scale(1); }
 }
 .opt-art {
   margin-left: 2px;

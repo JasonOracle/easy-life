@@ -1,11 +1,18 @@
 # AddFood.uvue — 公共添加食物弹窗
 
+> 变更记录：
+> - 2026-09-23（Gemini 系列）：剥离外层 page-container，改为内容视图嵌入 FoodPicker 单流程，外层加 scroll-view 支持自如滚动；90deg 渐变与字重 bold 规范化；清理 sealPop 动画。
+> - 2026-09-23（OpenCode / Gemini 底层）：按指令清除甜度切换、餐次卡片、步进变更、蒙层关闭与确认保存中的触觉震动(vibrateShort/vibrateLong)，避免微信模拟器窗口剧烈抖动，待后续按需开启。
+> - 2026-09-22（Gemini 系列）：移除顶部伪手势横杠（.af-handle）；右上角新增统一 32px 圆形关闭按钮（.af-closebtn）；底部确认按钮升级 fluid-interaction-expert 弹性阻尼按压反馈（.btn-capsule-pressed）；底部追加动态安全区避让（calc(24px + env(safe-area-inset-bottom))）。
+> - 2026-09-22（Gemini 系列）：接入 selected-card.mp3 音效，在用户切换甜度（pickSweet）和切换餐次卡片（pickMeal）时提供轻快干脆的听觉确认。
+
 ## 💡 核心思想
 
 pencil 弹窗①–⑥⑧ 的统一结构：茶饮有甜度电量条，咖啡有糖包/糖浆底槽，其余只有分量＋餐次。
 计件类（个／片／串）分量区走步进器（**不展示计量单位图**，Boss 拍板；弹窗⑧ 亦无「分量」标题），
 其余走器皿底槽（同族一张图按档位 scale 0.60/0.80/1.00）；砝码类按「颗数=份数」渲染；
 餐次四照片卡（设计稿**实拍图** sky_*.png＋名称水平居中单行，2026-09-21 Boss 定案：稿面无时间段行，已删）；
+选项切换与餐次点击均触发 `card` 听觉反馈；
 确认只组装 payload emit，不写库（Boss 决策）。
 
 ## 💻 使用示例

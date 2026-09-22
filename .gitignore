@@ -44,6 +44,7 @@ app/unpackage/
 .codebuddy/
 .idea/
 .vscode/
+.hbuilderx/
 *.swp
 
 # ── 系统 ─────────────────────────────────────────────────────────────────

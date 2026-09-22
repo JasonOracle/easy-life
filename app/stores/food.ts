@@ -192,6 +192,7 @@ export interface FoodEntry {
 
 /** 首页餐次下的单条食物明细（结构化，替代原 string[] —— 供图片 + 时分秒展示） */
 export interface FoodLine {
+  id: string        // 真实的记录 ID，供删除/修改使用
   key: string       // 同餐同名会重复，必须带唯一后缀
   img: string       // "<catKey>/<id>.webp"，App 前缀 static/icons/
   name: string
@@ -603,6 +604,7 @@ export const useFoodStore = defineStore('food', {
           // 结构化明细：每条食物自带图片 / 份量 / 热量 / 时分秒
           // （原 string[] 承载不了图片与时间；同餐同名的多条靠 index 保证 key 唯一）
           details: entries.map((e, i): FoodLine => ({
+            id: e.id,
             key: `${e.id}_${i}`,
             img: e.img ?? '',
             name: e.name,

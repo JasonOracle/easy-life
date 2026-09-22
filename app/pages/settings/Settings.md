@@ -1,5 +1,8 @@
 # Settings.uvue — 设置页（Pencil 稿 T0IUr 还原）
 
+> 变更记录：
+> - 2026-09-23（OpenCode / Gemini 底层）：按指令清除切换深色模式开关(toggleDark)时的 vibrateShort 触觉震动，避免微信模拟器窗口剧烈抖动，待后续按需开启。
+
 ## 💡 核心思想
 
 按 Pencil 最新稿「Settings 设置」画板 T0IUr（375 宽 = App 逻辑 px 1:1）还原设置页：

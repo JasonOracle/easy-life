@@ -1,5 +1,25 @@
 <!--
   [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[遵循 uni-app x 原生渲染规范，将 .tb-label 的 font-weight: 600 统一为 bold]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[按指令清除切换 Tabbar 时的 vibrateShort 触觉震动，避免微信模拟器窗口剧烈抖动，待后续按需开启]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[浅色态气泡在白底上立体投影强化（对齐设计稿）：
+    将 .tb-bub-light 的单层弱投影升级为双层墨绿复合柔影（0 2px 6px rgba(0,0,0,0.08), 0 6px 18px rgba(10,79,61,0.14)），
+    确保胶囊滑过白色卡片时气泡依然具有清晰的物理悬浮感与立体轮廓]
+-->
+<!--
+  [变更日志]
   修改时间：2026-09-22
   AI模型：Qoder (Claude)
   修改内容：[浅色态「气泡隐身」定稿修正（Boss 拍板：不接受气泡隐身，要有物理体积感）：
@@ -256,16 +276,9 @@ onMounted(() => {
 
 function onTap(idx: number): void {
   if (idx == myIdx.value) return
-  // L1 反馈（切 Tab）：按下压扁 ＋ 轻触觉，low 档无振动马达时静默降级
+  // L1 反馈（切 Tab）：按下压扁动画，震动已按指令统一移除
   anchorIdx.value = myIdx.value
   phase.value = 'press'
-  if (device.haptics) {
-    try {
-      uni.vibrateShort()
-    } catch (e) {
-      // 无触觉设备忽略
-    }
-  }
   writeOrigin(myIdx.value)
   // 90ms＝稿面「静止→按下」时长，让压扁被看见一瞬再换页（换页后由新页继续飞入→落位）
   setTimeout(() => {
@@ -351,7 +364,7 @@ function onTap(idx: number): void {
 }
 .tb-label {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: bold;
   color: #8A8A8A;
   margin-left: 6px;
 }
@@ -394,7 +407,7 @@ function onTap(idx: number): void {
   border-right-color: rgba(255, 255, 255, 0.6);
   border-bottom-color: rgba(255, 255, 255, 0.6);
   border-left-color: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 6px 18px rgba(10, 79, 61, 0.14);
 }
 /* #ifdef MP-WEIXIN */
 .tb-bub-dark {

@@ -1,5 +1,11 @@
 # DayDetail — 单日详情页
 
+> 变更记录：
+> - 2026-09-23（Gemini 系列）：接入方案 A 单流程 FoodPicker 架构，移除宿主端 addShow/onPickFood/onAddChange 等状态机。
+> - 2026-09-23（Gemini 系列）：.dd-header 补实色兜底；字重 500/600 转为 bold；openPicker 与 onAddConfirm 清空 addFoodId。
+> - 2026-09-23（OpenCode / Gemini 底层）：营养分布卡（蛋白质、碳水、脂肪）图标同步更新为矢量 SVG 素材引用（macro_protein.svg / macro_carb.svg / macro_fat.svg），并微调 .dd-mg 为 20x20 正方比例。
+> - 2026-09-23（OpenCode / Gemini 底层）：按指令清除长按删除单条饮食记录时的 vibrateShort 触觉震动，避免微信模拟器窗口剧烈抖动，待后续按需开启。
+
 ## 用途
 查看某一天的完整饮食记录：今日热量大卡（大数字/进度环/能量条/营养分布）+ 按餐次分组的记录行 + 今日饮食总结条。
 记录行**长按 → uni.showActionSheet 底部菜单「删除这条记录」**（Boss 拍板的删除交互）。
@@ -8,7 +14,7 @@
 - **Store**：`useFoodStore`（`viewDay` 查看日、`entries`、`dayRange`、`amountText`、`removeEntry`、`addEntry`）、`useGoalStore`
 - **子组件**：`FoodPicker / AddFood / SettleBadge`（「添加食物」复用首页同款链路）
 - **资产**：`static/records/dd_add.png`（添加食物＋号）、`dd_sum.png`（总结嫩芽）、`lr_back.png`、`lr_meal_*.png`；
-  火焰复用 `static/profile/flame.png`，宏量图标复用 `static/home/macro_*.png`
+  火焰复用 `static/profile/flame.png`，宏量图标复用 `static/home/macro_*.svg`
 - **入口**：Records 页「查看详情 / 查看全部」（跳转前写 `food.viewDay`；空则回落今日）
 
 ## 设计决策
@@ -17,7 +23,7 @@
 - **进度环 MP 端 conic-gradient**（SettleBadge 已验证通路）：外环 72 轨道 `#E5F1F0`，进度 `#3AC39A→#009B7A`，
   内孔白圆盖孔；App 端 canvas 未接 → 真机待验，文档不宣称双端支持
 - **能量条与 Records 汇总卡同一算法**：轨道 = max(总量, 目标)
-- **长按删除**＝`@longpress` → `uni.showActionSheet({itemList:['删除这条记录']})` → success 里 `removeEntry(id)` + `vibrateShort`；
+- **长按删除**＝`@longpress` → `uni.showActionSheet({itemList:['删除这条记录']})` → success 里 `removeEntry(id)`；震动已按指令全量下线，避免微信模拟器窗口剧烈抖动；
   不做自定义弹层（Boss 原话「长按 uni.showActionSheet …加个删除选项就行了」）
 - **营养分布数值取整**（稿面 68g/248g/62g 为整数），三列 `justify-content: space-between` + 1px 分隔线
   （分隔线严禁 `flex:1`——会被拉成灰块，本轮实拍踩坑）

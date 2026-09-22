@@ -1,5 +1,23 @@
 <!--
   [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[1. 架构升级：剥离外层 page-container，改为由 FoodPicker 统一宿主作为内容视图展示，解决双弹窗冷启动 1500ms 卡顿问题；2. 外层使用 scroll-view 包裹，解决在小屏或内容过长时无法滚动的问题；3. 渐变语法替换为 90deg；4. 遵循原生规范将 font-weight: 500/600 统一为 bold；5. 清理 sealPop 动画]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[按指令清除甜度切换、餐次卡片、步进变更、蒙层关闭与确认保存中的触觉震动(vibrateShort/vibrateLong)，避免微信模拟器窗口剧烈抖动，待后续按需开启]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[音效接入升级：甜度切换（pickSweet）与餐次卡片切换（pickMeal）接入 selected-card.mp3 音效]
+-->
+<!--
+  [变更日志]
   修改时间：2026-09-22
   AI模型：Qoder (Claude)
   修改内容：[弹层壳迁移到原生 page-container（同 FoodPicker 模式）：自研 .af-mask 固定层＋点蒙层关闭＋z900 退役；
@@ -105,15 +123,9 @@
 -->
 
 <template>
-  <page-container <!-- #ifdef MP -->
-    v-if="show"
-    <!-- #endif -->
-    :show="show" position="bottom" :overlay="true" :duration="300"
-    custom-style="background-color:transparent;"
-    @clickoverlay="onOverlayTap" @afterleave="onAfterLeave">
-    <view class="af-sheet" v-if="food != null">
-      <view class="af-handle"></view>
-      <view class="food-row">
+  <scroll-view class="af-scroll" direction="vertical" :show-scrollbar="false" v-if="food != null">
+    <view class="af-sheet">
+    <view class="food-row">
         <image class="food-thumb" :src="'/static/icons/' + food.img" mode="aspectFill"></image>
         <view class="food-text">
           <text class="food-name">{{ food.name }}</text>
@@ -121,9 +133,12 @@
         </view>
         <text class="big-kcal">{{ totalKcal }}</text>
         <text class="kcal-unit">kcal</text>
-        <view class="change-btn" @click="onChange">
+        <view class="change-btn ui-pressable" hover-class="ui-pressed" :hover-stay-time="120" @click="onChange">
           <image class="change-icon" :src="'/static/common/change_icon.png'" mode="aspectFit"></image>
           <text class="change-text">更换</text>
+        </view>
+        <view class="af-closebtn" hover-class="icon-pressed" :hover-stay-time="120" @click="close">
+          <image class="af-close-ic" :src="'/static/goal/gm_close.png'" mode="aspectFit"></image>
         </view>
       </view>
       <view class="sub-row">
@@ -150,7 +165,9 @@
             :style="{ left: sweetPillLeft(grpItem) }"
           ></view>
           <view
-            class="sweet-seg"
+            class="sweet-seg ui-pressable"
+            hover-class="ui-pressed"
+            :hover-stay-time="120"
             v-for="(optItem, optIdx) in sweetOpts(grpItem)"
             :key="optIdx"
             @click="pickSweet(grpItem.key, optItem.key)"
@@ -173,8 +190,10 @@
       <text class="form-label">餐次</text>
       <view class="af-meal-row">
         <view
-          class="af-meal-card"
+          class="af-meal-card ui-pressable"
           :class="{ 'af-meal-card-on': mealItem.key === meal }"
+          hover-class="ui-pressed"
+          :hover-stay-time="120"
           v-for="(mealItem, mealIdx) in mealCards"
           :key="mealIdx"
           @click="pickMeal(mealItem.key)"
@@ -189,11 +208,11 @@
         </view>
       </view>
 
-      <view class="confirm-btn" @click="confirm">
+      <view class="confirm-btn ui-pressable" hover-class="af-btn-pressed" :hover-stay-time="140" @click="confirm">
         <text class="confirm-text">添加到{{ mealLabel }} · {{ totalKcal }} kcal</text>
       </view>
     </view>
-  </page-container>
+  </scroll-view>
 </template>
 
 <script setup lang="uts">
@@ -203,6 +222,7 @@ import { watch } from 'vue'
 import OptionTray from './OptionTray.uvue'
 import type { TrayOption } from './OptionTray.uvue'
 import CountStepper from './CountStepper.uvue'
+import { playSound, triggerHaptic } from '../stores/settings'
 import {
   getFoodById,
   gramsOf,
@@ -222,7 +242,7 @@ import {
  */
 
 const props = defineProps<{
-  show: boolean
+  show?: boolean
   foodId: string
 }>()
 
@@ -230,6 +250,7 @@ const emit = defineEmits<{
   (e: 'update:show', v: boolean): void
   (e: 'confirm', v: AddPayload): void
   (e: 'change'): void
+  (e: 'close'): void
 }>()
 
 export type AddPayload = {
@@ -443,13 +464,13 @@ function sweetPillLeft(grp: OptGroup): string {
 }
 
 function pickSweet(key: string, v: string): void {
-  if (sweetPick(key) === v) return
-  try {
-    uni.vibrateShort()
-  } catch (e) {
-    // 无触觉设备忽略
+  if (sweetPick(key) === v) {
+    triggerHaptic('light')
+    return
   }
+  playSound('card')
   setSweet(key, v)
+  triggerHaptic('light')
 }
 
 /** 头部副行：计件类=每单位热量，其余=每100单位热量 */
@@ -515,37 +536,23 @@ const totalKcal = computed(() => {
 })
 
 function pickMeal(key: string): void {
-  if (key === meal.value) return
-  meal.value = key
-  try {
-    uni.vibrateShort()
-  } catch (e) {
-    // 无触觉设备忽略
+  if (key === meal.value) {
+    triggerHaptic('light')
+    return
   }
+  playSound('card')
+  meal.value = key
+  triggerHaptic('light')
 }
 
 function onChange(): void {
-  try {
-    uni.vibrateShort()
-  } catch (e) {
-    // 无触觉设备忽略
-  }
+  triggerHaptic('light')
   emit('change')
 }
 
-/** 原生蒙层不自动关闭，点按时回传 show=false 触发离场动画 */
-function onOverlayTap(): void {
-  try {
-    uni.vibrateShort()
-  } catch (e) {
-    // 无触觉设备忽略
-  }
+function close(): void {
   emit('update:show', false)
-}
-
-/** page-container 离场结束（系统返回/confirm 关闭等），回传关闭态保持父级同步 */
-function onAfterLeave(): void {
-  emit('update:show', false)
+  emit('close')
 }
 
 function confirm(): void {
@@ -553,11 +560,7 @@ function confirm(): void {
   if (f == null) return
   const sizes = vesselSizesOf(f.vessel ?? '')
   const hit = sizes.find((s) => s.k === sizeKey.value)
-  try {
-    uni.vibrateLong()
-  } catch (e) {
-    // 无触觉设备忽略
-  }
+  triggerHaptic('medium')
   emit('confirm', {
     foodId: f.id,
     amount: isCountUnit.value ? count.value : (hit != null ? hit.amount : 0),
@@ -571,19 +574,34 @@ function confirm(): void {
 </script>
 
 <style>
+.af-scroll {
+  flex: 1;
+  height: 100%;
+}
 .af-sheet {
+  position: relative;
   background-color: #FFFFFF;
   border-top-left-radius: 34px;
   border-top-right-radius: 34px;
-  padding: 12px 18px 24px 18px;
+  padding: 16px 18px 24px 18px;
+  /* #ifdef MP-WEIXIN */
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  /* #endif */
   flex-shrink: 0;
 }
-.af-handle {
-  width: 44px;
-  height: 5px;
-  border-radius: 3px;
-  background-color: #DCEDE6;
-  align-self: center;
+.af-closebtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background-color: #F2FAF5;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+.af-close-ic {
+  width: 16px;
+  height: 16px;
 }
 .food-row {
   flex-direction: row;
@@ -618,7 +636,7 @@ function confirm(): void {
 }
 .kcal-unit {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: bold;
   color: #0A7A5C;
   margin-left: 3px;
 }
@@ -638,7 +656,7 @@ function confirm(): void {
 }
 .change-text {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: bold;
   color: #0F4F3D;
   margin-left: 3px;
 }
@@ -752,9 +770,6 @@ function confirm(): void {
 /* 稿面选中卡：薄荷外描边（Pencil MC_午餐 stroke #1FBF8F）＋抬升 4px */
 .af-meal-card-on {
   transform: translateY(-4px);
-  border-width: 1px;
-  border-style: solid;
-  border-color: #1FBF8F;
   box-shadow: 0 8px 12px rgba(10, 79, 61, 0.35);
 }
 .af-meal-photo {
@@ -793,7 +808,7 @@ function confirm(): void {
   top: 65.5px;
   text-align: center;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: bold;
   color: rgba(255, 255, 255, 0.72);
 }
 .af-meal-name-on {
@@ -814,30 +829,33 @@ function confirm(): void {
   border-color: #FFFFFF;
   justify-content: center;
   align-items: center;
-  animation: sealPop 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .seal-glyph {
   font-size: 12px;
   font-weight: bold;
   color: #FFFFFF;
 }
-@keyframes sealPop {
-  0% { transform: scale(0.6); }
-  100% { transform: scale(1); }
-}
 .confirm-btn {
   height: 52px;
   border-radius: 26px;
-  background-image: linear-gradient(to right, #7DEBC7, #1FBF8F);
+  background-image: linear-gradient(90deg, #7DEBC7, #1FBF8F);
   justify-content: center;
   align-items: center;
   margin-top: 18px;
   flex-shrink: 0;
   box-shadow: 0 8px 18px rgba(31, 191, 143, 0.34);
+  /* #ifdef MP-WEIXIN */
+  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.16s ease-out;
+  /* #endif */
+}
+.af-btn-pressed {
+  transform: scale(0.965);
+  box-shadow: 0 2px 6px rgba(31, 191, 143, 0.22);
+  opacity: 0.95;
 }
 .confirm-text {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: bold;
   color: #FFFFFF;
 }
 </style>

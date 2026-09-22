@@ -1,5 +1,33 @@
 <!--
   [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[个人中心三项热量卡（目标热量、已摄入、还能吃）图标全面升级引用高保真矢量 SVG 素材（stat_target.svg / stat_consumed.svg / stat_remain.svg），调整合适比例规整展示]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[解决 uni-app x 编译器将 BannerState 泛型编译为运行时 new BannerState 导致 setup 崩溃白屏的致命Bug，改用纯对象推导；修正 calStatus.color 取值]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[今日热量卡与达标Banner业务状态机深度重构：
+    1. 修复 100% 满额时 conic-gradient 属性解析异常导致外圆环隐身消失的问题，改用实色与渐变自适应兼容；
+    2. 解决进度条写死 #23B391 导致全局超标珊瑚色失效的问题，支持绿/琥珀/珊瑚红三态自适应；
+    3. 修复「还能吃」数值超标时显示负数诱导误解的Bug，超标归零并切换标签；
+    4. 重构「今日达标/不达标」Banner 状态机：当日吃满 2 餐及以上且未超标显示「今日已达标（绿）」，超额即转为「今日不达标（橙色 + 请减少进食，加油啊）」]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[将 getCalorieStatus 改为从 goal store 直接引入，消除独立 utils 模块在小程序运行期 module is not defined 导致页面崩溃的严重Bug]
+-->
+<!--
+  [变更日志]
   修改时间：2026-09-22
   AI模型：Gemini 系列
   修改内容：[实施方案A：页底预留高度升级为动态安全区全避让。
@@ -145,21 +173,21 @@
         <image class="cal-flame" :src="'/static/profile/flame.png'" mode="aspectFit"></image>
         <text class="cal-title">今日热量</text>
         <view class="pill">
-          <text class="pill-text">还可以吃</text>
+          <text class="pill-text">{{ remainCal > 0 ? '还可以吃' : '已超标' }}</text>
         </view>
       </view>
-      <view class="ring" :style="{ backgroundImage: ringGrad }">
+      <view class="ring" :style="ringStyleText">
         <view class="ring-inner">
           <text class="ring-pct">{{ progPct }}%</text>
           <text class="ring-lbl">已摄入</text>
         </view>
       </view>
       <view class="bignum-row">
-        <text class="bignum">{{ remainCal }}</text>
+        <text class="bignum">{{ Math.abs(remainCal) }}</text>
         <text class="bignum-unit">kcal</text>
       </view>
       <view class="prog-track">
-        <view class="prog-fill" :style="{ width: progPct + '%' }"></view>
+        <view class="prog-fill" :style="'width: ' + progPct + '%; background-color: ' + calStatus.color + ';'"></view>
       </view>
       <view class="prog-row">
         <view class="pl-side">
@@ -177,7 +205,7 @@
         <view class="stat-col">
           <view class="stat-top">
             <view class="stat-chip">
-              <image class="stat-ico" :src="'/static/profile/stat_target.png'" mode="aspectFit"></image>
+              <image class="stat-ico" :src="'/static/profile/stat_target.svg'" mode="aspectFit"></image>
             </view>
             <text class="stat-num">{{ goal.calorieGoal }}</text>
           </view>
@@ -187,7 +215,7 @@
         <view class="stat-col">
           <view class="stat-top">
             <view class="stat-chip">
-              <image class="stat-ico" :src="'/static/profile/stat_consumed.png'" mode="aspectFit"></image>
+              <image class="stat-ico" :src="'/static/profile/stat_consumed.svg'" mode="aspectFit"></image>
             </view>
             <text class="stat-num">{{ food.totalCal }}</text>
           </view>
@@ -197,21 +225,22 @@
         <view class="stat-col">
           <view class="stat-top">
             <view class="stat-chip">
-              <image class="stat-ico" :src="'/static/profile/stat_remain.png'" mode="aspectFit"></image>
+              <image class="stat-ico" :src="'/static/profile/stat_remain.svg'" mode="aspectFit"></image>
             </view>
-            <text class="stat-num-green">{{ remainCal }}</text>
+            <text :class="remainCal > 0 ? 'stat-num-green' : 'stat-num-coral'">{{ displayRemainCal }}</text>
           </view>
           <text class="stat-lbl">还能吃 / kcal</text>
         </view>
       </view>
-      <!-- 达标 Banner：设计稿为白卡内嵌件（卡片在 Banner 下方仍有留白），必须真实嵌套进 .cal-card -->
-      <view class="banner">
-        <view class="check-circle">
-          <image class="check" :src="'/static/profile/check.png'" mode="aspectFit"></image>
+      <!-- 达标 Banner：支持达标绿态与超额橙态状态机自适应 -->
+      <view class="banner" :class="bannerState.cardClass">
+        <view class="check-circle" :class="bannerState.circleClass">
+          <image v-if="bannerState.isOk" class="check" :src="'/static/profile/check.png'" mode="aspectFit"></image>
+          <text v-else class="banner-excl">!</text>
         </view>
         <view class="banner-text">
-          <text class="banner-title">今日已达标</text>
-          <text class="banner-sub">继续保持，做得很好！</text>
+          <text class="banner-title" :class="{ 'banner-title-over': !bannerState.isOk }">{{ bannerState.title }}</text>
+          <text class="banner-sub">{{ bannerState.sub }}</text>
         </view>
         <image class="banner-chev" :src="'/static/profile/chev_banner.png'" mode="aspectFit"></image>
       </view>
@@ -317,7 +346,7 @@ import { onShow } from '@dcloudio/uni-app'
 // #endif
 import Tabbar from '../../components/Tabbar.uvue'
 import { useFoodStore } from '../../stores/food'
-import { useGoalStore } from '../../stores/goal'
+import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import { useUserStore } from '../../stores/user'
 import { useSettingsStore } from '../../stores/settings'
 
@@ -395,15 +424,66 @@ const goRecords = () => {
 }
 
 const remainCal = computed(() => goal.calorieGoal - food.totalCal)
-const progPct = computed(() => {
+const calStatus = computed(() => getCalorieStatus(food.totalCal, goal.calorieGoal))
+const displayRemainCal = computed<number>(() => (remainCal.value > 0 ? remainCal.value : 0))
+
+const progPct = computed<number>(() => {
   if (goal.calorieGoal <= 0) return 0
-  const p = Math.round(food.totalCal / goal.calorieGoal * 100)
+  const p = Math.round((food.totalCal / goal.calorieGoal) * 100)
   return p > 100 ? 100 : p
 })
-/** 71% 圆环：conic-gradient 按真实进度着色（模拟器验证渲染兼容性） */
-const ringGrad = computed(() =>
-  'conic-gradient(#23B391 0% ' + progPct.value + '%, #E5F0EC ' + progPct.value + '% 100%)'
-)
+
+/** 圆环样式字符串：100% 满额时直接使用实色 color，低于 100% 时使用 conic-gradient，彻底解决全满时圆环消失问题 */
+const ringStyleText = computed<string>(() => {
+  const c = calStatus.value.color
+  if (progPct.value >= 100) {
+    return 'background-color: ' + c + ';'
+  }
+  return 'background-image: conic-gradient(' + c + ' 0% ' + progPct.value + '%, #E5F0EC ' + progPct.value + '% 100%);'
+})
+
+/** 今日吃过的有效餐次数 */
+const activeMealCount = computed<number>(() => {
+  return food.mealRows.filter((m) => (typeof m.cal === 'number' ? m.cal : 0) > 0).length
+})
+
+/**
+ * 达标 Banner 状态机：
+ * 1. 达标：至少记录 2 个餐次且未超额（food.totalCal <= goal.calorieGoal && activeMealCount >= 2 && food.totalCal > 0）
+ * 2. 不达标：超额（food.totalCal > goal.calorieGoal）-> 橙色图标，请减少进食，加油啊
+ * 3. 记录中：未超额但不足 2 餐
+ */
+const bannerState = computed(() => {
+  const isOver = food.totalCal > goal.calorieGoal
+  if (isOver) {
+    return {
+      type: 'over',
+      title: '今日不达标',
+      sub: '请减少进食，加油啊',
+      cardClass: 'banner-over',
+      circleClass: 'circle-orange',
+      isOk: false,
+    }
+  }
+  if (activeMealCount.value >= 2 && food.totalCal > 0) {
+    return {
+      type: 'ok',
+      title: '今日已达标',
+      sub: '继续保持，做得很好！',
+      cardClass: 'banner-ok',
+      circleClass: 'circle-green',
+      isOk: true,
+    }
+  }
+  return {
+    type: 'pending',
+    title: '今日记录中',
+    sub: '记录 2 餐及以上且未超标即算达标',
+    cardClass: 'banner-pending',
+    circleClass: 'circle-green',
+    isOk: true,
+  }
+})
 
 const WEEKDAY = ['日', '一', '二', '三', '四', '五', '六']
 
@@ -636,7 +716,13 @@ const records = computed<Rec[]>(() => {
 .prog-fill {
   height: 9px;
   border-radius: 5px;
-  background-color: #23B391;
+  background-color: #1FBF8F;
+}
+.prog-fill.bg-amber {
+  background-color: #E8B54D;
+}
+.prog-fill.bg-coral {
+  background-color: #FF9E7D;
 }
 .prog-row {
   flex-direction: row;
@@ -686,8 +772,8 @@ const records = computed<Rec[]>(() => {
   align-items: center;
 }
 .stat-ico {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
 }
 .stat-num {
   font-size: 18px;
@@ -699,6 +785,12 @@ const records = computed<Rec[]>(() => {
   font-size: 18px;
   font-weight: bold;
   color: #008561;
+  margin-left: 8px;
+}
+.stat-num-coral {
+  font-size: 18px;
+  font-weight: bold;
+  color: #FF7043;
   margin-left: 8px;
 }
 .stat-lbl {
@@ -714,20 +806,38 @@ const records = computed<Rec[]>(() => {
 .banner {
   flex-direction: row;
   align-items: center;
-  background-color: #EBF8F5;
   border-radius: 13px;
   margin-left: 10px;
   margin-right: 10px;
   margin-top: 13px;
   padding: 10px 12px;
 }
+.banner-ok {
+  background-color: #EBF8F5;
+}
+.banner-over {
+  background-color: #FFF2EC;
+}
+.banner-pending {
+  background-color: #F0F7F4;
+}
 .check-circle {
   width: 27px;
   height: 27px;
   border-radius: 14px;
-  background-color: #009771;
   justify-content: center;
   align-items: center;
+}
+.circle-green {
+  background-color: #009771;
+}
+.circle-orange {
+  background-color: #FF7043;
+}
+.banner-excl {
+  font-size: 16px;
+  font-weight: 800;
+  color: #FFFFFF;
 }
 .check {
   width: 12px;
@@ -739,7 +849,11 @@ const records = computed<Rec[]>(() => {
 }
 .banner-title {
   font-size: 11px;
+  font-weight: bold;
   color: #00865C;
+}
+.banner-title-over {
+  color: #D94826;
 }
 .banner-sub {
   font-size: 8px;
@@ -960,8 +1074,8 @@ const records = computed<Rec[]>(() => {
   color: #FA543A;
 }
 .chev-row {
-  width: 10px;
-  height: 16px;
+  width: 8px;
+  height: 14px;
   margin-left: 8px;
 }
 .rec-div {

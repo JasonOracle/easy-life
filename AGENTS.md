@@ -1,4 +1,4 @@
-# AGENTS.md — CalTrack 项目开发指引
+# AGENTS.md — 轻律生活 项目开发指引
 
 > 本文件供 AI Agent 在当前项目中工作时读取，是项目静态宪法。
 > **新会话启动顺序：先读 `docs/progress.md`（动态状态），再读本文件（静态规则）。**
@@ -6,7 +6,7 @@
 
 ## 项目概述
 
-**CalTrack** — 轻量级卡路里追踪 App，帮助用户快速记录每日饮食，直观展示摄入数据。
+**轻律生活** — 轻量级卡路里追踪 App，帮助用户快速记录每日饮食，直观展示摄入数据。
 
 - 版本：v1.0 MVP
 - 状态：MVP 主体已落地（5 页 ＋ 8 组件 ＋ 5 store 在微信模拟器跑通，353 条食物库），处于「还原度收尾 ＋ 工程化加固」阶段
@@ -489,6 +489,12 @@ app/src/
 - 音效在静音模式下不应触发 → 加系统静音检测 `uni.getSystemInfoSync().audioStatus`
 - **uvue 模板 v-for 循环变量禁用单字母 `r`**（2026-09-19 Settings 页实测）：症状为该 v-for 块插值全空、行数错乱、同页其他 v-for 卡片消失，**控制台零报错**；静态对照实验定位后，改名 `item` 即愈。其余单字母 d/m/s/i/h/b 实测正常，`r` 高度疑似与 WXML 编译产物内部变量冲突 —— **v-for 变量一律语义化命名（item/row/drop）**
 
+- **uni-app x UTS 蒸汽模式严禁自闭合标签（2026-09-23 编译排错铁律）**：`<input />`、`<Component />` 等自闭合标签在 UTS 编译器中会导致语法树解析中断，抛出 `[plugin:uts] Element is missing end tag. at ...:1:0` 假象报错。所有标签必须严格写作 `<input></input>`、`<Component></Component>`。
+- **组件模板根层级闭合标签缺失级联报错**（2026-09-23 GoalModal 实测）：当子组件深层嵌套（如 `.overlay > .container > .sheet`）遗漏闭合 `</view>` 标签时，编译器无法匹配父级元素，往往不在子组件报错，而是直接导致引用它的父页面（如 `Settings.uvue:1:0`）报语法错误。排查排错第一步使用 AST/正则全量检查成对闭合。
+- **方案A单流程食物添加架构（2026-09-23 定案）**：微信原生 `page-container` 连续销毁重建有约 1500ms 冷启动白屏且状态机容易死锁。因此将「列表选择」与「分量添加」统一合并于 `FoodPicker.uvue` 内部（`step: 'list' | 'detail'`），单弹层原地无缝切换，点击「更换」秒回列表并回显当前项，宿主侧零冗余状态机。
+- **SettleBadge 结算徽章 2D Canvas 环形渲染（2026-09-23 定案）**：真机环境下 CSS `conic-gradient` 极易出现掉帧、卡顿与渲染异常。重构为标准 Canvas 2D 动效引擎驱动，确保双端 60fps 丝滑满帧扫环；同时结算弹窗关闭后去除倒水音效，保持交互干净明快。
+- **水瓶卡片物理比例与微风动效（2026-09-23 定案）**：水瓶尺寸（104x168）、背景卡片（176x176）与两侧托底叶片（64x64/62x62）回归黄金构图，腔体水位严格保持 80% 上限；单次点击播放轻脆 feedback，长按播放晃动音效，手势音效彻底解耦。
+
 ## 当前待办
 
 - [x] **已定（实践中定型，2026-09-22 文档校准确认）：工程化路线＝HBuilderX 图形模式** —— 配置文件（`manifest.json`/`pages.json`）放 `app/` **项目根**，`pages.json` 的 path **不带** `src/` 前缀（实测五条页面路径均为 `pages/...`）；`app/src/` 只放 build.py 产出的 `data/`。CLI 路线（`package.json`+`vite.config.ts`）不采用：uni-app x 编译器在 HBuilderX 内部，`npm run dev:mp-weixin` 不存在
@@ -496,18 +502,14 @@ app/src/
   组件（`redirectTo` 切换），不用原生 tabBar；不存在 midbutton 需求（加号在首页右上 FAB，小程序端避胶囊）。
   **终态＝三 Tab**：「首页／日历／我的」，其中「日历」＝ `pages/records/Records.uvue`（Boss 拍板 #4 由二级页升为一级 Tab，删左上返回钮，Tab 文案用「日历」、页内标题保留稿面「最近记录」）。
   三 Tab 的选中态与玻璃材质见「核心约束／玻璃面」条（色值几何以 `DesignTokens.md` §7 为准）
-- [x] **已完成（2026-09-21）：公共添加食物弹窗** —— `AddFood/OptionTray/CountStepper/FoodToast/GoalModal` 6 组件（方案 B 底槽＋光晕＋对数能量条＋Toast L3 触觉），首页 FAB → 吐司步进器 1→5→100 → 确认 → Toast L3 触觉；设置目标行 → GoalModal chips 同步；软阴影贴图 `app/static/common/shadow512.png`；验收：步进器 1/5/100 全态、OptionTray 底槽悬浮、GoalModal 表盘+chips、FoodToast 2s/点按、控制台空
-- [x] **已完成（2026-09-21）：弹层③ 结算徽章** —— `SettleBadge.uvue` 定稿重写（Pencil Dz3YV 几何＋MU1O4 九轨动效，单一 progress 同驱环扫/计数/触感，
-  MP 端 conic 环＋App 端 canvas 双实现，严格 2160ms 自动关无点按关闭，千位空格分隔，low 档直落淡入淡出）；
-  Home 接线替换 FoodToast（FAB→FoodPicker→AddFood→SettleBadge）；Boss 人工实测动效与自动关通过；音效暂缓
-- [x] **已完成（2026-09-21）：弹层⓪ 食物选择列表** —— `FoodPicker.uvue`（Pencil n3dgv：搜索〔名称/全拼/首字母，py 索引由 build.py 生成〕＋库内真实 7 类 chips＋真实 webp 缩略图＋单选点行即关）；链路＝首页 FAB → FoodPicker → AddFood，AddFood「更换」→ FoodPicker 回显（scroll-into-view 滚至选中行）；首开无选中（Boss 拍板）
-- [x] **已完成（2026-09-21）：5 个 store** —— device / food（含 library＋vessel＋opt 解析）/ goal / settings / user，
-  全带 `ct_*` 本地持久化；三页已接读数；页面 `app/src/data/food_library.json` 现 353 条
+- [x] **已完成（2026-09-23）：方案A单流程食物添加架构** —— `FoodPicker.uvue` 内置两态 `step: 'list' | 'detail'`，选食物原地切入 `AddFood`，消除双 `page-container` 造成的 1500ms 冷启动卡顿与互斥；宿主侧零冗余状态机；弹窗高度限制为标准半屏抽屉规格。
+- [x] **已完成（2026-09-23）：SettleBadge 升级 Canvas 2D 动效** —— 废弃 conic-gradient，重构为真双端统一的 Canvas 2D 动效渲染，移除弹层结束倒水音效。
+- [x] **已完成（2026-09-23）：首页水瓶与叶片物理动效与比例重构** —— 水瓶卡片回归黄金比例（瓶身 104x168，卡片 176x176，叶子 64x64/62x62）；单击播放轻脆 feedback，长按播放晃动音效；枝叶微风摆动与双层波浪往复动效；`stores/settings.ts` 集中管理全 App 音效。
+- [x] **已完成（2026-09-23）：全工程 UTS 语法合规与抗坑加固** —— 清理所有组件中的自闭合标签（`<input></input>`, `<AddFood></AddFood>`）；修复 `GoalModal.uvue` 缺失的根视图闭合标签；修复 `PrivacyDialog.uvue` 废弃属性与不兼容伪类。
 - [x] **已完成（2026-09-22，Boss 五条拍板）：TabBar 液态玻璃重构** —— 两 Tab 通栏 → **三 Tab 悬浮胶囊＋会跑的选中气泡**（四关键帧，MP 端 CSS transition）；Records 升一级 Tab（删返回钮、入口改 `redirectTo`）；#29 的 fade 渐显**整条废弃**；页底预留 40 → **78**；6 色值＋几何入 `DesignTokens.md` §7。小程序端验收（三格换页／暗态／四关键帧逐值吻合，证据见 `docs/progress.md` 同日前端进度与 `debug/shots/tab8~13*.png`）
 - [x] **已完成（2026-09-22，Boss 定稿）：浅色态「气泡隐身」修正** —— 胶囊底 88%→**60%**、气泡加白 60% 1px 描边（折射亮边）＋ 投影 `0 4 12 rgba(0,0,0,.06)`（悬浮高度差）；暗态与 low 降级档未动。验收＝三页浅底截图 ＋ 暗态回归 `debug/shots/f_prof_dark.png`
 - [ ] **暗态染色图标未产出**（深色模式下仍用浅底那套矢量图标，需专门出暗态版本）
 - [ ] **App／Web 端真机回归**：气泡动画的 **Worklet 实现**（现仅 MP 端 CSS transition，App 端阶段跳变＋TODO）、`backdrop-filter` 原生端支持度（未验，代码用 `#ifdef MP-WEIXIN` 包住）
-- [ ] 实现组件：**Bottle／液体晃动**（`composables/useLiquid.ts` 尚不存在，视觉语言里的核心动效仍未落地）、**音效**（`assets/sound/` 未建，四类音未接）。~~Sheet / Modal~~ 已由微信原生 `page-container` 取代，不再自研壳
 - [ ] **p348–p353 六条后补食物的图标是 92×92**（其余 353−6＝347 张为 512×512），且 `assets/icons-gen/` 里没有它们的原始 PNG。要提清晰度须跑 `gen_icons.py`（花生图额度）→ **等 Boss 拍板**
 - [ ] `toolchain/gen_tab_icons.py` 现无任何文档/脚本引用（疑似一次性工具）→ 去留待 Boss
 - [ ] **食物缩略图「画框托底」只做了暗黑态**（`docs/design/2026-09-22-food-thumb-plate/README.md`）：浅色态该节原文标「**需老板拍板**」，至今未拍 ⇒ 浅色**保持现状不加托底**，AI 不得自行显影 `.row-thumb` 里那句 `#EAF9F3`

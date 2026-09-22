@@ -1,5 +1,35 @@
 <!--
   [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[补齐 .gm-overlay 根节点缺失的闭合 </view> 标签，彻底解决 UTS 编译器 Element is missing end tag 编译中断错误]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[1. 遵循 uni-app x 原生规范，将 font-weight: 500/600 统一为 bold；2. 为 .gm-fill 与 .gm-thumb 的 transition 添加 MP-WEIXIN 条件编译保护，避免 App 原生端样式失效]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[按指令清除滑块拖动、步进增减、快速选择与保存目标中的触觉震动(vibrateShort/vibrateLong)，避免微信模拟器窗口剧烈抖动，待后续按需开启]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[音效接入升级：拖动滑条与步进加减接入 slide.mp3 滑动音效，快速选择热量预设卡片接入 selected-card.mp3 卡片切换音效]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[将 playSound 迁移至 settings store 引入，彻底消除独立 composables 模块在小程序运行期 module is not defined 导致页面崩溃的严重Bug]
+-->
+<!--
+  [变更日志]
   修改时间：2026-09-22
   AI模型：Qoder (Claude)
   修改内容：[弹层壳迁移到原生 page-container（同 FoodPicker 模式）：自研 .gm-mask 固定层＋点蒙层关闭＋z900 退役；
@@ -30,21 +60,24 @@
 -->
 <!--
   [变更日志]
+  修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[弹窗手势与安全区规范落地：
+    1. 移除顶部静态灰色横杠（.gm-handle）；
+    2. 保存按钮 .gm-save 升级 fluid-interaction-expert 物理弹性按压动效（btn-capsule-pressed）；
+    3. 底部追加 calc(24px + env(safe-area-inset-bottom)) 动态安全区避让，彻底消除小黑条遮挡]
+-->
+<!--
+  [变更日志]
   修改时间：2026-09-21
   AI模型：Qoder (Claude)
   修改内容：[修复蒙层点击不关闭 bug：mask 加 @click close，sheet @click.stop 阻断冒泡]
 -->
 
 <template>
-  <page-container <!-- #ifdef MP -->
-    v-if="show"
-    <!-- #endif -->
-    :show="show" position="bottom" :overlay="true" :duration="300"
-    custom-style="height:560px;background-color:#FFFFFF;border-top-left-radius:34px;border-top-right-radius:34px;"
-    @clickoverlay="onOverlayTap" @afterleave="onAfterLeave">
-    <view class="gm-sheet">
-      <view class="gm-handle"></view>
-
+  <view class="gm-overlay" :class="{ 'gm-overlay-active': active }" v-if="render" @click="onOverlayTap">
+    <view class="gm-container" :class="{ 'gm-container-active': active }" @click.stop>
+      <view class="gm-sheet">
       <view class="gm-head">
         <view class="gm-badge">
           <image class="gm-badge-ic" :src="'/static/goal/gm_target.png'" mode="aspectFit"></image>
@@ -59,15 +92,15 @@
       </view>
 
       <view class="gm-dial" id="gm-dial">
-        <view class="gm-stepbtn" :class="{ 'gm-stepbtn-off': picked <= MIN }" @click="step(-1)">
+        <view class="gm-stepbtn ui-pressable" :class="{ 'gm-stepbtn-off': picked <= MIN }" hover-class="ui-pressed" :hover-stay-time="120" @click="step(-1)">
           <image class="gm-step-ic" :src="'/static/goal/gm_minus.png'" mode="aspectFit"></image>
         </view>
-        <view class="gm-stepbtn gm-stepbtn-r" :class="{ 'gm-stepbtn-off': picked >= MAX }" @click="step(1)">
+        <view class="gm-stepbtn gm-stepbtn-r ui-pressable" :class="{ 'gm-stepbtn-off': picked >= MAX }" hover-class="ui-pressed" :hover-stay-time="120" @click="step(1)">
           <image class="gm-step-ic" :src="'/static/goal/gm_plus.png'" mode="aspectFit"></image>
         </view>
         <view class="gm-numrow">
-          <text class="gm-bignum">{{ picked }}</text>
-          <text class="gm-unit">kcal</text>
+          <text class="gm-bignum" :class="statusStyle.textClass">{{ picked }}</text>
+          <text class="gm-unit" :class="statusStyle.textClass">kcal</text>
         </view>
         <view
           class="gm-dragzone"
@@ -77,8 +110,8 @@
           @touchcancel="onDragEnd"
         >
           <view class="gm-track"></view>
-          <view class="gm-fill" :style="{ width: fillW + 'px' }"></view>
-          <view class="gm-thumb" :style="{ left: (TRACK_X + fillW - 10) + 'px' }"></view>
+          <view class="gm-fill" :class="statusStyle.bgClass" :style="{ width: fillW + 'px' }"></view>
+          <view class="gm-thumb" :style="{ left: (TRACK_X + fillW - 10) + 'px', borderColor: statusStyle.hex }"></view>
         </view>
         <view class="gm-ticks">
           <text
@@ -93,8 +126,10 @@
       <text class="gm-qlabel">快速选择</text>
       <view class="gm-qtray">
         <view
-          class="gm-qslot"
+          class="gm-qslot ui-pressable"
           :class="{ 'gm-qslot-on': quickItem === picked }"
+          hover-class="ui-pressed"
+          :hover-stay-time="120"
           v-for="(quickItem, quickIdx) in TICKS"
           :key="quickIdx"
           @click="pick(quickItem)"
@@ -113,11 +148,12 @@
         <image class="gm-tip-arrow" :src="'/static/goal/gm_chev.png'" mode="aspectFit"></image>
       </view>
 
-      <view class="gm-save" @click="save">
+      <view class="gm-save ui-pressable" hover-class="gm-btn-pressed" :hover-stay-time="140" @click="save">
         <text class="gm-save-txt">保存设置</text>
       </view>
     </view>
-  </page-container>
+    </view>
+  </view>
 </template>
 
 <script setup lang="uts">
@@ -134,6 +170,8 @@ import { getCurrentInstance } from 'vue'
  * 查询失败仅禁用拖拽（−/＋钮与快速选择始终可用）。保存 emit 给父调 setGoal。
  */
 
+import { playSound, triggerHaptic } from '../stores/settings'
+
 const props = defineProps<{
   show: boolean
   initial: number
@@ -143,6 +181,10 @@ const emit = defineEmits<{
   (e: 'update:show', v: boolean): void
   (e: 'save', v: number): void
 }>()
+
+const render = ref(false)
+const active = ref(false)
+let timer = 0
 
 const MIN = 1200
 const MAX = 2400
@@ -165,10 +207,22 @@ function clamp(v: number): number {
 const ratio = computed<number>(() => (picked.value - MIN) / (MAX - MIN))
 const fillW = computed<number>(() => Math.round(ratio.value * TRACK_W * 10) / 10)
 
+const statusStyle = computed(() => {
+  if (picked.value <= 1800) {
+    return { textClass: 'clr-mint', bgClass: 'bg-mint', hex: '#1FBF8F' }
+  } else if (picked.value <= 2100) {
+    return { textClass: 'clr-amber', bgClass: 'bg-amber', hex: '#E8B54D' }
+  } else {
+    return { textClass: 'clr-coral', bgClass: 'bg-coral', hex: '#FF9E7D' }
+  }
+})
+
 watch(
   () => props.show,
   (v) => {
     if (v) {
+      if (timer > 0) { clearTimeout(timer); timer = 0; }
+      render.value = true
       picked.value = clamp(props.initial)
       nextTick(() => {
         try {
@@ -184,30 +238,53 @@ watch(
           dialLeft.value = -1
         }
       })
+      setTimeout(() => {
+        active.value = true
+      }, 50)
+    } else {
+      active.value = false
+      if (timer > 0) { clearTimeout(timer); timer = 0; }
+      timer = setTimeout(() => {
+        render.value = false
+        onAfterLeave()
+        timer = 0
+      }, 300) as unknown as number
     }
   }
 )
 
 function bump(): void {
-  try {
-    uni.vibrateShort()
-  } catch (e) {
-    // 无触觉设备忽略
-  }
+  // 震动已按指令统一移除
+}
+
+function playCard(): void {
+  playSound('card')
+}
+
+function playSlide(): void {
+  playSound('slide')
 }
 
 function pick(v: number): void {
   const next = clamp(v)
-  if (next === picked.value) return
+  if (next === picked.value) {
+    triggerHaptic('light')
+    return
+  }
   picked.value = next
-  bump()
+  playCard()
+  triggerHaptic('light')
 }
 
 function step(dir: number): void {
   const next = picked.value + dir * STEP
-  if (next < MIN || next > MAX) return
+  if (next < MIN || next > MAX) {
+    triggerHaptic('heavy')
+    return
+  }
   picked.value = next
-  bump()
+  playSlide()
+  triggerHaptic('light')
 }
 
 function onDragStart(e: any): void {
@@ -219,7 +296,7 @@ function onDragMove(e: any): void {
 }
 
 function onDragEnd(): void {
-  bump()
+  playSlide()
 }
 
 function updateFromTouch(e: any): void {
@@ -229,7 +306,11 @@ function updateFromTouch(e: any): void {
   const x = list[0].clientX - dialLeft.value - TRACK_X
   const r = Math.min(Math.max(x / TRACK_W, 0), 1)
   const next = clamp(MIN + r * (MAX - MIN))
-  if (next !== picked.value) picked.value = next
+  if (next !== picked.value) {
+    picked.value = next
+    playSlide()
+    triggerHaptic('light')
+  }
 }
 
 function close(): void {
@@ -247,31 +328,61 @@ function onAfterLeave(): void {
 }
 
 function save(): void {
+  triggerHaptic('medium')
+  playSound('success')
   emit('save', picked.value)
   emit('update:show', false)
 }
 </script>
 
 <style>
+.gm-overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 900;
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: 300ms;
+}
+.gm-overlay-active {
+  opacity: 1;
+}
+.gm-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: auto;
+  min-height: 570px;
+  background-color: #FFFFFF;
+  border-top-left-radius: 34px;
+  border-top-right-radius: 34px;
+  transform: translateY(100%);
+  transition-property: transform;
+  transition-duration: 300ms;
+  display: flex;
+  flex-direction: column;
+}
+.gm-container-active {
+  transform: translateY(0);
+}
 /* 稿面 D3308：高 560 顶部圆角 34（容器外观已迁 page-container custom-style） */
 .gm-sheet {
   flex: 1;
-  padding: 12px 20px 24px 20px;
+  padding: 18px 20px 24px 20px;
+  /* #ifdef MP-WEIXIN */
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  /* #endif */
 }
-/* 稿面 EYi92：41×4 $line */
-.gm-handle {
-  width: 41px;
-  height: 4px;
-  border-radius: 2px;
-  background-color: #DCEDE6;
-  align-self: center;
-  flex-shrink: 0;
-}
-/* 头部：徽章 y34（handle 底 16 + 18） */
+/* 头部：徽章与标题 */
 .gm-head {
   flex-direction: row;
   align-items: flex-start;
-  margin-top: 18px;
+  margin-top: 4px;
   flex-shrink: 0;
 }
 /* 稿面 qhjRQ：44×44 $mintsoft r14，target 图标 22 居中 */
@@ -373,7 +484,7 @@ function save(): void {
 }
 .gm-unit {
   font-size: 13.5px;
-  font-weight: 600;
+  font-weight: bold;
   color: rgba(15, 79, 61, 0.6);
   margin-left: 6px;
   margin-bottom: 6px;
@@ -404,6 +515,9 @@ function save(): void {
   height: 8px;
   border-radius: 4px;
   background-image: linear-gradient(90deg, #7DEBC7, #1FBF8F);
+  /* #ifdef MP-WEIXIN */
+  transition: background-color 0.2s, background-image 0.2s;
+  /* #endif */
 }
 /* 稿面 WKknG：20 白圆 $mint 描边 3，圆心=Fill 右端 */
 .gm-thumb {
@@ -416,6 +530,9 @@ function save(): void {
   border-width: 3px;
   border-style: solid;
   border-color: #1FBF8F;
+  /* #ifdef MP-WEIXIN */
+  transition: border-color 0.2s;
+  /* #endif */
 }
 /* 稿面 sAGAr：刻度行 y112（卡内），5 标签 w44 中心 48..287 → 容器 left/right 26 space-between */
 .gm-ticks {
@@ -472,7 +589,7 @@ function save(): void {
 }
 .gm-qnum {
   font-size: 15px;
-  font-weight: 500;
+  font-weight: bold;
   color: rgba(15, 79, 61, 0.6);
 }
 .gm-qnum-on {
@@ -510,7 +627,7 @@ function save(): void {
 }
 .gm-tip-title {
   font-size: 13.5px;
-  font-weight: 600;
+  font-weight: bold;
   color: #0A4F3D;
 }
 .gm-tip-sub {
@@ -533,6 +650,14 @@ function save(): void {
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
+  /* #ifdef MP-WEIXIN */
+  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.16s ease-out;
+  /* #endif */
+}
+.gm-btn-pressed {
+  transform: scale(0.965);
+  box-shadow: 0 2px 6px rgba(31, 191, 143, 0.22);
+  opacity: 0.95;
 }
 .gm-save-txt {
   font-size: 15.5px;

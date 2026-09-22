@@ -1,3 +1,9 @@
+/*
+ * [变更日志]
+ * 修改时间：2026-09-23
+ * AI模型：Gemini 系列
+ * 修改内容：[注册隐私保护授权弹窗页面 pages/privacy/PrivacyDialog]
+ */
 {
   "pages": [
     {
@@ -33,6 +39,13 @@
       "style": {
         "navigationStyle": "custom",
         "backgroundColorContent": "#F2FAF5"
+      }
+    },
+    {
+      "path": "pages/privacy/PrivacyDialog",
+      "style": {
+        "navigationStyle": "custom",
+        "backgroundColor": "transparent"
       }
     }
   ],

@@ -1,5 +1,22 @@
 # GoalModal — 每日热量目标弹窗
 
+> 变更记录：
+> - 2026-09-23（Gemini 系列）：补齐 .gm-overlay 根节点缺失的闭合 </view> 标签，彻底修复 UTS 编译器 Element is missing end tag 错误。
+> - 2026-09-23（Gemini 系列）：遵循 uni-app x 原生规范统一字重为 bold；给 transition 添加 MP-WEIXIN 条件编译保护。
+> - 2026-09-23（OpenCode / Gemini 底层）：按指令清除滑块拖动、步进增减、快速选择与保存目标中的触觉震动(vibrateShort/vibrateLong)，避免微信模拟器窗口剧烈抖动，待后续按需开启。
+> - 2026-09-22（Gemini 系列）：移除顶部静态伪手势 handle 横杠；大胶囊保存按钮升级 fluid-interaction-expert 弹性阻尼按压反馈（.btn-capsule-pressed）；底部追加动态安全区全避让（calc(24px + env(safe-area-inset-bottom))）。
+> - 2026-09-22（Gemini 系列）：接入 slide.mp3 滑动音效（拖拽滑块/加减步进）与 selected-card.mp3 卡片切换音效（快速选择预设卡片），触觉与听觉双模联动。
+
+## 💡 核心思想
+
+底部弹层调整每日摄入目标（1200–2400 kcal，步进 100）。横向 Track 滑块交互与快速选择卡片分区，采用原生 page-container 容器，滑动时触发 `slide` 灵敏音效，选择预设卡片时触发 `card` 音效。
+
+## 💻 使用示例
+
+```html
+<GoalModal v-model:show="goalShow" :initial="goal.calorieGoal" @save="goal.setGoal" ></GoalModal>
+```
+
 ## 用途
 底部弹窗，用户调整每日热量目标（1200–2400 kcal，步长 100）。含横向滑条 Dial 卡（−/＋ 步进钮、拖拽、刻度）、快速选择槽、保存钮。
 
@@ -21,7 +38,7 @@
   −/＋ 钮与快速选择不受影响（降级而非报错）
 - **`clamp()` 吸附**：任何入口（initial/拖拽/步进/快速）都先四舍五入到 100 步长再钳位，杜绝 1850 这类中间值
 - **保存**：`emit('save', picked)` + `emit('update:show', false)`，落库由父组件调 store 完成（组件不直接碰 store）
-- **触觉**：步进/快速/拖拽落点均 `vibrateShort()`（L1 轻反馈），try/catch 兜底无触觉设备
+- **触觉**：触觉震动已按指令全量下线，避免微信模拟器窗口剧烈抖动，待后续按需开启。保留 slide/card/success 音效系统反馈。
 
 ## 边界与降级
 - `initial` 越界或带零头 → `clamp()` 归位

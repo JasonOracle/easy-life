@@ -2,6 +2,24 @@
 
 <!--
 [变更日志]
+修改时间：2026-09-23
+AI模型：Gemini 系列
+修改内容：[1. 修复 Android 选中日期空白与顶部渐变异常：.lr-pill-sel 和 .lr-header 补充 background-color 实色兜底；2. 遵循 uni-app x 原生规范，将 font-weight: 500/600 统一为 bold]
+-->
+<!--
+[变更日志]
+修改时间：2026-09-23
+AI模型：OpenCode / Gemini 底层
+修改内容：[按指令清除日历日期选择(pickDay)与月份翻页(prevMonth/nextMonth)中的 vibrateShort 触觉震动，避免微信模拟器窗口剧烈抖动，待后续按需开启]
+-->
+<!--
+[变更日志]
+修改时间：2026-09-22
+AI模型：Gemini 系列
+修改内容：[对齐修复：餐次卡 .lr-mcard 内部图标、标题、热量行及脚部项数行全量实现水平轴心对齐居中（align-items: center / justify-content: center），消除视觉偏左偏差]
+-->
+<!--
+[变更日志]
 修改时间：2026-09-22
 AI模型：Gemini 系列
 修改内容：[实施方案A：页底预留高度升级为动态安全区全避让。

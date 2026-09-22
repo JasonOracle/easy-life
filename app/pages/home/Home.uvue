@@ -1,5 +1,118 @@
 <!--
   [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[接入方案A单流程架构：FAB点击拉起整合版 FoodPicker，内部无缝切换列表与详情，删除宿主侧 addShow/onPickFood/onAddChange 冗余状态机，彻底消除双 page-container 冷启动 1500ms 卡顿]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[1. 树叶微风摇摆重构：以枝茎根部为 px 支点，通过 CSS transition + @transitionend 实现往复微摆动；2. 水面波浪动效：双层 wave 通过 @transitionend 往复平移动态居中；3. 渐变语法替换为 180deg；4. 清理 Android 端不支持的 @keyframes 动画；5. 打开食物选择与添加确认时清空 addFoodId 防止残留旧选中]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[修复水瓶点击与长按音效解耦：单次点击水瓶（onBottleTap）播放轻脆反馈 click.mp3（playSound('click')），长按水瓶（onBottleLongPress）保持播放震颤音效 shake.mp3]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[水瓶与背景尺寸适度放大回归黄金比例：
+    1. 背景卡片由 162x162 放大至 176x176，瓶身由 94x152 适度放大至 104x168（解决视觉偏小问题，饱满大气）；
+    2. 两侧叶片等比微调至 64x64 / 62x62，保持 V 形托底舒展优美构图；
+    3. 流体腔体适配重算（CAVITY_HEIGHT = 118px，宽 73px），严格保持 80% 最高水位限制]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[水瓶与叶子排布和视觉比例重构（对照参考图精调）：
+    1. 瓶身尺寸缩小精细化（112x180 -> 94x152），居中于背景卡片，预留充足呼吸空间；
+    2. 叶片尺寸按参考图小巧化（88px -> 58px），排布在瓶底后方两侧呈 V 形斜向上舒展托底；
+    3. 流体腔体适配重算（CAVITY_HEIGHT = 106px，宽 66px），严格保持 80% 最高水位限制]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[水瓶与叶子动效全量落地（接入 4 张独立矢量 SVG 素材：bg.svg / yezi-zuo.svg / yezi-you.svg / pingzi.svg）：
+    1. 结构与动效物理彻底解耦：两侧叶子独立微风错相摆动，完全不随瓶身晃动；
+    2. 基于 fluid-interaction-expert 规范实现点击二阶欠阻尼钟摆（小狗抖毛）与反相惯性晃水联动，长按高频横向微震颤；
+    3. 严格落实水瓶最高水位不超过 80% 约束规则，接入倒水冲击凹陷与回弹涌浪时序]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[宏量卡（蛋白质、碳水、脂肪）图标全面升级引用高保真矢量 SVG 素材（macro_protein.svg / macro_carb.svg / macro_fat.svg），并微调 .macro-icon 尺寸为 24x24 正方契合]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[按指令清除水瓶点击/长按、食物长按删除、添加食物确认与倒水动效中的触觉震动(vibrateShort/vibrateLong)，避免微信模拟器窗口剧烈抖动，待后续按需开启]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[食物删除链路与弹窗时序修复：
+    1. 首页今日餐次列表项（.meal-row）接入 @longpress 长按删除确认弹窗，联动 food.removeEntry；
+    2. 修复更换食物时前后两个 page-container 并发动画冲突导致的状态机锁死 bug（增加 320ms 延时解耦）]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[图层架构重构——彻底解决「瓶身随叶子一起晃动」问题：
+    1. 废弃 bottle_bg_leaves.png（该图含瓶身白色区域，是分层问题根源）；
+    2. 背景光晕改为纯 CSS view 实现（.bottle-bg-glow）；
+    3. 左叶/右叶改为独立 image（leaves_left.png / leaves_right.png），各自单独旋转支点和不同动画周期，实现自然错开的微风效果；
+    4. 增加倒水水流视觉元素（.pour-stream），配合 triggerPourEffect 从左侧滑入消失，强化注水物理感]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[水瓶与叶子高级微交互升级：
+    1. 点击动效重构为「小狗甩水」物理阻尼钟摆（整体往左-15°再往右+30°随后振荡衰减归零），内部液体正弦波动态联动，彻底摒除缩放感；
+    2. 长按动效重构为瓶体水平高频平移 shake 震颤（密集往复平移归零）；
+    3. 音效接入升级：点击与长按切换为 shake.mp3 真实晃动音效，倒水 drop-water.mp3 配合 2 秒注水波澜起伏动画精准闭环]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[水瓶物理动效与轻绿质感全面重构（对齐物理规则与治愈系主题）：
+    1. 彻底解决「晃动时周围树叶跟着动」：提取独立静态背景叶子层（.bottle-bg-leaves），瓶身遮罩（.bottle-mask）完全剔除外围叶片，瓶体晃动时背景叶子静止伫立；
+    2. 改造点击与长按物理规则：单次点击由瓶底为支点斜向左右摆动（角度衰减阻尼钟摆）且水面正弦波浪联动；长按改为水平快速平移震颤（translateX 手机震动感），不旋转不放大；
+    3. 全局优化水瓶颜色设计：水体统一为轻律生活治愈系清透薄荷轻绿多层通透渐变，彻底告别沉重橙色；
+    4. 接入添加食物成功后倒水物理效果：监听 SettleBadge @close 事件，弹层消失后播放 drop-water.mp3 倒水音效，伴随液位物理上涌、水流冲击超冲鼓包与波浪激荡]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[彻底重构水瓶液体质感与动效（解决「没有液体的感觉」Bug）：
+    1. 增加双层无缝正弦波浪水面（wave_front + wave_back），不同相位无限循环激荡流动；
+    2. 增加水体内部晶莹折射高光带（.liquid-glare）与底部徐徐升起的微气泡（.bubble-1 / .bubble-2）；
+    3. 接入入场注水动画（Fill-up Intro），冷启动平滑注水抬升；
+    4. 增强水体深层渐变对比度，彻底摆脱单一平面色块感]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-22
+  AI模型：Gemini 系列
+  修改内容：[实施 Phase 2 动态水瓶流体架构：
+    1. 将原有静态单图 .bottle 升级为三层夹心结构（底层内胆 .bottle-cavity + 夹层动态液位 .bottle-liquid + 表层刻度遮罩 .bottle-mask）；
+    2. 基于零重排 GPU translateY 驱动液位升降与状态色彩联动（绿/琥珀/珊瑚红）；
+    3. 接入点击微波激荡、长按蓄力呼吸、食物添加平滑涌入物理动效]
+-->
+<!--
+  [变更日志]
   修改时间：2026-09-22
   AI模型：Gemini 系列
   修改内容：[实施方案A：页底预留高度升级为动态安全区全避让。
@@ -130,7 +243,7 @@
           <text class="title">轻律生活</text>
           <text class="subtitle">让健康饮食成为一种习惯</text>
         </view>
-        <view class="fab" :style="{ right: fabRight, top: fabTop }" @click="openAdd">
+        <view class="fab" :style="{ right: fabRight, top: fabTop }" hover-class="icon-pressed" :hover-stay-time="120" @click="openAdd">
           <text class="fab-plus">＋</text>
         </view>
       </view>
@@ -138,7 +251,7 @@
 
     <!-- 顶栏文档流占位（随内容滚走）：日期行 -->
     <view class="header" :style="{ paddingTop: (sbH + 64) + 'px' }">
-      <view class="date-row">
+      <view class="date-row" hover-class="icon-pressed" :hover-stay-time="120" @click="onDateClick">
         <image class="date-icon" :src="'/static/home/date_icon.png'" mode="aspectFit"></image>
         <text class="date-text">9月19日 · 周五</text>
       </view>
@@ -147,22 +260,58 @@
     <!-- Hero（常驻标题块 #28：避让已由 .header 的 paddingTop 完成，此处保持原 -18 上叠，勿重复加 sbH） -->
     <view class="hero">
       <image class="hero-wave" :src="'/static/home/hero_wave.png'" mode="widthFix"></image>
-      <image class="bottle" :src="'/static/home/bottle.png'" mode="aspectFit"></image>
+      <!-- 独立底层背景：柔和底色渐变 + 流体斑块 + 装饰气泡星芒（bg.svg） -->
+      <image class="bottle-bg" :src="'/static/home/bg.svg'" mode="aspectFit"></image>
+      <!-- 左侧独立叶子（yezi-zuo.svg，旋转支点在茎底，自然微风往复微摆） -->
+      <image
+        class="leaf-left"
+        :style="{ transform: 'rotate(' + leafLeftDeg + 'deg)' }"
+        @transitionend="onLeafLeftEnd"
+        :src="'/static/home/yezi-zuo.svg'"
+        mode="aspectFit"
+      ></image>
+      <!-- 右侧独立叶子（yezi-you.svg，旋转支点在茎底，自然微风错相往复微摆） -->
+      <image
+        class="leaf-right"
+        :style="{ transform: 'rotate(' + leafRightDeg + 'deg)' }"
+        @transitionend="onLeafRightEnd"
+        :src="'/static/home/yezi-you.svg'"
+        mode="aspectFit"
+      ></image>
+      <!-- 倒水水流视觉条（pour 时激活，从左上切入瓶口） -->
+      <view class="pour-stream" :class="{ 'pour-stream-active': pourStreamActive }"></view>
+      <!-- 水瓶交互主体：底层内胆流体 + 表层纯净瓶身本体（pingzi.svg，独立物理动效） -->
+      <view class="bottle-wrap" :style="bottleAnimStyle" @click="onBottleTap" @longpress="onBottleLongPress">
+        <view class="bottle-cavity">
+          <view class="bottle-liquid" :class="liquidClass" :style="liquidStyle">
+            <!-- 双层无缝正弦波浪液面 -->
+            <image class="wave-back" :style="{ transform: 'translateX(' + (-waveX) + 'px)' }" :src="'/static/home/wave_back.png'" mode="scaleToFill"></image>
+            <image class="wave-front" :style="{ transform: 'translateX(' + waveX + 'px)' }" @transitionend="onWaveEnd" :src="'/static/home/wave_front.png'" mode="scaleToFill"></image>
+            <!-- 液体深层流动晶莹反光带 -->
+            <view class="liquid-glare"></view>
+            <!-- 向上漂浮微气泡 -->
+            <view class="bubble bubble-1"></view>
+            <view class="bubble bubble-2"></view>
+          </view>
+        </view>
+        <!-- 纯净瓶身 SVG（含刻度线、侧高光、瓶盖与投影，完全无叶子粘连） -->
+        <image class="bottle-mask" :src="'/static/home/pingzi.svg'" mode="aspectFit"></image>
+      </view>
       <image class="sticker" :src="'/static/home/sticker.png'" mode="aspectFit"></image>
       <view class="hero-text">
         <view class="remain-head">
-          <text class="remain-label">还能吃</text>
+          <text class="remain-label" :class="calStatus.textClass">{{ remainCal >= 0 ? '还能吃' : '已超标' }}</text>
           <image class="remain-leaf" :src="'/static/home/leaf.png'" mode="aspectFit"></image>
         </view>
         <view class="remain-num-row">
-          <text class="remain-num">{{ remainCal }}</text>
-          <text class="remain-unit">kcal</text>
+          <text class="remain-num" :class="calStatus.textClass">{{ Math.abs(remainCal) }}</text>
+          <text class="remain-unit" :class="calStatus.textClass">kcal</text>
         </view>
         <text class="consumed">已摄入 {{ food.totalCal }} / {{ goal.calorieGoal }} kcal</text>
-        <view class="goal-pill">
-          <image class="pill-cal" :src="'/static/home/pill_calendar.png'" mode="aspectFit" @click="openRecords"></image>
+        <view class="goal-pill ui-pressable" hover-class="ui-pressed" :hover-stay-time="120" @click="openGoal">
+          <image class="pill-cal" :src="'/static/home/pill_calendar.png'" mode="aspectFit"></image>
           <text class="goal-pill-text">每日目标 {{ goal.calorieGoal }} kcal</text>
-          <image class="pill-edit" :src="'/static/home/pill_edit.png'" mode="aspectFit" @click="openGoal"></image>
+          <image class="pill-edit" :src="'/static/home/pill_edit.png'" mode="aspectFit"></image>
         </view>
       </view>
     </view>
@@ -170,19 +319,19 @@
     <!-- 宏量卡 -->
     <view class="macro-card">
       <view class="macro-col">
-        <image class="macro-icon" :src="'/static/home/macro_protein.png'" mode="aspectFit"></image>
+        <image class="macro-icon" :src="'/static/home/macro_protein.svg'" mode="aspectFit"></image>
         <text class="macro-num">{{ macroP }}g</text>
         <text class="macro-label">蛋白质</text>
       </view>
       <view class="macro-div"></view>
       <view class="macro-col">
-        <image class="macro-icon" :src="'/static/home/macro_carb.png'" mode="aspectFit"></image>
+        <image class="macro-icon" :src="'/static/home/macro_carb.svg'" mode="aspectFit"></image>
         <text class="macro-num">{{ macroC }}g</text>
         <text class="macro-label">碳水</text>
       </view>
       <view class="macro-div"></view>
       <view class="macro-col">
-        <image class="macro-icon" :src="'/static/home/macro_fat.png'" mode="aspectFit"></image>
+        <image class="macro-icon" :src="'/static/home/macro_fat.svg'" mode="aspectFit"></image>
         <text class="macro-num">{{ macroF }}g</text>
         <text class="macro-label">脂肪</text>
       </view>
@@ -211,7 +360,7 @@
         </view>
         <view class="meal-card" v-if="meal.key !== 'dinner' || showDinner">
           <view v-for="(rowItem, rowIdx) in meal.rows" :key="rowIdx">
-            <view class="meal-row">
+            <view class="meal-row" @longpress="onFoodLongPress(rowItem.id, rowItem.name)">
               <image class="meal-thumb" :src="rowItem.img" mode="aspectFill"></image>
               <text class="meal-row-name">{{ rowItem.name }}</text>
               <text class="meal-row-portion">{{ rowItem.portion }}</text>
@@ -231,16 +380,15 @@
     <!-- 底部 Tab（共享组件：液态玻璃悬浮胶囊，三 Tab 首页／日历／我的） -->
     <Tabbar active="home" ></Tabbar>
 
-    <!-- 弹层⓪ 食物选择列表 → 弹窗① 添加食物（更换时回到列表并回显） -->
-    <FoodPicker v-model:show="pickerShow" :selected-id="addFoodId" @select="onPickFood" ></FoodPicker>
-    <AddFood v-model:show="addShow" :food-id="addFoodId" @confirm="onAddConfirm" @change="onAddChange" ></AddFood>
-    <SettleBadge v-model:show="settleShow" :kcal="settleKcal" :after="settleAfter" :goal="goal.calorieGoal" :meal="settleMeal" ></SettleBadge>
+    <!-- 弹层⓪ 食物选择与添加单流程（列表+详情内部无缝切换） -->
+    <FoodPicker v-model:show="pickerShow" @confirm="onAddConfirm" ></FoodPicker>
+    <SettleBadge v-model:show="settleShow" :kcal="settleKcal" :after="settleAfter" :goal="goal.calorieGoal" :meal="settleMeal" @close="onSettleClose" ></SettleBadge>
     <GoalModal v-model:show="goalShow" :initial="goal.calorieGoal" @save="goal.setGoal" ></GoalModal>
   </view>
 </template>
 
 <script setup lang="uts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 /**
  * 演示数据（稿面静态值，store 重建后再接真实数据）。
@@ -277,14 +425,14 @@ try {
 
 import Tabbar from '../../components/Tabbar.uvue'
 import { computed } from 'vue'
-import AddFood from '../../components/AddFood.uvue'
-import type { AddPayload } from '../../components/AddFood.uvue'
 import FoodPicker from '../../components/FoodPicker.uvue'
+import type { AddPayload } from '../../components/FoodPicker.uvue'
 import SettleBadge from '../../components/SettleBadge.uvue'
 import GoalModal from '../../components/GoalModal.uvue'
 import { useFoodStore } from '../../stores/food'
-import { useGoalStore } from '../../stores/goal'
+import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import { getFoodById, computeEntry } from '../../stores/food'
+import { playSound, triggerHaptic } from '../../stores/settings'
 
 /**
  * 接 store 读数（今日种子精确还原 v2 行：早 420 / 午 560 / 晚 390，宏量 68/156/42）。
@@ -294,11 +442,216 @@ const food = useFoodStore()
 const goal = useGoalStore()
 
 const remainCal = computed(() => goal.calorieGoal - food.totalCal)
+const calStatus = computed(() => getCalorieStatus(food.totalCal, goal.calorieGoal))
+
 const macroP = computed(() => Math.round(food.totalProtein))
 const macroC = computed(() => Math.round(food.totalCarbs))
 const macroF = computed(() => Math.round(food.totalFat))
 
+// 瓶身内胆几何参数与最高水位硬约束（Boss 规则：最高不超过 80% 高度）
+const CAVITY_HEIGHT = 118 // 与 CSS .bottle-cavity 一致
+const MAX_FILL_RATIO = 0.80
+
+// 瓶身流体动效状态
+const bottleScale = ref(1)
+const bottleRotate = ref(0)
+const bottleTranslateX = ref(0)
+const bottleTransition = ref('transform 0.08s ease-out')
+const liquidWave = ref(0) // 波浪微振位移 (px)
+const pourOffset = ref(0) // 倒水注入时的弹性超冲位移 (px)
+const pourStreamActive = ref(false) // 倒水水流条纹是否激活
+
+const bottleAnimStyle = computed(() => {
+  return {
+    transform: `translateX(${bottleTranslateX.value}px) rotate(${bottleRotate.value}deg) scale(${bottleScale.value})`,
+    transformOrigin: '50% 96%',
+    transition: bottleTransition.value
+  }
+})
+
+// 树叶自然往复微风摆动状态
+const leafLeftDeg = ref(0)
+const leafRightDeg = ref(0)
+const leafLeftDir = ref(1)
+const leafRightDir = ref(1)
+const leafSwinging = ref(false)
+
+// 水面波浪往复流动状态
+const waveX = ref(0)
+const waveDir = ref(1)
+const waveSwinging = ref(false)
+
+function onLeafLeftEnd(): void {
+  if (!leafSwinging.value) return
+  leafLeftDir.value = -leafLeftDir.value
+  leafLeftDeg.value = 2.5 * leafLeftDir.value
+}
+
+function onLeafRightEnd(): void {
+  if (!leafSwinging.value) return
+  leafRightDir.value = -leafRightDir.value
+  leafRightDeg.value = -2.2 * leafRightDir.value
+}
+
+function onWaveEnd(): void {
+  if (!waveSwinging.value) return
+  waveDir.value = -waveDir.value
+  waveX.value = waveDir.value > 0 ? 0 : -64
+}
+
+// 入场注水动效：进页面先置为底部 (CAVITY_HEIGHT - 6)，挂载后平滑注水落位到真实水位
+const introReady = ref(false)
+onMounted(() => {
+  setTimeout(() => {
+    introReady.value = true
+  }, 100)
+  leafSwinging.value = true
+  waveSwinging.value = true
+  setTimeout(() => {
+    leafLeftDeg.value = 2.5
+    leafRightDeg.value = -2.2
+  }, 200)
+  setTimeout(() => {
+    waveX.value = -64
+  }, 100)
+})
+
+onUnmounted(() => {
+  leafSwinging.value = false
+  waveSwinging.value = false
+})
+
+// 液位高度计算：内腔有效高度 126px，根据已摄入/目标百分比映射为 translateY
+const liquidOffsetY = computed<number>(() => {
+  if (!introReady.value) {
+    return CAVITY_HEIGHT - 6 // 初始极低水位，等待注水升起
+  }
+  const g = goal.calorieGoal > 0 ? goal.calorieGoal : 2000
+  // 水位限制在 0.06 ~ 0.80 之间，严格遵守 80% 限高规则，预留 20% 注水冲击空腔
+  const ratio = Math.min(Math.max((food.totalCal / g) * MAX_FILL_RATIO, 0.06), MAX_FILL_RATIO)
+  // translateY = CAVITY_HEIGHT * (1 - ratio) + 微波动效偏移 + 倒水超冲位移
+  const baseOffset = CAVITY_HEIGHT * (1 - ratio)
+  return Math.max(0, baseOffset + liquidWave.value + pourOffset.value)
+})
+
+const liquidStyle = computed(() => {
+  // 水体受瓶身倾斜反作用力的惯性剪切（瓶身右倾时液体向左下倾斜）
+  const skewDeg = -bottleRotate.value * 0.45
+  return {
+    transform: `translateY(${liquidOffsetY.value}px) skewX(${skewDeg}deg)`,
+    transition: 'transform 0.65s cubic-bezier(0.34, 1.25, 0.64, 1)'
+  }
+})
+
+// 液体颜色与全局卡路里状态联动（保持薄荷治愈系清透轻绿设计）
+const liquidClass = computed(() => {
+  if (calStatus.value.type === 'coral') return 'liquid-coral'
+  if (calStatus.value.type === 'amber') return 'liquid-amber'
+  return 'liquid-green'
+})
+
+let tapTimers: any[] = []
+
+function clearTapTimers() {
+  for (let i = 0; i < tapTimers.length; i++) {
+    clearTimeout(tapTimers[i])
+  }
+  tapTimers = []
+}
+
+function onBottleTap() {
+  playSound('click')
+  triggerHaptic('light')
+  clearTapTimers()
+
+  bottleScale.value = 1
+  bottleTranslateX.value = 0
+  bottleTransition.value = 'transform 0.075s cubic-bezier(0.2, 0, 0, 1)'
+
+  // fluid-interaction-expert: 二阶欠阻尼钟摆甩水模型（总历时约 385ms）
+  // 1. 先向左蓄势 -14°
+  bottleRotate.value = -14
+  liquidWave.value = 14
+
+  tapTimers.push(setTimeout(() => {
+    // 2. 猛烈反向甩动过冲 +24°
+    bottleRotate.value = 24
+    liquidWave.value = -16
+    tapTimers.push(setTimeout(() => {
+      // 3. 回摆 -16°
+      bottleRotate.value = -16
+      liquidWave.value = 10
+      tapTimers.push(setTimeout(() => {
+        // 4. 余摆 +8°
+        bottleRotate.value = 8
+        liquidWave.value = -5
+        tapTimers.push(setTimeout(() => {
+          // 5. 微摆 -3°
+          bottleRotate.value = -3
+          liquidWave.value = 2
+          tapTimers.push(setTimeout(() => {
+            // 6. 归零平息
+            bottleRotate.value = 0
+            liquidWave.value = 0
+          }, 60))
+        }, 65))
+      }, 70))
+    }, 75))
+  }, 85))
+}
+
+let pressTimers: any[] = []
+
+function clearPressTimers() {
+  for (let i = 0; i < pressTimers.length; i++) {
+    clearTimeout(pressTimers[i])
+  }
+  pressTimers = []
+}
+
+function onBottleLongPress() {
+  playSound('shake')
+  triggerHaptic('heavy')
+  clearPressTimers()
+
+  bottleScale.value = 1
+  bottleRotate.value = 0
+  bottleTransition.value = 'transform 0.035s ease-out'
+
+  // fluid-interaction-expert: 28Hz 高频密集微平移（纯 translateX: ±4px，不旋转不缩放）
+  bottleTranslateX.value = -4
+  liquidWave.value = 3.5
+
+  pressTimers.push(setTimeout(() => {
+    bottleTranslateX.value = 4
+    liquidWave.value = -3.5
+    pressTimers.push(setTimeout(() => {
+      bottleTranslateX.value = -3
+      liquidWave.value = 2.5
+      pressTimers.push(setTimeout(() => {
+        bottleTranslateX.value = 3
+        liquidWave.value = -2.5
+        pressTimers.push(setTimeout(() => {
+          bottleTranslateX.value = -1.5
+          liquidWave.value = 1
+          pressTimers.push(setTimeout(() => {
+            bottleTranslateX.value = 0
+            liquidWave.value = 0
+          }, 25))
+        }, 25))
+      }, 30))
+    }, 30))
+  }, 35))
+}
+
+function onDateClick() {
+  playSound('click')
+  triggerHaptic('light')
+  openRecords()
+}
+
 type MealRow = {
+  id: string
   img: string
   name: string
   portion: string
@@ -320,10 +673,8 @@ const MEAL_ICONS: Record<string, string> = {
   dinner: '/static/home/meal_moon.png',
 }
 
-/** 弹层⓪ 选择食物 → 弹窗① 添加（确认写库＋弹弹层③ 结算徽章）；Pill 铅笔 → GoalModal */
+/** 弹层⓪ 选择并添加食物（确认写库＋弹弹层③ 结算徽章）；Pill 铅笔 → GoalModal */
 const pickerShow = ref(false)
-const addShow = ref(false)
-const addFoodId = ref('')
 const settleShow = ref(false)
 const settleKcal = ref(0)
 const settleAfter = ref(0)
@@ -331,6 +682,7 @@ const settleMeal = ref('')
 const goalShow = ref(false)
 
 function openGoal(): void {
+  triggerHaptic('light')
   goalShow.value = true
 }
 
@@ -347,21 +699,26 @@ const MEAL_LABELS: Record<string, string> = {
 }
 
 function openAdd(): void {
+  playSound('click')
+  triggerHaptic('light')
   pickerShow.value = true
 }
 
-function onPickFood(id: string): void {
-  addFoodId.value = id
-  addShow.value = true
-}
-
-function onAddChange(): void {
-  addShow.value = false
-  pickerShow.value = true
+function onFoodLongPress(entryId: string, foodName: string): void {
+  triggerHaptic('medium')
+  uni.showActionSheet({
+    itemList: [`删除「${foodName}」`],
+    itemColor: '#FA543A',
+    success: (res) => {
+      if (res.tapIndex === 0) {
+        food.removeEntry(entryId)
+        playSound('delete')
+      }
+    }
+  })
 }
 
 function onAddConfirm(payload: AddPayload): void {
-  addShow.value = false
   // 落库（2026-09-21 Boss 拍板：确认即写真实记录，供首页/最近记录/单日详情消费）
   const f = getFoodById(payload.foodId)
   if (f != null) food.addEntry(computeEntry(f, payload.amount, payload.unit, payload.meal, payload.extraKcal))
@@ -369,6 +726,53 @@ function onAddConfirm(payload: AddPayload): void {
   settleAfter.value = food.totalCal
   settleMeal.value = MEAL_LABELS[payload.meal] ?? ''
   settleShow.value = true
+  
+  playSound('success')
+}
+
+function onSettleClose(): void {
+  // 结算徽章完全退场，不播放倒水特效（根据用户要求移除）
+}
+
+function triggerPourEffect(): void {
+  // 激活水流条纹视觉（从左滑入瓶口，CSS animation 自动执行 1.3s 后自动隐藏）
+  pourStreamActive.value = true
+  setTimeout(() => {
+    pourStreamActive.value = false
+  }, 1300)
+
+  // 3. 物理倒水注水模拟：水柱重力冲入液面，水面下砸凹陷（-14px）→ 回弹涌浪（+12px）→ 阻尼平息
+  // 先延迟 180ms 让水流条纹先切入瓶口，再触发水面重力下砸
+  setTimeout(() => {
+    // 冲击下凹：translateY 增加 14px（视觉凹陷）
+    pourOffset.value = 14
+    liquidWave.value = -8
+    bottleScale.value = 0.985
+
+    setTimeout(() => {
+      // 冲击反冲涌浪：translateY 减少 12px（视觉上浮涌浪）
+      pourOffset.value = -12
+      liquidWave.value = 12
+      bottleScale.value = 1.015
+      setTimeout(() => {
+        // 次级回荡
+        pourOffset.value = 5
+        liquidWave.value = -6
+        bottleScale.value = 0.995
+        setTimeout(() => {
+          pourOffset.value = -2
+          liquidWave.value = 3
+          bottleScale.value = 1.005
+          setTimeout(() => {
+            // 平息归零
+            pourOffset.value = 0
+            liquidWave.value = 0
+            bottleScale.value = 1
+          }, 320)
+        }, 280)
+      }, 280)
+    }, 280)
+  }, 180)
 }
 
 /** 晚餐按稿面默认收起（点展开钮可看明细） */
@@ -388,6 +792,7 @@ const meals = computed<Meal[]>(() =>
       time: m.time,
       totalKcal: typeof m.cal === 'number' ? m.cal : 0,
       rows: m.details.map((d) => ({
+        id: d.id,
         img: '/static/icons/' + d.img,
         name: d.name,
         portion: d.amountText,
@@ -442,6 +847,7 @@ const meals = computed<Meal[]>(() =>
   width: 40px;
   height: 40px;
   border-radius: 20px;
+  background-color: #2EB889;
   background-image: linear-gradient(180deg, #5CD9A6, #2EB889);
   justify-content: center;
   align-items: center;
@@ -483,12 +889,154 @@ const meals = computed<Meal[]>(() =>
   width: 100%;
   height: 220px;
 }
-.bottle {
+/* 独立底层背景：柔和底色渐变 + 流体斑块 + 装饰气泡星芒（bg.svg） */
+.bottle-bg {
   position: absolute;
-  left: 4px;
-  top: 33px;
-  width: 178px;
-  height: 192px;
+  left: 0px;
+  top: 58px;
+  width: 176px;
+  height: 176px;
+  pointer-events: none;
+}
+/* 左侧叶子：尺寸雅致（64x64），从瓶身左后方向左上方舒展，旋转支点在茎部右下方（56px 61px） */
+.leaf-left {
+  position: absolute;
+  left: 6px;
+  top: 128px;
+  width: 64px;
+  height: 64px;
+  pointer-events: none;
+  transform-origin: 56px 61px;
+  transition-property: transform;
+  transition-duration: 2000ms;
+  transition-timing-function: ease-in-out;
+}
+/* 右侧叶子：尺寸雅致（62x62），从瓶身右后方向右上方舒展，旋转支点在茎部左下方（7px 59px） */
+.leaf-right {
+  position: absolute;
+  left: 110px;
+  top: 130px;
+  width: 62px;
+  height: 62px;
+  pointer-events: none;
+  transform-origin: 7px 59px;
+  transition-property: transform;
+  transition-duration: 2600ms;
+  transition-timing-function: ease-in-out;
+}
+/* 倒水水流条：pour 动效激活时从左侧倾倒 */
+.pour-stream {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 5px;
+  height: 70px;
+  border-radius: 2.5px;
+  background-image: linear-gradient(180deg, rgba(125, 235, 199, 0) 0%, rgba(125, 235, 199, 0.7) 20%, rgba(31, 191, 143, 0.9) 100%);
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: top center;
+}
+.pour-stream-active {
+  opacity: 0.8;
+  transform: rotate(-26deg);
+}
+.bottle-wrap {
+  position: absolute;
+  left: 36px;
+  top: 48px;
+  width: 104px;
+  height: 168px;
+}
+.bottle-cavity {
+  position: absolute;
+  left: 15px;
+  top: 40px;
+  width: 74px;
+  height: 118px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  border-bottom-left-radius: 26px;
+  border-bottom-right-radius: 26px;
+  overflow: hidden;
+  background-color: rgba(235, 248, 243, 0.4);
+}
+.bottle-liquid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 118px;
+}
+/* 主题色清透轻绿治愈系水体质感 */
+.liquid-green {
+  background-color: #1FBF8F;
+  background-image: linear-gradient(180deg, #7DEBC7 0%, #2CD8A5 28%, #1AA87D 75%, #108A64 100%);
+}
+.liquid-amber {
+  background-color: #24C999;
+  background-image: linear-gradient(180deg, #86ECC8 0%, #29D2A0 35%, #18A67B 100%);
+}
+.liquid-coral {
+  background-color: #1FBF8F;
+  background-image: linear-gradient(180deg, #94F0D2 0%, #25CE9C 35%, #16A277 100%);
+}
+/* 液体内部高光反光带，赋予水体真实晶莹通透折射感 */
+.liquid-glare {
+  position: absolute;
+  top: 10px;
+  left: 8px;
+  width: 12px;
+  bottom: 15px;
+  background-color: rgba(255, 255, 255, 0.22);
+  border-radius: 6px;
+}
+.wave-back {
+  position: absolute;
+  top: -9px;
+  left: 0;
+  width: 128px;
+  height: 16px;
+  opacity: 0.65;
+  transition-property: transform;
+  transition-duration: 2200ms;
+  transition-timing-function: linear;
+}
+.wave-front {
+  position: absolute;
+  top: -7px;
+  left: 0;
+  width: 128px;
+  height: 16px;
+  opacity: 0.95;
+  transition-property: transform;
+  transition-duration: 2200ms;
+  transition-timing-function: linear;
+}
+.bubble {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.75);
+  border-radius: 10px;
+}
+.bubble-1 {
+  bottom: 12px;
+  left: 18px;
+  width: 4px;
+  height: 4px;
+}
+.bubble-2 {
+  bottom: 6px;
+  right: 18px;
+  width: 3px;
+  height: 3px;
+}
+.bottle-mask {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 104px;
+  height: 168px;
+  pointer-events: none;
 }
 .sticker {
   position: absolute;
@@ -580,8 +1128,8 @@ const meals = computed<Meal[]>(() =>
   align-items: center;
 }
 .macro-icon {
-  width: 27px;
-  height: 21px;
+  width: 24px;
+  height: 24px;
 }
 .macro-num {
   font-size: 21px;
