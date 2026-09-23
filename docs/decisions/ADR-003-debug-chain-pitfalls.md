@@ -12,3 +12,5 @@ uni-app x + mp-weixin 环境下热重载和 automator 存在未记录坑位，�
 3. **窗口遮挡假象**：窗口被遮挡时截图和 DOM 探针失效。
 4. **组件跨文件类名冲突**：组件内类名必须加前缀。
 5. **宿主幻影副本**：特定情况下组件渲染出重复 DOM，勿盲目修改逻辑。
+6. **UTS 顶层拆分赋值引发 Unexpected token**：严禁在 `<script setup lang="uts">` 顶层写 `const x = ref(0); x.value = ...` 的二次副作用赋值，必须单行原子初始化 `const x = ref<T>(...)`。
+7. **.uvue 根层严禁放置 HTML 注释块**：HBuilderX 5.26 蒸汽模式下，`.uvue` 文件必须从根标签（`<template>` / `<script>`）直接开始。若在文件头部放置 `<!-- [变更日志] -->` 等 HTML 注释块，UTS 编译器预处理时会把注释文本误送入 UTS AST 词法分析器，导致在注释某行（如第 35 行）直接触发 `[plugin:uts] Unexpected token (35:1)` 致命中断。所有历史记录必须归档至 `docs/history/`，源码头部保持纯净。

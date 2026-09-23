@@ -1,126 +1,3 @@
-<!--
-  [变更日志]
-  修改时间：2026-09-23
-  AI模型：OpenCode / Gemini 底层
-  修改内容：[彻底修复图4达标Banner图标视觉Bug：1. 将 check-circle 背景色从深墨绿 #009771 纠正为设计稿正统亮薄荷绿 #1FBF8F；2. 替换内部图标为纯白矢量 check_white.svg，消除颜色发灰与色块变形]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-23
-  AI模型：OpenCode / Gemini 底层
-  修改内容：[基于 ai-worldclass-design 落地高颜值全局顶栏：1. 淘汰粗硬模糊的 header_wave.png 位图；2. 统一接入纯矢量有机双层水波 liquid_wave.svg；3. 升级为全 App 统一高保真双色温薄荷水体渐变 (#4EE2B6 -> #1FBF8F -> #0A7A5C)；4. 优化今日热量浮岛卡片自然叠层 (-32rpx)]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-23
-  AI模型：OpenCode / Gemini 底层
-  修改内容：[全量排查并升级页面内所有位图图标为高清晰矢量 SVG：替换 gear.svg、flame.svg、check.svg、trend_icon.svg，并将所有微型箭头统一为矢量 chev_right.svg，彻底消除位图锯齿与残留]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-23
-  AI模型：Gemini 系列
-  修改内容：[全量换算为 750rpx 规范（1px = 2rpx）：头图、今日热量卡、三项宏量卡、周概览液滴、趋势柱状图与历史列表全量自适应真机]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-23
-  AI模型：OpenCode / Gemini 底层
-  修改内容：[个人中心三项热量卡（目标热量、已摄入、还能吃）图标全面升级引用高保真矢量 SVG 素材（stat_target.svg / stat_consumed.svg / stat_remain.svg），调整合适比例规整展示]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Gemini 系列
-  修改内容：[解决 uni-app x 编译器将 BannerState 泛型编译为运行时 new BannerState 导致 setup 崩溃白屏的致命Bug，改用纯对象推导；修正 calStatus.color 取值]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Gemini 系列
-  修改内容：[今日热量卡与达标Banner业务状态机深度重构：
-    1. 修复 100% 满额时 conic-gradient 属性解析异常导致外圆环隐身消失的问题，改用实色与渐变自适应兼容；
-    2. 解决进度条写死 #23B391 导致全局超标珊瑚色失效的问题，支持绿/琥珀/珊瑚红三态自适应；
-    3. 修复「还能吃」数值超标时显示负数诱导误解的Bug，超标归零并切换标签；
-    4. 重构「今日达标/不达标」Banner 状态机：当日吃满 2 餐及以上且未超标显示「今日已达标（绿）」，超额即转为「今日不达标（橙色 + 请减少进食，加油啊）」]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Gemini 系列
-  修改内容：[将 getCalorieStatus 改为从 goal store 直接引入，消除独立 utils 模块在小程序运行期 module is not defined 导致页面崩溃的严重Bug]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Gemini 系列
-  修改内容：[实施方案A：页底预留高度升级为动态安全区全避让。
-    .page padding-bottom 由固定 78px 改为 92px 并在小程序端结合 calc(82px + env(safe-area-inset-bottom))，
-    消除全面屏下内容滚到底被 Tabbar 遮挡的问题，保持 14px 舒适呼吸间距]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Qoder (Claude)
-  修改内容：[TabBar 液态玻璃胶囊配套（Boss 拍板第 3/4 条）：删 tabFade（渐显机制废弃，
-    新胶囊恒常可见），Tabbar 调用去 :fade；onPageScroll 保留（pf-st-mask 两态仍依赖它）；
-    .page padding-bottom 40 → 78＝悬浮胶囊实占（高 56 ＋ 离底 22）；
-    goRecords 由 navigateTo 改 redirectTo（Records 升为一级 Tab 页，页内无返回钮）]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Qoder (Claude)
-  修改内容：[#29 配套（Boss 拍板「缩页底预留位」）：.page 的 padding-bottom 由 78 压到 40，
-    让内容常态穿到玻璃 Tabbar（高约 76）之下，玻璃才有东西可透;
-    2. #29 续（Boss：「我想要的 tabbar 是 scroll-fade-navbar 那种效果」）：onPageScroll 按 0→60px
-    线性算 tabFade（0.05 量化）透传给 Tabbar；该监听原包在 #ifdef MP-WEIXIN 内，现去条件编译三端生效
-    （顺带补上 App／Web 端滚动时 pf-st-mask 不响应的既有缺口）
-    （2026-09-22 胶囊化后 fade 已按 Boss 指令废弃，此条留作追溯）]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Qoder (Claude)
-  修改内容：[P2 暗黑收尾：①头部薄荷渐变在暗色下改实色 #162924（深色卡面色，Pencil 无暗色稿的临时方案）；
-    ②滚动遮罩暗色同步 #0E211C→#162924；③状态栏字色随暗黑反转——onShow 与切换后调 uni.setNavigationBarColor
-    （深色白字/浅色黑字），App 原生端 plus.navigator 方案留 TODO 待实测]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Qoder (Claude)
-  修改内容：[滚动遮罩弃 StickyTop 组件改页内内联 fixed 视图：该组件实测双故障——其 v-if 遮罩视图在 mp-weixin
-    端不渲染，且其宿主节点内会再渲染一份整页模板的幻影副本（插值全空、页高虚增）；内联视图与 fx-back 同机制已验证]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Qoder (Claude)
-  修改内容：[组件标签一律成对书写（禁自闭合）＋StickyTop 置模板最末：实测本工程 mp-weixin VDOM 产物中任一自闭合
-    组件标签会在该宿主内以空作用域重渲染整页模板（幻影副本：插值全空、wx:for 空、页高虚增，首个自闭合标签决定幻影位置）；
-    fixed 遮罩与文档序无关，末位安全]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Qoder (Claude)
-  修改内容：[接 StickyTop 防穿透遮罩（Boss 拍板 P1）：onPageScroll 两态 scrollTop>80；
-    遮罩色随暗黑切换（浅 #EEF7F4 / 深 #0E211C）]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-21
-  AI模型：Qoder (Claude)
-  修改内容：[深色模式适配（Boss 指令第 5 项）：根节点 :class page-dark 绑 settings.darkMode，
-    样式末尾追加 MP-WEIXIN 条件编译的后代覆盖块（薄荷深色临时色板，Pencil 暂无暗色稿）]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-21
-  AI模型：Qoder (Claude)
-  修改内容：[最近记录卡「查看全部」接 goRecords → navigateTo /pages/records/Records（Boss 指令：个人中心「查看详情」→最近记录页）]
--->
 
 <template>
   <view class="page" :class="{ 'page-dark': dk }">
@@ -709,7 +586,7 @@ const records = computed<Rec[]>(() => {
 }
 .pl-side {
   flex-direction: row;
-  align-items: baseline;
+  align-items: center;
 }
 .pl-txt {
   font-size: 20rpx;
@@ -1020,7 +897,7 @@ const records = computed<Rec[]>(() => {
 }
 .rec-right {
   flex-direction: row;
-  align-items: baseline;
+  align-items: center;
 }
 .rec-num {
   font-size: 28rpx;

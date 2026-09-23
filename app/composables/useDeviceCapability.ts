@@ -1,9 +1,3 @@
-/**
- * [变更日志]
- * 修改时间：2026-09-21
- * AI模型：Muse Spark
- * 修改内容：[手脚架重建后恢复：从 git 历史取回实现并接线（新文件头；food.ts 数据源路径改为 src/data；其余逻辑原样）]
- */
 // useDeviceCapability.ts — 设备能力检测
 // 按平台 + 机型 + 系统版本分档，决定哪些反馈可以开。
 // 不依赖任何运行时探测，纯静态规则，改规则改这里就行。
@@ -22,8 +16,7 @@ export interface DeviceCapability {
   liquidWave: boolean
   /** 是否播放音效 */
   sound: boolean
-  /** 是否尝试 backdrop-filter（iOS 13+ / Android 部分支持） */
-  backdropBlur: boolean
+      backdropBlur: boolean
 }
 
 // ── iOS 机型分代（A 系列芯片）────────────────────────

@@ -153,3 +153,7 @@
 
 ---
 
+
+### 2026-09-23 21:11:00 解决 Vapor UTS 编译幽灵报错及 CSS 原生降级
+- **修复 Settings.uvue (35:1) 报错**：排查到 Vue 模板中 -model 和 $event 在 uni-app x Vapor 模式底层生成 UTS 静态强类型内联函数时会触发 AST 解析崩溃（报在构建产物的第 35 行，而非源码行）。彻底重构为强类型闭包外独立函数响应 @update:show= 解决。
+- **CSS 兼容降级**：清理了全量 .uvue 中的非原生兼容 CSS。包括剥离 lign-items: baseline (替换为 center)，清除 linear-gradient 的 180deg 并将 90deg 修正为标准 	o right，删除了 Records.uvue 中的废弃语法 lines: 1。

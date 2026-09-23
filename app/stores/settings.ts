@@ -1,47 +1,3 @@
-/**
- * [变更日志]
- * 修改时间：2026-09-23
- * AI模型：Gemini 系列
- * 修改内容：[根据指令彻底清理 pour 倒水音效类型、音频路径映射与相关定时器逻辑]
- */
-/**
- * [变更日志]
- * 修改时间：2026-09-23
- * AI模型：Gemini 系列
- * 修改内容：[升级 playSound 为双缓冲音频实例轮转池机制，设置 mixWithOther 属性并在触发时强制 seek(0)，彻底解决快速连点/连续切换卡片时底层音频实例忙导致吞音与不响的缺陷]
- */
-/**
- * [变更日志]
- * 修改时间：2026-09-22
- * AI模型：Gemini 系列
- * 修改内容：[1. 新增 shake（水瓶晃动）、slide（拖动滑块）、card（切换卡片/选项）音效类型与音频路径映射；2. 增加倒水音频 pour 配合动画在 2 秒后自动停止机制]
- */
-/**
- * [变更日志]
- * 修改时间：2026-09-22
- * AI模型：Gemini 系列
- * 修改内容：[新增 pour 倒水音效类型与 /static/audio/pour.mp3 映射，支撑食物结算后水瓶注水物理动效]
- */
-/**
- * [变更日志]
- * 修改时间：2026-09-22
- * AI模型：Gemini 系列
- * 修改内容：[将 playSound 音效逻辑集中集成在 settings store 中，彻底解决独立 composables 文件在小程序运行期 module is not defined 导致页面崩溃不加载的致命Bug]
- */
-/**
- * [变更日志]
- * 修改时间：2026-09-21
- * AI模型：Qoder (Claude)
- * 修改内容：[darkMode 解除「v1.0 恒关」锁定：加载时不再强制 false（Boss 拍板个人中心深色模式），
- *   新增 setDarkMode()（持久化 + 供 Settings 开关点击）。]
- */
-/**
- * [变更日志]
- * 修改时间：2026-09-21
- * AI模型：Muse Spark
- * 修改内容：[新建：设置 store——偏好开关（深色模式 v1.0 置灰、用餐提醒）/ 音效 / 触觉，
- *   本地存储持久化；USER_FOOD_ENABLED=false 集中在此，不散落各处 if]
- */
 
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -93,8 +49,7 @@ export const useSettingsStore = defineStore('settings', () => {
         hapticsEnabled: hapticsEnabled.value,
       }))
     } catch (e) {
-      // 存储失败不阻塞
-    }
+      }
   }
 
   function setMealReminders(v: boolean): void {

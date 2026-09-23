@@ -239,8 +239,10 @@ $tok  = "<微信工具 设置→安全 里的 MCP Token>"
   ② **严禁 `linear-gradient` 携带角度（如 `180deg` / `90deg`）**：原生端会发出 `WARNING: Invalid linear-gradient value`，必须写纯色标（如 `linear-gradient(#E2F5EC, #F6FCF9)`）；
   ③ **App 原生端严禁后代选择器**：样式必须保持 class-only 单类定义，杜绝 `.a .b` 嵌套选择器；
   ④ **`:style` 严禁拼接跨单位计算**：`calc(116rpx + px)` 在原生端会导致编译白屏报错，必须在 UTS/TS 层计算为确切数值后再传入 `:style`。
-- **UTS / <script setup> 变量唯一声明规范（2026-09-23 定案）**：
-  在页面顶层，`sbH` 等通用变量**严禁在不同位置（如文件顶部与方法区）重复 `let/const` 声明**，会导致 `Identifier 'xxx' has already been declared` 编译红灯。必须统一定义在 `<script setup>` 顶部单一位置，后续直接复用。
+- **UTS / <script setup> 变量唯一声明与原子初始化规范（2026-09-23 定案）**：
+  ① 在页面顶层，`sbH` 等通用变量**严禁在不同位置重复 `let/const` 声明**（导致 `Identifier has already been declared`）；
+  ② **严禁顶层拆分赋值**：严禁写成 `const sbH = ref(0); sbH.value = ...` 这种在 `<script setup>` 顶层的裸副作用赋值，UTS 编译器在 AST 转换时会报 `Unexpected token (xx:1)`。**必须统一采用原子内联强类型初始化**：
+     `const sbH = ref<number>(uni.getSystemInfoSync().statusBarHeight ?? 0)`。
 
 ---
 

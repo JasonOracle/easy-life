@@ -1,126 +1,5 @@
-<!--
-  [变更日志]
-  修改时间：2026-09-23
-  AI模型：OpenCode / Gemini 底层
-  修改内容：[彻底根除编译器报错 Identifier 'sbH' has already been declared：清理 script 尾部冗余声明的 let sbH 块，保持统一的 sbH 响应式状态管理]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-23
-  AI模型：OpenCode / Gemini 底层
-  修改内容：[基于 ai-worldclass-design 落地高颜值全局顶栏：1. 淘汰粗硬的 hd-arc 几何圆切线与高斯光晕；2. 统一接入纯矢量有机双层贝塞尔水波 liquid_wave.svg；3. 浅色模式升级为全 App 统一双色温薄荷水体渐变 (#4EE2B6 -> #1FBF8F -> #0A7A5C)，深色模式保持 #162924 静谧暗夜；4. 调整偏好分组标题呼吸留白]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-23
-  AI模型：OpenCode / Gemini 底层
-  修改内容：[1. 彻底修复 Android 端顶部背景丢失 Bug：重构 header 为状态栏独立占位层并恢复绿色双波浪渐变；2. 全量将 settings 内所有 PNG 位图升级为高清晰矢量 SVG（chev_back/icon_moon/icon_bell/icon_target/icon_mega/icon_down/icon_up/icon_shield/icon_trash/icon_leaf）]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-23
-  AI模型：Gemini 系列
-  修改内容：[全面升级向右箭头为高清晰矢量 SVG（chev_right.svg），保持与全局矢量图标规范一致]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-23
-  AI模型：Gemini 系列
-  修改内容：[全量换算为 750rpx 规范（1px = 2rpx），头图波浪、弧线、卡片、开关、图标与字号全量自适应大屏]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-23
-  AI模型：OpenCode / Gemini 底层
-  修改内容：[按指令清除切换深色模式开关(toggleDark)时的 vibrateShort 触觉震动，避免微信模拟器窗口剧烈抖动，待后续按需开启]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Qoder (Claude)
-  修改内容：[#28 常驻导航栏：P1 遮罩（set-st-mask z40）＋独立返回钮（set-fx-back z45）两件套合并为整栏
-    .set-nav（末色底 #39AD95／暗 #162924＋返回箭＋白标题 17/700＋轻阴影，z45，模板最末）；
-    onPageScroll 去 MP-only 条件编译（三端通用），阈值 >40 两态不变]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Qoder (Claude)
-  修改内容：[P2 设置页暗黑＋状态栏字色反转（Boss 指令）：根节点 page-dark 绑 settings.darkMode，MP-WEIXIN 后代
-    覆盖块按薄荷深色板（底 #0E211C/卡 #162924/chip #1E3B33/主字 #EAF9F3/强调 #52D6AC·#8FE8CB/危 #3A221C+#FF8266）；
-    暗里头图改实色 #162924＋隐光晕（配状态栏白字，setNavigationBarColor 于 onShow 与切换后同步；App 端 plus.navigator 待实测）；
-    滚动遮罩色随暗黑 #162924]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Qoder (Claude)
-  修改内容：[滚动遮罩弃 StickyTop 组件改页内内联 fixed 视图：该组件实测双故障——其 v-if 遮罩视图在 mp-weixin
-    端不渲染，且其宿主节点内会再渲染一份整页模板的幻影副本（插值全空、页高虚增）；内联视图与 fx-back 同机制已验证]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Qoder (Claude)
-  修改内容：[组件标签一律成对书写（禁自闭合）＋StickyTop 置模板最末：实测本工程 mp-weixin VDOM 产物中任一自闭合
-    组件标签会在该宿主内以空作用域重渲染整页模板（幻影副本：插值全空、wx:for 空、页高虚增，首个自闭合标签决定幻影位置）；
-    fixed 遮罩与文档序无关，末位安全]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Qoder (Claude)
-  修改内容：[P1 滚动防穿透（Boss 拍板 B-lite：头部随内容滚走＋返回钮常驻）：
-    接入 StickyTop 两态遮罩（scrollTop>80 显示，色取头图实色 #39AD95，高 sbH+58 盖到状态栏＋导航带）；
-    新增常驻返回钮 fx-back（fixed，z 45 在遮罩之上，滚过阈值才 v-if 出现，点击 goBack）；
-    onPageScroll 仅 MP-WEIXIN 条件编译，只在跨阈值时改 ref 不做逐帧透明度]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Qoder (Claude)
-  修改内容：[头图按 Pencil 最新稿 T0IUr 重建（Boss：设置页顶部还原度不够）：
-    竖渐变 #5CC4AC→#39AD95 ＋ 径向光晕椭圆 ＋ 双白弧 ＋ 388×159 大波浪（白10%，新资产 dbWL6@4x 覆写 header_wave.png）；
-    返回钮 41px 白圆＋8×14 箭 改为 44px 透明热区＋6×10.5 裸白箭（新资产 jWqeB@4x 覆写 chev_back.png）；
-    标题 19→18/700 @(36,46)、副题改白80% @(36,74)（原 x=69）；头图高改 sbH+113（稿 140 含 27 状态栏）；
-    首组标题距头图 19→10（稿 150-140）；
-    波浪资产改名 header_wave.png→settings_wave.png（模拟器对同路径旧图有强缓存，覆写后仍渲染旧字节，改名破缓存）；
-    终案：弃用波浪贴图（模拟器端该 image 恒渲染为不透明薄荷色帽、遮盖渐变），稿面底部波浪带即双白弧椭圆，纯 CSS 实现]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-21
-  AI模型：Qoder (Claude)
-  修改内容：[「深色模式」行开关由稿面静态改接 settings.darkMode：点击 toggleDark →
-    settings.setDarkMode + vibrateShort（Boss 指令第 5 项：点击切换个人中心暗黑主题）]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-21
-  AI模型：Qoder (Claude)
-  修改内容：[页面无法滚动修复：删除 .page 的 flex:1（uni-app x 运行时强制 page{height:100%}，
-    flex:1 把根节点钉为视口高＋view 默认 overflow:hidden 裁切 → 文档永不超屏原生滚动不触发；
-    删后内容自然撑高恢复滚动）。未引入 scroll-view。]
-  修改时间：2026-09-21
-  AI模型：Qoder (Claude)
-  修改内容：[还原度修复（对照 Ardot 画板 11:3 ×0.794 换算）：
-    返回钮按稿回滚为半透明白圆+白箭（chev_back.png）；头图收窄（波浪资产裁掉顶部透明区，
-    高度 80→49，行底距 52→42）；深色模式行标题包 row-text 修复与开关重叠；
-    分隔线对齐稿面从卡边起；箭头 6×11；即将上线 pill 61×21 比例；危险区 chip 34/行高 52]
-  修改时间：2026-09-21
-  AI模型：Muse Spark
-  修改内容：[目标管理行开 GoalModal（保存调 setGoal）；开关保持稿面静态]
-  修改时间：2026-09-21
-  AI模型：Muse Spark
-  修改内容：[目标管理行接 goal 读数；开关保持稿面静态（见 script 说明）]
-  修改时间：2026-09-20
-  AI模型：Muse Spark
-  修改内容：[新建：按 v2 设计稿（727788215940571 · 11:3）1:1 还原设置页 P3：
-    渐变头图/偏好组/目标管理组/数据管理组/危险区/页脚]
--->
-
 <template>
-  <view class="page" :class="{ 'page-dark': dk }">
+   <view class="page" :class="{ 'page-dark': dk }">
     <!-- 头图（全App统一薄荷液滴水体渐变 + 纯矢量有机双水波） -->
     <view class="header" :style="{ backgroundColor: dk ? '#162924' : '#1FBF8F', backgroundImage: dk ? 'none' : 'linear-gradient(#4EE2B6, #1FBF8F, #0A7A5C)' }">
       <!-- 状态栏独立占位，杜绝混合 calc(rpx+px) 塌陷 -->
@@ -153,7 +32,7 @@
         <view class="toggle" :class="{ 'toggle-on': settings.darkMode }" @click="toggleDark">
           <view class="knob" :class="{ 'knob-on': settings.darkMode }"></view>
         </view>
-      </view>
+      </view> 
       <view class="row-div"></view>
       <view class="row">
         <view class="chip">
@@ -165,7 +44,7 @@
         </view>
         <view class="soon-pill">
           <text class="soon-pill-text">即将上线</text>
-        </view>
+        </view> 
       </view>
     </view>
 
@@ -244,7 +123,7 @@
     </view>
 
     <!-- 每日热量目标弹窗 -->
-    <GoalModal v-model:show="goalShow" :initial="goal.calorieGoal" @save="goal.setGoal" ></GoalModal>
+    <GoalModal :show="goalShow" @update:show="updateGoalShow" :initial="goal.calorieGoal" @save="goal.setGoal"></GoalModal>
 
     <!-- 常驻导航栏（#28：替代 P1 遮罩＋fx-back 两件套）：滚动跨阈后整栏出现＝末色底＋返回箭＋标题，三端生效 -->
     <view v-if="scrolled" class="set-nav" :style="{ height: navBarH + 'px', paddingTop: sbH + 'px', backgroundColor: dk ? '#162924' : '#39AD95' }">
@@ -266,18 +145,14 @@ import { useGoalStore } from '../../stores/goal'
 import { useSettingsStore } from '../../stores/settings'
 import { ref, computed } from 'vue'
 import { onPageScroll } from '@dcloudio/uni-app'
-// #ifdef MP-WEIXIN
 import { onShow } from '@dcloudio/uni-app'
-// #endif
-import GoalModal from '../../components/GoalModal.uvue'
 
 const goal = useGoalStore()
 const settings = useSettingsStore()
 const goalShow = ref(false)
 const dk = computed((): boolean => settings.darkMode)
 
-const sbH = ref(0)
-sbH.value = uni.getSystemInfoSync().statusBarHeight ?? 0
+const sbH = ref<number>(uni.getSystemInfoSync().statusBarHeight ?? 0)
 
 // 常驻导航栏高度计算：58px (116rpx) 内容高 + 状态栏高，避免跨端 calc(rpx+px) 错误
 const navBarH = computed<number>(() => sbH.value + 58)
@@ -285,15 +160,11 @@ const navBarH = computed<number>(() => sbH.value + 58)
 // 状态栏字色随暗黑反转（Boss P2 指令）：小程序走 setNavigationBarColor；
 // TODO App 原生端改 plus.navigator.setStatusBarStyle 实测后补
 function syncBar(): void {
-  // #ifdef MP-WEIXIN
   uni.setNavigationBarColor({ frontColor: dk.value ? '#ffffff' : '#000000', backgroundColor: '#000000' })
-  // #endif
 }
-// #ifdef MP-WEIXIN
 onShow(() => {
   syncBar()
 })
-// #endif
 
 // 常驻导航栏两态（跨阈值才写 ref，避免逐帧触发 setData）：>40 即整栏出现——
 // 该滚位头图渐变已近末色 #39AD95，栏底实色与稿面无缝；onPageScroll 三端通用（#28 去 MP-only）
@@ -305,6 +176,10 @@ onPageScroll((e) => {
 
 function openGoal(): void {
   goalShow.value = true
+}
+
+function updateGoalShow(v: boolean): void {
+  goalShow.value = v
 }
 
 function toggleDark(): void {
@@ -355,7 +230,7 @@ const goBack = () => {
   align-items: center;
 }
 .hd-back-icon {
-  width: 20rpx;
+  width: 20rpx;   
   height: 36rpx;
 }
 .hd-info {

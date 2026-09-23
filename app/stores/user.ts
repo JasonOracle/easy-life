@@ -1,10 +1,3 @@
-/**
- * [变更日志]
- * 修改时间：2026-09-21
- * AI模型：Muse Spark
- * 修改内容：[新建：用户 store——昵称/连续记录天数/头像，本地存储持久化；
- *   个人中心头图与统计共用]
- */
 
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -39,8 +32,7 @@ export const useUserStore = defineStore('user', () => {
     try {
       uni.setStorageSync(STORAGE_KEY, JSON.stringify({ name: next }))
     } catch (e) {
-      // 存储失败不阻塞
-    }
+      }
   }
 
   return { name, streakDays, setName }

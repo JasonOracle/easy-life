@@ -1,73 +1,4 @@
-/**
- * [变更日志]
- * 修改时间：2026-09-21
- * AI模型：Qoder (Claude)
- * 修改内容：[「最近记录/单日详情」两页数据支撑：新增导出 dayKeyOf(ts)（YYYY-MM-DD 日键）与
- *           dayRange(key)（该日 [起,止) 毫秒区间）；store 新增 getter dayTotals
- *           （日键→当日总 kcal，供月历圆点/超标判定一次遍历）；state 新增 viewDay
- *           （Records→DayDetail 跳转传日，免 URL options 兼容问题）；
- *           amountText 改为导出（单日详情行份量用）；MEAL_LABELS.snack 修正为「夜宵」
- *           （对齐 Pencil 稿 MC_夜宵/Meal_夜宵 命名，原「加餐」与稿不符）。]
- */
-/**
- * [变更日志]
- * 修改时间：2026-09-21
- * AI模型：Qoder (Claude)
- * 修改内容：[1. FoodBase 增 py 拼音索引（build.py 新产物字段）；searchFoods 支持
- *            名称子串 / 全拼 / 首字母三种匹配，供弹层⓪ 食物选择列表搜索。
- *          2. 新增导出 vesselLabelOf()：取器具模板中文名（碗/杯/盘…），
- *            供 FoodPicker 副行「一碗约 200g」拼句。]
-/**
- * [变更日志]
- * 修改时间：2026-09-21
- * AI模型：Muse Spark
- * 修改内容：[增补计数步进器三件套 MAX_COUNT/DEFAULT_COUNT/portionRatio/portionLevel（设计稿规格）]
-﻿/**
- * [变更日志]
- * 修改时间：2026-09-20
- * AI模型：CodeBuddy
- * 修改内容：[1. 【P0-Bug 修复】按「个/片/串」计的食物热量算错约 80 倍——原 computeEntry
- *            一律按 amount/100 缩放，而这类食物 vessel 档位 amount=1（单位「个」），
- *            base 却是每 100g，必须先乘 pieceWeight 再缩放。实测馒头(p017,pw=75)
- *            正确 167 kcal 却算出 2 kcal。影响面 piece 170 条 / pieceWeight 非空 102 条。
- *            改法：新增导出的 COUNT_UNITS + gramsOf()，computeEntry 增加 unit 入参，
- *            遇计数单位时先 gramsOf 折算 grams 再缩放。g/ml 类行为保持不变（回归项）。
- *          2. 【P0-Bug 修复】sweetOptsOf() 硬返回 []，而 AddSheet 判断写的是
- *            "sweets !== null" → [] !== null 恒真 → 甜度段对所有食物都渲染且内部空。
- *            改法：库解析补读 optTpl（此前只读了 vesselTpl），新增 optGroupsOf(food)
- *            按条目 opts 字段真读模板；AddSheet 改按 groups 渲染且空则不渲染整段。
- *          3. 明细行结构化：MealRow.details 由 string[] 改为 FoodLine[]
- *            （含 img / amountText / kcal / time），供首页每条食物显示自身时分秒 + 缩略图。
- *            Home.uvue 模板同步改造（v-for key 改 d.key）。
- *          4. 选项真正计入热量：OptGroup 补 scale / baseAmount（来自 opts_tpl.yaml
- *             的 scale: by_capacity + base_amount: 500），新增 optDeltaOf()；
- *             computeEntry 增第 5 参 extraKcal——此前选「全糖」热量纹丝不动。]
- */
 
-/**
- * [变更日志]
- * 修改时间：2026-09-19
- * AI模型：CodeBuddy
- * 修改内容：[1. 食物 store——库解析（347 条一次，模块级缓存）+ 当日记录（entries）
- *           + 宏量营养素总计（protein/carb/fat，供首页营养素卡）;
- *           2. 接入 app/data/food_library.json 真实数据（含 protein/carb/fat，
- *              由 build.py 从 nutrition_v1.yaml 合并，2026-09-19 补入 base 字段）;
- *           3. 演示数据全部删除，改为从 JSON 加载。
- *           4. 修复：漏 import pinia 的 defineStore，编译产物输出裸全局引用，
- *              运行时 ReferenceError: defineStore is not defined（拖垮 AddSheet/MealIcon）。
- *           5. 修复：mealRows 返回字段（label/entries）与 Home 模板消费字段（name/
- *              active/details）不一致，m.details.length 报 reading 'length'；已对齐
- *              MealRow 结构（key/name/active/cal/details），details 恒为数组。
- *           6. 灌演示数据（Boss 授权）：SEED_PLAN 七天（今日四餐 + 前 6 天），
- *              热量全走 computeEntry 按库值计算；所有统计 getter 改为按日过滤
- *              （todayEntries / weekTotals 新增）；totalCal 从 state 改 getter
- *              （保证与 entries 恒一致，删 totalCal 手工加减的重复状态）。
- *           7. UI 还原度评审 Round1 修复：FoodEntry 增 amount/unit、MealRow 增
- *              time（餐次最早记录 HH:MM）、明细改「名称 份量 · kcal」格式——
- *              对齐设计稿「早餐 · 07:30」「燕麦片 40g · 150 kcal」。]
- * 触发重编译：2026-09-19T22:02
- * ⚠️ 用 .ts 而非 .uts：UTS 编译器会破坏 .uts 里的中文字符串，.ts 编译产物中文完好。
- */
 
 import { defineStore } from 'pinia'
 import foodLibraryJson from '../src/data/food_library.json'
@@ -535,7 +466,6 @@ interface FoodState {
 
 const STORAGE_KEY = 'ct_food_entries_v1'
 
-/** 从本地存储恢复记录；失败或为空则回落演示种子（Boss 授权灌入） */
 function loadEntries(): FoodEntry[] {
   try {
     const raw = uni.getStorageSync(STORAGE_KEY)
@@ -553,8 +483,7 @@ function saveEntries(entries: FoodEntry[]): void {
   try {
     uni.setStorageSync(STORAGE_KEY, JSON.stringify(entries))
   } catch (e) {
-    // 存储失败不阻塞记录
-  }
+    }
 }
 
 const state = (): FoodState => ({

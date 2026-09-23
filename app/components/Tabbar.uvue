@@ -1,86 +1,3 @@
-<!--
-  [变更日志]
-  修改时间：2026-09-23
-  AI模型：Gemini 系列
-  修改内容：[实施方案A响应式重构：全量胶囊尺寸(112rpx)、气泡尺寸(192×88rpx)、四阶段动画位移与字号按 750rpx 规范（1px=2rpx）重构]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-23
-  AI模型：Gemini 系列
-  修改内容：[遵循 uni-app x 原生渲染规范，将 .tb-label 的 font-weight: 600 统一为 bold]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-23
-  AI模型：OpenCode / Gemini 底层
-  修改内容：[按指令清除切换 Tabbar 时的 vibrateShort 触觉震动，避免微信模拟器窗口剧烈抖动，待后续按需开启]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Gemini 系列
-  修改内容：[浅色态气泡在白底上立体投影强化（对齐设计稿）：
-    将 .tb-bub-light 的单层弱投影升级为双层墨绿复合柔影（0 2px 6px rgba(0,0,0,0.08), 0 6px 18px rgba(10,79,61,0.14)），
-    确保胶囊滑过白色卡片时气泡依然具有清晰的物理悬浮感与立体轮廓]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Qoder (Claude)
-  修改内容：[浅色态「气泡隐身」定稿修正（Boss 拍板：不接受气泡隐身，要有物理体积感）：
-    1. 胶囊底减负＝#FFFFFF 88% → **60%**（Boss 说明：88% 那条是稿面文字标注漏改）；
-    2. 气泡「雕」出来＝浅色玻璃档新增极细半透明白描边 rgba(255,255,255,.6) 1px（模拟折射亮边）
-       ＋ 向下轻投影 0/4/12 rgba(0,0,0,.06)（悬浮高度差）；气泡底色在 18% 与 25% 之间由 AI 看真机截图自定；
-    3. 暗色态与 low 档降级方案**保持现状不动**（观感正常）。描边/投影走单类 .tb-bub-light
-       （只在 glass 且非暗态时挂），不用后代选择器也不写行内样式，保 App 端可用]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Qoder (Claude)
-  修改内容：[液态玻璃胶囊重构（Pencil gFuXt「Tab 关键帧 (微博标准版)」，Boss 五条拍板）：
-    1. 通栏底槽 → 悬浮胶囊（左右各 16、高 56、r28，底＝#FFFFFF 88% ＋ 顶部折光 ＋ 白 80% 描边
-       ＋ blur24 ＋ 向上投影 0/-4/24 #0A4F3D 14%）；
-    2. 两 Tab → 三 Tab（首页／日历／我的），日历＝Records 升级一级 Tab；
-    3. 新增会跑的选中气泡 96×44 r22（Boss 拍板「文字标注为唯一真理」：纯 backdrop-filter blur(20px)
-       ＋ 实色 #FFFFFF 18%（暗态 13% ＋ blur28），**不做**节点里遗留的三段渐变与手绘内高光）；
-    4. 四关键帧动画：按下 ×0.96／90ms → 移动 ×1.12÷0.94／320ms cubic-bezier(.34,1.56,.64,1)
-       → 落位 ×1.06÷0.97／120ms → 静止；图标弹跳滞后 40ms。CSS transition 只在 MP-WEIXIN 下发
-       （App／Vapor 禁用 transition），App 端 Worklet 原生线程动画留 TODO 未实现；
-    5. 删除 #29 的 fade 渐显 prop 与 barStyle 五属性同驱（Boss：新胶囊前提是恒常可见）；
-    6. 色值全部改用 DesignTokens §7 的 TabBar 语义 token；low 档（backdropBlur=false）按稿面降级
-       ＝胶囊不透明 #F8FCFA ＋ 气泡实色 ＋ #E3EFE8 描边，折光／投影／动画保留；
-    7. 切页起点（气泡从哪一格飞来）改由本地存储 ct_tab_origin 一次性传递。原方案是 components/tabOrigin.uts
-       模块单例，实测产物已正确产出 components/tabOrigin.js，运行时却报
-       `module 'components/tabOrigin.js' is not defined` → Tabbar 渲染中断、整页白屏；
-       cleanCompileCache＋simulator_refresh 跑过仍未见效（包体哈希未变，根因未定案）。
-       改走存储载体后不再依赖新模块文件，且天然满足「换页重挂载后仍读得到」；
-    8. 入场起点改在 setup 内同步读（首帧即画在上一格）——automator 采样实测到原 onMounted 读法
-       会先在目标槽渲染一帧 rest 再跳回起点，出现「闪一下」]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Qoder (Claude)
-  修改内容：[#29 续（Boss：「我想要的 tabbar 是 scroll-fade-navbar 那种效果」）：玻璃底由「常开」改为
-    「随滚动渐显」——新增 fade prop(0~1)，底 alpha／顶部折光／上缘高光描边／向上柔影／blur 半径
-    全部按 fade 线性抬升；low 档不参与渐显。
-    （2026-09-22 液态玻璃胶囊重构中该机制已按 Boss 指令整体废弃，此条留作追溯）]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-22
-  AI模型：Qoder (Claude)
-  修改内容：[#29 毛玻璃：底槽改玻璃态＋切 Tab 补 L1 触觉反馈（vibrateShort，按 device.haptics 降级）]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-21
-  AI模型：Muse Spark
-  修改内容：[新建：共享底部 Tab（首页/我的），v2 稿 10:333 规格；redirectTo 切换防栈堆积；
-    图片 :src 运行时绑定（绕开编译器 assets 跨页碰撞铁律）]
--->
 
 <template>
   <view class="tb-bar" :class="barClass" :style="barStyle">
@@ -303,7 +220,7 @@ function onTap(idx: number): void {
 /* 玻璃档（backdropBlur=true）：底 #FFFFFF 60% ＋ 顶部折光 ＋ 白 80% 描边 ＋ 向上柔影 */
 .tb-glass {
   background-color: rgba(255, 255, 255, 0.6);
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 45%);
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 45%);
   border-top-width: 1px;
   border-right-width: 1px;
   border-bottom-width: 1px;
@@ -324,13 +241,13 @@ function onTap(idx: number): void {
 /* 降级档（low 机／无模糊能力）：稿面「胶囊改不透明 #F8FCFA」，折光与投影保留 */
 .tb-flat {
   background-color: #F8FCFA;
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 45%);
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 45%);
   box-shadow: 0 -8rpx 48rpx rgba(10, 79, 61, 0.14);
 }
 /* 暗黑档：卡色 token #162924 加 alpha（玻璃面不丢 alpha），描边白 10%，投影改向下黑 */
 .tb-dark {
   background-color: rgba(22, 41, 36, 0.72);
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 45%);
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 45%);
   border-top-color: rgba(255, 255, 255, 0.1);
   border-right-color: rgba(255, 255, 255, 0.1);
   border-bottom-color: rgba(255, 255, 255, 0.1);
