@@ -12,87 +12,6 @@
 - 状态：MVP 主体已落地（5 页 ＋ 8 组件 ＋ 5 store 在微信模拟器跑通，353 条食物库），处于「还原度收尾 ＋ 工程化加固」阶段
 - 目标平台：uni-app x（Vue3 + TS + Pinia），本地存储，无服务器
 
-## 目录结构
-
-```
-kaluli/
-├── README.md                  # 项目总览
-├── AGENTS.md                  # 本文件
-├── docs/                      # 产品与过程文档
-│   ├── progress.md            # 动态进度追踪（最高动态事实来源，新会话先读）
-│   ├── PRD.md                 # 产品需求文档（当前生效）
-│   ├── PRD_v1.0_Profile与首页视觉修正.md  # 历史 PRD，仅决策追溯
-│   ├── PRD_v1.1_首页与个人中心_UI改版.md  # 历史 PRD，仅决策追溯
-│   ├── Review.md              # 评审复盘（决策依据）
-│   ├── FoodLibraryPlan.md     # 食物库方案
-│   ├── design-fidelity-audit-2026-09-21.md # 还原度审计（缺陷清单来源）
-│   ├── design/                # 分阶段设计交付，按「日期-主题」分目录（含 liquid-glass-tabbar 方案）
-│   └── review/                # 人工复核截图（01~07 编号 PNG）
-├── design/                    # 设计文档
-│   ├── DesignTokens.md        # ★ 色值/圆角/字号唯一事实来源（Ardot 变量集导出）
-│   ├── VisualLanguage.md      # 视觉语言（薄荷液滴）
-│   ├── ScreenSpecs.md         # 8 屏开发对照清单（几何/间距为设计稿实测值）
-│   ├── IconPlan.md            # 图标方案
-│   ├── UI_Spec.md             # Figma/Pixso 交付规格
-│   ├── Critique_Lenny.md      # 设计审视（独特性诊断）
-│   └── replica/               # 逐屏还原对照（量取记录）
-├── app/                       # 前端（uni-app x 项目根）2026-09-20 推倒重写，已按 Pencil 稿重建完成主体
-│   ├── manifest.json          # 应用配置（含 uni-app-x 节点=项目类型标识；appid 已分配 __UNI__F70225F）
-│   ├── pages.json             # 页面路由（5 页：Home/Profile/Settings/Records/DayDetail；全部 navigationStyle:custom）
-│   ├── App.uvue               # 应用根组件
-│   ├── main.uts               # 启动入口（createSSRApp + Pinia）
-│   ├── pages/                 # 5 页（各配同名 .md；类名不得与组件同名）
-│   │   ├── home/Home.uvue         # 首页（常驻标题块 .hm-nav ＋ 右上 FAB）
-│   │   ├── profile/Profile.uvue   # 个人中心（唯一保留顶遮罩 pf-st-mask；随深色模式）
-│   │   ├── settings/Settings.uvue # 设置页（深色模式开关 ＋ 目标设置入口）
-│   │   └── records/               # 2026-09-21 新增两页（Pencil bTPUq / VEWYt）
-│   │       ├── Records.uvue       # 最近记录：月历+选中日汇总（素材 lr_ 前缀）＝**一级 Tab「日历」**（2026-09-22 升级，无返回钮）
-│   │       └── DayDetail.uvue     # 单日详情：热量卡+餐次记录，长按删除（素材 dd_ 前缀）
-│   ├── components/            # AddFood/FoodPicker/GoalModal/SettleBadge/OptionTray/CountStepper/Tabbar/FoodToast（各配 .md；类名必须带组件前缀）
-│   ├── composables/           # useDeviceCapability.ts（设备能力分档，启动检测一次 → Pinia）
-│   ├── stores/                # device/food/goal/settings/user（ct_* 本地持久化，各配 .md）
-│   ├── src/data/              # ★ 食物库 JSON 的真实位置（toolchain/build.py 产出，严禁手写）
-│   ├── static/                # 素材：icons(353 张 webp＝图标唯一入库副本)/meals/goal/records/home/profile/settings/settle/vessels/common
-│   ├── prototype/             # 交互原型
-│   │   └── CalTrack_Protoype.html
-│   └── unpackage/dist/        # HBuilderX 编译产物（不进 git；微信工具读这里）
-├── debug/                     # App 调试工具（node）：miniprogram-automator 零窗口截图/探针/取数据
-│                              #   ⚠️ node_modules 不进 git（依赖见 debug/package.json）；shots/ 存验收截图
-├── toolchain/                 # 数据与素材处理（Python，不进 App 包）
-│   ├── sources/               # 数据源（人可读 YAML，六份参与校验）
-│   │   ├── icons_v1.yaml          # 353 项食物清单（图标线 + 数据线的共同事实来源）
-│   │   ├── icons_v1_visual.yaml   # 生图槽位（container/content/toppings/state/view）＝353 条
-│   │   ├── icons_v1_usage.yaml    # 份量与选项引用（vessel_tpl / opts_tpl）
-│   │   ├── nutrition_v1.yaml      # 营养数据（每 100g/100ml + basis + confidence）
-│   │   ├── nutrition_checklist.md # 人工核对清单（30 条按风险排序，进度 0/30）
-│   │   ├── vessel_tpl.yaml        # 计量器具模板集（18 个，带容量档位）
-│   │   ├── opts_tpl.yaml          # 选项模板集（sweet/topping/sugar_pack/syrup_pump）
-│   │   └── milk_tea.yaml          # 旧：首版单条数据源（已被上面取代，保留追溯）
-│   ├── schema/v1.0.json       # 输出 JSON 格式定义（App 启动校验用）
-│   ├── hooks.py               # ★ 提交闸门（五道闸，见「Hooks 兜底强约束」）；install 写 .git/hooks/pre-commit
-│   ├── validate.py            # 多源一致性校验（四源 id 对齐 + 模板引用 + 宏量配平 + 槽位五键）
-│   ├── build.py               # 多源合并 → dist/ ＋ 同步 app/src/data/ ＋ 增量同步图标进 app/static/icons/
-│   ├── gen_icons.py           # 批量生图（20 路并发 + Key 池 + 429 退避 + 白底校验）
-│   ├── compress_icons.py      # PNG → 512 WebP（目标 ≤25KB）
-│   ├── gen_nutrition.py       # 营养数据初稿生成（分层：成分表值 / 配方推算）
-│   ├── gen_visual_spec.py     # 生图槽位生成 ⚠️ 全量覆写 icons_v1_visual.yaml（会冲掉人工修正，慎跑）
-│   ├── gen_usage_spec.py      # 份量与选项引用生成
-│   ├── fill_piece_weights.py  # 计件类 piece_weight 批量填充
-│   ├── gen_tab_icons.py       # 旧 TabBar 图标生成 ⚠️ 现无任何引用，去留待 Boss 拍板
-│   ├── fetch_icons.py         # 旧：真实图源抓取（当前纯文生图方案不用，保留备用）
-│   ├── README.md              # 工具链数据流与生图流水线说明
-│   ├── WxCliReference.md      # 微信开发者工具 CLI 参考
-│   ├── debug_shot.ps1         # 截图/重载辅助（⚠️ 内含本机 MCP Token，勿外传）
-│   ├── cli-bg.ps1             # HBuilderX CLI 后台编译辅助
-│   └── dist/food_library.json # 打包中间产物（不进 git）
-├── assets/                    # 素材资源
-│   ├── exports/               # 设计稿 @2x PNG（8 屏命名图 ＋ 1 张首页备选方案）
-│   ├── icons-gen/             # 生图原始 PNG（1K，347 张 ＋ _report.json，~800KB/张）★ 入库留档
-│   └── icons-final/           # 压缩中间产物 512 WebP ⚠️ 已进 .gitignore（App 副本才是唯一入库那份）
-├── vibe_images/               # AI 生成的 App Logo
-└── .workbuddy/                # 会话数据（不进 git）
-```
-
 ## 技术栈
 
 | 层 | 技术 |
@@ -333,7 +252,7 @@ $tok  = "<微信工具 设置→安全 里的 MCP Token>"
 - **不编品牌/品类**：v1.0 只有「奶茶」一个品类（Boss 已拍板）。不许 AI 自行追加咖啡/果汁/快餐等品类——哪怕「感觉用户会需要」。
 
 ### 2. 设计幻觉
-- **以 Ardot 设计稿 + 原型为唯一视觉准绳**：`https://ardot.tencent.com/file/727289305476547` + `app/prototype/CalTrack_Protoype.html`。
+- **以 Pencil 设计稿 + 原型为唯一视觉准绳**：`app/prototype/CalTrack_Protoype.html`（Ardot 及其链接已于 2026-09-21 废止，不再作为参考）。
 - **不在设计稿上的元素不许加**：设计稿里没有的 tab、按钮、卡片、动效，AI 不许「顺手补上」。觉得应该加 → 先问 Boss。
 - **不编色值**：色板已在 `AGENTS.md` 核心约束里固化，不许 AI 自行调一个「看起来差不多」的颜色。
 
