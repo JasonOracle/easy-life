@@ -2,6 +2,30 @@
   [变更日志]
   修改时间：2026-09-23
   AI模型：OpenCode / Gemini 底层
+  修改内容：[彻底修复图4达标Banner图标视觉Bug：1. 将 check-circle 背景色从深墨绿 #009771 纠正为设计稿正统亮薄荷绿 #1FBF8F；2. 替换内部图标为纯白矢量 check_white.svg，消除颜色发灰与色块变形]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[基于 ai-worldclass-design 落地高颜值全局顶栏：1. 淘汰粗硬模糊的 header_wave.png 位图；2. 统一接入纯矢量有机双层水波 liquid_wave.svg；3. 升级为全 App 统一高保真双色温薄荷水体渐变 (#4EE2B6 -> #1FBF8F -> #0A7A5C)；4. 优化今日热量浮岛卡片自然叠层 (-32rpx)]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[全量排查并升级页面内所有位图图标为高清晰矢量 SVG：替换 gear.svg、flame.svg、check.svg、trend_icon.svg，并将所有微型箭头统一为矢量 chev_right.svg，彻底消除位图锯齿与残留]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[全量换算为 750rpx 规范（1px = 2rpx）：头图、今日热量卡、三项宏量卡、周概览液滴、趋势柱状图与历史列表全量自适应真机]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
   修改内容：[个人中心三项热量卡（目标热量、已摄入、还能吃）图标全面升级引用高保真矢量 SVG 素材（stat_target.svg / stat_consumed.svg / stat_remain.svg），调整合适比例规整展示]
 -->
 <!--
@@ -95,61 +119,12 @@
   [变更日志]
   修改时间：2026-09-21
   AI模型：Qoder (Claude)
-  修改内容：[最近记录卡「查看全部」接 goRecords → navigateTo /pages/records/Records
-    （Boss 指令：个人中心「查看详情」→最近记录页）]
--->
-<!--
-  [变更日志]
-  修改时间：2026-09-21
-  AI模型：Qoder (Claude)
-  修改内容：[达标 Banner「未被今日热量卡包裹」返工修复（Boss 多次反馈的同一缺陷）：
-    根因＝Banner 一直是 .cal-card 的**兄弟节点**，靠 margin-top:-28px 上提叠在卡片底缘，
-    Banner 实际高约 47px → 下半截必然悬在白色卡片之外，负 margin 方案在结构上就不可能「被包裹」；
-    上一轮补 .cal-card padding-bottom:30px 只是让它少露一点，方向即错。
-    本次＝按设计稿把 Banner 真实嵌套进 .cal-card（stat-panel 之后），删负 margin，
-    改卡片内水平缩进 10px + margin-top:13px，并撤销 padding-bottom:30px 补丁恢复 padding:14px。]
-  修改时间：2026-09-21
-  AI模型：Qoder (Claude)
-  修改内容：[①页面无法滚动修复：删除 .page 的 flex:1（uni-app x 运行时强制 page{height:100%}，
-    flex:1 把根节点钉为视口高＋overflow:hidden 裁切 → 原生滚动不触发；删后内容自然撑高可滚）。
-    ②达标 Banner 压住统计标签修复：.banner 负 margin -28px 是稿面叠压效果应保留，
-    真正缺口是 .cal-card 底部留白仅 14px，补 padding-bottom:30px 使 Banner 只叠在留白区。]
-  修改时间：2026-09-21
-  AI模型：Qoder (Claude)
-  修改内容：[第二轮还原度修复（设计源改为 Pencil，Ardot 废止）：最近记录超标徽章按 Pencil「个人中心」稿
-    补回超出值文字（badge = 「超标 N kcal」，N=当日总量-目标），撤销上一轮基于 Ardot 的删除；
-    经清编译缓存+关窗重开验证徽章渲染为「超标 150 kcal」。]
-  修改时间：2026-09-21
-  AI模型：Qoder (Claude)
-  修改内容：[设置齿轮修复：白底圆圈改设计稿的 25% 半透明白（原白底+白图标导致不可见）；
-    改为绝对定位，小程序端条件编译按 getMenuButtonBoundingClientRect 放到胶囊左侧、与胶囊垂直居中，
-    其他端保持稿面位置（右 25、状态栏下 13）]
-  修改时间：2026-09-21
-  AI模型：Qoder (Claude)
-  修改内容：[复核抛光：趋势图「目标」标签按设计稿改为右端两行灰字（绑定 store 真实目标值），
-    柱状区右侧让出 32px 标签位、虚线止于标签前（消除与末柱数值重叠）；
-    删除设计稿没有的最近记录「+N kcal」超标文字及其数据字段]
-  修改时间：2026-09-21
-  AI模型：Qoder (Claude)
-  修改内容：[还原度修复（对照 Ardot 画板 10:6 ×0.794 换算）：
-    今日热量卡重建（火焰标题行+还可以吃 pill、右上 71% conic 圆环、进度条下移已摄入/目标行、
-    三列统计补图标底座 chip+分隔线）；周概览液滴三态（白勾/白!/灰圈）；
-    趋势目标线改虚线、7 柱全标日期；头图底部留白收窄]
-  修改时间：2026-09-21
-  AI模型：Muse Spark
-  修改内容：[接 store 读数：头图/数字/进度/周点/趋势/历史走 user＋goal＋food；Banner 达标态与真值一致]
-  修改时间：2026-09-21
-  AI模型：Muse Spark
-  修改内容：[页内 Tab 替换为共享 Tabbar 组件（active=profile），删 goHome 与冗余样式]
-  修改时间：2026-09-20
-  AI模型：Muse Spark
-  修改内容：[新建：按 v2 设计稿（727788215940571 · 10:6）1:1 还原个人中心 P2：
-    渐变头图/今日热量卡/达标 Banner/本周概览/热量趋势/最近记录/页内 Tab（我的激活）]
+  修改内容：[最近记录卡「查看全部」接 goRecords → navigateTo /pages/records/Records（Boss 指令：个人中心「查看详情」→最近记录页）]
 -->
 
 <template>
   <view class="page" :class="{ 'page-dark': dk }">
-    <!-- 头图 -->
+    <!-- 头图（全App统一薄荷液滴水体渐变 + 纯矢量双水波） -->
     <view class="header" :style="{ paddingTop: sbH + 'px' }">
       <view class="header-row">
         <view class="avatar-ring">
@@ -160,17 +135,17 @@
           <text class="sub">已连续记录  {{ user.streakDays }} 天  ·  每日目标  {{ goal.calorieGoal }} kcal</text>
         </view>
       </view>
-      <image class="header-wave" :src="'/static/profile/header_wave.png'" mode="widthFix"></image>
+      <image class="header-wave" :src="'/static/common/liquid_wave.svg'" mode="widthFix"></image>
     </view>
     <!-- 设置齿轮：挂在页面根上相对 .page 定位（小程序端 .header 内的 absolute 基准实测会偏移一个状态栏高度） -->
     <view class="gear-circle" :style="{ right: gearRight, top: gearTop }" @click="goSettings">
-      <image class="gear" :src="'/static/profile/gear.png'" mode="aspectFit"></image>
+      <image class="gear" :src="'/static/profile/gear.svg'" mode="aspectFit"></image>
     </view>
 
     <!-- 今日热量卡 -->
     <view class="cal-card">
       <view class="cal-head">
-        <image class="cal-flame" :src="'/static/profile/flame.png'" mode="aspectFit"></image>
+        <image class="cal-flame" :src="'/static/profile/flame.svg'" mode="aspectFit"></image>
         <text class="cal-title">今日热量</text>
         <view class="pill">
           <text class="pill-text">{{ remainCal > 0 ? '还可以吃' : '已超标' }}</text>
@@ -235,14 +210,14 @@
       <!-- 达标 Banner：支持达标绿态与超额橙态状态机自适应 -->
       <view class="banner" :class="bannerState.cardClass">
         <view class="check-circle" :class="bannerState.circleClass">
-          <image v-if="bannerState.isOk" class="check" :src="'/static/profile/check.png'" mode="aspectFit"></image>
+          <image v-if="bannerState.isOk" class="check" :src="'/static/profile/check_white.svg'" mode="aspectFit"></image>
           <text v-else class="banner-excl">!</text>
         </view>
         <view class="banner-text">
           <text class="banner-title" :class="{ 'banner-title-over': !bannerState.isOk }">{{ bannerState.title }}</text>
           <text class="banner-sub">{{ bannerState.sub }}</text>
         </view>
-        <image class="banner-chev" :src="'/static/profile/chev_banner.png'" mode="aspectFit"></image>
+        <image class="banner-chev" :src="'/static/profile/chev_right.svg'" mode="aspectFit"></image>
       </view>
     </view>
 
@@ -253,13 +228,13 @@
         <view class="head-right">
           <text class="week-num">{{ weekOkCount }}/7</text>
           <text class="week-lbl">天达标</text>
-          <image class="chev-mini" :src="'/static/profile/chev_week.png'" mode="aspectFit"></image>
+          <image class="chev-mini" :src="'/static/profile/chev_right.svg'" mode="aspectFit"></image>
         </view>
       </view>
       <view class="dots-row">
         <view class="dot-col" v-for="(dayItem, dayIdx) in weekDots" :key="dayIdx">
           <view class="dot" :class="{ 'dot-empty': dayItem.state === 'none' }" :style="{ backgroundColor: dayItem.bg }">
-            <image v-if="dayItem.state === 'ok'" class="dot-check" :src="'/static/profile/check.png'" mode="aspectFit"></image>
+            <image v-if="dayItem.state === 'ok'" class="dot-check" :src="'/static/profile/check.svg'" mode="aspectFit"></image>
             <text v-else-if="dayItem.state === 'over'" class="dot-excl">!</text>
           </view>
           <text class="dot-lbl">{{ dayItem.lbl }}</text>
@@ -270,11 +245,11 @@
     <!-- 热量趋势 -->
     <view class="card trend-card">
       <view class="card-head">
-        <image class="trend-icon" :src="'/static/profile/trend_icon.png'" mode="aspectFit"></image>
+        <image class="trend-icon" :src="'/static/profile/trend_icon.svg'" mode="aspectFit"></image>
         <text class="card-title">热量趋势</text>
         <view class="head-right">
           <text class="view-all">查看全部</text>
-          <image class="chev-mini" :src="'/static/profile/chev_trend.png'" mode="aspectFit"></image>
+          <image class="chev-mini" :src="'/static/profile/chev_right.svg'" mode="aspectFit"></image>
         </view>
       </view>
       <view class="chart">
@@ -290,7 +265,7 @@
           <view class="bars-row">
             <view class="bar-col" v-for="(barItem, barIdx) in bars" :key="barIdx">
               <text class="bar-val" :class="{ 'bar-val-over': barItem.over }">{{ barItem.val }}</text>
-              <view class="bar" :class="{ 'bar-over': barItem.over }" :style="{ height: barItem.h + 'px' }"></view>
+              <view class="bar" :class="{ 'bar-over': barItem.over }" :style="{ height: barItem.h + 'rpx' }"></view>
               <text class="bar-date">{{ barItem.date }}</text>
             </view>
           </view>
@@ -308,7 +283,7 @@
         <text class="card-title">最近记录</text>
         <view class="head-right" @click="goRecords">
           <text class="view-all">查看全部</text>
-          <image class="chev-mini" :src="'/static/profile/chev_rec.png'" mode="aspectFit"></image>
+          <image class="chev-mini" :src="'/static/profile/chev_right.svg'" mode="aspectFit"></image>
         </view>
       </view>
       <view v-for="(recItem, recIdx) in records" :key="recIdx">
@@ -513,11 +488,11 @@ const weekOkCount = computed(() =>
 )
 
 type Bar = { val: number; h: number; date: string; over: boolean }
-// 柱高 = val / 2400 * 100（稿面纵轴）；日期取实际 M/D
+// 柱高 = val / 2400 * 200rpx（稿面纵轴）；日期取实际 M/D
 const bars = computed<Bar[]>(() =>
   food.weekTotals.map((d, i) => ({
     val: d.total,
-    h: Math.round(d.total / 2400 * 100),
+    h: Math.round(d.total / 2400 * 200),
     date: fmtMD(d.ts),
     over: d.total > goal.calorieGoal,
   }))
@@ -532,9 +507,9 @@ type Rec = {
   chev: string
 }
 const REC_CHEVS = [
-  '/static/profile/chev_r1.png',
-  '/static/profile/chev_r2.png',
-  '/static/profile/chev_r3.png',
+  '/static/profile/chev_right.svg',
+  '/static/profile/chev_right.svg',
+  '/static/profile/chev_right.svg',
 ]
 // 最近 3 天（不含今天）：日期/周几/总量/达标态（超标态徽章内含超出值，按 Pencil 稿「超标 150 kcal」）
 const records = computed<Rec[]>(() => {
@@ -557,62 +532,65 @@ const records = computed<Rec[]>(() => {
 <style>
 .page {
   background-color: #EEF7F4;
-  padding-bottom: 92px;
+  padding-bottom: 184rpx;
   /* #ifdef MP-WEIXIN */
-  padding-bottom: calc(82px + env(safe-area-inset-bottom));
+  padding-bottom: calc(164rpx + env(safe-area-inset-bottom));
   /* #endif */
 }
 .header {
-  background-color: #39AD95;
+  background-color: #1FBF8F;
+  background-image: linear-gradient(#4EE2B6, #1FBF8F, #0A7A5C);
   position: relative;
+  overflow: hidden;
 }
 .header-row {
   flex-direction: row;
   align-items: center;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 12px;
-  padding-bottom: 26px;
+  padding-left: 36rpx;
+  padding-right: 36rpx;
+  padding-top: 24rpx;
+  padding-bottom: 64rpx;
 }
 .avatar-ring {
-  width: 51px;
-  height: 51px;
-  border-radius: 26px;
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 52rpx;
   background-color: #FFFFFF;
   justify-content: center;
   align-items: center;
+  box-shadow: 0 4rpx 16rpx rgba(10, 79, 61, 0.12);
 }
 .avatar {
-  width: 46px;
-  height: 46px;
-  border-radius: 23px;
+  width: 94rpx;
+  height: 94rpx;
+  border-radius: 47rpx;
 }
 .header-text {
   flex: 1;
-  margin-left: 10px;
+  margin-left: 22rpx;
 }
 .name {
-  font-size: 14px;
+  font-size: 32rpx;
   font-weight: bold;
   color: #FFFFFF;
 }
 .sub {
-  font-size: 10px;
-  color: #FFFFFF;
-  margin-top: 3px;
+  font-size: 21rpx;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 6rpx;
 }
 .gear-circle {
   position: absolute;
-  width: 24px;
-  height: 24px;
-  border-radius: 12px;
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 24rpx;
   background-color: rgba(255, 255, 255, 0.25);
   justify-content: center;
   align-items: center;
 }
 .gear {
-  width: 13px;
-  height: 13px;
+  width: 26rpx;
+  height: 26rpx;
 }
 .header-wave {
   position: absolute;
@@ -620,102 +598,102 @@ const records = computed<Rec[]>(() => {
   right: 0;
   bottom: 0;
   width: 100%;
-  height: 37px;
+  height: 72rpx;
 }
 .cal-card {
   position: relative;
   background-color: #F7FCFA;
-  border-radius: 16px;
-  margin-left: 13px;
-  margin-right: 13px;
-  margin-top: -10px;
-  padding: 14px;
-  box-shadow: 0 3px 10px rgba(0, 51, 40, 0.08);
+  border-radius: 36rpx;
+  margin-left: 28rpx;
+  margin-right: 28rpx;
+  margin-top: -32rpx;
+  padding: 30rpx;
+  box-shadow: 0 8rpx 32rpx rgba(10, 79, 61, 0.06);
 }
 .cal-head {
   flex-direction: row;
   align-items: center;
 }
 .cal-flame {
-  width: 10px;
-  height: 14px;
+  width: 20rpx;
+  height: 28rpx;
 }
 .cal-title {
-  font-size: 12px;
+  font-size: 24rpx;
   font-weight: bold;
   color: #003528;
-  margin-left: 6px;
+  margin-left: 12rpx;
 }
 .pill {
   background-color: #E7F2ED;
-  border-radius: 7px;
-  padding-left: 8px;
-  padding-right: 8px;
-  height: 14px;
+  border-radius: 14rpx;
+  padding-left: 16rpx;
+  padding-right: 16rpx;
+  height: 28rpx;
   justify-content: center;
   align-items: center;
-  margin-left: 8px;
+  margin-left: 16rpx;
 }
 .pill-text {
-  font-size: 8px;
+  font-size: 16rpx;
   color: #009465;
 }
 .ring {
   position: absolute;
-  right: 14px;
-  top: 12px;
-  width: 72px;
-  height: 72px;
-  border-radius: 36px;
+  right: 28rpx;
+  top: 24rpx;
+  width: 144rpx;
+  height: 144rpx;
+  border-radius: 72rpx;
   justify-content: center;
   align-items: center;
 }
 .ring-inner {
-  width: 52px;
-  height: 52px;
-  border-radius: 26px;
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 52rpx;
   background-color: #F7FCFA;
   justify-content: center;
   align-items: center;
   flex-direction: column;
 }
 .ring-pct {
-  font-size: 14px;
+  font-size: 28rpx;
   font-weight: bold;
   color: #003528;
 }
 .ring-lbl {
-  font-size: 8px;
+  font-size: 16rpx;
   color: #617B85;
-  margin-top: 1px;
+  margin-top: 2rpx;
 }
 .bignum-row {
   flex-direction: row;
   align-items: flex-end;
-  margin-top: 6px;
+  margin-top: 12rpx;
 }
 .bignum {
-  font-size: 45px;
+  font-size: 90rpx;
   font-weight: bold;
   color: #003528;
-  line-height: 50px;
+  line-height: 100rpx;
 }
 .bignum-unit {
-  font-size: 14px;
+  font-size: 28rpx;
   color: #003528;
-  margin-left: 4px;
-  margin-bottom: 5px;
+  margin-left: 8rpx;
+  margin-bottom: 10rpx;
 }
 .prog-track {
-  height: 9px;
-  border-radius: 5px;
+  height: 18rpx;
+  border-radius: 10rpx;
   background-color: #E5F0EC;
-  margin-top: 4px;
+  margin-top: 8rpx;
   overflow: hidden;
 }
 .prog-fill {
-  height: 9px;
-  border-radius: 5px;
+  height: 18rpx;
+  border-radius: 10rpx;
   background-color: #1FBF8F;
 }
 .prog-fill.bg-amber {
@@ -727,33 +705,33 @@ const records = computed<Rec[]>(() => {
 .prog-row {
   flex-direction: row;
   justify-content: space-between;
-  margin-top: 5px;
+  margin-top: 10rpx;
 }
 .pl-side {
   flex-direction: row;
   align-items: baseline;
 }
 .pl-txt {
-  font-size: 10px;
+  font-size: 20rpx;
   color: #617B85;
 }
 .pl-num {
-  font-size: 11px;
+  font-size: 22rpx;
   font-weight: bold;
   color: #00222B;
-  margin-left: 3px;
+  margin-left: 6rpx;
 }
 .pl-txt2 {
-  margin-left: 3px;
+  margin-left: 6rpx;
 }
 .stat-panel {
   flex-direction: row;
   align-items: center;
   background-color: #FFFFFF;
-  border-radius: 11px;
-  margin-top: 13px;
-  padding-top: 12px;
-  padding-bottom: 12px;
+  border-radius: 22rpx;
+  margin-top: 26rpx;
+  padding-top: 24rpx;
+  padding-bottom: 24rpx;
 }
 .stat-col {
   flex: 1;
@@ -764,53 +742,53 @@ const records = computed<Rec[]>(() => {
   align-items: center;
 }
 .stat-chip {
-  width: 21px;
-  height: 21px;
-  border-radius: 6px;
+  width: 42rpx;
+  height: 42rpx;
+  border-radius: 12rpx;
   background-color: #E7F2ED;
   justify-content: center;
   align-items: center;
 }
 .stat-ico {
-  width: 15px;
-  height: 15px;
+  width: 30rpx;
+  height: 30rpx;
 }
 .stat-num {
-  font-size: 18px;
+  font-size: 36rpx;
   font-weight: bold;
   color: #082731;
-  margin-left: 8px;
+  margin-left: 16rpx;
 }
 .stat-num-green {
-  font-size: 18px;
+  font-size: 36rpx;
   font-weight: bold;
   color: #008561;
-  margin-left: 8px;
+  margin-left: 16rpx;
 }
 .stat-num-coral {
-  font-size: 18px;
+  font-size: 36rpx;
   font-weight: bold;
   color: #FF7043;
-  margin-left: 8px;
+  margin-left: 16rpx;
 }
 .stat-lbl {
-  font-size: 9px;
+  font-size: 18rpx;
   color: #5A737D;
-  margin-top: 6px;
+  margin-top: 12rpx;
 }
 .stat-div {
   width: 1px;
-  height: 36px;
+  height: 72rpx;
   background-color: #E5EFEA;
 }
 .banner {
   flex-direction: row;
   align-items: center;
-  border-radius: 13px;
-  margin-left: 10px;
-  margin-right: 10px;
-  margin-top: 13px;
-  padding: 10px 12px;
+  border-radius: 26rpx;
+  margin-left: 20rpx;
+  margin-right: 20rpx;
+  margin-top: 26rpx;
+  padding: 20rpx 24rpx;
 }
 .banner-ok {
   background-color: #EBF8F5;
@@ -822,33 +800,33 @@ const records = computed<Rec[]>(() => {
   background-color: #F0F7F4;
 }
 .check-circle {
-  width: 27px;
-  height: 27px;
-  border-radius: 14px;
+  width: 54rpx;
+  height: 54rpx;
+  border-radius: 28rpx;
   justify-content: center;
   align-items: center;
 }
 .circle-green {
-  background-color: #009771;
+  background-color: #1FBF8F;
 }
 .circle-orange {
   background-color: #FF7043;
 }
 .banner-excl {
-  font-size: 16px;
+  font-size: 32rpx;
   font-weight: 800;
   color: #FFFFFF;
 }
 .check {
-  width: 12px;
-  height: 12px;
+  width: 28rpx;
+  height: 28rpx;
 }
 .banner-text {
   flex: 1;
-  margin-left: 10px;
+  margin-left: 20rpx;
 }
 .banner-title {
-  font-size: 11px;
+  font-size: 22rpx;
   font-weight: bold;
   color: #00865C;
 }
@@ -856,21 +834,21 @@ const records = computed<Rec[]>(() => {
   color: #D94826;
 }
 .banner-sub {
-  font-size: 8px;
+  font-size: 16rpx;
   color: #57747E;
-  margin-top: 2px;
+  margin-top: 4rpx;
 }
 .banner-chev {
-  width: 25px;
-  height: 25px;
+  width: 50rpx;
+  height: 50rpx;
 }
 .card {
   background-color: #FBFDFD;
-  border-radius: 16px;
-  margin-left: 13px;
-  margin-right: 13px;
-  margin-top: 12px;
-  padding: 14px;
+  border-radius: 32rpx;
+  margin-left: 26rpx;
+  margin-right: 26rpx;
+  margin-top: 24rpx;
+  padding: 28rpx;
 }
 .card-head {
   flex-direction: row;
@@ -878,7 +856,7 @@ const records = computed<Rec[]>(() => {
 }
 .card-title {
   flex: 1;
-  font-size: 13px;
+  font-size: 26rpx;
   color: #001521;
 }
 .head-right {
@@ -886,36 +864,36 @@ const records = computed<Rec[]>(() => {
   align-items: center;
 }
 .week-num {
-  font-size: 10px;
+  font-size: 20rpx;
   font-weight: bold;
   color: #087156;
 }
 .week-lbl {
-  font-size: 9px;
+  font-size: 18rpx;
   color: #087A5C;
-  margin-left: 2px;
+  margin-left: 4rpx;
 }
 .view-all {
-  font-size: 9px;
+  font-size: 18rpx;
   color: #6F8491;
 }
 .chev-mini {
-  width: 7px;
-  height: 13px;
-  margin-left: 5px;
+  width: 14rpx;
+  height: 26rpx;
+  margin-left: 10rpx;
 }
 .dots-row {
   flex-direction: row;
-  margin-top: 12px;
+  margin-top: 24rpx;
 }
 .dot-col {
   flex: 1;
   align-items: center;
 }
 .dot {
-  width: 19px;
-  height: 19px;
-  border-radius: 10px;
+  width: 38rpx;
+  height: 38rpx;
+  border-radius: 20rpx;
   justify-content: center;
   align-items: center;
 }
@@ -925,41 +903,41 @@ const records = computed<Rec[]>(() => {
   border-color: #C9D9D4;
 }
 .dot-check {
-  width: 9px;
-  height: 7px;
+  width: 18rpx;
+  height: 14rpx;
 }
 .dot-excl {
-  font-size: 12px;
+  font-size: 24rpx;
   font-weight: bold;
   color: #FFFFFF;
 }
 .dot-lbl {
-  font-size: 9px;
+  font-size: 18rpx;
   color: #93A3AD;
-  margin-top: 5px;
+  margin-top: 10rpx;
 }
 .trend-icon {
-  width: 24px;
-  height: 25px;
-  margin-right: 6px;
+  width: 48rpx;
+  height: 50rpx;
+  margin-right: 12rpx;
 }
 .chart {
   flex-direction: row;
-  margin-top: 10px;
-  height: 130px;
+  margin-top: 20rpx;
+  height: 260rpx;
 }
 .yaxis {
-  width: 26px;
+  width: 52rpx;
   justify-content: space-between;
-  padding-top: 12px;
-  padding-bottom: 16px;
+  padding-top: 24rpx;
+  padding-bottom: 32rpx;
 }
 .ax {
-  font-size: 7px;
+  font-size: 14rpx;
   color: #738B99;
 }
 .ax-green {
-  font-size: 7px;
+  font-size: 14rpx;
   color: #096751;
 }
 .bars-area {
@@ -969,8 +947,8 @@ const records = computed<Rec[]>(() => {
 .target-line {
   position: absolute;
   left: 0;
-  right: 32px;
-  top: 37px;
+  right: 64rpx;
+  top: 74rpx;
   height: 0;
   border-top-width: 1px;
   border-top-style: dashed;
@@ -979,8 +957,8 @@ const records = computed<Rec[]>(() => {
 .bars-row {
   flex-direction: row;
   align-items: flex-end;
-  height: 114px;
-  padding-right: 32px;
+  height: 228rpx;
+  padding-right: 64rpx;
 }
 .bar-col {
   flex: 1;
@@ -988,95 +966,95 @@ const records = computed<Rec[]>(() => {
   justify-content: flex-end;
 }
 .bar-val {
-  font-size: 7px;
+  font-size: 14rpx;
   color: #4BA38F;
-  margin-bottom: 3px;
+  margin-bottom: 6rpx;
 }
 .bar-val-over {
-  font-size: 9px;
+  font-size: 18rpx;
   font-weight: bold;
   color: #FA5C38;
 }
 .bar {
-  width: 20px;
-  border-radius: 6px;
+  width: 40rpx;
+  border-radius: 12rpx;
   background-color: #23A889;
 }
 .bar-over {
   background-color: #FF7D5C;
 }
 .bar-date {
-  font-size: 8px;
+  font-size: 16rpx;
   color: #7D929D;
-  margin-top: 4px;
-  height: 11px;
+  margin-top: 8rpx;
+  height: 22rpx;
 }
 .target-tag {
   position: absolute;
   right: 0;
-  top: 25px;
+  top: 50rpx;
   align-items: center;
 }
 .target-tag-text {
-  font-size: 7px;
-  line-height: 11px;
+  font-size: 14rpx;
+  line-height: 22rpx;
   color: #647B87;
 }
 .rec-row {
   flex-direction: row;
   align-items: center;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding-top: 20rpx;
+  padding-bottom: 20rpx;
 }
 .rec-left {
   flex: 1;
 }
 .rec-date {
-  font-size: 11px;
+  font-size: 22rpx;
   color: #001521;
 }
 .rec-wday {
-  font-size: 9px;
+  font-size: 18rpx;
   color: #6A8391;
-  margin-top: 2px;
+  margin-top: 4rpx;
 }
 .rec-right {
   flex-direction: row;
   align-items: baseline;
 }
 .rec-num {
-  font-size: 14px;
+  font-size: 28rpx;
   font-weight: bold;
   color: #001521;
 }
 .rec-unit {
-  font-size: 9px;
+  font-size: 18rpx;
   color: #6A8391;
-  margin-left: 2px;
+  margin-left: 4rpx;
 }
 .rec-badge {
   background-color: #E2F5EE;
-  border-radius: 7px;
-  padding-left: 6px;
-  padding-right: 6px;
-  height: 14px;
+  border-radius: 14rpx;
+  padding-left: 12rpx;
+  padding-right: 12rpx;
+  height: 28rpx;
   justify-content: center;
-  margin-left: 6px;
+  margin-left: 12rpx;
 }
 .rec-badge-over {
   background-color: #FDE9E4;
 }
 .rec-badge-text {
-  font-size: 8px;
+  font-size: 16rpx;
   color: #129C77;
 }
 .rec-badge-text-over {
   color: #FA543A;
 }
 .chev-row {
-  width: 8px;
-  height: 14px;
-  margin-left: 8px;
+  width: 16rpx;
+  height: 28rpx;
+  margin-left: 16rpx;
 }
 .rec-div {
   height: 1px;

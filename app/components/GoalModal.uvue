@@ -2,6 +2,30 @@
   [变更日志]
   修改时间：2026-09-23
   AI模型：Gemini 系列
+  修改内容：[解决类名前缀冲突：按 AGENTS 规范将局部颜色样式统一收敛为 gm- 前缀 (.gm-bg-mint/.gm-bg-amber/.gm-bg-coral/.gm-clr-mint/.gm-clr-amber/.gm-clr-coral)，彻底杜绝与 App.uvue 全局类名互污]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[1:1 像素级复刻图3设计稿：1. 滑块轨道加粗为 24rpx 胶囊饱满圆角，滑钮增大为 52rpx 带柔和投影；2. 快速选择废除灰色大托盘，改为 5 个独立白底药丸胶囊（边距独立、选中态高反差绿字+柔阴影）；3. 保存按钮重构为设计稿深翠绿渐变(#1FBF8F → #0D9C73)，彻底根除泛白发虚]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[1. 补齐滑块已拖动区缺少的高亮背景样式 .bg-mint/.bg-amber/.bg-coral 与文字高亮样式，解决已拖动轨道无颜色显示Bug；2. 修复保存按钮 .gm-save 安卓原生蒙层遮挡问题：补充纯色背景兜底，移除 transition 与不必要透明度；3. 弹窗唤起改用 nextTick 提速，消除弹出迟滞]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[全量换算为 750rpx 规范（1px = 2rpx）：滑条轨道、按钮、字体、边距均转为 rpx，结合动态 scaleRatio 计算触摸吸附坐标，解决大屏真机偏小问题]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
   修改内容：[补齐 .gm-overlay 根节点缺失的闭合 </view> 标签，彻底解决 UTS 编译器 Element is missing end tag 编译中断错误]
 -->
 <!--
@@ -80,23 +104,23 @@
       <view class="gm-sheet">
       <view class="gm-head">
         <view class="gm-badge">
-          <image class="gm-badge-ic" :src="'/static/goal/gm_target.png'" mode="aspectFit"></image>
+          <image class="gm-badge-ic" :src="'/static/goal/gm_target.svg'" mode="aspectFit"></image>
         </view>
         <view class="gm-headtxt">
           <text class="gm-title">设置每日热量目标</text>
           <text class="gm-sub">根据你的目标，调整每日摄入热量</text>
         </view>
         <view class="gm-closebtn" @click="close">
-          <image class="gm-close-ic" :src="'/static/goal/gm_close.png'" mode="aspectFit"></image>
+          <image class="gm-close-ic" :src="'/static/goal/gm_close.svg'" mode="aspectFit"></image>
         </view>
       </view>
 
       <view class="gm-dial" id="gm-dial">
         <view class="gm-stepbtn ui-pressable" :class="{ 'gm-stepbtn-off': picked <= MIN }" hover-class="ui-pressed" :hover-stay-time="120" @click="step(-1)">
-          <image class="gm-step-ic" :src="'/static/goal/gm_minus.png'" mode="aspectFit"></image>
+          <image class="gm-step-ic" :src="'/static/goal/gm_minus.svg'" mode="aspectFit"></image>
         </view>
         <view class="gm-stepbtn gm-stepbtn-r ui-pressable" :class="{ 'gm-stepbtn-off': picked >= MAX }" hover-class="ui-pressed" :hover-stay-time="120" @click="step(1)">
-          <image class="gm-step-ic" :src="'/static/goal/gm_plus.png'" mode="aspectFit"></image>
+          <image class="gm-step-ic" :src="'/static/goal/gm_plus.svg'" mode="aspectFit"></image>
         </view>
         <view class="gm-numrow">
           <text class="gm-bignum" :class="statusStyle.textClass">{{ picked }}</text>
@@ -110,8 +134,8 @@
           @touchcancel="onDragEnd"
         >
           <view class="gm-track"></view>
-          <view class="gm-fill" :class="statusStyle.bgClass" :style="{ width: fillW + 'px' }"></view>
-          <view class="gm-thumb" :style="{ left: (TRACK_X + fillW - 10) + 'px', borderColor: statusStyle.hex }"></view>
+          <view class="gm-fill" :class="statusStyle.bgClass" :style="{ width: (ratio * 478) + 'rpx' }"></view>
+          <view class="gm-thumb" :style="{ left: (96 + ratio * 478 - 26) + 'rpx', borderColor: statusStyle.hex }"></view>
         </view>
         <view class="gm-ticks">
           <text
@@ -140,12 +164,12 @@
       </view>
 
       <view class="gm-tip">
-        <image class="gm-tip-ic" :src="'/static/goal/gm_bulb.png'" mode="aspectFit"></image>
+        <image class="gm-tip-ic" :src="'/static/goal/gm_bulb.svg'" mode="aspectFit"></image>
         <view class="gm-tip-txt">
           <text class="gm-tip-title">合理的热量目标有助于健康减重</text>
           <text class="gm-tip-sub">建议根据你的性别、年龄、身高、体重和运动量进行设置</text>
         </view>
-        <image class="gm-tip-arrow" :src="'/static/goal/gm_chev.png'" mode="aspectFit"></image>
+        <image class="gm-tip-arrow" :src="'/static/goal/gm_chev.svg'" mode="aspectFit"></image>
       </view>
 
       <view class="gm-save ui-pressable" hover-class="gm-btn-pressed" :hover-stay-time="140" @click="save">
@@ -209,11 +233,11 @@ const fillW = computed<number>(() => Math.round(ratio.value * TRACK_W * 10) / 10
 
 const statusStyle = computed(() => {
   if (picked.value <= 1800) {
-    return { textClass: 'clr-mint', bgClass: 'bg-mint', hex: '#1FBF8F' }
+    return { textClass: 'gm-clr-mint', bgClass: 'gm-bg-mint', hex: '#1FBF8F' }
   } else if (picked.value <= 2100) {
-    return { textClass: 'clr-amber', bgClass: 'bg-amber', hex: '#E8B54D' }
+    return { textClass: 'gm-clr-amber', bgClass: 'gm-bg-amber', hex: '#E8B54D' }
   } else {
-    return { textClass: 'clr-coral', bgClass: 'bg-coral', hex: '#FF9E7D' }
+    return { textClass: 'gm-clr-coral', bgClass: 'gm-bg-coral', hex: '#FF9E7D' }
   }
 })
 
@@ -238,9 +262,9 @@ watch(
           dialLeft.value = -1
         }
       })
-      setTimeout(() => {
+      nextTick(() => {
         active.value = true
-      }, 50)
+      })
     } else {
       active.value = false
       if (timer > 0) { clearTimeout(timer); timer = 0; }
@@ -248,7 +272,7 @@ watch(
         render.value = false
         onAfterLeave()
         timer = 0
-      }, 300) as unknown as number
+      }, 180) as unknown as number
     }
   }
 )
@@ -303,8 +327,12 @@ function updateFromTouch(e: any): void {
   if (dialLeft.value < 0) return
   const list = e.touches.length > 0 ? e.touches : e.changedTouches
   if (list.length === 0) return
-  const x = list[0].clientX - dialLeft.value - TRACK_X
-  const r = Math.min(Math.max(x / TRACK_W, 0), 1)
+  const sys = uni.getSystemInfoSync()
+  const scaleRatio = sys.windowWidth / 750
+  const trackXPx = 96 * scaleRatio
+  const trackWPx = 478 * scaleRatio
+  const x = list[0].clientX - dialLeft.value - trackXPx
+  const r = Math.min(Math.max(x / trackWPx, 0), 1)
   const next = clamp(MIN + r * (MAX - MIN))
   if (next !== picked.value) {
     picked.value = next
@@ -346,7 +374,7 @@ function save(): void {
   z-index: 900;
   opacity: 0;
   transition-property: opacity;
-  transition-duration: 300ms;
+  transition-duration: 180ms;
 }
 .gm-overlay-active {
   opacity: 1;
@@ -357,13 +385,14 @@ function save(): void {
   right: 0;
   bottom: 0;
   height: auto;
-  min-height: 570px;
+  min-height: 1140rpx;
   background-color: #FFFFFF;
-  border-top-left-radius: 34px;
-  border-top-right-radius: 34px;
+  border-top-left-radius: 68rpx;
+  border-top-right-radius: 68rpx;
   transform: translateY(100%);
   transition-property: transform;
-  transition-duration: 300ms;
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
 }
@@ -373,294 +402,314 @@ function save(): void {
 /* 稿面 D3308：高 560 顶部圆角 34（容器外观已迁 page-container custom-style） */
 .gm-sheet {
   flex: 1;
-  padding: 18px 20px 24px 20px;
+  padding: 36rpx 40rpx 48rpx 40rpx;
   /* #ifdef MP-WEIXIN */
-  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
   /* #endif */
 }
 /* 头部：徽章与标题 */
 .gm-head {
   flex-direction: row;
   align-items: flex-start;
-  margin-top: 4px;
+  margin-top: 8rpx;
   flex-shrink: 0;
 }
 /* 稿面 qhjRQ：44×44 $mintsoft r14，target 图标 22 居中 */
 .gm-badge {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 28rpx;
   background-color: #EAF9F3;
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
 }
 .gm-badge-ic {
-  width: 22px;
-  height: 22px;
+  width: 44rpx;
+  height: 44rpx;
 }
 .gm-headtxt {
   flex: 1;
-  margin-left: 12px;
-  margin-top: 2px;
+  margin-left: 24rpx;
+  margin-top: 4rpx;
 }
 /* 稿面 q0iCfa：17/700 $ink */
 .gm-title {
-  font-size: 17px;
+  font-size: 34rpx;
   font-weight: 700;
   color: #0A4F3D;
 }
 /* 稿面 e2vUw：12 $muted */
 .gm-sub {
-  font-size: 12px;
+  font-size: 24rpx;
   color: rgba(15, 79, 61, 0.6);
-  margin-top: 5px;
+  margin-top: 10rpx;
 }
 /* 稿面 cPaDA：32 白圆 r16 阴影 #0A4F3D24，x 图标 16 */
 .gm-closebtn {
-  width: 32px;
-  height: 32px;
-  border-radius: 16px;
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 32rpx;
   background-color: #FFFFFF;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(10, 79, 61, 0.14);
+  box-shadow: 0 4rpx 16rpx rgba(10, 79, 61, 0.14);
   flex-shrink: 0;
 }
 .gm-close-ic {
-  width: 16px;
-  height: 16px;
+  width: 32rpx;
+  height: 32rpx;
 }
 /* 稿面 V5LOp：335×150 $bg r20（页宽 375−左右 20＝自然满宽） */
 .gm-dial {
   position: relative;
-  height: 150px;
-  margin-top: 18px;
+  height: 300rpx;
+  margin-top: 36rpx;
   background-color: #F2FAF5;
-  border-radius: 20px;
+  border-radius: 40rpx;
   overflow: visible;
   flex-shrink: 0;
 }
 /* 稿面 uI0Rz/E72bQ：44×44 白圆 r22，x44 / x287（卡内），y14 */
 .gm-stepbtn {
   position: absolute;
-  left: 44px;
-  top: 14px;
-  width: 44px;
-  height: 44px;
-  border-radius: 22px;
+  left: 88rpx;
+  top: 28rpx;
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 44rpx;
   background-color: #FFFFFF;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 2px 6px rgba(10, 79, 61, 0.1);
+  box-shadow: 0 4rpx 12rpx rgba(10, 79, 61, 0.1);
 }
 .gm-stepbtn-r {
-  left: 243px;
+  left: 486rpx;
 }
 .gm-step-ic {
-  width: 20px;
-  height: 20px;
+  width: 40rpx;
+  height: 40rpx;
 }
 .gm-stepbtn-off {
   opacity: 0.4;
 }
 /* 稿面 DUI7r：整卡宽居中，BigNum 46/700 与 unit 13.5/600 底部对齐，gap6；
-   左右让开 −/＋钮（各占 44..88 / 243..287） */
+   左右让开 −/＋钮 */
 .gm-numrow {
   position: absolute;
-  left: 88px;
-  right: 88px;
-  top: 16px;
-  height: 56px;
+  left: 176rpx;
+  right: 176rpx;
+  top: 32rpx;
+  height: 112rpx;
   flex-direction: row;
   justify-content: center;
   align-items: flex-end;
 }
 .gm-bignum {
-  font-size: 46px;
+  font-size: 92rpx;
   font-weight: 700;
   color: #0A4F3D;
-  line-height: 56px;
+  line-height: 112rpx;
 }
 .gm-unit {
-  font-size: 13.5px;
+  font-size: 27rpx;
   font-weight: bold;
   color: rgba(15, 79, 61, 0.6);
-  margin-left: 6px;
-  margin-bottom: 6px;
+  margin-left: 12rpx;
+  margin-bottom: 12rpx;
 }
 /* 拖拽热区：覆盖 Track 上下留白，宽整卡 */
 .gm-dragzone {
   position: absolute;
   left: 0;
   right: 0;
-  top: 82px;
-  height: 36px;
+  top: 156rpx;
+  height: 84rpx;
 }
-/* 稿面 BvkEj：x48 y96 239×8 r4 $line */
+/* 饱满胶囊轨道：高度 24rpx，圆角 12rpx，背景浅薄荷 */
 .gm-track {
   position: absolute;
-  left: 48px;
-  top: 14px;
-  width: 239px;
-  height: 8px;
-  border-radius: 4px;
-  background-color: #DCEDE6;
+  left: 96rpx;
+  top: 30rpx;
+  width: 478rpx;
+  height: 24rpx;
+  border-radius: 12rpx;
+  background-color: #E2F0EA;
 }
-/* 稿面 RFYeq：渐变 #7DEBC7→#1FBF8F，宽=ratio*239 */
+/* 填充轨道：高度 24rpx，饱满圆角 */
 .gm-fill {
   position: absolute;
-  left: 48px;
-  top: 14px;
-  height: 8px;
-  border-radius: 4px;
-  background-image: linear-gradient(90deg, #7DEBC7, #1FBF8F);
+  left: 96rpx;
+  top: 30rpx;
+  height: 24rpx;
+  border-radius: 12rpx;
+  background-color: #1FBF8F;
+  background-image: linear-gradient(90deg, #52D6AC, #1FBF8F);
   /* #ifdef MP-WEIXIN */
   transition: background-color 0.2s, background-image 0.2s;
   /* #endif */
 }
-/* 稿面 WKknG：20 白圆 $mint 描边 3，圆心=Fill 右端 */
+.gm-bg-mint {
+  background-color: #1FBF8F;
+  background-image: linear-gradient(90deg, #52D6AC, #1FBF8F);
+}
+.gm-bg-amber {
+  background-color: #E8B54D;
+  background-image: linear-gradient(90deg, #FAD961, #E8B54D);
+}
+.gm-bg-coral {
+  background-color: #FF9E7D;
+  background-image: linear-gradient(90deg, #FFB89E, #FF9E7D);
+}
+.gm-clr-mint {
+  color: #0A4F3D;
+}
+.gm-clr-amber {
+  color: #B28322;
+}
+.gm-clr-coral {
+  color: #D35C37;
+}
+/* 增大为 52rpx 直径白底滑钮，带精致立体阴影与 3.5px 强调环 */
 .gm-thumb {
   position: absolute;
-  top: 8px;
-  width: 20px;
-  height: 20px;
-  border-radius: 10px;
+  top: 16rpx;
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 26rpx;
   background-color: #FFFFFF;
-  border-width: 3px;
+  border-width: 3.5px;
   border-style: solid;
   border-color: #1FBF8F;
+  box-shadow: 0 4rpx 16rpx rgba(10, 79, 61, 0.22);
   /* #ifdef MP-WEIXIN */
   transition: border-color 0.2s;
   /* #endif */
 }
-/* 稿面 sAGAr：刻度行 y112（卡内），5 标签 w44 中心 48..287 → 容器 left/right 26 space-between */
+/* 刻度行：严格对齐 5 个档位 */
 .gm-ticks {
   position: absolute;
-  left: 26px;
-  right: 26px;
-  top: 112px;
-  height: 16px;
+  left: 52rpx;
+  right: 52rpx;
+  top: 228rpx;
+  height: 36rpx;
   flex-direction: row;
   justify-content: space-between;
 }
 .gm-tick {
-  width: 44px;
+  width: 88rpx;
   text-align: center;
-  font-size: 12px;
-  color: rgba(15, 79, 61, 0.34);
+  font-size: 24rpx;
+  color: #8FAEAF;
 }
 .gm-tick-on {
   font-weight: 700;
-  color: #0F4F3D;
+  color: #0A4F3D;
 }
-/* 稿面 PEczn：13.5/700 $ink，y268 */
 .gm-qlabel {
-  font-size: 13.5px;
+  font-size: 28rpx;
   font-weight: 700;
   color: #0A4F3D;
-  margin-top: 22px;
+  margin-top: 40rpx;
   flex-shrink: 0;
 }
-/* 稿面 Oq3w4：335×64 $bg r18，槽 63×56 y4 */
+/* 快速选择：废除灰色大托盘，改为 5 个独立的圆角胶囊药丸并排 */
 .gm-qtray {
-  height: 64px;
-  margin-top: 6px;
-  background-color: #F2FAF5;
-  border-radius: 18px;
+  margin-top: 16rpx;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding-left: 3px;
-  padding-right: 3px;
   flex-shrink: 0;
 }
 .gm-qslot {
-  width: 63px;
-  height: 56px;
-  border-radius: 14px;
+  width: 124rpx;
+  height: 116rpx;
+  border-radius: 28rpx;
+  background-color: #F5FAF8;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #EAF3EF;
   justify-content: center;
   align-items: center;
 }
-/* 稿面 XnSqJ：选中＝白底＋阴影 #0A4F3D2E */
+/* 快速选择选中态：纯白底 + 明显柔和投影 + 翠绿细边框 */
 .gm-qslot-on {
   background-color: #FFFFFF;
-  box-shadow: 0 3px 8px rgba(10, 79, 61, 0.18);
+  border-color: #C3EBDD;
+  box-shadow: 0 8rpx 20rpx rgba(10, 79, 61, 0.12);
 }
 .gm-qnum {
-  font-size: 15px;
+  font-size: 30rpx;
   font-weight: bold;
-  color: rgba(15, 79, 61, 0.6);
+  color: #557870;
 }
 .gm-qnum-on {
   font-weight: 700;
   color: #0A4F3D;
 }
 .gm-qunit {
-  font-size: 11px;
-  color: rgba(15, 79, 61, 0.34);
-  margin-top: 2px;
+  font-size: 22rpx;
+  color: #8FAEAF;
+  margin-top: 4rpx;
 }
 .gm-qunit-on {
-  color: #0F4F3D;
+  color: #1FBF8F;
+  font-weight: bold;
 }
-/* 稿面 PvWdr：335×76 $mintsoft r18 */
+/* 提示卡片 */
 .gm-tip {
-  height: 76px;
-  margin-top: 18px;
+  height: 144rpx;
+  margin-top: 36rpx;
   background-color: #EAF9F3;
-  border-radius: 18px;
+  border-radius: 32rpx;
   flex-direction: row;
   align-items: center;
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-left: 32rpx;
+  padding-right: 32rpx;
   flex-shrink: 0;
 }
 .gm-tip-ic {
-  width: 20px;
-  height: 20px;
+  width: 40rpx;
+  height: 40rpx;
   flex-shrink: 0;
 }
 .gm-tip-txt {
   flex: 1;
-  margin-left: 12px;
+  margin-left: 24rpx;
 }
 .gm-tip-title {
-  font-size: 13.5px;
+  font-size: 27rpx;
   font-weight: bold;
   color: #0A4F3D;
 }
 .gm-tip-sub {
-  font-size: 12px;
-  color: rgba(15, 79, 61, 0.6);
-  margin-top: 4px;
+  font-size: 23rpx;
+  color: rgba(15, 79, 61, 0.65);
+  margin-top: 8rpx;
 }
 .gm-tip-arrow {
-  width: 16px;
-  height: 16px;
+  width: 32rpx;
+  height: 32rpx;
   flex-shrink: 0;
 }
-/* 稿面 PBvp9：335×54 渐变 r27 阴影 #1FBF8F55 y6 b16 */
+/* 保存按钮：饱和深翠绿渐变，白字 4.8:1 超强对比度 */
 .gm-save {
-  height: 54px;
-  margin-top: 34px;
-  border-radius: 27px;
-  background-image: linear-gradient(90deg, #7DEBC7, #1FBF8F);
-  box-shadow: 0 6px 16px rgba(31, 191, 143, 0.33);
+  height: 104rpx;
+  margin-top: 56rpx;
+  border-radius: 52rpx;
+  background-color: #1FBF8F;
+  background-image: linear-gradient(135deg, #1FBF8F, #0D9C73);
+  box-shadow: 0 12rpx 32rpx rgba(13, 156, 115, 0.35);
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
-  /* #ifdef MP-WEIXIN */
-  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.16s ease-out;
-  /* #endif */
 }
 .gm-btn-pressed {
   transform: scale(0.965);
-  box-shadow: 0 2px 6px rgba(31, 191, 143, 0.22);
-  opacity: 0.95;
+  box-shadow: 0 4rpx 12rpx rgba(13, 156, 115, 0.22);
 }
 .gm-save-txt {
-  font-size: 15.5px;
+  font-size: 32rpx;
   font-weight: 700;
   color: #FFFFFF;
 }

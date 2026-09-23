@@ -1,6 +1,36 @@
 <!--
   [变更日志]
   修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[彻底修复编译器报错与警告：1. 移除 uni-app x 不支持的 min-height: 100%，改用原生规范属性；2. 修复 linear-gradient 携带角度 (180deg/90deg) 的语法警告，规范为无角度标准渐变；3. 解决 .dd-prog-right .dd-pnum 非法后代选择器，重构为单类 .dd-pnum-target；4. 修复 :style 中 calc(116rpx + px) 混合计算在原生端的报错，改由 computed navBarH 像素安全累加计算]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[基于 ai-worldclass-design 落地高颜值全局顶栏：1. 接入统一 liquid_wave.svg 纯矢量有机双层水波；2. 升级为全 App 统一双色温薄荷水体渐变 (#4EE2B6 -> #1FBF8F -> #0A7A5C)；3. 今日热量卡升级为统一自然浮岛层叠 (-32rpx)，彻底消除单日详情页与其它页面的视觉割裂]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[1. 彻底防范 Android 端 calc(rpx+px) 动态高度失效，重构 dd-header 为状态栏独立占位层；2. 升级 flame 位图为高清晰矢量 SVG]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[1. 餐次记录完整保留四大餐次（早/中/晚/夜宵），未记录时展示 empty 状态“尚未添加”；2. 全面升级餐次与导航图标为高清晰矢量 SVG（lr_back/lr_meal_breakfast/lr_meal_lunch/lr_meal_dinner/lr_meal_snack/dd_add/dd_sum），消除位图失真；3. 优化餐次头部垂直居中与空状态卡片排版]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[全量换算为 750rpx 规范（1px = 2rpx）：Header、今日热量大卡、营养分布三列、餐次列表及总结条全量自适应大屏]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
   AI模型：Gemini 系列
   修改内容：[接入方案A单流程架构：点击添加食物拉起整合版 FoodPicker，移除 addShow/addFoodId/onPickFood/onAddChange 等冗余状态机，消除双弹窗 1500ms 延迟]
 -->
@@ -71,18 +101,21 @@
 -->
 <template>
   <view class="page">
-    <!-- Header（稿面 P1xTZv 375×152 渐变；Card 上叠 56） -->
-    <view class="dd-header" :style="{ paddingTop: sbH + 'px', height: (108 + sbH) + 'px' }">
+    <!-- Header（全App统一薄荷液滴水体渐变 + 纯矢量有机双水波） -->
+    <view class="dd-header">
+      <view :style="{ height: sbH + 'px' }"></view>
       <view class="dd-nav">
-        <image class="dd-back" :src="'/static/records/lr_back.png'" mode="aspectFit" @click="goBack"></image>
+        <image class="dd-back" :src="'/static/records/lr_back.svg'" mode="aspectFit" @click="goBack"></image>
         <text class="dd-title">{{ headerTitle }}</text>
       </view>
+      <!-- 统一纯矢量双层水波 -->
+      <image class="dd-wave" :src="'/static/common/liquid_wave.svg'" mode="widthFix"></image>
     </view>
 
     <!-- 今日热量卡 -->
     <view class="dd-card">
       <view class="dd-card-head">
-        <image class="dd-flame" :src="'/static/profile/flame.png'" mode="aspectFit"></image>
+        <image class="dd-flame" :src="'/static/profile/flame.svg'" mode="aspectFit"></image>
         <text class="dd-card-title">今日热量</text>
         <view class="dd-overpill" v-if="dayOver > 0">
           <text class="dd-overtxt">超标 {{ dayOver }} kcal</text>
@@ -98,7 +131,7 @@
         <text class="dd-bigunit" :class="calStatus.textClass">kcal</text>
       </view>
       <view class="dd-track">
-        <view class="dd-fill" :class="calStatus.bgClass" :style="{ width: fillW + 'px' }"></view>
+        <view class="dd-fill" :class="calStatus.bgClass" :style="{ width: fillW + 'rpx' }"></view>
       </view>
       <view class="dd-prog-foot">
         <view class="dd-prog-left">
@@ -108,7 +141,7 @@
         </view>
         <view class="dd-prog-right">
           <text class="dd-plabel">目标</text>
-          <text class="dd-pnum">{{ goalVal }}</text>
+          <text class="dd-pnum dd-pnum-target">{{ goalVal }}</text>
           <text class="dd-punit">kcal</text>
         </view>
       </view>
@@ -147,7 +180,7 @@
       <view class="dd-acc"></view>
       <text class="dd-sec">餐次记录</text>
       <view class="dd-add" @click="openPicker">
-        <image class="dd-add-ic" :src="'/static/records/dd_add.png'" mode="aspectFit"></image>
+        <image class="dd-add-ic" :src="'/static/records/dd_add.svg'" mode="aspectFit"></image>
         <text class="dd-add-txt">添加食物</text>
       </view>
     </view>
@@ -157,13 +190,17 @@
           <image class="dd-meal-ic" :src="mealItem.icon" mode="aspectFit"></image>
         </view>
         <text class="dd-meal-name">{{ mealItem.name }}</text>
-        <text class="dd-meal-time">{{ mealItem.time }}</text>
+        <text class="dd-meal-time" v-if="mealItem.time !== ''">{{ mealItem.time }}</text>
         <view class="dd-meal-cal">
           <text class="dd-meal-num">{{ mealItem.cal }}</text>
           <text class="dd-meal-unit">kcal</text>
         </view>
       </view>
+      <view v-if="mealItem.rows.length === 0" class="dd-empty">
+        <text class="dd-empty-txt">尚未添加</text>
+      </view>
       <view
+        v-else
         class="dd-row"
         v-for="(rowItem, rowIdx) in mealItem.rows"
         :key="rowIdx"
@@ -179,7 +216,7 @@
     <!-- 今日饮食总结 -->
     <view class="dd-band">
       <view class="dd-band-circ">
-        <image class="dd-band-ic" :src="'/static/records/dd_sum.png'" mode="aspectFit"></image>
+        <image class="dd-band-ic" :src="'/static/records/dd_sum.svg'" mode="aspectFit"></image>
       </view>
       <view class="dd-band-txt">
         <text class="dd-band-title">今日饮食总结</text>
@@ -193,9 +230,9 @@
     <SettleBadge v-model:show="settleShow" :kcal="settleKcal" :after="settleAfter" :goal="goal.calorieGoal" :meal="settleMeal" ></SettleBadge>
 
     <!-- 常驻导航栏（#28：替代 P1 遮罩＋fx-back 两件套）：滚动跨阈后整栏出现＝末色底＋返回箭＋日期标题，三端生效 -->
-    <view v-if="scrolled" class="dd-nav-fixed" :style="{ height: (sbH + 58) + 'px', paddingTop: sbH + 'px' }">
+    <view v-if="scrolled" class="dd-nav-fixed" :style="{ height: navBarH + 'px', paddingTop: sbH + 'px' }">
       <view class="dd-nav-back" @click="goBack">
-        <image class="dd-nav-icon" :src="'/static/records/lr_back.png'" mode="aspectFit"></image>
+        <image class="dd-nav-icon" :src="'/static/records/lr_back.svg'" mode="aspectFit"></image>
       </view>
       <text class="dd-nav-title">{{ headerTitle }}</text>
     </view>
@@ -223,6 +260,9 @@ const goal = useGoalStore()
 
 const sbH = ref(0)
 sbH.value = uni.getSystemInfoSync().statusBarHeight ?? 0
+
+// 常驻导航栏高度计算：58px (116rpx) 内容高 + 状态栏高，避免跨端 calc(rpx+px) 错误
+const navBarH = computed<number>(() => sbH.value + 58)
 
 // 常驻导航栏两态（#28，三端生效；跨阈值才写 ref 避免逐帧 setData）：>40 整栏出现＝
 // 头图渐变末色 #39AD95 实底＋返回箭＋日期标题，与滚动中的头图无缝接续
@@ -276,7 +316,7 @@ const ringStyle = computed<any>(() => {
 const fillW = computed<number>(() => {
   const scale = dayTotal.value > goalVal.value ? dayTotal.value : goalVal.value
   if (scale <= 0) return 0
-  return Math.round(Math.min(dayTotal.value, goalVal.value) / scale * 319 * 10) / 10
+  return Math.round(Math.min(dayTotal.value, goalVal.value) / scale * 638 * 10) / 10
 })
 
 const dayProtein = computed<number>(() => Math.round(dayEntries.value.reduce((s: number, e: FoodEntry): number => s + e.protein, 0)))
@@ -300,22 +340,25 @@ interface MealGroup {
 }
 
 const MEAL_ICONS: Record<string, string> = {
-  breakfast: '/static/records/lr_meal_breakfast.png',
-  lunch: '/static/records/lr_meal_lunch.png',
-  dinner: '/static/records/lr_meal_dinner.png',
-  snack: '/static/records/lr_meal_snack.png',
+  breakfast: '/static/records/lr_meal_breakfast.svg',
+  lunch: '/static/records/lr_meal_lunch.svg',
+  dinner: '/static/records/lr_meal_dinner.svg',
+  snack: '/static/records/lr_meal_snack.svg',
 }
 
 const mealGroups = computed<MealGroup[]>(() => {
   const out: MealGroup[] = []
   for (const mk of MEAL_KEYS) {
     const entries = dayEntries.value.filter((e: FoodEntry): boolean => e.meal === mk)
-    if (entries.length === 0) continue
     let cal = 0
-    for (const e of entries) cal += e.kcal
-    const d = new Date(entries[0].ts)
-    const hh = d.getHours() < 10 ? '0' + d.getHours().toString() : d.getHours().toString()
-    const mm = d.getMinutes() < 10 ? '0' + d.getMinutes().toString() : d.getMinutes().toString()
+    let time = ''
+    if (entries.length > 0) {
+      for (const e of entries) cal += e.kcal
+      const d = new Date(entries[0].ts)
+      const hh = d.getHours() < 10 ? '0' + d.getHours().toString() : d.getHours().toString()
+      const mm = d.getMinutes() < 10 ? '0' + d.getMinutes().toString() : d.getMinutes().toString()
+      time = hh + ':' + mm
+    }
     const rows: Row[] = []
     for (const e of entries) {
       rows.push({
@@ -329,7 +372,7 @@ const mealGroups = computed<MealGroup[]>(() => {
     out.push({
       icon: MEAL_ICONS[mk] ?? '',
       name: MEAL_LABELS[mk] ?? mk,
-      time: hh + ':' + mm,
+      time,
       cal,
       rows,
     })
@@ -377,138 +420,151 @@ function goBack(): void {
 
 <style>
 .page {
-  background-image: linear-gradient(180deg, #E2F5EC, #F6FCF9);
-  min-height: 100%;
+  background-color: #F6FCF9;
+  background-image: linear-gradient(#E2F5EC, #F6FCF9);
+  flex: 1;
 }
 
-/* ===== Header（375×152 渐变，Card 上叠 56） ===== */
+/* ===== Header（全App统一薄荷液滴水体：渐变 + 纯矢量水波） ===== */
 .dd-header {
-  background-color: #39AD95;
-  background-image: linear-gradient(180deg, #5CC4AC, #39AD95);
+  position: relative;
+  background-color: #1FBF8F;
+  background-image: linear-gradient(#4EE2B6, #1FBF8F, #0A7A5C);
+  overflow: hidden;
+  padding-bottom: 64rpx;
 }
 .dd-nav {
   flex-direction: row;
   align-items: center;
-  height: 40px;
-  padding-left: 16px;
+  height: 88rpx;
+  padding-left: 28rpx;
 }
 .dd-back {
-  width: 18px;
-  height: 18px;
+  width: 36rpx;
+  height: 36rpx;
 }
 .dd-title {
-  font-size: 18px;
+  font-size: 38rpx;
   font-weight: bold;
   color: #FFFFFF;
-  height: 26px;
-  line-height: 26px;
-  margin-left: 12px;
+  height: 52rpx;
+  line-height: 52rpx;
+  margin-left: 20rpx;
+}
+.dd-wave {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 72rpx;
 }
 
-/* ===== 今日热量卡 348×229 r16 ===== */
+/* ===== 今日热量卡 348×229 r16，统一自然浮岛层叠 ===== */
 .dd-card {
-  margin: -56px 14px 0 14px;
-  height: 229px;
+  margin: -32rpx 28rpx 0 28rpx;
+  height: 458rpx;
   background-color: #FFFFFF;
-  border-radius: 16px;
+  border-radius: 36rpx;
   flex-shrink: 0;
   position: relative;
-  box-shadow: 0 4px 16px rgba(10, 79, 61, 0.06);
+  box-shadow: 0 8rpx 32rpx rgba(10, 79, 61, 0.06);
 }
 .dd-card-head {
   flex-direction: row;
   align-items: center;
-  padding: 13px 0 0 15px;
+  padding: 26rpx 0 0 30rpx;
 }
 .dd-flame {
-  width: 12px;
-  height: 14px;
+  width: 24rpx;
+  height: 28rpx;
 }
 .dd-card-title {
-  font-size: 11.5px;
+  font-size: 23rpx;
   font-weight: 700;
   color: #002920;
-  margin-left: 8px;
+  margin-left: 16rpx;
 }
 .dd-overpill {
-  height: 14px;
-  padding: 0 7px 0 8px;
-  border-radius: 7px;
+  height: 28rpx;
+  padding: 0 14rpx 0 16rpx;
+  border-radius: 14rpx;
   background-color: #FDF0ED;
   justify-content: center;
-  margin-left: 8px;
+  margin-left: 16rpx;
 }
 .dd-overtxt {
-  font-size: 8.3px;
+  font-size: 17rpx;
   font-weight: bold;
   color: #FA543A;
 }
 .dd-ring {
   position: absolute;
-  right: 20px;
-  top: 13px;
-  width: 72px;
-  height: 72px;
-  border-radius: 36px;
+  right: 40rpx;
+  top: 26rpx;
+  width: 144rpx;
+  height: 144rpx;
+  border-radius: 72rpx;
   background-color: #E5F1F0;
   align-items: center;
 }
 .dd-ring-hole {
   position: absolute;
-  left: 4px;
-  top: 4px;
-  right: 4px;
-  bottom: 4px;
-  border-radius: 32px;
+  left: 8rpx;
+  top: 8rpx;
+  right: 8rpx;
+  bottom: 8rpx;
+  border-radius: 64rpx;
   background-color: #FFFFFF;
 }
 .dd-ring-pct {
-  font-size: 14.3px;
+  font-size: 29rpx;
   font-weight: 700;
   color: #003826;
-  margin-top: 18px;
+  margin-top: 36rpx;
   z-index: 1;
 }
 .dd-ring-label {
-  font-size: 7.9px;
+  font-size: 16rpx;
   color: #16A880;
-  margin-top: 1px;
+  margin-top: 2rpx;
   z-index: 1;
 }
 .dd-bignum-row {
   flex-direction: row;
   align-items: flex-end;
-  padding: 0 0 0 13px;
+  padding: 0 0 0 26rpx;
 }
 .dd-bignum {
-  font-size: 45.3px;
+  font-size: 91rpx;
   font-weight: 700;
   color: #003428;
-  line-height: 55px;
+  line-height: 110rpx;
 }
 .dd-bigunit {
-  font-size: 14.3px;
+  font-size: 29rpx;
   font-weight: 700;
   color: #00835F;
-  margin-left: 5px;
-  margin-bottom: 6px;
+  margin-left: 10rpx;
+  margin-bottom: 12rpx;
 }
 .dd-track {
-  margin: 14px 15px 0 14px;
-  height: 9px;
-  border-radius: 4.5px;
+  margin: 28rpx 30rpx 0 28rpx;
+  height: 18rpx;
+  border-radius: 9rpx;
   background-color: #E5F1F0;
 }
 .dd-fill {
-  height: 9px;
-  border-radius: 4.5px;
-  background-image: linear-gradient(90deg, #12A581, #23B391);
+  height: 18rpx;
+  border-radius: 9rpx;
+  background-color: #23B391;
+  background-image: linear-gradient(#12A581, #23B391);
 }
 .dd-prog-foot {
   flex-direction: row;
   justify-content: space-between;
-  padding: 5px 0 0 15px;
-  width: 319px;
+  padding: 10rpx 0 0 30rpx;
+  width: 638rpx;
 }
 .dd-prog-left {
   flex-direction: row;
@@ -517,37 +573,37 @@ function goBack(): void {
 .dd-prog-right {
   flex-direction: row;
   align-items: flex-end;
-  margin-right: 16px;
+  margin-right: 32rpx;
 }
 .dd-plabel {
-  font-size: 9.5px;
+  font-size: 19rpx;
   font-weight: bold;
   color: #4A6171;
 }
 .dd-pnum {
-  font-size: 11.1px;
+  font-size: 22rpx;
   font-weight: 700;
   color: #00222B;
-  margin-left: 6px;
+  margin-left: 12rpx;
 }
-.dd-prog-right .dd-pnum {
+.dd-pnum-target {
   font-weight: 400;
   color: #1C4455;
 }
 .dd-punit {
-  font-size: 9.5px;
+  font-size: 19rpx;
   color: #465F69;
-  margin-left: 2px;
+  margin-left: 4rpx;
 }
 .dd-stat {
-  margin: 12px 10px 0 10px;
-  height: 76px;
-  border-radius: 11px;
+  margin: 24rpx 20rpx 0 20rpx;
+  height: 152rpx;
+  border-radius: 22rpx;
   background-color: #F2F8F9;
-  padding: 7px 12px 0 12px;
+  padding: 14rpx 24rpx 0 24rpx;
 }
 .dd-stat-title {
-  font-size: 9.5px;
+  font-size: 19rpx;
   font-weight: 700;
   color: #0A7A5C;
 }
@@ -555,34 +611,34 @@ function goBack(): void {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  margin-top: 8px;
+  margin-top: 16rpx;
 }
 .dd-stat-col {
   flex-direction: row;
   align-items: center;
 }
 .dd-mg {
-  width: 20px;
-  height: 20px;
-  margin-right: 6px;
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 12rpx;
 }
 .dd-stat-txt {
   align-items: flex-start;
 }
 .dd-stat-num {
-  font-size: 17.5px;
+  font-size: 35rpx;
   font-weight: 700;
   color: #082731;
 }
 .dd-stat-lbl {
-  font-size: 8.6px;
+  font-size: 17rpx;
   font-weight: bold;
   color: #5A7380;
-  margin-top: 1px;
+  margin-top: 2rpx;
 }
 .dd-stat-div {
   width: 1px;
-  height: 36px;
+  height: 72rpx;
   background-color: #E3EAEB;
 }
 
@@ -590,20 +646,20 @@ function goBack(): void {
 .dd-secrow {
   flex-direction: row;
   align-items: center;
-  margin: 22px 14px 0 14px;
-  height: 22px;
+  margin: 44rpx 28rpx 0 28rpx;
+  height: 44rpx;
 }
 .dd-acc {
-  width: 3px;
-  height: 14px;
-  border-radius: 2px;
+  width: 6rpx;
+  height: 28rpx;
+  border-radius: 4rpx;
   background-color: #0A7A5C;
 }
 .dd-sec {
-  font-size: 15px;
+  font-size: 30rpx;
   font-weight: 700;
   color: #0F5B44;
-  margin-left: 6px;
+  margin-left: 12rpx;
   flex: 1;
 }
 .dd-add {
@@ -611,52 +667,52 @@ function goBack(): void {
   align-items: center;
 }
 .dd-add-ic {
-  width: 12px;
-  height: 12px;
+  width: 24rpx;
+  height: 24rpx;
 }
 .dd-add-txt {
-  font-size: 11.5px;
+  font-size: 23rpx;
   font-weight: bold;
   color: #0A7A5C;
-  margin-left: 3px;
+  margin-left: 6rpx;
 }
 
 /* ===== 餐次卡 347 r16（高随行数：122 + 46*(n-1)） ===== */
 .dd-meal {
-  margin: 16px 14px 0 14px;
+  margin: 32rpx 28rpx 0 28rpx;
   background-color: #FFFFFF;
-  border-radius: 16px;
-  padding-bottom: 21px;
+  border-radius: 32rpx;
+  padding-bottom: 42rpx;
   flex-shrink: 0;
 }
 .dd-meal-head {
   flex-direction: row;
   align-items: center;
-  padding: 14px 14px 0 14px;
-  height: 55px;
+  padding: 28rpx 28rpx 0 28rpx;
+  height: 110rpx;
 }
 .dd-meal-circ {
-  width: 34px;
-  height: 34px;
-  border-radius: 17px;
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 34rpx;
   background-color: #E7F7EF;
   justify-content: center;
   align-items: center;
 }
 .dd-meal-ic {
-  width: 16px;
-  height: 16px;
+  width: 32rpx;
+  height: 32rpx;
 }
 .dd-meal-name {
-  font-size: 15px;
+  font-size: 30rpx;
   font-weight: 700;
   color: #0F5B44;
-  margin-left: 10px;
+  margin-left: 20rpx;
 }
 .dd-meal-time {
-  font-size: 11.5px;
+  font-size: 23rpx;
   color: #8FAEAF;
-  margin-left: 8px;
+  margin-left: 16rpx;
   flex: 1;
 }
 .dd-meal-cal {
@@ -664,86 +720,96 @@ function goBack(): void {
   align-items: flex-end;
 }
 .dd-meal-num {
-  font-size: 17px;
+  font-size: 34rpx;
   font-weight: 800;
   color: #0A5A40;
 }
 .dd-meal-unit {
-  font-size: 9.5px;
+  font-size: 19rpx;
   font-weight: bold;
   color: #8FAEAF;
-  margin-left: 3px;
-  margin-bottom: 2px;
+  margin-left: 6rpx;
+  margin-bottom: 4rpx;
+}
+.dd-empty {
+  height: 72rpx;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20rpx;
+}
+.dd-empty-txt {
+  font-size: 24rpx;
+  color: #8FAEAF;
 }
 .dd-row {
   flex-direction: row;
   align-items: center;
-  height: 32px;
-  margin-top: 14px;
-  padding-left: 44px;
+  height: 64rpx;
+  margin-top: 28rpx;
+  padding-left: 88rpx;
 }
 .dd-row-ph {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 20rpx;
 }
 .dd-row-name {
-  font-size: 13px;
+  font-size: 26rpx;
   font-weight: bold;
   color: #0F5B44;
-  margin-left: 10px;
+  margin-left: 20rpx;
 }
 .dd-row-portion {
-  font-size: 11px;
+  font-size: 22rpx;
   color: #8FAEAF;
-  margin-left: 14px;
+  margin-left: 28rpx;
   flex: 1;
 }
 .dd-row-kcal {
-  font-size: 12.5px;
+  font-size: 25rpx;
   font-weight: bold;
   color: #12A87B;
-  margin-right: 14px;
+  margin-right: 28rpx;
 }
 
 /* ===== 今日饮食总结 347×76 r16 ===== */
 .dd-band {
-  margin: 20px 14px 0 14px;
-  height: 76px;
+  margin: 40rpx 28rpx 0 28rpx;
+  height: 152rpx;
   background-color: #FFFFFF;
-  border-radius: 16px;
+  border-radius: 32rpx;
   flex-direction: row;
   align-items: center;
-  padding: 0 14px 0 16px;
+  padding: 0 28rpx 0 32rpx;
   flex-shrink: 0;
 }
 .dd-band-circ {
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 40rpx;
   background-color: #E7F7EF;
   justify-content: center;
   align-items: center;
 }
 .dd-band-ic {
-  width: 16px;
-  height: 16px;
+  width: 32rpx;
+  height: 32rpx;
 }
 .dd-band-txt {
-  margin-left: 12px;
+  margin-left: 24rpx;
 }
 .dd-band-title {
-  font-size: 13px;
+  font-size: 26rpx;
   font-weight: 700;
   color: #0A7A5C;
 }
 .dd-band-sub {
-  font-size: 11px;
+  font-size: 22rpx;
   color: #46706B;
-  margin-top: 3px;
+  margin-top: 6rpx;
 }
 .dd-bottom-space {
-  height: 40px;
+  height: 80rpx;
 }
 /* 常驻导航栏（#28：替代 P1 顶遮罩＋fx-back 两件套）：z45；标题动态＝日期·星期（headerTitle） */
 .dd-nav-fixed {
@@ -755,21 +821,21 @@ function goBack(): void {
   flex-direction: row;
   align-items: center;
   background-color: #39AD95;
-  box-shadow: 0 2px 10px rgba(10, 79, 61, 0.10);
+  box-shadow: 0 4rpx 20rpx rgba(10, 79, 61, 0.10);
 }
 .dd-nav-back {
-  width: 44px;
-  height: 44px;
-  margin-left: 3px;
+  width: 88rpx;
+  height: 88rpx;
+  margin-left: 6rpx;
   justify-content: center;
   align-items: center;
 }
 .dd-nav-icon {
-  width: 18px;
-  height: 18px;
+  width: 36rpx;
+  height: 36rpx;
 }
 .dd-nav-title {
-  font-size: 17px;
+  font-size: 34rpx;
   font-weight: bold;
   color: #FFFFFF;
 }

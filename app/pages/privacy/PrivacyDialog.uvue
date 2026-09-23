@@ -32,6 +32,12 @@
  * [变更日志]
  * 修改时间：2026-09-23
  * AI模型：Gemini 系列
+ * 修改内容：[全量换算为 750rpx 规范（1px = 2rpx），弹窗尺寸、滚动区、按钮及字体全部自适应大屏与真机]
+ */
+/**
+ * [变更日志]
+ * 修改时间：2026-09-23
+ * AI模型：Gemini 系列
  * 修改内容：[新建隐私政策授权弹窗页面，支持双端同意逻辑与链接点击]
  */
 
@@ -73,32 +79,32 @@ function hrefClick(href : string) {
 }
 
 .dialog-content {
-  width: 280px;
+  width: 560rpx;
   background-color: #FFFFFF;
-  border-radius: 20px;
-  padding: 24px 20px;
+  border-radius: 40rpx;
+  padding: 48rpx 40rpx;
   display: flex;
   flex-direction: column;
 }
 
 .dialog-header {
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 32rpx;
 }
 
 .dialog-title {
-  font-size: 18px;
+  font-size: 36rpx;
   font-weight: bold;
   color: #0A4F3D;
 }
 
 .dialog-scroll {
-  height: 220px;
-  margin-bottom: 24px;
+  height: 440rpx;
+  margin-bottom: 48rpx;
 }
 
 .dialog-text {
-  font-size: 14px;
+  font-size: 28rpx;
   color: #333333;
   line-height: 1.6;
 }
@@ -115,10 +121,10 @@ function hrefClick(href : string) {
 }
 
 .btn {
-  width: 110px;
-  height: 44px;
-  border-radius: 22px;
-  font-size: 16px;
+  width: 220rpx;
+  height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 32rpx;
   display: flex;
   justify-content: center;
   align-items: center;

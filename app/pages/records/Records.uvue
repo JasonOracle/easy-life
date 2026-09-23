@@ -2,6 +2,50 @@
   [变更日志]
   修改时间：2026-09-23
   AI模型：Gemini 系列
+  修改内容：[解决图3顶部水波异样与图4页面无法滚动缺陷：
+    1. 移除 Header 里的 liquid_wave 水波图，改为纯净平滑的自然绿色渐变 (#32D0A0 -> #1FBF8F -> #159C72)，视觉纯净治愈；
+    2. 全页面内容包裹在 scroll-view(direction="vertical") 独立滚动容器内，解除 Android/小程序端因 flex:1 视口锁定导致的无法向下滚动 Bug，确保主要食物与三餐摄入丝滑滑动到底部完整露出]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[彻底根除编译器报错 property value 100% is not supported for min-height：遵循 uni-app x 原生规范，将 .page 的 min-height: 100% 替换为 flex: 1 原生弹性伸缩]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[基于 ai-worldclass-design 重构三餐摄入四小卡片排版：优化内边距、字号比例与时间项数排布，采用 space-between 纵向黄金比例，注入轻微卡片浮层投影，彻底消除四卡紧凑并排时的拥挤压抑感]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[基于 ai-worldclass-design 落地高颜值全局顶栏：1. 淘汰粗硬的 lr-arc 切线与高斯光晕；2. 统一全 App 顶级双色温薄荷渐变 (#4EE2B6 -> #1FBF8F -> #0A7A5C)；3. 接入统一 liquid_wave.svg 纯矢量有机双层贝塞尔水波，实现自然浮岛层叠]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[1. 彻底修复 Android 端月历卡遮挡页面标题 Bug：重构 lr-header 布局，移除不支持的 calc(rpx+px) 动态高度，采用状态栏独立占位层并优化月历卡负边距，标题副标题完整舒展露出；2. 升级 flame 图标为矢量 SVG]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[全面升级月历翻页、查看详情箭头与餐次图标为高清晰矢量 SVG（lr_prev/lr_next/lr_chev/lr_meal_breakfast/lr_meal_lunch/lr_meal_dinner/lr_meal_snack），消除位图锯齿与模糊]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[全量换算为 750rpx 规范（1px = 2rpx）：月历卡、选中日汇总、能量条轨道（630rpx）、餐次卡、食物卡全部等比缩放适配真机]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
   修改内容：[1. 修复 Android 选中日期空白与顶部渐变异常：.lr-pill-sel 和 .lr-header 补充 background-color 实色兜底；2. 遵循 uni-app x 原生规范，将 font-weight: 500/600 统一为 bold]
 -->
 <!--
@@ -37,11 +81,11 @@
   修改内容：[升级为一「日历」一级 Tab 页（Boss 拍板第 4 条）：
     1. Tabbar 由 active="home" 改 active="records"，本页成为三槽胶囊的中间 Tab；
     2. 删头图左上返回箭（lr-back ＋ goBack）与常驻导航栏的返回热区（rec-nav-back），
-       跨阈出栏只保留标题「最近记录」——一级 Tab 页无返回语义（稿面标题不动，Tab 文案用「日历」）；
+        跨阈出栏只保留标题「最近记录」——一级 Tab 页无返回语义（稿面标题不动，Tab 文案用「日历」）；
     3. 删 #29 tabFade（渐显废弃），onPageScroll 仅保留 rec-nav 两态阈值；
     4. .lr-bottom-space 由 40 恢复 78＝悬浮胶囊实占（高 56 ＋ 离底 22，即无小白条机型）；
-       带小白条机型离底＝safeBottom+12（iPhone 模拟器实测 46 → 实占 102），内容仍会穿到栏下，
-       属 Boss 拍板「常态穿到栏下」取舍的既知代价，勿据此再改预留值]
+        带小白条机型离底＝safeBottom+12（iPhone 模拟器实测 46 → 实占 102），内容仍会穿到栏下，
+        属 Boss 拍板「常态穿到栏下」取舍的既知代价，勿据此再改预留值]
 -->
 <!--
   [变更日志]
@@ -95,25 +139,25 @@
 -->
 <template>
   <view class="page">
-    <!-- Header（稿面 k8TS5：渐变 + 白字，CalCard 上叠 34px） -->
-    <view class="lr-header" :style="{ paddingTop: sbH + 'px', height: (108 + sbH) + 'px' }">
-      <view class="lr-glow"></view>
-      <view class="lr-arc lr-arc1"></view>
-      <view class="lr-arc lr-arc2"></view>
-      <view class="lr-nav">
-        <view class="lr-navtxt">
-          <text class="lr-title">最近记录</text>
-          <text class="lr-sub">查看过去的饮食记录与热量摄入</text>
+    <scroll-view class="lr-scroll" direction="vertical" :show-scrollbar="false" @scroll="onScroll">
+      <!-- Header（纯净自然的高级绿色平滑渐变） -->
+      <view class="lr-header">
+        <!-- 状态栏独立占位层，杜绝跨端 calc(rpx+px) 塌陷 -->
+        <view :style="{ height: sbH + 'px' }"></view>
+        <view class="lr-nav">
+          <view class="lr-navtxt">
+            <text class="lr-title">最近记录</text>
+            <text class="lr-sub">查看过去的饮食记录与热量摄入</text>
+          </view>
         </view>
       </view>
-    </view>
 
-    <!-- 月历卡 -->
-    <view class="lr-cal">
+      <!-- 月历卡 -->
+      <view class="lr-cal">
       <view class="lr-mrow">
-        <image class="lr-mnav" :src="'/static/records/lr_prev.png'" mode="aspectFit" @click="prevMonth"></image>
+        <image class="lr-mnav" :src="'/static/records/lr_prev.svg'" mode="aspectFit" @click="prevMonth"></image>
         <text class="lr-mlabel">{{ monthLabel }}</text>
-        <image class="lr-mnav" :src="'/static/records/lr_next.png'" mode="aspectFit" @click="nextMonth"></image>
+        <image class="lr-mnav" :src="'/static/records/lr_next.svg'" mode="aspectFit" @click="nextMonth"></image>
       </view>
       <view class="lr-wrow">
         <text class="lr-wd" v-for="(wdItem, wdIdx) in weekNames" :key="wdIdx">{{ wdItem }}</text>
@@ -135,7 +179,7 @@
       </view>
       <view class="lr-sum-div"></view>
       <view class="lr-sum-mid">
-        <image class="lr-flame" :src="'/static/profile/flame.png'" mode="aspectFit"></image>
+        <image class="lr-flame" :src="'/static/profile/flame.svg'" mode="aspectFit"></image>
         <view class="lr-sum-numrow">
           <text class="lr-sum-num" :class="selStatus.textClass">{{ selTotal }}</text>
           <text class="lr-sum-unit" :class="selStatus.textClass">kcal</text>
@@ -149,9 +193,9 @@
         <text class="lr-goaltxt">目标 {{ goalVal }} kcal</text>
       </view>
       <view class="lr-bar-track">
-        <view class="lr-bar-green" :class="selStatus.bgClass" :style="{ width: barGreenW + 'px' }"></view>
-        <view class="lr-bar-over" :style="{ width: barOverW + 'px' }" v-if="barOverW > 0"></view>
-        <view class="lr-bar-tick" :style="{ left: barTickX + 'px' }"></view>
+        <view class="lr-bar-green" :class="selStatus.bgClass" :style="{ width: barGreenW + 'rpx' }"></view>
+        <view class="lr-bar-over" :style="{ width: barOverW + 'rpx' }" v-if="barOverW > 0"></view>
+        <view class="lr-bar-tick" :style="{ left: barTickX + 'rpx' }"></view>
       </view>
     </view>
 
@@ -161,7 +205,7 @@
       <text class="lr-sec">三餐摄入</text>
       <view class="lr-sec-link" @click="goDetail">
         <text class="lr-link-txt">查看详情</text>
-        <image class="lr-link-chev" :src="'/static/records/lr_chev.png'" mode="aspectFit"></image>
+        <image class="lr-link-chev" :src="'/static/records/lr_chev.svg'" mode="aspectFit"></image>
       </view>
     </view>
     <view class="lr-mcard-row">
@@ -187,7 +231,7 @@
       <text class="lr-sec">主要食物</text>
       <view class="lr-sec-link" @click="goDetail">
         <text class="lr-link-txt">查看全部</text>
-        <image class="lr-link-chev" :src="'/static/records/lr_chev.png'" mode="aspectFit"></image>
+        <image class="lr-link-chev" :src="'/static/records/lr_chev.svg'" mode="aspectFit"></image>
       </view>
     </view>
     <view class="lr-fcard-row">
@@ -202,10 +246,12 @@
     </view>
 
     <view class="lr-bottom-space"></view>
+    </scroll-view>
+
     <Tabbar active="records" ></Tabbar>
 
     <!-- 常驻导航栏（#28）：本页已升为一级 Tab 页，跨阈出栏只留标题，无返回钮（Boss 拍板第 4 条） -->
-    <view v-if="scrolled" class="rec-nav" :style="{ height: (sbH + 58) + 'px', paddingTop: sbH + 'px' }">
+    <view v-if="scrolled" class="rec-nav" :style="{ height: navBarH + 'px', paddingTop: sbH + 'px' }">
       <text class="rec-nav-title">最近记录</text>
     </view>
   </view>
@@ -230,10 +276,20 @@ const goal = useGoalStore()
 const sbH = ref(0)
 sbH.value = uni.getSystemInfoSync().statusBarHeight ?? 0
 
+// 常驻导航栏高度计算：58px (116rpx) 内容高 + 状态栏高，避免跨端 calc(rpx+px) 错误
+const navBarH = computed<number>(() => sbH.value + 58)
+
 // 常驻导航栏两态（#28，三端生效；跨阈值才写 ref 避免逐帧 setData）：>40 整栏出现＝
 // 头图渐变末色 #39AD95 实底＋标题，与滚动中的头图无缝接续
 const scrolled = ref<boolean>(false)
-// #29 的 tabFade 渐显已随 2026-09-22 液态玻璃胶囊重构废弃（新胶囊恒常可见，Boss 拍板第 3 条）
+
+function onScroll(e: any): void {
+  const top = (e.detail != null && e.detail.scrollTop != null) ? (e.detail.scrollTop as number) : 0
+  const v = top > 40
+  if (v !== scrolled.value) scrolled.value = v
+}
+
+// 页面级滚动备用兼容
 onPageScroll((e) => {
   const v = e.scrollTop > 40
   if (v !== scrolled.value) scrolled.value = v
@@ -376,13 +432,13 @@ const barScale = computed<number>(() => {
   return selTotal.value > goalVal.value ? selTotal.value : goalVal.value
 })
 const barGreenW = computed<number>(() => {
-  return Math.round(Math.min(selTotal.value, goalVal.value) / barScale.value * 315 * 10) / 10
+  return Math.round(Math.min(selTotal.value, goalVal.value) / barScale.value * 630 * 10) / 10
 })
 const barOverW = computed<number>(() => {
-  return Math.round(selOver.value / barScale.value * 315 * 10) / 10
+  return Math.round(selOver.value / barScale.value * 630 * 10) / 10
 })
 const barTickX = computed<number>(() => {
-  return Math.round(goalVal.value / barScale.value * 315) - 1
+  return Math.round(goalVal.value / barScale.value * 630) - 1
 })
 
 interface MealCard {
@@ -394,10 +450,10 @@ interface MealCard {
 }
 
 const MEAL_ICONS: Record<string, string> = {
-  breakfast: '/static/records/lr_meal_breakfast.png',
-  lunch: '/static/records/lr_meal_lunch.png',
-  dinner: '/static/records/lr_meal_dinner.png',
-  snack: '/static/records/lr_meal_snack.png',
+  breakfast: '/static/records/lr_meal_breakfast.svg',
+  lunch: '/static/records/lr_meal_lunch.svg',
+  dinner: '/static/records/lr_meal_dinner.svg',
+  snack: '/static/records/lr_meal_snack.svg',
 }
 
 const mealCards = computed<MealCard[]>(() => {
@@ -455,125 +511,112 @@ function goDetail(): void {
 <style>
 .page {
   background-color: #F2FAF5;
-  min-height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
 }
 
-/* ===== Header（稿面 375×152，含状态栏；CalCard 上叠 34） ===== */
+.lr-scroll {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
+/* ===== Header（普通自然的高级绿色平滑渐变） ===== */
 .lr-header {
-  background-color: #39AD95;
-  background-image: linear-gradient(180deg, #5CC4AC, #39AD95);
-  overflow: visible;
-}
-.lr-glow {
-  position: absolute;
-  left: 180px;
-  top: -60px;
-  width: 260px;
-  height: 200px;
-  border-radius: 130px;
-  background-color: rgba(255, 255, 255, 0.16);
-}
-.lr-arc {
-  position: absolute;
-  border-radius: 500px;
-}
-.lr-arc1 {
-  left: -70px;
-  top: 40px;
-  width: 220px;
-  height: 220px;
-  background-color: rgba(255, 255, 255, 0.08);
-}
-.lr-arc2 {
-  right: -90px;
-  top: 60px;
-  width: 260px;
-  height: 260px;
-  background-color: rgba(255, 255, 255, 0.06);
+  position: relative;
+  background-color: #29B385;
+  background-image: linear-gradient(180deg, #32D0A0 0%, #1FBF8F 60%, #159C72 100%);
+  padding-bottom: 56rpx;
 }
 .lr-nav {
   flex-direction: row;
   align-items: flex-start;
-  height: 46px;
-  padding-left: 16px;
+  padding-top: 20rpx;
+  padding-bottom: 24rpx;
+  padding-left: 36rpx;
 }
-/* 一级 Tab 页无返回箭（2026-09-22）：标题直接吃 .lr-nav 的 16 左边距 */
+/* 一级 Tab 页无返回箭：标题直接居左呼吸排列 */
 .lr-navtxt {
   margin-left: 0;
 }
 .lr-title {
-  font-size: 18px;
+  font-size: 38rpx;
   font-weight: bold;
   color: #FFFFFF;
-  height: 26px;
-  line-height: 26px;
+  height: 52rpx;
+  line-height: 52rpx;
 }
 .lr-sub {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.8);
-  height: 16px;
-  line-height: 16px;
-  margin-top: 2px;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.85);
+  height: 32rpx;
+  line-height: 32rpx;
+  margin-top: 6rpx;
 }
 
-/* ===== 月历卡 347×292 r18，上叠 header 34 ===== */
+/* ===== 月历卡 347×292 r18，自然上叠保留呼吸感 ===== */
 .lr-cal {
-  margin: -34px 14px 0 14px;
+  margin: -32rpx 28rpx 0 28rpx;
   background-color: #FFFFFF;
-  border-radius: 18px;
-  padding: 13px 0 19px 0;
+  border-radius: 36rpx;
+  padding: 26rpx 0 38rpx 0;
   flex-shrink: 0;
   overflow: visible;
-  box-shadow: 0 4px 16px rgba(10, 79, 61, 0.06);
+  box-shadow: 0 8rpx 32rpx rgba(10, 79, 61, 0.06);
 }
 .lr-mrow {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  height: 20px;
-  padding: 0 12px 0 12px;
+  height: 40rpx;
+  padding: 0 24rpx 0 24rpx;
 }
 .lr-mnav {
-  width: 16px;
-  height: 16px;
+  width: 32rpx;
+  height: 32rpx;
 }
 .lr-mlabel {
-  font-size: 14px;
+  font-size: 28rpx;
   font-weight: bold;
   color: #0A4F3D;
 }
 .lr-wrow {
   flex-direction: row;
-  margin-top: 14px;
+  margin-top: 28rpx;
 }
 .lr-wd {
   flex: 1;
   text-align: center;
-  font-size: 11px;
+  font-size: 22rpx;
   font-weight: bold;
   color: rgba(15, 79, 61, 0.34);
 }
 .lr-drow {
   flex-direction: row;
-  margin-top: 17px;
+  margin-top: 34rpx;
   overflow: visible;
 }
 .lr-cell {
   flex: 1;
-  height: 42px;
+  height: 84rpx;
   align-items: center;
   overflow: visible;
 }
 .lr-pill {
   position: absolute;
-  top: -9px;
+  top: -18rpx;
   left: 0;
   right: 0;
   margin-left: auto;
   margin-right: auto;
-  width: 34px;
-  height: 36px;
-  border-radius: 11px;
+  width: 68rpx;
+  height: 72rpx;
+  border-radius: 22rpx;
 }
 .lr-pill-sel {
   background-color: #0A7A5C;
@@ -583,7 +626,7 @@ function goDetail(): void {
   background-color: #EAF9F3;
 }
 .lr-daynum {
-  font-size: 12.5px;
+  font-size: 25rpx;
   font-weight: bold;
   color: #0F5B44;
   z-index: 1;
@@ -600,10 +643,10 @@ function goDetail(): void {
   color: #C6D6CE;
 }
 .lr-dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 2px;
-  margin-top: 3px;
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 4rpx;
+  margin-top: 6rpx;
   z-index: 1;
   background-color: transparent;
 }
@@ -619,120 +662,120 @@ function goDetail(): void {
 
 /* ===== 选中日汇总卡 347×92 r16 ===== */
 .lr-sum {
-  margin: 10px 14px 0 14px;
-  height: 92px;
+  margin: 20rpx 28rpx 0 28rpx;
+  height: 184rpx;
   background-color: #FFFFFF;
-  border-radius: 16px;
+  border-radius: 32rpx;
   flex-shrink: 0;
   position: relative;
 }
 .lr-sum-left {
   position: absolute;
-  left: 16px;
-  top: 15px;
+  left: 32rpx;
+  top: 30rpx;
 }
 .lr-sum-date {
-  font-size: 13px;
+  font-size: 26rpx;
   font-weight: 700;
   color: #0F5B44;
 }
 .lr-sum-wd {
-  font-size: 10.5px;
+  font-size: 21rpx;
   color: rgba(15, 79, 61, 0.34);
-  margin-top: 2px;
+  margin-top: 4rpx;
 }
 .lr-sum-div {
   position: absolute;
-  left: 92px;
-  top: 16px;
+  left: 184rpx;
+  top: 32rpx;
   width: 1px;
-  height: 44px;
+  height: 88rpx;
   background-color: #EDF4F0;
 }
 .lr-sum-mid {
   position: absolute;
-  left: 108px;
-  top: 11px;
+  left: 216rpx;
+  top: 22rpx;
 }
 .lr-flame {
   position: absolute;
   left: 0;
-  top: 6px;
-  width: 14px;
-  height: 14px;
+  top: 12rpx;
+  width: 28rpx;
+  height: 28rpx;
 }
 .lr-sum-numrow {
   flex-direction: row;
   align-items: flex-end;
-  margin-left: 19px;
+  margin-left: 38rpx;
 }
 .lr-sum-num {
-  font-size: 21px;
+  font-size: 42rpx;
   font-weight: 800;
   color: #0A5A40;
 }
 .lr-sum-unit {
-  font-size: 10px;
+  font-size: 20rpx;
   font-weight: bold;
   color: rgba(15, 79, 61, 0.6);
-  margin-left: 4px;
-  margin-bottom: 3px;
+  margin-left: 8rpx;
+  margin-bottom: 6rpx;
 }
 .lr-sum-in {
-  font-size: 9.5px;
+  font-size: 19rpx;
   color: rgba(15, 79, 61, 0.34);
-  margin-top: 10px;
+  margin-top: 20rpx;
 }
 .lr-sum-right {
   position: absolute;
-  right: 16px;
-  top: 14px;
+  right: 32rpx;
+  top: 28rpx;
   align-items: flex-end;
 }
 .lr-overpill {
-  height: 20px;
-  padding: 0 10px 0 10px;
-  border-radius: 10px;
+  height: 40rpx;
+  padding: 0 20rpx 0 20rpx;
+  border-radius: 20rpx;
   background-color: #FDF0ED;
   justify-content: center;
 }
 .lr-overtxt {
-  font-size: 9.5px;
+  font-size: 19rpx;
   font-weight: bold;
   color: #FA543A;
 }
 .lr-goaltxt {
-  font-size: 10px;
+  font-size: 20rpx;
   color: rgba(15, 79, 61, 0.6);
-  margin-top: 7px;
+  margin-top: 14rpx;
 }
 .lr-bar-track {
   position: absolute;
-  left: 16px;
-  top: 68px;
-  width: 315px;
-  height: 6px;
-  border-radius: 3px;
+  left: 32rpx;
+  top: 136rpx;
+  width: 630rpx;
+  height: 12rpx;
+  border-radius: 6rpx;
   background-color: #EDF4F0;
   flex-direction: row;
 }
 .lr-bar-green {
-  height: 6px;
-  border-radius: 3px;
+  height: 12rpx;
+  border-radius: 6rpx;
   background-image: linear-gradient(90deg, #45C4A2, #0A7A5C);
 }
 .lr-bar-over {
-  height: 6px;
-  border-top-right-radius: 3px;
-  border-bottom-right-radius: 3px;
+  height: 12rpx;
+  border-top-right-radius: 6rpx;
+  border-bottom-right-radius: 6rpx;
   background-color: #FB5D37;
 }
 .lr-bar-tick {
   position: absolute;
-  top: -2px;
-  width: 2px;
-  height: 10px;
-  border-radius: 1px;
+  top: -4rpx;
+  width: 4rpx;
+  height: 20rpx;
+  border-radius: 2rpx;
   background-color: #FFFFFF;
 }
 
@@ -740,20 +783,20 @@ function goDetail(): void {
 .lr-secrow {
   flex-direction: row;
   align-items: center;
-  margin: 14px 14px 0 14px;
-  height: 19px;
+  margin: 28rpx 28rpx 0 28rpx;
+  height: 38rpx;
 }
 .lr-acc {
-  width: 3px;
-  height: 13px;
-  border-radius: 1.5px;
+  width: 6rpx;
+  height: 26rpx;
+  border-radius: 3rpx;
   background-color: #1FBF8F;
 }
 .lr-sec {
-  font-size: 13px;
+  font-size: 26rpx;
   font-weight: 700;
   color: #0F5B44;
-  margin-left: 5px;
+  margin-left: 10rpx;
   flex: 1;
 }
 .lr-sec-link {
@@ -761,134 +804,137 @@ function goDetail(): void {
   align-items: center;
 }
 .lr-link-txt {
-  font-size: 10.5px;
+  font-size: 21rpx;
   color: rgba(15, 79, 61, 0.34);
 }
 .lr-link-chev {
-  width: 12px;
-  height: 12px;
-  margin-left: 5px;
+  width: 24rpx;
+  height: 24rpx;
+  margin-left: 10rpx;
 }
 
-/* ===== 餐次小卡 80×92 r14 ===== */
+/* ===== 餐次小卡（4张卡片自适应呼吸排版，消除拥挤感） ===== */
 .lr-mcard-row {
   flex-direction: row;
   justify-content: space-between;
-  margin: 5px 14px 0 14px;
+  margin: 12rpx 28rpx 0 28rpx;
 }
 .lr-mcard {
-  width: 80px;
-  height: 92px;
+  width: 160rpx;
+  height: 188rpx;
   background-color: #FFFFFF;
-  border-radius: 14px;
-  padding: 10px 6px 0 6px;
+  border-radius: 28rpx;
+  padding: 16rpx 6rpx 14rpx 6rpx;
   align-items: center;
+  justify-content: space-between;
   flex-shrink: 0;
+  box-shadow: 0 4rpx 16rpx rgba(10, 79, 61, 0.04);
 }
 .lr-mcirc {
-  width: 26px;
-  height: 26px;
-  border-radius: 13px;
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 26rpx;
   background-color: #E7F7EF;
   justify-content: center;
   align-items: center;
 }
 .lr-mic {
-  width: 14px;
-  height: 14px;
+  width: 28rpx;
+  height: 28rpx;
 }
 .lr-mname {
-  font-size: 11px;
+  font-size: 22rpx;
   font-weight: bold;
   color: #0F5B44;
-  margin-top: 6px;
-  height: 16px;
-  line-height: 16px;
+  margin-top: 6rpx;
+  height: 30rpx;
+  line-height: 30rpx;
   text-align: center;
 }
 .lr-mkcal-row {
   flex-direction: row;
   align-items: flex-end;
   justify-content: center;
-  margin-top: 0;
-  height: 17px;
+  margin-top: 2rpx;
+  height: 32rpx;
   width: 100%;
 }
 .lr-mkcal {
-  font-size: 14px;
+  font-size: 28rpx;
   font-weight: 800;
   color: #0A5A40;
 }
 .lr-mkcal-u {
-  font-size: 8.5px;
+  font-size: 16rpx;
   font-weight: bold;
   color: rgba(15, 79, 61, 0.6);
-  margin-left: 2px;
-  margin-bottom: 1px;
+  margin-left: 4rpx;
+  margin-bottom: 2rpx;
 }
 .lr-mfoot-row {
   flex-direction: row;
   justify-content: center;
-  margin-top: 2px;
-  height: 13px;
+  align-items: center;
+  margin-top: 2rpx;
+  height: 24rpx;
   width: 100%;
 }
 .lr-mtime {
-  font-size: 9px;
-  color: rgba(15, 79, 61, 0.34);
-  margin-right: 4px;
+  font-size: 17rpx;
+  color: rgba(15, 79, 61, 0.38);
+  margin-right: 6rpx;
 }
 .lr-mcount {
-  font-size: 9px;
-  color: rgba(15, 79, 61, 0.34);
+  font-size: 17rpx;
+  color: rgba(15, 79, 61, 0.38);
 }
 
 /* ===== 食物卡 80×104 r14 ===== */
 .lr-fcard-row {
   flex-direction: row;
   justify-content: space-between;
-  margin: 8px 14px 0 14px;
+  margin: 16rpx 28rpx 0 28rpx;
 }
 .lr-fcard {
-  width: 80px;
-  height: 104px;
+  width: 160rpx;
+  height: 208rpx;
   background-color: #FFFFFF;
-  border-radius: 14px;
+  border-radius: 28rpx;
   align-items: center;
   flex-shrink: 0;
 }
 .lr-fphoto {
-  width: 64px;
-  height: 64px;
-  border-radius: 12px;
-  margin-top: 8px;
+  width: 128rpx;
+  height: 128rpx;
+  border-radius: 24rpx;
+  margin-top: 16rpx;
 }
 .lr-fname {
-  font-size: 10px;
+  font-size: 20rpx;
   font-weight: bold;
   color: #0F5B44;
-  margin-top: 5px;
-  max-width: 72px;
+  margin-top: 10rpx;
+  max-width: 144rpx;
   lines: 1;
   text-overflow: ellipsis;
 }
 .lr-fkcal {
-  font-size: 8.5px;
+  font-size: 17rpx;
   color: rgba(15, 79, 61, 0.6);
-  margin-top: 2px;
+  margin-top: 4rpx;
 }
 .lr-empty {
-  margin: 12px 14px 0 14px;
+  margin: 24rpx 28rpx 0 28rpx;
   align-items: center;
 }
 .lr-empty-txt {
-  font-size: 12px;
+  font-size: 24rpx;
   color: rgba(15, 79, 61, 0.34);
 }
 .lr-bottom-space {
-  height: 92px;
+  height: 184rpx;
   /* #ifdef MP-WEIXIN */
-  height: calc(82px + env(safe-area-inset-bottom));
+  height: calc(164rpx + env(safe-area-inset-bottom));
   /* #endif */
 }
 /* 常驻导航栏（#28）：z45 在 Tabbar（z30）之上；本页升为一级 Tab 页后栏内无返回钮，只剩标题 */
@@ -901,12 +947,12 @@ function goDetail(): void {
   flex-direction: row;
   align-items: center;
   background-color: #39AD95;
-  box-shadow: 0 2px 10px rgba(10, 79, 61, 0.10);
+  box-shadow: 0 4rpx 20rpx rgba(10, 79, 61, 0.10);
 }
 .rec-nav-title {
-  font-size: 17px;
+  font-size: 34rpx;
   font-weight: bold;
   color: #FFFFFF;
-  margin-left: 16px;
+  margin-left: 32rpx;
 }
 </style>

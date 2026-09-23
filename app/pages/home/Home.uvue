@@ -2,6 +2,35 @@
   [变更日志]
   修改时间：2026-09-23
   AI模型：Gemini 系列
+  修改内容：[解决首页顶部截断与背景混乱缺陷：
+    1. 将 .header-spacer 占位高度由 176rpx 提升至 220rpx，并重置 .hero 的 margin-top 为 0，彻底消除 Hero 内容上插被固定导航栏腰斩遮挡的问题，日期文案与水瓶瓶盖完整舒展露出；
+    2. 移除背景杂乱的 hero_wave 位图素材，.hero 接入纯净清爽的薄荷绿自然平滑渐变 (#E6F8EF -> #F2FAF5)]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[首页深度视觉与交互修复：
+    1. 根治顶部日期看不到：重构 .hm-nav 与 .header 占位高度，确保日期行（date-row）在不同分辨率与平台下 100% 舒展外露；
+    2. 清除图标下方难看变形的脏深阴影：重构 .fab 与 .meal-circle 投影，移除生硬深绿暗晕，改用极轻纯净微柔光；
+    3. 晚餐（dinner）餐次有食物时默认平铺展开：移除 showDinner 折叠状态机与右侧展开按钮 (.meal-expand / chev_down.svg)，交互体验统一连贯]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[1. 今日餐次增加无食物时的 empty 状态展示（尚未添加）；2. 调整 .meal-head 高度与 align-items:center，实现左侧圆圈图标与右侧餐次文案精准垂直居中；3. 补齐夜宵（snack）餐次与专属矢量图标；4. 全面升级餐次与公共图标为高清晰矢量 SVG（date_icon/pill_calendar/pill_edit/chev_right/chev_down/meal_sun/meal_sun_l/meal_moon/meal_snack），彻底根除午餐图标下方被截断与位图模糊问题]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[全量适配 750rpx 设计规范：1. 导航栏、Hero、水瓶腔体与动效位移、宏量卡、餐次列表按 1px=2rpx 改造为 rpx；2. 保留 1px/2px 物理线与状态栏避让；3. 水瓶内胆 CAVITY_HEIGHT 设为 236rpx，波浪与流体物理参数同步适配]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
   修改内容：[接入方案A单流程架构：FAB点击拉起整合版 FoodPicker，内部无缝切换列表与详情，删除宿主侧 addShow/onPickFood/onAddChange 冗余状态机，彻底消除双 page-container 冷启动 1500ms 卡顿]
 -->
 <!--
@@ -235,13 +264,16 @@
 
 <template>
   <view class="page">
-    <!-- 常驻标题块导航栏（#28 方案A：Boss 拍板 Home 标题块三端固定顶部）：页内内联 fixed（禁组件——幻影副本），
-         z45 常驻置顶；内容以 margin-top 避让整栏，无透明态故不存在点击穿透问题 -->
-    <view class="hm-nav" :style="{ height: (sbH + 64) + 'px', paddingTop: sbH + 'px' }">
+    <!-- 标题与操作栏（顶栏常驻+日期整合，对齐设计图规范，保证日期完全外露） -->
+    <view class="hm-nav" :style="{ paddingTop: sbH + 'px' }">
       <view class="hm-nav-inner">
         <view class="hm-nav-left">
           <text class="title">轻律生活</text>
           <text class="subtitle">让健康饮食成为一种习惯</text>
+          <view class="date-row" hover-class="icon-pressed" :hover-stay-time="120" @click="onDateClick">
+            <image class="date-icon" :src="'/static/home/date_icon.svg'" mode="aspectFit"></image>
+            <text class="date-text">9月19日 · 周五</text>
+          </view>
         </view>
         <view class="fab" :style="{ right: fabRight, top: fabTop }" hover-class="icon-pressed" :hover-stay-time="120" @click="openAdd">
           <text class="fab-plus">＋</text>
@@ -249,17 +281,11 @@
       </view>
     </view>
 
-    <!-- 顶栏文档流占位（随内容滚走）：日期行 -->
-    <view class="header" :style="{ paddingTop: (sbH + 64) + 'px' }">
-      <view class="date-row" hover-class="icon-pressed" :hover-stay-time="120" @click="onDateClick">
-        <image class="date-icon" :src="'/static/home/date_icon.png'" mode="aspectFit"></image>
-        <text class="date-text">9月19日 · 周五</text>
-      </view>
-    </view>
+    <!-- 顶栏文档流占位层（为常驻导航栏腾出充足空间，确保日期完全外露不被切） -->
+    <view class="header-spacer" :style="{ height: 'calc(220rpx + ' + sbH + 'px)' }"></view>
 
-    <!-- Hero（常驻标题块 #28：避让已由 .header 的 paddingTop 完成，此处保持原 -18 上叠，勿重复加 sbH） -->
+    <!-- Hero（常驻标题块：紧接导航栏下方，纯净绿色渐变底） -->
     <view class="hero">
-      <image class="hero-wave" :src="'/static/home/hero_wave.png'" mode="widthFix"></image>
       <!-- 独立底层背景：柔和底色渐变 + 流体斑块 + 装饰气泡星芒（bg.svg） -->
       <image class="bottle-bg" :src="'/static/home/bg.svg'" mode="aspectFit"></image>
       <!-- 左侧独立叶子（yezi-zuo.svg，旋转支点在茎底，自然微风往复微摆） -->
@@ -285,8 +311,8 @@
         <view class="bottle-cavity">
           <view class="bottle-liquid" :class="liquidClass" :style="liquidStyle">
             <!-- 双层无缝正弦波浪液面 -->
-            <image class="wave-back" :style="{ transform: 'translateX(' + (-waveX) + 'px)' }" :src="'/static/home/wave_back.png'" mode="scaleToFill"></image>
-            <image class="wave-front" :style="{ transform: 'translateX(' + waveX + 'px)' }" @transitionend="onWaveEnd" :src="'/static/home/wave_front.png'" mode="scaleToFill"></image>
+            <image class="wave-back" :style="{ transform: 'translateX(' + (-waveX) + 'rpx)' }" :src="'/static/home/wave_back.png'" mode="scaleToFill"></image>
+            <image class="wave-front" :style="{ transform: 'translateX(' + waveX + 'rpx)' }" @transitionend="onWaveEnd" :src="'/static/home/wave_front.png'" mode="scaleToFill"></image>
             <!-- 液体深层流动晶莹反光带 -->
             <view class="liquid-glare"></view>
             <!-- 向上漂浮微气泡 -->
@@ -309,9 +335,9 @@
         </view>
         <text class="consumed">已摄入 {{ food.totalCal }} / {{ goal.calorieGoal }} kcal</text>
         <view class="goal-pill ui-pressable" hover-class="ui-pressed" :hover-stay-time="120" @click="openGoal">
-          <image class="pill-cal" :src="'/static/home/pill_calendar.png'" mode="aspectFit"></image>
+          <image class="pill-cal" :src="'/static/home/pill_calendar.svg'" mode="aspectFit"></image>
           <text class="goal-pill-text">每日目标 {{ goal.calorieGoal }} kcal</text>
-          <image class="pill-edit" :src="'/static/home/pill_edit.png'" mode="aspectFit"></image>
+          <image class="pill-edit" :src="'/static/home/pill_edit.svg'" mode="aspectFit"></image>
         </view>
       </view>
     </view>
@@ -342,7 +368,7 @@
       <text class="meal-section-title">今日餐次</text>
       <view class="all-records">
         <text class="all-records-text">全部记录</text>
-        <image class="chev-right" :src="'/static/home/chev_right.png'" mode="aspectFit"></image>
+        <image class="chev-right" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
       </view>
     </view>
 
@@ -358,20 +384,20 @@
           <text class="meal-name">{{ meal.name }}<text class="meal-time"> · {{ meal.time }}</text></text>
           <text class="meal-kcal">{{ meal.totalKcal }} kcal</text>
         </view>
-        <view class="meal-card" v-if="meal.key !== 'dinner' || showDinner">
-          <view v-for="(rowItem, rowIdx) in meal.rows" :key="rowIdx">
-            <view class="meal-row" @longpress="onFoodLongPress(rowItem.id, rowItem.name)">
-              <image class="meal-thumb" :src="rowItem.img" mode="aspectFill"></image>
-              <text class="meal-row-name">{{ rowItem.name }}</text>
-              <text class="meal-row-portion">{{ rowItem.portion }}</text>
-              <text class="meal-row-kcal">{{ rowItem.kcal }} kcal</text>
-            </view>
-            <view class="meal-row-div" v-if="rowIdx < meal.rows.length - 1"></view>
+        <view class="meal-card">
+          <view v-if="meal.rows.length === 0" class="meal-empty">
+            <text class="meal-empty-txt">尚未添加</text>
           </view>
-        </view>
-        <view class="meal-expand" v-if="meal.key === 'dinner' && !showDinner">
-          <view class="expand-btn" @click="toggleDinner">
-            <image class="chev-down" :src="'/static/home/chev_down.png'" mode="aspectFit"></image>
+          <view v-else>
+            <view v-for="(rowItem, rowIdx) in meal.rows" :key="rowIdx">
+              <view class="meal-row" @longpress="onFoodLongPress(rowItem.id, rowItem.name)">
+                <image class="meal-thumb" :src="rowItem.img" mode="aspectFill"></image>
+                <text class="meal-row-name">{{ rowItem.name }}</text>
+                <text class="meal-row-portion">{{ rowItem.portion }}</text>
+                <text class="meal-row-kcal">{{ rowItem.kcal }} kcal</text>
+              </view>
+              <view class="meal-row-div" v-if="rowIdx < meal.rows.length - 1"></view>
+            </view>
           </view>
         </view>
       </view>
@@ -449,7 +475,7 @@ const macroC = computed(() => Math.round(food.totalCarbs))
 const macroF = computed(() => Math.round(food.totalFat))
 
 // 瓶身内胆几何参数与最高水位硬约束（Boss 规则：最高不超过 80% 高度）
-const CAVITY_HEIGHT = 118 // 与 CSS .bottle-cavity 一致
+const CAVITY_HEIGHT = 236 // 与 CSS .bottle-cavity (236rpx) 一致
 const MAX_FILL_RATIO = 0.80
 
 // 瓶身流体动效状态
@@ -457,13 +483,13 @@ const bottleScale = ref(1)
 const bottleRotate = ref(0)
 const bottleTranslateX = ref(0)
 const bottleTransition = ref('transform 0.08s ease-out')
-const liquidWave = ref(0) // 波浪微振位移 (px)
-const pourOffset = ref(0) // 倒水注入时的弹性超冲位移 (px)
+const liquidWave = ref(0) // 波浪微振位移 (rpx)
+const pourOffset = ref(0) // 倒水注入时的弹性超冲位移 (rpx)
 const pourStreamActive = ref(false) // 倒水水流条纹是否激活
 
 const bottleAnimStyle = computed(() => {
   return {
-    transform: `translateX(${bottleTranslateX.value}px) rotate(${bottleRotate.value}deg) scale(${bottleScale.value})`,
+    transform: `translateX(${bottleTranslateX.value}rpx) rotate(${bottleRotate.value}deg) scale(${bottleScale.value})`,
     transformOrigin: '50% 96%',
     transition: bottleTransition.value
   }
@@ -496,10 +522,10 @@ function onLeafRightEnd(): void {
 function onWaveEnd(): void {
   if (!waveSwinging.value) return
   waveDir.value = -waveDir.value
-  waveX.value = waveDir.value > 0 ? 0 : -64
+  waveX.value = waveDir.value > 0 ? 0 : -128
 }
 
-// 入场注水动效：进页面先置为底部 (CAVITY_HEIGHT - 6)，挂载后平滑注水落位到真实水位
+// 入场注水动效：进页面先置为底部 (CAVITY_HEIGHT - 12)，挂载后平滑注水落位到真实水位
 const introReady = ref(false)
 onMounted(() => {
   setTimeout(() => {
@@ -512,7 +538,7 @@ onMounted(() => {
     leafRightDeg.value = -2.2
   }, 200)
   setTimeout(() => {
-    waveX.value = -64
+    waveX.value = -128
   }, 100)
 })
 
@@ -521,10 +547,10 @@ onUnmounted(() => {
   waveSwinging.value = false
 })
 
-// 液位高度计算：内腔有效高度 126px，根据已摄入/目标百分比映射为 translateY
+// 液位高度计算：内腔有效高度 236rpx，根据已摄入/目标百分比映射为 translateY
 const liquidOffsetY = computed<number>(() => {
   if (!introReady.value) {
-    return CAVITY_HEIGHT - 6 // 初始极低水位，等待注水升起
+    return CAVITY_HEIGHT - 12 // 初始极低水位，等待注水升起
   }
   const g = goal.calorieGoal > 0 ? goal.calorieGoal : 2000
   // 水位限制在 0.06 ~ 0.80 之间，严格遵守 80% 限高规则，预留 20% 注水冲击空腔
@@ -538,7 +564,7 @@ const liquidStyle = computed(() => {
   // 水体受瓶身倾斜反作用力的惯性剪切（瓶身右倾时液体向左下倾斜）
   const skewDeg = -bottleRotate.value * 0.45
   return {
-    transform: `translateY(${liquidOffsetY.value}px) skewX(${skewDeg}deg)`,
+    transform: `translateY(${liquidOffsetY.value}rpx) skewX(${skewDeg}deg)`,
     transition: 'transform 0.65s cubic-bezier(0.34, 1.25, 0.64, 1)'
   }
 })
@@ -571,24 +597,24 @@ function onBottleTap() {
   // fluid-interaction-expert: 二阶欠阻尼钟摆甩水模型（总历时约 385ms）
   // 1. 先向左蓄势 -14°
   bottleRotate.value = -14
-  liquidWave.value = 14
+  liquidWave.value = 28
 
   tapTimers.push(setTimeout(() => {
     // 2. 猛烈反向甩动过冲 +24°
     bottleRotate.value = 24
-    liquidWave.value = -16
+    liquidWave.value = -32
     tapTimers.push(setTimeout(() => {
       // 3. 回摆 -16°
       bottleRotate.value = -16
-      liquidWave.value = 10
+      liquidWave.value = 20
       tapTimers.push(setTimeout(() => {
         // 4. 余摆 +8°
         bottleRotate.value = 8
-        liquidWave.value = -5
+        liquidWave.value = -10
         tapTimers.push(setTimeout(() => {
           // 5. 微摆 -3°
           bottleRotate.value = -3
-          liquidWave.value = 2
+          liquidWave.value = 4
           tapTimers.push(setTimeout(() => {
             // 6. 归零平息
             bottleRotate.value = 0
@@ -618,22 +644,22 @@ function onBottleLongPress() {
   bottleRotate.value = 0
   bottleTransition.value = 'transform 0.035s ease-out'
 
-  // fluid-interaction-expert: 28Hz 高频密集微平移（纯 translateX: ±4px，不旋转不缩放）
-  bottleTranslateX.value = -4
-  liquidWave.value = 3.5
+  // fluid-interaction-expert: 28Hz 高频密集微平移（纯 translateX: ±8rpx，不旋转不缩放）
+  bottleTranslateX.value = -8
+  liquidWave.value = 7
 
   pressTimers.push(setTimeout(() => {
-    bottleTranslateX.value = 4
-    liquidWave.value = -3.5
+    bottleTranslateX.value = 8
+    liquidWave.value = -7
     pressTimers.push(setTimeout(() => {
-      bottleTranslateX.value = -3
-      liquidWave.value = 2.5
+      bottleTranslateX.value = -6
+      liquidWave.value = 5
       pressTimers.push(setTimeout(() => {
-        bottleTranslateX.value = 3
-        liquidWave.value = -2.5
+        bottleTranslateX.value = 6
+        liquidWave.value = -5
         pressTimers.push(setTimeout(() => {
-          bottleTranslateX.value = -1.5
-          liquidWave.value = 1
+          bottleTranslateX.value = -3
+          liquidWave.value = 2
           pressTimers.push(setTimeout(() => {
             bottleTranslateX.value = 0
             liquidWave.value = 0
@@ -668,9 +694,10 @@ type Meal = {
 }
 
 const MEAL_ICONS: Record<string, string> = {
-  breakfast: '/static/home/meal_sun.png',
-  lunch: '/static/home/meal_sun_l.png',
-  dinner: '/static/home/meal_moon.png',
+  breakfast: '/static/home/meal_sun.svg',
+  lunch: '/static/home/meal_sun_l.svg',
+  dinner: '/static/home/meal_moon.svg',
+  snack: '/static/home/meal_snack.svg',
 }
 
 /** 弹层⓪ 选择并添加食物（确认写库＋弹弹层③ 结算徽章）；Pill 铅笔 → GoalModal */
@@ -741,27 +768,27 @@ function triggerPourEffect(): void {
     pourStreamActive.value = false
   }, 1300)
 
-  // 3. 物理倒水注水模拟：水柱重力冲入液面，水面下砸凹陷（-14px）→ 回弹涌浪（+12px）→ 阻尼平息
+  // 3. 物理倒水注水模拟：水柱重力冲入液面，水面下砸凹陷（-28rpx）→ 回弹涌浪（+24rpx）→ 阻尼平息
   // 先延迟 180ms 让水流条纹先切入瓶口，再触发水面重力下砸
   setTimeout(() => {
-    // 冲击下凹：translateY 增加 14px（视觉凹陷）
-    pourOffset.value = 14
-    liquidWave.value = -8
+    // 冲击下凹：translateY 增加 28rpx（视觉凹陷）
+    pourOffset.value = 28
+    liquidWave.value = -16
     bottleScale.value = 0.985
 
     setTimeout(() => {
-      // 冲击反冲涌浪：translateY 减少 12px（视觉上浮涌浪）
-      pourOffset.value = -12
-      liquidWave.value = 12
+      // 冲击反冲涌浪：translateY 减少 24rpx（视觉上浮涌浪）
+      pourOffset.value = -24
+      liquidWave.value = 24
       bottleScale.value = 1.015
       setTimeout(() => {
         // 次级回荡
-        pourOffset.value = 5
-        liquidWave.value = -6
+        pourOffset.value = 10
+        liquidWave.value = -12
         bottleScale.value = 0.995
         setTimeout(() => {
-          pourOffset.value = -2
-          liquidWave.value = 3
+          pourOffset.value = -4
+          liquidWave.value = 6
           bottleScale.value = 1.005
           setTimeout(() => {
             // 平息归零
@@ -775,19 +802,13 @@ function triggerPourEffect(): void {
   }, 180)
 }
 
-/** 晚餐按稿面默认收起（点展开钮可看明细） */
-const showDinner = ref(false)
-
-function toggleDinner(): void {
-  showDinner.value = !showDinner.value
-}
 
 const meals = computed<Meal[]>(() =>
   food.mealRows
-    .filter((m) => m.key === 'breakfast' || m.key === 'lunch' || m.key === 'dinner')
+    .filter((m) => m.key === 'breakfast' || m.key === 'lunch' || m.key === 'dinner' || m.key === 'snack')
     .map((m) => ({
       key: m.key,
-      icon: MEAL_ICONS[m.key] ?? '/static/home/meal_sun.png',
+      icon: MEAL_ICONS[m.key] ?? '/static/home/meal_sun.svg',
       name: m.name,
       time: m.time,
       totalKcal: typeof m.cal === 'number' ? m.cal : 0,
@@ -805,9 +826,9 @@ const meals = computed<Meal[]>(() =>
 <style>
 .page {
   background-color: #F2FAF5;
-  padding-bottom: 92px;
+  padding-bottom: 184rpx;
   /* #ifdef MP-WEIXIN */
-  padding-bottom: calc(82px + env(safe-area-inset-bottom));
+  padding-bottom: calc(164rpx + env(safe-area-inset-bottom));
   /* #endif */
 }
 /* 常驻标题块导航栏（#28 方案A：Boss 拍板三端固定顶部，替代 P1 hm-st-mask 两态遮罩）：
@@ -819,12 +840,12 @@ const meals = computed<Meal[]>(() =>
   right: 0;
   z-index: 45;
   background-color: #F2FAF5;
-  padding-left: 17px;
-  padding-right: 14px;
+  padding-left: 34rpx;
+  padding-right: 28rpx;
 }
 .hm-nav-inner {
   position: relative;
-  margin-top: 6px;
+  margin-top: 12rpx;
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;
@@ -833,93 +854,88 @@ const meals = computed<Meal[]>(() =>
   flex-direction: column;
 }
 .title {
-  font-size: 24px;
+  font-size: 48rpx;
   font-weight: bold;
   color: #0F5B44;
 }
 .subtitle {
-  font-size: 13px;
+  font-size: 26rpx;
   color: #46706B;
-  margin-top: 4px;
-}
-.fab {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-  background-color: #2EB889;
-  background-image: linear-gradient(180deg, #5CD9A6, #2EB889);
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 5px 13px rgba(31, 140, 97, 0.28);
-}
-.fab-plus {
-  font-size: 20px;
-  color: #FFFFFF;
-}
-/* 顶栏文档流带（随内容滚走）：仅剩日期行，paddingTop 避开常驻栏整高 */
-.header {
-  padding-left: 17px;
-  padding-right: 14px;
+  margin-top: 8rpx;
 }
 .date-row {
   flex-direction: row;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 14rpx;
+  margin-bottom: 12rpx;
 }
 .date-icon {
-  width: 17px;
-  height: 16px;
-  margin-right: 4px;
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 8rpx;
 }
 .date-text {
-  font-size: 13px;
+  font-size: 26rpx;
   color: #2F7E6E;
+}
+.fab {
+  position: absolute;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 40rpx;
+  background-color: #2EB889;
+  background-image: linear-gradient(180deg, #5CD9A6, #2EB889);
+  justify-content: center;
+  align-items: center;
+}
+.fab-plus {
+  font-size: 40rpx;
+  color: #FFFFFF;
+}
+/* 顶栏文档流占位层 */
+.header-spacer {
+  width: 100%;
 }
 .hero {
   position: relative;
-  height: 235px;
-  margin-top: -18px;
-}
-.hero-wave {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 220px;
+  height: 470rpx;
+  margin-top: 0;
+  background-color: #E6F8EF;
+  background-image: linear-gradient(180deg, #E6F8EF 0%, #F2FAF5 100%);
+  border-bottom-left-radius: 40rpx;
+  border-bottom-right-radius: 40rpx;
 }
 /* 独立底层背景：柔和底色渐变 + 流体斑块 + 装饰气泡星芒（bg.svg） */
 .bottle-bg {
   position: absolute;
-  left: 0px;
-  top: 58px;
-  width: 176px;
-  height: 176px;
+  left: 0rpx;
+  top: 116rpx;
+  width: 352rpx;
+  height: 352rpx;
   pointer-events: none;
 }
-/* 左侧叶子：尺寸雅致（64x64），从瓶身左后方向左上方舒展，旋转支点在茎部右下方（56px 61px） */
+/* 左侧叶子：尺寸雅致（128x128），从瓶身左后方向左上方舒展，旋转支点在茎部右下方（112rpx 122rpx） */
 .leaf-left {
   position: absolute;
-  left: 6px;
-  top: 128px;
-  width: 64px;
-  height: 64px;
+  left: 12rpx;
+  top: 256rpx;
+  width: 128rpx;
+  height: 128rpx;
   pointer-events: none;
-  transform-origin: 56px 61px;
+  transform-origin: 112rpx 122rpx;
   transition-property: transform;
   transition-duration: 2000ms;
   transition-timing-function: ease-in-out;
 }
-/* 右侧叶子：尺寸雅致（62x62），从瓶身右后方向右上方舒展，旋转支点在茎部左下方（7px 59px） */
+/* 右侧叶子：尺寸雅致（124x124），从瓶身右后方向右上方舒展，旋转支点在茎部左下方（14rpx 118rpx） */
 .leaf-right {
   position: absolute;
-  left: 110px;
-  top: 130px;
-  width: 62px;
-  height: 62px;
+  left: 220rpx;
+  top: 260rpx;
+  width: 124rpx;
+  height: 124rpx;
   pointer-events: none;
-  transform-origin: 7px 59px;
+  transform-origin: 14rpx 118rpx;
   transition-property: transform;
   transition-duration: 2600ms;
   transition-timing-function: ease-in-out;
@@ -927,11 +943,11 @@ const meals = computed<Meal[]>(() =>
 /* 倒水水流条：pour 动效激活时从左侧倾倒 */
 .pour-stream {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  width: 5px;
-  height: 70px;
-  border-radius: 2.5px;
+  top: 40rpx;
+  left: 40rpx;
+  width: 10rpx;
+  height: 140rpx;
+  border-radius: 5rpx;
   background-image: linear-gradient(180deg, rgba(125, 235, 199, 0) 0%, rgba(125, 235, 199, 0.7) 20%, rgba(31, 191, 143, 0.9) 100%);
   opacity: 0;
   pointer-events: none;
@@ -943,21 +959,21 @@ const meals = computed<Meal[]>(() =>
 }
 .bottle-wrap {
   position: absolute;
-  left: 36px;
-  top: 48px;
-  width: 104px;
-  height: 168px;
+  left: 72rpx;
+  top: 96rpx;
+  width: 208rpx;
+  height: 336rpx;
 }
 .bottle-cavity {
   position: absolute;
-  left: 15px;
-  top: 40px;
-  width: 74px;
-  height: 118px;
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
-  border-bottom-left-radius: 26px;
-  border-bottom-right-radius: 26px;
+  left: 30rpx;
+  top: 80rpx;
+  width: 148rpx;
+  height: 236rpx;
+  border-top-left-radius: 24rpx;
+  border-top-right-radius: 24rpx;
+  border-bottom-left-radius: 52rpx;
+  border-bottom-right-radius: 52rpx;
   overflow: hidden;
   background-color: rgba(235, 248, 243, 0.4);
 }
@@ -966,7 +982,7 @@ const meals = computed<Meal[]>(() =>
   left: 0;
   right: 0;
   bottom: 0;
-  height: 118px;
+  height: 236rpx;
 }
 /* 主题色清透轻绿治愈系水体质感 */
 .liquid-green {
@@ -984,19 +1000,19 @@ const meals = computed<Meal[]>(() =>
 /* 液体内部高光反光带，赋予水体真实晶莹通透折射感 */
 .liquid-glare {
   position: absolute;
-  top: 10px;
-  left: 8px;
-  width: 12px;
-  bottom: 15px;
+  top: 20rpx;
+  left: 16rpx;
+  width: 24rpx;
+  bottom: 30rpx;
   background-color: rgba(255, 255, 255, 0.22);
-  border-radius: 6px;
+  border-radius: 12rpx;
 }
 .wave-back {
   position: absolute;
-  top: -9px;
+  top: -18rpx;
   left: 0;
-  width: 128px;
-  height: 16px;
+  width: 256rpx;
+  height: 32rpx;
   opacity: 0.65;
   transition-property: transform;
   transition-duration: 2200ms;
@@ -1004,10 +1020,10 @@ const meals = computed<Meal[]>(() =>
 }
 .wave-front {
   position: absolute;
-  top: -7px;
+  top: -14rpx;
   left: 0;
-  width: 128px;
-  height: 16px;
+  width: 256rpx;
+  height: 32rpx;
   opacity: 0.95;
   transition-property: transform;
   transition-duration: 2200ms;
@@ -1016,52 +1032,52 @@ const meals = computed<Meal[]>(() =>
 .bubble {
   position: absolute;
   background-color: rgba(255, 255, 255, 0.75);
-  border-radius: 10px;
+  border-radius: 20rpx;
 }
 .bubble-1 {
-  bottom: 12px;
-  left: 18px;
-  width: 4px;
-  height: 4px;
+  bottom: 24rpx;
+  left: 36rpx;
+  width: 8rpx;
+  height: 8rpx;
 }
 .bubble-2 {
-  bottom: 6px;
-  right: 18px;
-  width: 3px;
-  height: 3px;
+  bottom: 12rpx;
+  right: 36rpx;
+  width: 6rpx;
+  height: 6rpx;
 }
 .bottle-mask {
   position: absolute;
   left: 0;
   top: 0;
-  width: 104px;
-  height: 168px;
+  width: 208rpx;
+  height: 336rpx;
   pointer-events: none;
 }
 .sticker {
   position: absolute;
-  right: 4px;
-  top: 40px;
-  width: 100px;
-  height: 98px;
+  right: 8rpx;
+  top: 80rpx;
+  width: 200rpx;
+  height: 196rpx;
 }
 .hero-text {
   position: absolute;
-  left: 173px;
-  bottom: 15px;
+  left: 346rpx;
+  bottom: 30rpx;
 }
 .remain-head {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  width: 110px;
+  width: 220rpx;
 }
 .remain-leaf {
-  width: 19px;
-  height: 18px;
+  width: 38rpx;
+  height: 36rpx;
 }
 .remain-label {
-  font-size: 19px;
+  font-size: 38rpx;
   font-weight: bold;
   color: #0F5B44;
 }
@@ -1070,94 +1086,94 @@ const meals = computed<Meal[]>(() =>
   align-items: flex-end;
 }
 .remain-num {
-  font-size: 52px;
+  font-size: 104rpx;
   font-weight: bold;
   color: #0A5A40;
-  line-height: 58px;
+  line-height: 116rpx;
 }
 .remain-unit {
-  font-size: 19px;
+  font-size: 38rpx;
   font-weight: bold;
   color: #0A5A40;
-  margin-left: 6px;
-  margin-bottom: 10px;
+  margin-left: 12rpx;
+  margin-bottom: 20rpx;
 }
 .consumed {
-  font-size: 13px;
+  font-size: 26rpx;
   color: #618585;
-  margin-top: 2px;
+  margin-top: 4rpx;
 }
 .goal-pill {
   flex-direction: row;
   align-items: center;
   background-color: #FFFFFF;
-  border-radius: 18px;
-  padding-left: 14px;
-  padding-right: 12px;
-  height: 36px;
-  margin-top: 8px;
-  box-shadow: 0 3px 10px rgba(26, 102, 77, 0.08);
+  border-radius: 36rpx;
+  padding-left: 28rpx;
+  padding-right: 24rpx;
+  height: 72rpx;
+  margin-top: 16rpx;
+  box-shadow: 0 6rpx 20rpx rgba(26, 102, 77, 0.08);
 }
 .pill-cal {
-  width: 16px;
-  height: 14px;
+  width: 32rpx;
+  height: 28rpx;
 }
 .goal-pill-text {
-  font-size: 12px;
+  font-size: 24rpx;
   color: #0B7954;
-  margin-left: 12px;
+  margin-left: 24rpx;
 }
 .pill-edit {
-  width: 13px;
-  height: 13px;
-  margin-left: 10px;
+  width: 26rpx;
+  height: 26rpx;
+  margin-left: 20rpx;
 }
 .macro-card {
   flex-direction: row;
   background-color: #FFFFFF;
-  border-radius: 19px;
-  margin-left: 14px;
-  margin-right: 14px;
-  margin-top: 6px;
-  padding-top: 19px;
-  padding-bottom: 14px;
-  box-shadow: 0 5px 13px rgba(26, 102, 77, 0.07);
+  border-radius: 38rpx;
+  margin-left: 28rpx;
+  margin-right: 28rpx;
+  margin-top: 12rpx;
+  padding-top: 38rpx;
+  padding-bottom: 28rpx;
+  box-shadow: 0 10rpx 26rpx rgba(26, 102, 77, 0.07);
 }
 .macro-col {
   flex: 1;
   align-items: center;
 }
 .macro-icon {
-  width: 24px;
-  height: 24px;
+  width: 48rpx;
+  height: 48rpx;
 }
 .macro-num {
-  font-size: 21px;
+  font-size: 42rpx;
   font-weight: bold;
   color: #0A5A40;
-  margin-top: 2px;
+  margin-top: 4rpx;
 }
 .macro-label {
-  font-size: 12px;
+  font-size: 24rpx;
   color: #73918B;
-  margin-top: 4px;
+  margin-top: 8rpx;
 }
 .macro-div {
   width: 1px;
   background-color: #E3F0EA;
-  margin-top: 25px;
-  margin-bottom: 25px;
+  margin-top: 50rpx;
+  margin-bottom: 50rpx;
 }
 .meal-section-head {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-left: 17px;
-  margin-right: 14px;
-  margin-top: 19px;
+  margin-left: 34rpx;
+  margin-right: 28rpx;
+  margin-top: 38rpx;
 }
 .meal-section-title {
-  font-size: 17px;
+  font-size: 34rpx;
   font-weight: bold;
   color: #0F5B44;
 }
@@ -1166,126 +1182,117 @@ const meals = computed<Meal[]>(() =>
   align-items: center;
 }
 .all-records-text {
-  font-size: 12px;
+  font-size: 24rpx;
   color: #8FAEAF;
 }
 .chev-right {
-  width: 8px;
-  height: 12px;
-  margin-left: 4px;
+  width: 16rpx;
+  height: 24rpx;
+  margin-left: 8rpx;
 }
 .meal-block {
   flex-direction: row;
-  margin-left: 17px;
-  margin-right: 14px;
-  margin-top: 18px;
+  margin-left: 34rpx;
+  margin-right: 28rpx;
+  margin-top: 36rpx;
 }
 .meal-rail {
-  width: 42px;
+  width: 84rpx;
   align-items: center;
 }
 .meal-circle {
-  width: 37px;
-  height: 37px;
-  border-radius: 19px;
+  width: 74rpx;
+  height: 74rpx;
+  border-radius: 38rpx;
   background-color: #29B385;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 4px 10px rgba(31, 140, 97, 0.25);
 }
 .meal-circle-icon {
-  width: 27px;
-  height: 25px;
+  width: 44rpx;
+  height: 44rpx;
 }
 .rail-line {
   flex: 1;
   width: 2px;
   background-color: #BFE8D6;
-  margin-top: 6px;
-  margin-bottom: -18px;
+  margin-top: 12rpx;
+  margin-bottom: -36rpx;
 }
 .meal-main {
   flex: 1;
-  margin-left: 6px;
+  margin-left: 12rpx;
 }
 .meal-head {
+  height: 74rpx;
   flex-direction: row;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
 }
 .meal-name {
-  font-size: 17px;
+  font-size: 34rpx;
   font-weight: bold;
   color: #0F5B44;
 }
 .meal-time {
-  font-size: 16px;
+  font-size: 32rpx;
   font-weight: normal;
   color: #8FAEAF;
 }
 .meal-kcal {
-  font-size: 17px;
+  font-size: 34rpx;
   font-weight: bold;
   color: #0A5A40;
 }
 .meal-card {
   background-color: #FFFFFF;
-  border-radius: 16px;
-  margin-top: 8px;
-  padding-left: 10px;
-  padding-right: 12px;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  box-shadow: 0 4px 11px rgba(26, 102, 77, 0.06);
+  border-radius: 32rpx;
+  margin-top: 16rpx;
+  padding-left: 20rpx;
+  padding-right: 24rpx;
+  padding-top: 4rpx;
+  padding-bottom: 4rpx;
+  box-shadow: 0 8rpx 22rpx rgba(26, 102, 77, 0.06);
+}
+.meal-empty {
+  height: 84rpx;
+  justify-content: center;
+  align-items: center;
+}
+.meal-empty-txt {
+  font-size: 26rpx;
+  color: #8FAEAF;
 }
 .meal-row {
   flex-direction: row;
   align-items: center;
-  height: 40px;
+  height: 80rpx;
 }
 .meal-thumb {
-  width: 37px;
-  height: 37px;
-  border-radius: 8px;
+  width: 74rpx;
+  height: 74rpx;
+  border-radius: 16rpx;
 }
 .meal-row-name {
-  font-size: 13px;
+  font-size: 26rpx;
   color: #14584A;
-  margin-left: 8px;
-  margin-right: 10px;
+  margin-left: 16rpx;
+  margin-right: 20rpx;
 }
 .meal-row-portion {
   flex: 1;
-  font-size: 12px;
+  font-size: 24rpx;
   color: #8FAEAF;
 }
 .meal-row-kcal {
-  width: 79px;
-  font-size: 13px;
+  width: 158rpx;
+  font-size: 26rpx;
   color: #0B7954;
   text-align: right;
 }
 .meal-row-div {
   height: 1px;
   background-color: #F0F5F2;
-  margin-right: 18px;
-}
-.meal-expand {
-  flex-direction: row;
-  justify-content: flex-end;
-  margin-top: 8px;
-}
-.expand-btn {
-  width: 29px;
-  height: 29px;
-  border-radius: 15px;
-  background-color: #FFFFFF;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 3px 8px rgba(26, 102, 77, 0.08);
-}
-.chev-down {
-  width: 10px;
-  height: 13px;
+  margin-right: 36rpx;
 }
 </style>

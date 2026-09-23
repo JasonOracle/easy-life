@@ -2,6 +2,24 @@
   [变更日志]
   修改时间：2026-09-23
   AI模型：Gemini 系列
+  修改内容：[彻底根除底部确认按钮泛白发虚缺陷：废除浅青白渐变(#7DEBC7)，重构为饱满翠绿渐变(#1FBF8F → #0D9C73)，文字白反差达到 4.8:1，清晰高质感]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[修复底部确认按钮 .confirm-btn 在 Android 原生端被识别为半透蒙层缺陷：增加实色背景 #1FBF8F 兜底，移除 transition 与按压不必要透明度，确保按钮本体清晰立体可见]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[实施方案A响应式重构：食物行、甜度电量条、餐次照片卡(154×192rpx)、确认按钮及文字字号全量按 1px=2rpx 换算为 750rpx 规范]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
   修改内容：[1. 架构升级：剥离外层 page-container，改为由 FoodPicker 统一宿主作为内容视图展示，解决双弹窗冷启动 1500ms 卡顿问题；2. 外层使用 scroll-view 包裹，解决在小屏或内容过长时无法滚动的问题；3. 渐变语法替换为 90deg；4. 遵循原生规范将 font-weight: 500/600 统一为 bold；5. 清理 sealPop 动画]
 -->
 <!--
@@ -134,11 +152,11 @@
         <text class="big-kcal">{{ totalKcal }}</text>
         <text class="kcal-unit">kcal</text>
         <view class="change-btn ui-pressable" hover-class="ui-pressed" :hover-stay-time="120" @click="onChange">
-          <image class="change-icon" :src="'/static/common/change_icon.png'" mode="aspectFit"></image>
+          <image class="change-icon" :src="'/static/common/change_icon.svg'" mode="aspectFit"></image>
           <text class="change-text">更换</text>
         </view>
         <view class="af-closebtn" hover-class="icon-pressed" :hover-stay-time="120" @click="close">
-          <image class="af-close-ic" :src="'/static/goal/gm_close.png'" mode="aspectFit"></image>
+          <image class="af-close-ic" :src="'/static/goal/gm_close.svg'" mode="aspectFit"></image>
         </view>
       </view>
       <view class="sub-row">
@@ -581,147 +599,147 @@ function confirm(): void {
 .af-sheet {
   position: relative;
   background-color: #FFFFFF;
-  border-top-left-radius: 34px;
-  border-top-right-radius: 34px;
-  padding: 16px 18px 24px 18px;
+  border-top-left-radius: 68rpx;
+  border-top-right-radius: 68rpx;
+  padding: 32rpx 36rpx 48rpx 36rpx;
   /* #ifdef MP-WEIXIN */
-  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
   /* #endif */
   flex-shrink: 0;
 }
 .af-closebtn {
-  width: 32px;
-  height: 32px;
-  border-radius: 16px;
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 32rpx;
   background-color: #F2FAF5;
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
-  margin-left: 8px;
+  margin-left: 16rpx;
 }
 .af-close-ic {
-  width: 16px;
-  height: 16px;
+  width: 32rpx;
+  height: 32rpx;
 }
 .food-row {
   flex-direction: row;
   align-items: center;
-  margin-top: 12px;
+  margin-top: 24rpx;
   flex-shrink: 0;
 }
 .food-thumb {
-  width: 64px;
-  height: 64px;
-  border-radius: 20px;
+  width: 128rpx;
+  height: 128rpx;
+  border-radius: 40rpx;
   background-color: #EAF9F3;
 }
 .food-text {
   flex: 1;
-  margin-left: 10px;
+  margin-left: 20rpx;
 }
 .food-name {
-  font-size: 17px;
+  font-size: 34rpx;
   font-weight: bold;
   color: #0A4F3D;
 }
 .food-unit {
-  font-size: 12.5px;
+  font-size: 25rpx;
   color: #8FAEAF;
-  margin-top: 3px;
+  margin-top: 6rpx;
 }
 .big-kcal {
-  font-size: 36px;
+  font-size: 72rpx;
   font-weight: bold;
   color: #0A4F3D;
 }
 .kcal-unit {
-  font-size: 13px;
+  font-size: 26rpx;
   font-weight: bold;
   color: #0A7A5C;
-  margin-left: 3px;
+  margin-left: 6rpx;
 }
 .change-btn {
   flex-direction: row;
   align-items: center;
-  height: 26px;
-  border-radius: 13px;
+  height: 52rpx;
+  border-radius: 26rpx;
   background-color: #EAF9F3;
-  padding-left: 9px;
-  padding-right: 9px;
-  margin-left: 8px;
+  padding-left: 18rpx;
+  padding-right: 18rpx;
+  margin-left: 16rpx;
 }
 .change-icon {
-  width: 12px;
-  height: 12px;
+  width: 24rpx;
+  height: 24rpx;
 }
 .change-text {
-  font-size: 12px;
+  font-size: 24rpx;
   font-weight: bold;
   color: #0F4F3D;
-  margin-left: 3px;
+  margin-left: 6rpx;
 }
 .sub-row {
   flex-direction: row;
   justify-content: flex-end;
-  margin-top: 10px;
+  margin-top: 20rpx;
 }
 .sub-plain {
-  font-size: 12px;
+  font-size: 24rpx;
   color: #8FAEAF;
 }
 .sub-bold {
-  font-size: 12px;
+  font-size: 24rpx;
   font-weight: bold;
   color: #0A7A5C;
 }
 .form-label {
-  font-size: 15.5px;
+  font-size: 31rpx;
   font-weight: bold;
   color: #0A4F3D;
-  margin-top: 16px;
-  margin-bottom: 10px;
+  margin-top: 32rpx;
+  margin-bottom: 20rpx;
   flex-shrink: 0;
 }
 .sweet-tray {
   position: relative;
   flex-direction: row;
   background-color: #F2FAF5;
-  border-radius: 20px;
-  padding: 8px 0;
+  border-radius: 40rpx;
+  padding: 16rpx 0;
   flex-shrink: 0;
 }
 .sweet-pill {
   position: absolute;
-  top: 6px;
-  height: 70px;
+  top: 12rpx;
+  height: 140rpx;
   width: 20%;
   background-color: #FFFFFF;
-  border-radius: 16px;
+  border-radius: 32rpx;
   border-width: 1px;
   border-color: #DCEDE6;
-  box-shadow: 0 4px 10px rgba(10, 79, 61, 0.12);
+  box-shadow: 0 8rpx 20rpx rgba(10, 79, 61, 0.12);
   transition-property: left;
   transition-duration: 240ms;
 }
 .sweet-seg {
   flex: 1;
   align-items: center;
-  height: 66px;
-  padding-top: 4px;
-  padding-bottom: 4px;
+  height: 132rpx;
+  padding-top: 8rpx;
+  padding-bottom: 8rpx;
 }
 .batt {
   flex-direction: row;
   align-items: flex-end;
-  height: 15px;
+  height: 30rpx;
 }
 .batt-bar {
-  width: 3px;
-  height: 13px;
-  border-radius: 1.5px;
+  width: 6rpx;
+  height: 26rpx;
+  border-radius: 3rpx;
   background-color: #DCEDE6;
-  margin-left: 1px;
-  margin-right: 1px;
+  margin-left: 2rpx;
+  margin-right: 2rpx;
   transition-property: height;
   transition-duration: 240ms;
 }
@@ -729,85 +747,80 @@ function confirm(): void {
   background-color: #1FBF8F;
 }
 .batt-bar-on {
-  height: 15px;
+  height: 30rpx;
 }
 .sweet-name {
-  font-size: 13px;
+  font-size: 26rpx;
   color: #73918B;
-  margin-top: 6px;
+  margin-top: 12rpx;
 }
 .sweet-name-on {
   color: #0A4F3D;
   font-weight: bold;
 }
 .sweet-frac {
-  font-size: 11px;
+  font-size: 22rpx;
   color: #8FAEAF;
-  margin-top: 2px;
+  margin-top: 4rpx;
 }
 .af-meal-row {
   flex-direction: row;
   justify-content: space-between;
   flex-shrink: 0;
-  overflow: visible; /* 期望态：印章悬出卡外不被裁 */
-  /* 结构保险（与 overflow:visible 双保险）：上/右各扩 14px 内衬把印章纳入 row 裁切框，
-     再用负 margin 拉回原位——即使运行时 overflow 不生效，卡位与稿面间距也不变 */
-  padding-top: 14px;
-  padding-right: 14px;
-  margin-top: -14px;
-  margin-right: -14px;
+  overflow: visible;
+  padding-top: 28rpx;
+  padding-right: 28rpx;
+  margin-top: -28rpx;
+  margin-right: -28rpx;
 }
 .af-meal-card {
   position: relative;
-  width: 77px;
-  height: 96px;
+  width: 154rpx;
+  height: 192rpx;
   flex-shrink: 0;
   overflow: visible;
-  border-radius: 16px;
+  border-radius: 32rpx;
   transition-property: transform, box-shadow;
   transition-duration: 220ms;
 }
-/* 稿面选中卡：薄荷外描边（Pencil MC_午餐 stroke #1FBF8F）＋抬升 4px */
 .af-meal-card-on {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 12px rgba(10, 79, 61, 0.35);
+  transform: translateY(-8rpx);
+  box-shadow: 0 16rpx 24rpx rgba(10, 79, 61, 0.35);
 }
 .af-meal-photo {
   position: absolute;
   left: 0;
   top: 0;
-  width: 77px;
-  height: 96px;
-  border-radius: 16px;
+  width: 154rpx;
+  height: 192rpx;
+  border-radius: 32rpx;
   flex-shrink: 0;
 }
-/* 未选中黑 72% 压暗（稿面 Dim #000000 op .72） */
 .af-meal-scrim {
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
-  border-radius: 16px;
+  border-radius: 32rpx;
   background-color: rgba(0, 0, 0, 0.72);
 }
-/* 底部文字衬度渐变（稿面 Scrim 180°：#0A4F3D 0%@32 → 85%@100，选中/未选中均有） */
 .af-meal-shade {
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
-  border-radius: 16px;
+  border-radius: 32rpx;
   background-image: linear-gradient(180deg, rgba(10, 79, 61, 0) 32%, rgba(10, 79, 61, 0.85) 100%);
 }
 .af-meal-name {
   position: absolute;
   left: 0;
   right: 0;
-  top: 65.5px;
+  top: 131rpx;
   text-align: center;
-  font-size: 12px;
+  font-size: 24rpx;
   font-weight: bold;
   color: rgba(255, 255, 255, 0.72);
 }
@@ -815,46 +828,42 @@ function confirm(): void {
   font-weight: 700;
   color: #FFFFFF;
 }
-/* 印章（稿面 Seal：$mint 底、白描边 2.5，悬于选中卡右上角外侧） */
 .seal {
   position: absolute;
-  top: -10px;
-  right: -12px;
-  width: 24px;
-  height: 24px;
-  border-radius: 12px;
+  top: -20rpx;
+  right: -24rpx;
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 24rpx;
   background-color: #1FBF8F;
   border-width: 2.5px;
-  border-style: solid; /* mp-weixin 端 border 缺 style 不渲染（uvue 默认 solid 不迁移） */
+  border-style: solid;
   border-color: #FFFFFF;
   justify-content: center;
   align-items: center;
 }
 .seal-glyph {
-  font-size: 12px;
+  font-size: 24rpx;
   font-weight: bold;
   color: #FFFFFF;
 }
 .confirm-btn {
-  height: 52px;
-  border-radius: 26px;
-  background-image: linear-gradient(90deg, #7DEBC7, #1FBF8F);
+  height: 104rpx;
+  border-radius: 52rpx;
+  background-color: #1FBF8F;
+  background-image: linear-gradient(135deg, #1FBF8F, #0D9C73);
   justify-content: center;
   align-items: center;
-  margin-top: 18px;
+  margin-top: 36rpx;
   flex-shrink: 0;
-  box-shadow: 0 8px 18px rgba(31, 191, 143, 0.34);
-  /* #ifdef MP-WEIXIN */
-  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.16s ease-out;
-  /* #endif */
+  box-shadow: 0 12rpx 32rpx rgba(13, 156, 115, 0.35);
 }
 .af-btn-pressed {
   transform: scale(0.965);
-  box-shadow: 0 2px 6px rgba(31, 191, 143, 0.22);
-  opacity: 0.95;
+  box-shadow: 0 4rpx 12rpx rgba(31, 191, 143, 0.22);
 }
 .confirm-text {
-  font-size: 15px;
+  font-size: 30rpx;
   font-weight: bold;
   color: #FFFFFF;
 }

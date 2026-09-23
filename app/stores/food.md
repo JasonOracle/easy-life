@@ -1,12 +1,5 @@
 # food.ts — 食物库＋记录 store
 
-<!--
-[变更日志]
-修改时间：2026-09-22
-AI模型：Qoder (Claude)
-修改内容：[校准模块级缓存解析条目数：正文「347 条」更正为「353 条」。依据 app/src/data/food_library.json 的 foods 数组实测 353 条（fingerprint.count 亦为 353）。]
--->
-
 ## 💡 核心思想
 
 一库一账：模块级缓存解析 353 条食物库（base／vessel／opts 模板）（2026-09-22 校准），`entries` 存当日及历史记录，

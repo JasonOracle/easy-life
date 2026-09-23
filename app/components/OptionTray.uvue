@@ -2,6 +2,12 @@
   [变更日志]
   修改时间：2026-09-23
   AI模型：Gemini 系列
+  修改内容：[实施方案A响应式重构：全量 px 尺寸、间距、字号与位移动画按 1px=2rpx 换算为 750rpx 规范]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
   修改内容：[清理 Android 原生不支持的 @keyframes optPop 及其相关动画属性，避免控制台报警并保持静态直出规范]
 -->
 <!--
@@ -163,8 +169,8 @@ function select(key: string): void {
 <style>
 .tray {
   flex-direction: row;
-  border-radius: 20px;
-  padding: 12px 10px;
+  border-radius: 40rpx;
+  padding: 24rpx 20rpx;
   flex-shrink: 0;
 }
 .opt {
@@ -172,8 +178,8 @@ function select(key: string): void {
   align-items: center;
   justify-content: flex-end;
   position: relative;
-  padding-top: 10px;
-  padding-bottom: 6px;
+  padding-top: 20rpx;
+  padding-bottom: 12rpx;
   overflow: visible;
 }
 .art-wrap {
@@ -184,7 +190,7 @@ function select(key: string): void {
 .halo {
   position: absolute;
   left: 50%;
-  border-radius: 45px;
+  border-radius: 90rpx;
   background-color: rgba(46, 207, 160, 0.22);
 }
 .art-row {
@@ -193,8 +199,8 @@ function select(key: string): void {
 }
 .float {
   align-items: center;
-  border-radius: 14px;
-  padding: 8px 6px;
+  border-radius: 28rpx;
+  padding: 16rpx 12rpx;
   overflow: visible;
   flex-shrink: 0;
   transform: translateY(0px);
@@ -202,31 +208,31 @@ function select(key: string): void {
   transition-duration: 220ms;
 }
 .float-on {
-  transform: translateY(-4px);
+  transform: translateY(-8rpx);
 }
 .float-card {
   background-color: #FFFFFF;
-  box-shadow: 0 5px 12px rgba(10, 79, 61, 0.25);
+  box-shadow: 0 10rpx 24rpx rgba(10, 79, 61, 0.25);
 }
 .opt-art {
-  margin-left: 2px;
-  margin-right: 2px;
+  margin-left: 4rpx;
+  margin-right: 4rpx;
   transition-property: opacity;
   transition-duration: 220ms;
 }
 .opt-name {
-  font-size: 13px;
+  font-size: 26rpx;
   color: #73918B;
-  margin-top: 6px;
+  margin-top: 12rpx;
 }
 .opt-name-on {
   color: #0A4F3D;
   font-weight: bold;
 }
 .opt-sub {
-  font-size: 11px;
+  font-size: 22rpx;
   color: #8FAEAF;
-  margin-top: 2px;
+  margin-top: 4rpx;
 }
 .opt-sub-on {
   color: #0A7A5C;

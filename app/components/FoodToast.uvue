@@ -1,6 +1,12 @@
 <!--
   [变更日志]
   修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[实施方案A响应式重构：全量 px 按 1px=2rpx 换算为 750rpx 规范，确保各类屏幕下比例自适应一致]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
   AI模型：OpenCode / Gemini 底层
   修改内容：[按指令清除Toast弹出时的 vibrateLong 触觉震动，避免微信模拟器窗口剧烈抖动，待后续按需开启]
 -->
@@ -112,52 +118,52 @@ onUnmounted(() => {
   align-items: center;
 }
 .ft-cup-circle {
-  width: 72px;
-  height: 72px;
-  border-radius: 36px;
+  width: 144rpx;
+  height: 144rpx;
+  border-radius: 72rpx;
   background-color: #1FBF8F;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 8px 20px rgba(31, 191, 143, 0.4);
+  box-shadow: 0 16rpx 40rpx rgba(31, 191, 143, 0.4);
 }
 .ft-cup-glyph {
-  font-size: 34px;
+  font-size: 68rpx;
   color: #FFFFFF;
 }
 .ft-toast-card {
   flex-direction: row;
   align-items: baseline;
   background-color: #FFFFFF;
-  border-radius: 18px;
-  padding: 14px 22px;
-  margin-top: 14px;
+  border-radius: 36rpx;
+  padding: 28rpx 44rpx;
+  margin-top: 28rpx;
 }
 .ft-plus-num {
-  font-size: 30px;
+  font-size: 60rpx;
   font-weight: bold;
   color: #0A4F3D;
 }
 .ft-plus-unit {
-  font-size: 14px;
+  font-size: 28rpx;
   color: #0A4F3D;
-  margin-left: 4px;
+  margin-left: 8rpx;
 }
 .ft-sub {
-  font-size: 13px;
+  font-size: 26rpx;
   color: #73918B;
-  margin-left: 10px;
+  margin-left: 20rpx;
 }
 .ft-pill {
   background-color: #1FBF8F;
-  border-radius: 14px;
-  padding-left: 18px;
-  padding-right: 18px;
-  height: 28px;
+  border-radius: 28rpx;
+  padding-left: 36rpx;
+  padding-right: 36rpx;
+  height: 56rpx;
   justify-content: center;
-  margin-top: 12px;
+  margin-top: 24rpx;
 }
 .ft-pill-text {
-  font-size: 13px;
+  font-size: 26rpx;
   color: #FFFFFF;
 }
 </style>

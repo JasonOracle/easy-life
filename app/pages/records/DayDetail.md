@@ -1,11 +1,5 @@
 # DayDetail — 单日详情页
 
-> 变更记录：
-> - 2026-09-23（Gemini 系列）：接入方案 A 单流程 FoodPicker 架构，移除宿主端 addShow/onPickFood/onAddChange 等状态机。
-> - 2026-09-23（Gemini 系列）：.dd-header 补实色兜底；字重 500/600 转为 bold；openPicker 与 onAddConfirm 清空 addFoodId。
-> - 2026-09-23（OpenCode / Gemini 底层）：营养分布卡（蛋白质、碳水、脂肪）图标同步更新为矢量 SVG 素材引用（macro_protein.svg / macro_carb.svg / macro_fat.svg），并微调 .dd-mg 为 20x20 正方比例。
-> - 2026-09-23（OpenCode / Gemini 底层）：按指令清除长按删除单条饮食记录时的 vibrateShort 触觉震动，避免微信模拟器窗口剧烈抖动，待后续按需开启。
-
 ## 用途
 查看某一天的完整饮食记录：今日热量大卡（大数字/进度环/能量条/营养分布）+ 按餐次分组的记录行 + 今日饮食总结条。
 记录行**长按 → uni.showActionSheet 底部菜单「删除这条记录」**（Boss 拍板的删除交互）。

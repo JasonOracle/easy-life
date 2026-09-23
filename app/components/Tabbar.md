@@ -1,48 +1,5 @@
 # Tabbar.uvue — 底部液态玻璃胶囊（三 Tab 共享）
 
-<!--
-[变更日志]
-修改时间：2026-09-23
-AI模型：Gemini 系列
-修改内容：[遵循 uni-app x 原生规范，将 .tb-label 字重 font-weight: 600 改为 bold]
--->
-<!--
-[变更日志]
-修改时间：2026-09-23
-AI模型：OpenCode / Gemini 底层
-修改内容：[按指令清除切换 Tabbar 时的 vibrateShort 触觉震动，避免微信模拟器窗口剧烈抖动，待后续按需开启]
--->
-<!--
-[变更日志]
-修改时间：2026-09-22
-AI模型：Gemini 系列
-修改内容：[浅色态气泡在白底上立体投影强化：
-升级为双层墨绿复合柔影（0 2px 6px rgba(0,0,0,0.08), 0 6px 18px rgba(10,79,61,0.14)），解决白底卡片滑动时气泡对比度不足问题]
--->
-<!--
-[变更日志]
-修改时间：2026-09-22
-AI模型：Qoder (Claude)
-修改内容：[浅色态最终定稿参数回填（Boss 拍板组合方案）：
-1. 胶囊底 #FFFFFF 88% → 60%（88% 那条稿面文字标注本身是漏改，故记为「文字标注为真理」的一条例外）；
-2. 气泡新增「雕边」材质＝1px rgba(255,255,255,.6) 描边 ＋ box-shadow 0 4px 12px rgba(0,0,0,.06)，
-   实现为单类 .tb-bub-light，只在「浅色 ＋ 玻璃档」挂载，暗态与 low 降级档不变；
-3. 气泡底色经 18% ↔ 25% 实机 A/B 像素比对后保持稿面的 18%；
-4. 补录本轮验收截图与「待 Boss 定」条目的关闭]
--->
-<!--
-[变更日志]
-修改时间：2026-09-22
-AI模型：Qoder (Claude)
-修改内容：[按「液态玻璃胶囊三 Tab」重构整体重写本文件：
-1. 通栏底槽 → 悬浮胶囊，两 Tab → 三 Tab（首页／日历／我的），Records 升一级 Tab；
-2. 删除 fade 随滚动渐显整节（Boss 拍板：胶囊前提＝恒常可见），改为追溯条目；
-3. 新增会跑的选中气泡与四关键帧（含 automator 采样取证数值）；
-4. 色值改引 DesignTokens §7；页底预留 40 → 78；
-5. 记录「components/ 下新增纯逻辑 .uts 不进微信包体」这一新踩坑与改用存储载体的结论]
--->
-
-
 ## 💡 核心思想
 
 悬浮玻璃胶囊 ＋ 一颗会在三格之间「跑」的选中气泡（Pencil `gFuXt`「Home Tab / Tab 关键帧 (微博标准版)」）。
@@ -94,19 +51,6 @@ props 只有两个：`active`（`home`|`records`|`profile`）、`dark`（缺省 
 - **`dark` prop 由页面显式传入而非组件自读 settings**：深色范围 Boss 只批了个人中心＋设置，组件不自行决定主题归属。
 - **切 Tab＝L1 反馈**：气泡四阶段几何压扁与飞行补间；触觉震动已按指令全量下线，避免微信模拟器窗口抖动，待后续按需开启。
 
-### 已废弃：#29「随滚动渐显（fade）」
-
-Boss 2026-09-22 拍板：「新的液态胶囊设计核心就在于恒常可见」→ fade 机制整体下线，
-`fade` prop、页面侧 `onPageScroll→tabFade` 透传、`barStyle` 五属性同驱全部删除；
-Home 的 `onPageScroll` 随之删除，Profile／Records 的 `onPageScroll` 仅保留「跨阈出常驻导航栏」用途。
-
-### 新踩坑：`components/` 下放纯逻辑 `.uts` → 运行时模块缺失、整页白屏
-
-产物侧 `components/tabOrigin.js` 正常生成、`Tabbar.js` 的 `require("./tabOrigin.js")` 路径也对，
-但微信工具运行时报 `module 'components/tabOrigin.js' is not defined`，Tabbar 渲染中断 → **整页白屏且首屏无任何可见错误**；
-`debug_clear_cache --action cleanCompileCache` ＋ `simulator_refresh` 跑过仍未见效（包体哈希未变）。根因未定案。
-**结论：跨页共享的纯逻辑不要放 `components/`；本工程改用本地存储载体，不新增 JS 模块文件。**
-
 ## 边界与降级
 
 - 点当前页 Tab 直接 return，不触发动画与跳转；`redirectTo` 失败静默停留。
@@ -128,29 +72,3 @@ Home 的 `onPageScroll` 随之删除，Profile／Records 的 `onPageScroll` 仅�
   Boss 2026-09-22 拍板组合方案＝**胶囊降 60% ＋ 气泡加白描边与柔影**，并明确「浅色版最终定稿参数」；
   稿面文字标注的 88% 被 Boss 判定为漏改，故这一处不再走「文字标注为真理」。**暗态观感正常，保持现状不动。**
 - **仍待 Boss 定**：暗态**染色图标**尚未产出（深色下仍用浅底那套矢量图）。
-
-## 验收取证（2026-09-22，全部零窗口）
-
-- 三页渲染与激活态：`debug/shots/tab8_home.png`／`tab9_records.png`／`tab10_profile.png`；暗态 `tab13_profile_dark.png`。
-- 三格坐标 tap 均正确换页（胶囊条带 css y=770，由 `debug/tab_geom.js` 按组件同公式算出）。
-- 四关键帧实跑（`debug/tab_flight.js` 轮询子组件 `$scope.data` 的行内 style）：
-  `w=96 l=11.67 dur=140`（Home 静止）→ `w=92.16 l=13.59 dur=90`（按下，仍在来源槽）→
-  换页后首帧 `w=92.16 l=13.59`（起点无闪帧）→ `w=107.52 l=125.24 dur=320`（移动）→
-  `w=101.76 l=128.12 dur=120`（落位）→ `w=96 l=131 dur=140`（静止）。
-  ⚠️ 实测阶段推进比稿面标称慢（页面挂载占住 JS 线程，`setTimeout` 被推迟：按下→移动实测 260ms，标称 16ms），
-  观感为「整段略长」，不影响形状；App 端 Worklet 化后可消掉此延迟。
-
-### 浅色态定稿（60% 胶囊底 ＋ 描边/投影气泡）验收
-
-- 三次单发编译绿灯；产物 `unpackage/dist/dev/mp-weixin/components/Tabbar.wxss` 内确认 `.tb-bub-light` 的
-  四边 `border-*-width` ＋ `border-style: solid` ＋ 四边色 ＋ `box-shadow` 已完整下发（uvue 只写 `border-width` 会整体不渲染）。
-- 三页浅色、内容穿过胶囊带（`debug/tab_final.js`：`reLaunch` → 截图 → `wx.pageScrollTo({scrollTop:300})` → 再截图）：
-  `debug/shots/f_home_a_top / f_home_b_scrolled`、`f_rec_*`、`f_prof_*`（`_crop` 为胶囊条带放大图）
-  ⇒ 气泡轮廓清晰可辨，页面内容在胶囊下仍可读。
-- 暗态回归（`debug/tab_dark_check.js`：设置页开关 → Profile 截图 → 复位）：`f_prof_dark.png`／`f_prof_dark_crop.png`
-  与定稿前一致（Boss 指令「暗色态保持现状」），验收后 `darkMode` 已还原 `false`、应用回到 Home。
-- 18% ↔ 25% A/B 取证：`tab15_bubble18.png` ↔ `tab16_bubble25.png`（静止）、`tab18_scroll18.png` ↔ `tab17_scroll25.png`（滚动）；
-  同点位像素采样气泡内区 `252,254,253` ↔ `253,255,254` → 取稿面文字标注 18%。
-- `python -X utf8 toolchain/hooks.py all` 五道全绿（新类 `tb-bub-light` 无跨文件同名冲突）。
-- 交 Boss 的收官图：`debug/shots/final_home.png`（整页，可见餐次列表穿到玻璃带下）与
-  `debug/shots/final_scroll_capsule.png`（胶囊条带 2× 放大，气泡描边／投影轮廓清晰）。

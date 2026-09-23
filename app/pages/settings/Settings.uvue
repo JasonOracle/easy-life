@@ -2,6 +2,36 @@
   [变更日志]
   修改时间：2026-09-23
   AI模型：OpenCode / Gemini 底层
+  修改内容：[彻底根除编译器报错 Identifier 'sbH' has already been declared：清理 script 尾部冗余声明的 let sbH 块，保持统一的 sbH 响应式状态管理]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[基于 ai-worldclass-design 落地高颜值全局顶栏：1. 淘汰粗硬的 hd-arc 几何圆切线与高斯光晕；2. 统一接入纯矢量有机双层贝塞尔水波 liquid_wave.svg；3. 浅色模式升级为全 App 统一双色温薄荷水体渐变 (#4EE2B6 -> #1FBF8F -> #0A7A5C)，深色模式保持 #162924 静谧暗夜；4. 调整偏好分组标题呼吸留白]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[1. 彻底修复 Android 端顶部背景丢失 Bug：重构 header 为状态栏独立占位层并恢复绿色双波浪渐变；2. 全量将 settings 内所有 PNG 位图升级为高清晰矢量 SVG（chev_back/icon_moon/icon_bell/icon_target/icon_mega/icon_down/icon_up/icon_shield/icon_trash/icon_leaf）]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[全面升级向右箭头为高清晰矢量 SVG（chev_right.svg），保持与全局矢量图标规范一致]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[全量换算为 750rpx 规范（1px = 2rpx），头图波浪、弧线、卡片、开关、图标与字号全量自适应大屏]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
   修改内容：[按指令清除切换深色模式开关(toggleDark)时的 vibrateShort 触觉震动，避免微信模拟器窗口剧烈抖动，待后续按需开启]
 -->
 <!--
@@ -91,16 +121,23 @@
 
 <template>
   <view class="page" :class="{ 'page-dark': dk }">
-    <!-- 头图（稿 T0IUr：140 高含 27 状态栏；渐变＋光晕＋双弧＋大波浪，返回箭/标题/副题绝对定位对齐稿面坐标） -->
-    <view class="header" :style="{ height: (113 + sbH) + 'px' }">
-      <view class="hd-glow" :style="{ top: (sbH - 170) + 'px' }"></view>
-      <view class="hd-arc1" :style="{ top: (sbH + 69) + 'px' }"></view>
-      <view class="hd-arc2" :style="{ top: (sbH + 91) + 'px' }"></view>
-      <view class="hd-back" :style="{ top: (sbH + 10) + 'px' }" @click="goBack">
-        <image class="hd-back-icon" :src="'/static/settings/chev_back.png'" mode="aspectFit"></image>
+    <!-- 头图（全App统一薄荷液滴水体渐变 + 纯矢量有机双水波） -->
+    <view class="header" :style="{ backgroundColor: dk ? '#162924' : '#1FBF8F', backgroundImage: dk ? 'none' : 'linear-gradient(#4EE2B6, #1FBF8F, #0A7A5C)' }">
+      <!-- 状态栏独立占位，杜绝混合 calc(rpx+px) 塌陷 -->
+      <view :style="{ height: sbH + 'px' }"></view>
+      <view class="header-inner">
+        <view class="hd-bar">
+          <view class="hd-back" hover-class="icon-pressed" :hover-stay-time="120" @click="goBack">
+            <image class="hd-back-icon" :src="'/static/settings/chev_back.svg'" mode="aspectFit"></image>
+          </view>
+          <view class="hd-info">
+            <text class="hd-title">设置</text>
+            <text class="hd-sub">管理你的饮食记录与偏好</text>
+          </view>
+        </view>
       </view>
-      <text class="hd-title" :style="{ top: (sbH + 19) + 'px' }">设置</text>
-      <text class="hd-sub" :style="{ top: (sbH + 47) + 'px' }">管理你的饮食记录与偏好</text>
+      <!-- 统一纯矢量双层水波 -->
+      <image class="hd-wave" :src="'/static/common/liquid_wave.svg'" mode="widthFix"></image>
     </view>
 
     <!-- 偏好 -->
@@ -108,7 +145,7 @@
     <view class="card">
       <view class="row">
         <view class="chip">
-          <image class="chip-icon" :src="'/static/settings/icon_moon.png'" mode="aspectFit"></image>
+          <image class="chip-icon" :src="'/static/settings/icon_moon.svg'" mode="aspectFit"></image>
         </view>
         <view class="row-text">
           <text class="row-title">深色模式</text>
@@ -120,7 +157,7 @@
       <view class="row-div"></view>
       <view class="row">
         <view class="chip">
-          <image class="chip-icon" :src="'/static/settings/icon_bell.png'" mode="aspectFit"></image>
+          <image class="chip-icon" :src="'/static/settings/icon_bell.svg'" mode="aspectFit"></image>
         </view>
         <view class="row-text">
           <text class="row-title">用餐提醒</text>
@@ -137,24 +174,24 @@
     <view class="card">
       <view class="row" @click="openGoal">
         <view class="chip">
-          <image class="chip-icon" :src="'/static/settings/icon_target.png'" mode="aspectFit"></image>
+          <image class="chip-icon" :src="'/static/settings/icon_target.svg'" mode="aspectFit"></image>
         </view>
         <view class="row-text">
           <text class="row-title">每日热量目标</text>
           <text class="row-sub">当前目标 {{ goal.calorieGoal }} kcal</text>
         </view>
-        <image class="chev" :src="'/static/home/chev_right.png'" mode="aspectFit"></image>
+        <image class="chev" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
       </view>
       <view class="row-div"></view>
       <view class="row">
         <view class="chip">
-          <image class="chip-icon" :src="'/static/settings/icon_mega.png'" mode="aspectFit"></image>
+          <image class="chip-icon" :src="'/static/settings/icon_mega.svg'" mode="aspectFit"></image>
         </view>
         <view class="row-text">
           <text class="row-title">自定义餐次</text>
           <text class="row-sub">早餐、午餐、晚餐、加餐…</text>
         </view>
-        <image class="chev" :src="'/static/home/chev_right.png'" mode="aspectFit"></image>
+        <image class="chev" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
       </view>
     </view>
 
@@ -163,44 +200,44 @@
     <view class="card">
       <view class="row">
         <view class="chip">
-          <image class="chip-icon" :src="'/static/settings/icon_down.png'" mode="aspectFit"></image>
+          <image class="chip-icon" :src="'/static/settings/icon_down.svg'" mode="aspectFit"></image>
         </view>
         <view class="row-text">
           <text class="row-title">导出数据</text>
           <text class="row-sub">备份到本地</text>
         </view>
-        <image class="chev" :src="'/static/home/chev_right.png'" mode="aspectFit"></image>
+        <image class="chev" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
       </view>
       <view class="row-div"></view>
       <view class="row">
         <view class="chip">
-          <image class="chip-icon" :src="'/static/settings/icon_up.png'" mode="aspectFit"></image>
+          <image class="chip-icon" :src="'/static/settings/icon_up.svg'" mode="aspectFit"></image>
         </view>
         <view class="row-text">
           <text class="row-title">导入数据</text>
           <text class="row-sub">从文件恢复</text>
         </view>
-        <image class="chev" :src="'/static/home/chev_right.png'" mode="aspectFit"></image>
+        <image class="chev" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
       </view>
     </view>
 
     <!-- 本机声明 -->
     <view class="shield-row">
-      <image class="shield-icon" :src="'/static/settings/icon_shield.png'" mode="aspectFit"></image>
+      <image class="shield-icon" :src="'/static/settings/icon_shield.svg'" mode="aspectFit"></image>
       <text class="shield-note">所有数据仅保存在本机</text>
     </view>
 
     <!-- 危险区 -->
     <view class="card-danger">
       <view class="chip-danger">
-        <image class="chip-icon" :src="'/static/settings/icon_trash.png'" mode="aspectFit"></image>
+        <image class="chip-icon" :src="'/static/settings/icon_trash.svg'" mode="aspectFit"></image>
       </view>
       <text class="danger-text">清空所有数据</text>
     </view>
 
     <!-- 页脚 -->
     <view class="footer">
-      <image class="brand-icon" :src="'/static/settings/icon_leaf.png'" mode="aspectFit"></image>
+      <image class="brand-icon" :src="'/static/settings/icon_leaf.svg'" mode="aspectFit"></image>
       <text class="brand">轻律生活  CalTrack</text>
       <text class="ver">v1.0.0</text>
       <text class="footnote">数据仅保存在本机</text>
@@ -210,9 +247,9 @@
     <GoalModal v-model:show="goalShow" :initial="goal.calorieGoal" @save="goal.setGoal" ></GoalModal>
 
     <!-- 常驻导航栏（#28：替代 P1 遮罩＋fx-back 两件套）：滚动跨阈后整栏出现＝末色底＋返回箭＋标题，三端生效 -->
-    <view v-if="scrolled" class="set-nav" :style="{ height: (sbH + 58) + 'px', paddingTop: sbH + 'px', backgroundColor: dk ? '#162924' : '#39AD95' }">
+    <view v-if="scrolled" class="set-nav" :style="{ height: navBarH + 'px', paddingTop: sbH + 'px', backgroundColor: dk ? '#162924' : '#39AD95' }">
       <view class="set-nav-back" @click="goBack">
-        <image class="set-nav-icon" :src="'/static/settings/chev_back.png'" mode="aspectFit"></image>
+        <image class="set-nav-icon" :src="'/static/settings/chev_back.svg'" mode="aspectFit"></image>
       </view>
       <text class="set-nav-title">设置</text>
     </view>
@@ -238,6 +275,12 @@ const goal = useGoalStore()
 const settings = useSettingsStore()
 const goalShow = ref(false)
 const dk = computed((): boolean => settings.darkMode)
+
+const sbH = ref(0)
+sbH.value = uni.getSystemInfoSync().statusBarHeight ?? 0
+
+// 常驻导航栏高度计算：58px (116rpx) 内容高 + 状态栏高，避免跨端 calc(rpx+px) 错误
+const navBarH = computed<number>(() => sbH.value + 58)
 
 // 状态栏字色随暗黑反转（Boss P2 指令）：小程序走 setNavigationBarColor；
 // TODO App 原生端改 plus.navigator.setStatusBarStyle 实测后补
@@ -269,13 +312,6 @@ function toggleDark(): void {
   syncBar()
 }
 
-let sbH = 0
-try {
-  sbH = uni.getSystemInfoSync().statusBarHeight ?? 0
-} catch (e) {
-  sbH = 0
-}
-
 const goBack = () => {
   uni.navigateBack()
 }
@@ -284,48 +320,59 @@ const goBack = () => {
 <style>
 .page {
   background-color: #F2FAF5;
-  padding-bottom: 30px;
+  padding-bottom: 60rpx;
 }
 .header {
-  background-image: linear-gradient(#5CC4AC, #39AD95);
   position: relative;
+  background-color: #1FBF8F;
+  background-image: linear-gradient(#4EE2B6, #1FBF8F, #0A7A5C);
   overflow: hidden;
+  padding-bottom: 56rpx;
 }
-.hd-glow {
-  position: absolute;
-  left: 24px;
-  width: 445px;
-  height: 238px;
-  border-radius: 50%;
-  background-image: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.42) 20%, rgba(255, 255, 255, 0.3) 40%, rgba(255, 255, 255, 0.17) 50%, rgba(255, 255, 255, 0.06) 70%, rgba(255, 255, 255, 0) 80%);
+.header-inner {
+  position: relative;
+  height: 160rpx;
+  justify-content: center;
 }
-.hd-arc1 {
+.hd-wave {
   position: absolute;
-  left: -112px;
-  width: 600px;
-  height: 260px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.08);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 72rpx;
 }
-.hd-arc2 {
-  position: absolute;
-  left: 196px;
-  width: 300px;
-  height: 150px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.06);
+.hd-bar {
+  flex-direction: row;
+  align-items: center;
+  padding-left: 16rpx;
+  padding-right: 32rpx;
 }
 .hd-back {
-  position: absolute;
-  left: 3px;
-  width: 44px;
-  height: 44px;
+  width: 72rpx;
+  height: 72rpx;
   justify-content: center;
   align-items: center;
 }
 .hd-back-icon {
-  width: 6px;
-  height: 10.5px;
+  width: 20rpx;
+  height: 36rpx;
+}
+.hd-info {
+  margin-left: 12rpx;
+  justify-content: center;
+}
+.hd-title {
+  font-size: 38rpx;
+  font-weight: bold;
+  color: #FFFFFF;
+  line-height: 48rpx;
+}
+.hd-sub {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 32rpx;
+  margin-top: 4rpx;
 }
 /* 常驻导航栏（#28）：滚动后整栏出现，返回箭＋标题，z45 压顶遮罩档与 Tabbar */
 .set-nav {
@@ -336,101 +383,86 @@ const goBack = () => {
   z-index: 45;
   flex-direction: row;
   align-items: center;
-  box-shadow: 0 2px 10px rgba(10, 79, 61, 0.10);
+  box-shadow: 0 4rpx 20rpx rgba(10, 79, 61, 0.10);
 }
 .set-nav-back {
-  width: 44px;
-  height: 44px;
-  margin-left: 3px;
+  width: 88rpx;
+  height: 88rpx;
+  margin-left: 6rpx;
   justify-content: center;
   align-items: center;
 }
 .set-nav-icon {
-  width: 6px;
-  height: 10.5px;
+  width: 20rpx;
+  height: 36rpx;
 }
 .set-nav-title {
-  font-size: 17px;
+  font-size: 34rpx;
   font-weight: bold;
   color: #FFFFFF;
-}
-.hd-title {
-  position: absolute;
-  left: 36px;
-  height: 26px;
-  font-size: 18px;
-  font-weight: bold;
-  color: #FFFFFF;
-}
-.hd-sub {
-  position: absolute;
-  left: 36px;
-  height: 16px;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.8);
 }
 .sec-title {
-  font-size: 15px;
+  font-size: 30rpx;
   font-weight: bold;
   color: #245E58;
-  margin-left: 25px;
-  margin-top: 20px;
-  margin-bottom: 7px;
+  margin-left: 50rpx;
+  margin-top: 40rpx;
+  margin-bottom: 14rpx;
 }
 .sec-first {
-  margin-top: 10px;
+  margin-top: 20rpx;
 }
 .card {
   background-color: #FCFFFF;
-  border-radius: 18px;
-  margin-left: 21px;
-  margin-right: 21px;
-  padding-left: 14px;
-  padding-right: 14px;
+  border-radius: 36rpx;
+  margin-left: 42rpx;
+  margin-right: 42rpx;
+  padding-left: 28rpx;
+  padding-right: 28rpx;
 }
 .row {
   flex-direction: row;
   align-items: center;
-  padding-top: 13px;
-  padding-bottom: 13px;
+  padding-top: 26rpx;
+  padding-bottom: 26rpx;
 }
 .chip {
-  width: 38px;
-  height: 38px;
-  border-radius: 19px;
+  width: 76rpx;
+  height: 76rpx;
+  border-radius: 38rpx;
   background-color: #E0F5EC;
   justify-content: center;
   align-items: center;
 }
 .chip-icon {
-  width: 20px;
-  height: 20px;
+  width: 40rpx;
+  height: 40rpx;
 }
 .row-text {
   flex: 1;
-  margin-left: 10px;
+  margin-left: 20rpx;
 }
 .row-title {
-  font-size: 14px;
+  font-size: 28rpx;
   color: #0A4F3D;
 }
 .row-sub {
-  font-size: 11px;
+  font-size: 22rpx;
   color: #8FAEAF;
-  margin-top: 3px;
+  margin-top: 6rpx;
 }
 .row-div {
   height: 1px;
   background-color: #EAF3EF;
 }
 .chev {
-  width: 6px;
-  height: 11px;
+  width: 12rpx;
+  height: 22rpx;
 }
 .toggle {
-  width: 47px;
-  height: 28px;
-  border-radius: 14px;
+  width: 94rpx;
+  height: 56rpx;
+  border-radius: 28rpx;
   background-color: #D5E5DD;
   justify-content: center;
 }
@@ -438,92 +470,92 @@ const goBack = () => {
   background-color: #1FBF8F;
 }
 .knob {
-  width: 23px;
-  height: 23px;
-  border-radius: 12px;
+  width: 46rpx;
+  height: 46rpx;
+  border-radius: 24rpx;
   background-color: #FFFFFF;
-  margin-left: 3px;
+  margin-left: 6rpx;
 }
 .knob-on {
-  margin-left: 21px;
+  margin-left: 42rpx;
 }
 .soon-pill {
   background-color: #EFF4F2;
-  border-radius: 11px;
-  padding-left: 9px;
-  padding-right: 9px;
-  height: 21px;
+  border-radius: 22rpx;
+  padding-left: 18rpx;
+  padding-right: 18rpx;
+  height: 42rpx;
   justify-content: center;
 }
 .soon-pill-text {
-  font-size: 12px;
+  font-size: 24rpx;
   color: #718E89;
 }
 .shield-row {
   flex-direction: row;
   align-items: center;
-  margin-left: 29px;
-  margin-top: 14px;
+  margin-left: 58rpx;
+  margin-top: 28rpx;
 }
 .shield-icon {
-  width: 15px;
-  height: 15px;
+  width: 30rpx;
+  height: 30rpx;
 }
 .shield-note {
-  font-size: 12px;
+  font-size: 24rpx;
   color: #4A7373;
-  margin-left: 6px;
+  margin-left: 12rpx;
 }
 .card-danger {
   flex-direction: row;
   align-items: center;
   background-color: #FFFFFF;
-  border-radius: 18px;
+  border-radius: 36rpx;
   border-width: 1px;
   border-color: #FBA095;
-  margin-left: 21px;
-  margin-right: 21px;
-  margin-top: 12px;
-  padding-top: 9px;
-  padding-bottom: 9px;
-  padding-left: 14px;
-  padding-right: 14px;
+  margin-left: 42rpx;
+  margin-right: 42rpx;
+  margin-top: 24rpx;
+  padding-top: 18rpx;
+  padding-bottom: 18rpx;
+  padding-left: 28rpx;
+  padding-right: 28rpx;
 }
 .chip-danger {
-  width: 34px;
-  height: 34px;
-  border-radius: 17px;
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 34rpx;
   background-color: #FDE9E4;
   justify-content: center;
   align-items: center;
 }
 .danger-text {
-  font-size: 14px;
+  font-size: 28rpx;
   color: #E0633C;
-  margin-left: 10px;
+  margin-left: 20rpx;
 }
 .footer {
   align-items: center;
-  margin-top: 26px;
+  margin-top: 52rpx;
 }
 .brand-icon {
-  width: 20px;
-  height: 20px;
+  width: 40rpx;
+  height: 40rpx;
 }
 .brand {
-  font-size: 13px;
+  font-size: 26rpx;
   color: #0A4F3D;
-  margin-top: 6px;
+  margin-top: 12rpx;
 }
 .ver {
-  font-size: 11px;
+  font-size: 22rpx;
   color: #8FAEAF;
-  margin-top: 3px;
+  margin-top: 6rpx;
 }
 .footnote {
-  font-size: 10px;
+  font-size: 20rpx;
   color: #8FAEAF;
-  margin-top: 3px;
+  margin-top: 6rpx;
 }
 /* ===== 深色模式（Boss P2：与个人中心同薄荷深色板；后代选择器仅 mp 端生效，App 端须改逐元素 :class） ===== */
 /* #ifdef MP-WEIXIN */

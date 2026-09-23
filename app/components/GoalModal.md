@@ -1,12 +1,5 @@
 # GoalModal — 每日热量目标弹窗
 
-> 变更记录：
-> - 2026-09-23（Gemini 系列）：补齐 .gm-overlay 根节点缺失的闭合 </view> 标签，彻底修复 UTS 编译器 Element is missing end tag 错误。
-> - 2026-09-23（Gemini 系列）：遵循 uni-app x 原生规范统一字重为 bold；给 transition 添加 MP-WEIXIN 条件编译保护。
-> - 2026-09-23（OpenCode / Gemini 底层）：按指令清除滑块拖动、步进增减、快速选择与保存目标中的触觉震动(vibrateShort/vibrateLong)，避免微信模拟器窗口剧烈抖动，待后续按需开启。
-> - 2026-09-22（Gemini 系列）：移除顶部静态伪手势 handle 横杠；大胶囊保存按钮升级 fluid-interaction-expert 弹性阻尼按压反馈（.btn-capsule-pressed）；底部追加动态安全区全避让（calc(24px + env(safe-area-inset-bottom))）。
-> - 2026-09-22（Gemini 系列）：接入 slide.mp3 滑动音效（拖拽滑块/加减步进）与 selected-card.mp3 卡片切换音效（快速选择预设卡片），触觉与听觉双模联动。
-
 ## 💡 核心思想
 
 底部弹层调整每日摄入目标（1200–2400 kcal，步进 100）。横向 Track 滑块交互与快速选择卡片分区，采用原生 page-container 容器，滑动时触发 `slide` 灵敏音效，选择预设卡片时触发 `card` 音效。

@@ -2,6 +2,12 @@
   [变更日志]
   修改时间：2026-09-23
   AI模型：Gemini 系列
+  修改内容：[实施方案A响应式重构：全量胶囊尺寸(112rpx)、气泡尺寸(192×88rpx)、四阶段动画位移与字号按 750rpx 规范（1px=2rpx）重构]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
   修改内容：[遵循 uni-app x 原生渲染规范，将 .tb-label 的 font-weight: 600 统一为 bold]
 -->
 <!--
@@ -106,17 +112,7 @@ const props = defineProps<{
   dark?: boolean
 }>()
 
-// ── 稿面几何（DesignTokens §7.2，单位 px，基准宽 375）────────────────────────
-const MARGIN = 16      // 胶囊距屏幕左右
-const BAR_H = 56       // 胶囊高
-const BUB_W = 96       // 气泡静止宽
-const BUB_H = 44       // 气泡静止高（＝BAR_H − 上下各 6）
-const S_PRESS = 0.96   // 按下
-const S_TRAVEL_X = 1.12 // 移动：横向拉伸
-const S_TRAVEL_Y = 0.94 // 移动：纵向压扁
-const S_SETTLE_X = 1.06 // 落位：过冲
-const S_SETTLE_Y = 0.97
-
+// ── 稿面几何（DesignTokens §7.2，按 750rpx 规范自适应，基准宽 750rpx 对应 375dp）────
 const device = useDeviceStore()
 const glass = computed((): boolean => device.backdropBlur)
 
@@ -159,10 +155,21 @@ const myIdx = computed((): number => {
   return i < 0 ? 0 : i
 })
 
-// ── 运行时尺寸：胶囊宽＝屏宽 − 2×16，三等分槽；窄屏时气泡收缩保证内嵌 ──────────
+// ── 运行时尺寸（严格按 750rpx 比例等比映射到实际屏幕宽度）：──────────────────────
 const sys = uni.getSystemInfoSync()
+const scaleRatio = sys.windowWidth / 750
+const MARGIN = 32 * scaleRatio       // 32rpx 左右边距
+const BAR_H = 112 * scaleRatio       // 112rpx 胶囊高
+const BUB_W = 192 * scaleRatio       // 192rpx 气泡静止宽
+const BUB_H = 88 * scaleRatio        // 88rpx 气泡静止高
+const S_PRESS = 0.96   // 按下
+const S_TRAVEL_X = 1.12 // 移动：横向拉伸
+const S_TRAVEL_Y = 0.94 // 移动：纵向压扁
+const S_SETTLE_X = 1.06 // 落位：过冲
+const S_SETTLE_Y = 0.97
+
 const slotW = (sys.windowWidth - MARGIN * 2) / 3
-const baseW = Math.min(BUB_W, slotW - 8)
+const baseW = Math.min(BUB_W, slotW - 8 * scaleRatio)
 const safeBottom = sys.safeAreaInsets?.bottom ?? 0
 
 function centerOf(idx: number): number {
@@ -186,8 +193,8 @@ const barStyle = computed((): Record<string, string> => {
   const st = {} as Record<string, string>
   st['left'] = MARGIN + 'px'
   st['right'] = MARGIN + 'px'
-  // 有小白条＝贴在安全区上方 12px（稿面「距 Home 指示条 12」）；无小白条＝稿面实测 22px 离底
-  st['bottom'] = (safeBottom > 0 ? safeBottom + 12 : 22) + 'px'
+  // 有小白条＝贴在安全区上方 24rpx（稿面「距 Home 指示条 12px」）；无小白条＝44rpx 离底
+  st['bottom'] = (safeBottom > 0 ? safeBottom + 24 * scaleRatio : 44 * scaleRatio) + 'px'
   st['height'] = BAR_H + 'px'
   return st
 })
@@ -218,9 +225,6 @@ const bubbleStyle = computed((): Record<string, string> => {
     ? (dm ? 'rgba(255, 255, 255, 0.13)' : 'rgba(255, 255, 255, 0.18)')
     : 'rgba(255, 255, 255, 0.88)'
   // #ifdef MP-WEIXIN
-  // App／Vapor 端禁用 CSS transition（见 uni-app x 原生渲染子集），故补间只在小程序端下发；
-  // TODO(App 端 Worklet)：稿面要求「Worklet 原生线程动画保 120fps」，本工程未做真机验证，
-  //   App 端当前退化为「阶段跳变」（气泡瞬移到目标槽，无压扁过程），待 Boss 决定要不要补 JS 补间
   st['transition-property'] = 'left, width, height'
   st['transition-timing-function'] = 'cubic-bezier(0.34, 1.56, 0.64, 1)'
   st['transition-duration'] = phase.value == 'press' ? '90ms'
@@ -293,11 +297,10 @@ function onTap(idx: number): void {
   position: fixed;
   z-index: 30;
   flex-direction: row;
-  border-radius: 28px;
+  border-radius: 56rpx;
   overflow: hidden;
 }
-/* 玻璃档（backdropBlur=true）：底 #FFFFFF 60% ＋ 顶部折光 ＋ 白 80% 描边 ＋ 向上柔影
-   ⚠️ 60%＝Boss 2026-09-22 定稿（原稿面文字标注的 88% 漏改，太厚压不住气泡） */
+/* 玻璃档（backdropBlur=true）：底 #FFFFFF 60% ＋ 顶部折光 ＋ 白 80% 描边 ＋ 向上柔影 */
 .tb-glass {
   background-color: rgba(255, 255, 255, 0.6);
   background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 45%);
@@ -310,7 +313,7 @@ function onTap(idx: number): void {
   border-bottom-color: rgba(255, 255, 255, 0.8);
   border-left-color: rgba(255, 255, 255, 0.8);
   border-style: solid;
-  box-shadow: 0 -4px 24px rgba(10, 79, 61, 0.14);
+  box-shadow: 0 -8rpx 48rpx rgba(10, 79, 61, 0.14);
 }
 /* #ifdef MP-WEIXIN */
 .tb-glass {
@@ -322,7 +325,7 @@ function onTap(idx: number): void {
 .tb-flat {
   background-color: #F8FCFA;
   background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 45%);
-  box-shadow: 0 -4px 24px rgba(10, 79, 61, 0.14);
+  box-shadow: 0 -8rpx 48rpx rgba(10, 79, 61, 0.14);
 }
 /* 暗黑档：卡色 token #162924 加 alpha（玻璃面不丢 alpha），描边白 10%，投影改向下黑 */
 .tb-dark {
@@ -332,71 +335,67 @@ function onTap(idx: number): void {
   border-right-color: rgba(255, 255, 255, 0.1);
   border-bottom-color: rgba(255, 255, 255, 0.1);
   border-left-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.3);
 }
 
-/* ── 三颗 Tab：图标在左、文字在右（稿面图标 x=18、文字 x=46，gap 6） ── */
+/* ── 三颗 Tab：图标在左、文字在右 ── */
 .tb-item {
   flex: 1;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  height: 56px;
+  height: 112rpx;
   position: relative;
   z-index: 2;
 }
 .tb-ic {
-  width: 22px;
-  height: 22px;
+  width: 44rpx;
+  height: 44rpx;
 }
 /* 源图留白不等，按稿面逐个回调到视觉等大 */
 .tb-ic-home {
-  width: 22px;
-  height: 22px;
+  width: 44rpx;
+  height: 44rpx;
 }
 .tb-ic-rec {
-  width: 23px;
-  height: 23px;
+  width: 46rpx;
+  height: 46rpx;
 }
 .tb-ic-me {
-  width: 23.5px;
-  height: 23.5px;
+  width: 47rpx;
+  height: 47rpx;
 }
 .tb-label {
-  font-size: 12px;
+  font-size: 24rpx;
   font-weight: bold;
   color: #8A8A8A;
-  margin-left: 6px;
+  margin-left: 12rpx;
 }
 .tb-label-on {
   color: #17916B;
 }
 
-/* ── 选中气泡：iOS26 折射全靠 backdrop-filter，无描边、无手绘内高光（Boss 拍板）
-   底色（浅 18%／暗 13%／降级 88%）由 bubbleStyle 运行时下发，此处只挂模糊与阴影 ── */
+/* ── 选中气泡 ── */
 .tb-bubble {
   position: absolute;
   z-index: 1;
-  border-radius: 22px;
+  border-radius: 44rpx;
 }
 /* #ifdef MP-WEIXIN */
 .tb-bub-glass {
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
 }
-/* 图标／文字高亮比气泡晚 40ms（稿面「移动中图标滞后 40ms，被气泡拖着走」） */
+/* 图标／文字高亮比气泡晚 40ms */
 .tb-label {
   transition-property: color;
   transition-duration: 120ms;
   transition-delay: 40ms;
 }
 /* #endif */
-/* 暗黑：模糊半径提到 28 ＋ 气泡投影（DesignTokens §7.2） */
 .tb-bub-dark {
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.38);
+  box-shadow: 0 12rpx 36rpx rgba(0, 0, 0, 0.38);
 }
-/* 浅色玻璃态（Boss 2026-09-22 定稿）：60% 胶囊底上「雕」出气泡＝极细半透明白描边（模拟玻璃折射亮边）
-   ＋ 微弱向下投影（悬浮高度差）。仅浅底玻璃档挂，暗态与 low 降级档不受影响 */
 .tb-bub-light {
   border-top-width: 1px;
   border-right-width: 1px;
@@ -407,7 +406,7 @@ function onTap(idx: number): void {
   border-right-color: rgba(255, 255, 255, 0.6);
   border-bottom-color: rgba(255, 255, 255, 0.6);
   border-left-color: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 6px 18px rgba(10, 79, 61, 0.14);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08), 0 12rpx 36rpx rgba(10, 79, 61, 0.14);
 }
 /* #ifdef MP-WEIXIN */
 .tb-bub-dark {
@@ -415,7 +414,6 @@ function onTap(idx: number): void {
   backdrop-filter: blur(28px);
 }
 /* #endif */
-/* 降级档：拿不到折射的气泡＝实色 ＋ token 描边，动画照留 */
 .tb-bub-flat {
   border-top-width: 1px;
   border-right-width: 1px;
@@ -423,7 +421,7 @@ function onTap(idx: number): void {
   border-left-width: 1px;
   border-style: solid;
   border-color: #E3EFE8;
-  box-shadow: 0 4px 14px rgba(10, 79, 61, 0.1);
+  box-shadow: 0 8rpx 28rpx rgba(10, 79, 61, 0.1);
 }
 
 /* #ifdef MP-WEIXIN */

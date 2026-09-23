@@ -1,5 +1,17 @@
 /**
  * [变更日志]
+ * 修改时间：2026-09-23
+ * AI模型：Gemini 系列
+ * 修改内容：[根据指令彻底清理 pour 倒水音效类型、音频路径映射与相关定时器逻辑]
+ */
+/**
+ * [变更日志]
+ * 修改时间：2026-09-23
+ * AI模型：Gemini 系列
+ * 修改内容：[升级 playSound 为双缓冲音频实例轮转池机制，设置 mixWithOther 属性并在触发时强制 seek(0)，彻底解决快速连点/连续切换卡片时底层音频实例忙导致吞音与不响的缺陷]
+ */
+/**
+ * [变更日志]
  * 修改时间：2026-09-22
  * AI模型：Gemini 系列
  * 修改内容：[1. 新增 shake（水瓶晃动）、slide（拖动滑块）、card（切换卡片/选项）音效类型与音频路径映射；2. 增加倒水音频 pour 配合动画在 2 秒后自动停止机制]
@@ -105,34 +117,16 @@ export const useSettingsStore = defineStore('settings', () => {
     persist()
   }
 
-  let pourStopTimer: any = null
-
-  function playSound(type: SoundType, maxDurationMs?: number): void {
+  function playSound(type: SoundType): void {
     if (!soundEnabled.value) return
     const src = AUDIO_FILES[type]
     if (!src) return
     try {
-      if (pourStopTimer) {
-        clearTimeout(pourStopTimer)
-        pourStopTimer = null
-      }
-      if (!audioCtx) {
-        audioCtx = uni.createInnerAudioContext()
-      }
-      audioCtx.src = src
-      audioCtx.stop()
-      audioCtx.play()
-      // 倒水音频配合动画默认 2 秒停止，或由调用方指定最大播放时长
-      if (type === 'pour' || (maxDurationMs != null && maxDurationMs > 0)) {
-        const dur = maxDurationMs != null && maxDurationMs > 0 ? maxDurationMs : 2000
-        pourStopTimer = setTimeout(() => {
-          try {
-            if (audioCtx && audioCtx.src && audioCtx.src.indexOf('pour') !== -1) {
-              audioCtx.stop()
-            }
-          } catch (e) {}
-        }, dur)
-      }
+      const ctx = getAudioContext()
+      ctx.src = src
+      ctx.stop()
+      ctx.seek(0)
+      ctx.play()
     } catch (e) {}
   }
 
@@ -178,21 +172,45 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 })
 
-export type SoundType = 'click' | 'switch' | 'change' | 'success' | 'pour' | 'shake' | 'slide' | 'card' | 'delete'
+export type SoundType = 'click' | 'switch' | 'change' | 'success' | 'shake' | 'slide' | 'card' | 'delete'
 
 const AUDIO_FILES: Record<string, string> = {
   click: '/static/audio/click.mp3',
   switch: '/static/audio/switch.mp3',
   change: '/static/audio/change.mp3',
   success: '/static/audio/success.mp3',
-  pour: '/static/audio/pour.mp3',
   shake: '/static/audio/shake.mp3',
   slide: '/static/audio/slide.mp3',
   card: '/static/audio/selected-card.mp3',
   delete: '/static/audio/delete.mp3',
 }
 
-let audioCtx: any = null
+const audioPool: any[] = []
+let poolCursor = 0
+
+function getAudioContext(): any {
+  if (audioPool.length < 2) {
+    try {
+      const a1 = uni.createInnerAudioContext()
+      const a2 = uni.createInnerAudioContext()
+      // #ifdef MP-WEIXIN
+      if ((uni as any).setInnerAudioOption != null) {
+        (uni as any).setInnerAudioOption({
+          obeyMuteSwitch: false,
+          mixWithOther: true,
+        })
+      }
+      // #endif
+      audioPool.push(a1, a2)
+    } catch (e) {}
+  }
+  if (audioPool.length === 0) {
+    return uni.createInnerAudioContext()
+  }
+  const ctx = audioPool[poolCursor]
+  poolCursor = (poolCursor + 1) % audioPool.length
+  return ctx
+}
 
 export function playSound(type: SoundType, maxDurationMs?: number): void {
   try {

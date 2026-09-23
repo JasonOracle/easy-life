@@ -114,18 +114,9 @@ kaluli/
   - 玻璃底 glass-bg `#FFFFFF`@74%（**带透明度，实现时不能丢 alpha**）
   - 圆角 card 20 ／ chip 18 ／ sheet 34；字号 hero 46 ／ title 17 ／ section 15.5 ／ body 13.5 ／ caption 12
 - 小字（≤15px）必须用 `mint-deep #0A7A5C`，因为 `#1FBF8F` 在白底只有 2.3:1 对比度
-- 深色模式：Boss 2026-09-21 拍板小范围测试——仅「个人中心＋设置」两页随动（2026-09-22 P2 扩至设置页）：Settings「深色模式」开关 → `settings.darkMode`（ct_settings_v1 持久化）→ 两页根类 `page-dark` ＋ Tabbar `:dark`；
-  色板为薄荷深色**临时方案**（底 #0E211C／卡 #162924／强调 #52D6AC，Pencil 无暗色稿，待设计稿校准）。实现走 `/* #ifdef MP-WEIXIN */` 后代选择器覆盖，**App 原生端不支持后代选择器，届时须改逐元素 :class**；
-  暗里头图渐变改实色 #162924＋隐光晕、滚动遮罩同色（临时方案，待暗色稿校准接缝）；**状态栏字色反转**＝两页 `syncBar()` 调 `uni.setNavigationBarColor`（深白/浅黑，onShow＋切换后双调用），App 端 `plus.navigator` 方案留 TODO 未实测；
-  首页/记录/单日详情三页暂不随动（范围外）。官方 `uni.setAppTheme`（theme-change 文档）为 App 端能力，小程序端不强制切系统主题
-- **玻璃面（TabBar，2026-09-22 定案＝三 Tab 悬浮液态玻璃胶囊）**：共享 `Tabbar.uvue` 不再是通栏底槽，而是**悬浮胶囊**（左右边距 16／高 56／r28，离底 22；有小白条机型离底＝`safeBottom+12`）＝浅色底 **`#FFFFFF`@60%**（Boss 定稿；稿面文字标注的 88% 系漏改，太厚压不住气泡） ＋ 顶部折光 ＋ 白 80% 描边 ＋ `backdrop-filter: blur(24px) saturate(180%)` ＋ 向上柔影 `0 -4 24 rgba(10,79,61,.14)`；暗态同构（卡色 `#162924` 加 alpha 到 `.72`，**本轮未动**）。选中态＝**会在三槽间飞行的气泡**（96×44 r22，浅色底 `#FFFFFF`@**18%** ＋ **白 60% 1px 描边（折射亮边）＋ 投影 `0 4 12 rgba(0,0,0,.06)`（悬浮高度差）**／暗色 @**13%** ＋ 投影 `0 6 18 rgba(0,0,0,.38)`，暗态与降级档**保持现状**），四关键帧 by 稿面文字标注：静止 → 按下 ×0.96（90ms）→ 移动 ×1.12÷0.94（320ms，`cubic-bezier(.34,1.56,.64,1)`）→ 落位 ×1.06÷0.97（120ms）→ 回静止（140ms）；**压扁用 width/height 不用 scale**，气泡底色走运行时 `:style`（App 端不认 `.a.b` 复合类），**描边/投影走单类 `.tb-bub-light`（只在「玻璃档且非暗态」时挂）**。low 档降级＝胶囊不透明 `#F8FCFA` ＋ 气泡实色 ＋ `#E3EFE8` 描边。**色值/几何唯一来源＝`design/DesignTokens.md` §7**，代码零自创。
-  **浅色气泡底色为何是 18% 不是稿面节点的 25%**：Boss 授权按真机观感自定，实测同帧同点位两档只差 1–2 个色阶（`252,254,253` ↔ `253,255,254`，肉眼不可辨），轮廓感实际来自描边＋投影 ⇒ 取**文字标注值 18%**（偏离稿面最少）。
-  **已废止（勿再实现）**：`glass-bg` `.74` 通栏底槽、以及 **#29 的「随滚动渐显 fade」整条机制**（页面 `onPageScroll` 算 fade 透传／阈值 60／0.05 量化／low 档不吃 fade）——Boss 拍板理由＝新胶囊核心是**恒常可见**，让内容从胶囊底部滑过时产生实时折射反馈，渐显反而破坏它。三页 `fade`/`tabFade` 已下线（Home 的 `onPageScroll` 整段删除；Profile／Records 只留跨阈两态遮罩与常驻栏）。
-  **稿面自相矛盾的裁决规则（Boss 2026-09-22 拍板）**：文字标注（文字规范）＝唯一真理，节点遗留参数（渐变、手绘内高光等）＝**直接忽略**；本 TabBar 因此走「微博标准版」极简＝纯 `backdrop-filter` ＋ 单一实色透明度，不还原节点里的三段渐变。**例外**：浅色胶囊底 88% 与气泡「无描边」两条经真机判定为稿面文字标注漏改，已由 Boss 直接改值并登记在 §7.2。
-  **四条铁律**：①玻璃类只在 `useDeviceStore().backdropBlur` 为真时挂（low 档见上降级配方，可读性优先）；②`backdrop-filter` 与 `transition` 本体必须包 `#ifdef MP-WEIXIN`（App 原生端支持与否**未真机验证**，勿当已双端可用；App 端正解＝Worklet 动画，现仅留 TODO，**严禁用 setData 逐帧驱动动画**）；③**任何玻璃面一律不丢 alpha、不自创染色**——要提可见度只能由 Boss 拍板（本轮即 Boss 亲自降 alpha ＋ 加描边/投影，AI 只照做并登记）；④跨页共享的**纯逻辑**（如气泡飞行起点）**不许放 `components/`**，见「已知风险」
-- **Tab 页页底预留＝方案 A 动态安全区全避让（2026-09-22 定案，取代 78px 静态预留）**：Home／Profile 的 `.page padding-bottom`、Records 的 `.lr-bottom-space` 统一采用动态全避让：无小白条机型基准 **92px**（高 56 ＋ 离底 22 ＋ 呼吸 14）；带小白条机型（MP-WEIXIN）自动叠加 **`calc(82px + env(safe-area-inset-bottom))`**（以 iPhone 模拟器 safeBottom 34px 计实占 **116px** ＝ 高 56 ＋ 离底 46 ＋ 呼吸 14）。
-  彻底消除内容滚到底时被悬浮胶囊遮挡的问题，确保末行内容（如 Records「主要食物」、Home「今日餐次」）100% 完整露出且可读可点，并保留 14px 清爽呼吸间距；滚动滑动过程中依然穿透胶囊保持折射质感。
-
+- **玻璃面（TabBar）**：三 Tab 悬浮液态玻璃胶囊。参数见 `design/DesignTokens.md` §7。（决策推演见 `docs/decisions/ADR-001-tabbar-glass-capsule.md`）
+- **深色模式**：仅个人中心＋设置两页随动，临时色板。（决策推演见 `docs/decisions/ADR-005-dark-mode-scope.md`）
+- **页底预留**：方案 A 动态安全区全避让（无小白条 92px / 有小白条 calc(82px + env())）
 ### 交互
 - **每个交互点击都要有反馈**：动画 + 触觉 + 音效，三选一不可省
 - **反馈分级**（按操作重要性，不是每个按钮都弹一下）：
@@ -322,44 +313,13 @@ $tok  = "<微信工具 设置→安全 里的 MCP Token>"
 - 验证脚本存 `debug/picker_check.js` / `picker_check_b.js` / `batch_check2.js`。
 - **新增组件后 `restartMiniProgram` 单独不够**（同日 GoalModal 定案）：运行时 `$vm.$children` 仍是旧列表（新组件未挂载、页面级 tap 全无反应且零报错），必须**先**清编译缓存（命令见下方降级链 ①，2026-09-22 已更正为 wechatide `debug_clear_cache`）**再** `wx.restartMiniProgram`；挂载核验＝evaluate 枚举 children 的 `$.type.name`。
 
-**踩坑**：
-- HBuilderX CLI（`cli launch mp-weixin`）的 watch **只编译一次**，不能替代 GUI 运行模式
-- 微信工具对 uni-app x 产物**不会自主重载**：无 watch 驱动时 `simulator_refresh` 也无效，必须关窗重开
-- **热重载对「新增组件/页面」不可靠**：hotreload 补丁环境解析不了新注册组件，报 `uid null` 并导致渲染部分损坏（如液体消失、新列表不渲染）。**改文案/样式可热重载；新增组件后必须关窗重开**
-- `close_project_window` 会**连自动化服务一起杀**：重开后必须执行 `cli.bat auto --project <产物路径> --auto-port 9420 --trust-project` 恢复，否则截图报 `waitForAutomatorReady timeout`
-- **零窗口操作（v4 定案）**：截图/取数据**一律走 automator 纯协议**（`node debug/shot.js`），**任何情况都不碰用户窗口**。v2 的"移屏外"方案**已废弃**（Boss 点任务栏时窗口"闪屏消失"，被否决两次）
-- **热重载崩（uid null，新增组件后渲染损坏）的修复降级链（v5 → 2026-09-22 #28 修订）**：
-  ① **清「微信工具自己的」编译缓存**（零窗口）＝`& $wx -c codebuddy debug_clear_cache --project <产物路径> --action cleanCompileCache --token $tok` → **再** `simulator_refresh`。
-     ⚠️ **旧记载的 `cli.bat cache --clean compile` 在 HBuilderX 5.26 不存在**（`cli.exe cache` 回「命令'cache'不存在或缺少参数」，`launch mp-weixin --cleanCache` 只打印 help）；要命令行触发重编译用 `cli.exe launch mp-weixin --project <源码项目> --compile true`。勿用 `--clean all`（连登录态一起清，要重新扫码）
-  ② `node debug/reload.js` —— automator `reLaunch` 重启页面（协议已实测），可与 ① 配合使用
-  ③ **automator `mp.evaluate(()=>wx.restartMiniProgram({path:'<页面路径>'}))`** —— 当 ①＋`simulator_refresh`
-     连跑多轮仍返回 success 但**运行时 wxss 冻结在旧版**时用（2026-09-21 AddFood 餐次卡验收实测：
-     三种 cache clean＋refresh 全绿但不生效，restartMiniProgram 一次生效）。零窗口操作
-  ④ `debug_shot.ps1 -Reload` —— 重开窗口保底（闪现约 1 秒自动缩任务栏），前三招无效才用。
-     **注意**：`close_project_window`＋`open_project_window` 对「旧 JS 包」这一类故障**实测无效**（只换回 WXML，见下条），别指望它救绑定错位
-- **微信工具会喂「旧 JS 包」，且关窗重开也救不了（2026-09-22 #28 定案，本轮最大坑）**：症状＝页面插值整体错位成
-  `[object Object],[object Object],[object Object]g`、`已摄入 e1_a1 / 1800 kcal`、数字串位（目标显成 187），**控制台零报错**。
-  机理＝uni-app x VDOM 产物在编译期把模板绑定压成**按位置分配的单字母键**（`Home.wxml` 的 `{{g}}` ↔ `Home.js` 里 `const __returned__ = { g: … }`），
-  **运行时 WXML 是新版、JS 包是旧版** → 键位错配。**鉴别法（动代码之前先做）**：①读磁盘产物 `X.wxml` 占位符与 `X.js` 的 `__returned__` 对照，一致＝我的代码没问题；
-  ②`mp.evaluate(()=>JSON.stringify(getCurrentPages()[0].data))` 读运行时 setData，与①错配＝纯陈旧（脚本 `debug/dump_data.js`）。
-  **修法＝上条 ①（`debug_clear_cache --action cleanCompileCache`＋`simulator_refresh`）**；`restartMiniProgram` 与关窗重开都换不掉旧 JS 包（实测），**严禁据此改业务代码**
-- **Git Bash 会改写 POSIX 风格路径参数**（2026-09-22 定案）：`node debug/nav_page.js /pages/profile/Profile` 实收到 `C:/Program Files/Git/pages/profile/Profile`，模拟器加载失败且不报错。**给脚本传 `/pages/...` 一类绝对路径必须前置 `MSYS_NO_PATHCONV=1`**
-- **窗口最小化的影响边界**：wechatide 的 `simulator_screenshot` 会超时（Chromium 节流）；**automator 协议不受影响（实测）** —— 所以截图一律走 automator，wechatide 只用于 -Reload 与 grep 日志
-- **窗口被其他全屏窗「遮挡」（非最小化）会双重失真**（2026-09-21 SettleBadge 验收定案）：automator `mp.screenshot` 回吐**陈旧帧**（连状态栏时间都冻结），且 reLaunch 后 `.page >>> .xxx` 探针出现**幽灵命中**（INIT 即全 true）。此状态下截图与 DOM 探针**双双不可信，严禁据此判 bug**——先让窗口可见/前置（由 Boss 人工确认或请 Boss 截图），仍异常才动代码。本轮曾据此误判「update:show 关闭链路断裂」，实际 Boss 人工实测动效与自动关全好
-- **遮挡态截图的典型假象＝「整页内容重复＋插值全空」**（2026-09-22 P1 验收定案）：合成器把多层陈旧帧叠成一图，肉眼看像页面模板重复渲染/数据没绑；**鉴别法＝DOM 探针对照**（`selectAll` 数节点个数＋读插值节点 rect，**并对照 `.page` 高度与内容实高**——高度虚增即重复为真），DOM 单份且有值且页高正常即截图在说谎，勿改代码。触发源实测：WeGame 浏览器前台＋Windows「设置」全屏窗压住微信工具（computer-use list_windows 可见 zOrder）。⚠️ 同症状亦可能为真 bug（见下下条组件宿主幻影），窗口前置后仍重复即按真 bug 隔离排查
-- **automator `mp.evaluate(fn, arg)` 传参不稳定**（2026-09-22 P1 定案）：带参 evaluate 时而拒绝抛 `Uncaught [object Object]`（Node 端未捕获直接崩脚本）、时而永久挂起；无参 evaluate 全稳。**铁律：evaluate 一律无参**（常量写进函数字面量），路由跳转用 automator 自带 `mp.reLaunch/navigateTo({url})`
-- **`page.$()` 查 v-if 未渲染的组件内节点会崩 Node 脚本**（2026-09-22 P1 定案）：devtools 对该查询回推一条 `error` 事件，automator 的 Connection 是 EventEmitter、无 `error` 监听即 throw。探针脚本要么避开缺席节点，要么在 require automator 前包 `process.on('uncaughtException', …)` 兜底
-- **常驻导航栏定案（页内内联 fixed 整栏，2026-09-22 #28 Boss 拍板，取代 P1「两态遮罩＋裸返回钮」）**：Boss 原话「每个子页面向下滑动，左上角的返回按钮和页面标题都需要显示」＋「无论小程序／App／Web 端，这里都固定在顶部」。两种形态：
-  ①**二级页（Records／DayDetail／Settings）＝跨阈出整栏**：头图仍随内容滚走，页末内联 `v-if="scrolled"` fixed 栏（`.rec-nav`／`.dd-nav-fixed`／`.set-nav`，z45，高 `sbH+58`，`paddingTop=sbH`，底色＝头图渐变末色实底 `#39AD95`，Settings 暗态 `#162924`，下投影 `0 2px 10px rgba(10,79,61,.10)`），栏内 44×44 返回热区＋白色粗体 17px 标题（DayDetail 标题＝动态日期）；P1 的 `*-st-mask`(z40) 与 `*-fx-back` 两件套**合并退役**
-  ②**首页＝全时段常驻标题块**（`.hm-nav` z45、高 `sbH+64`、底色同页面底 `#F2FAF5`、**无阈值无透明态**），文档流只留日期行，避让由 `.header` 的 `paddingTop=sbH+64` 承担；**Hero 保持原 CSS `margin-top:-18`，严禁再叠一次 sbH**（曾误加 `sbH+10` → 日期行与波浪之间约 57px 空带）
-  `onPageScroll` 已**去掉 `// #ifdef MP-WEIXIN` 条件编译**（三端共用），阈值 >40、跨阈才写 ref（无逐帧透明度/无 transition）。**栏底一律实色、且仍 `v-if` 两态**（透明常驻 fixed 层会吞顶区点击）；**仍不做成组件**（见下条幻影副本）。**唯一例外＝Profile 保留 `pf-st-mask`(z40)**：它是 Tab 页、稿面本就没有返回钮与页面标题，只有状态栏带需要遮罩，无「栏」可做。
-  **全局 z 层级表**（2026-09-22 #28 修订）：微信原生胶囊（原生层，压一切 webview z）＞ **弹层＝原生 page-container（不再占用 webview z，自研 900 蒙层壳全部退役）** ＞ **常驻导航栏 45** ＞ 顶遮罩 40（仅 Profile 在用）＞ Tabbar 30 ＞ 文档流；新增 fixed 元素必须对照此表取档
-- **弹层壳＝原生 page-container 约定（2026-09-22 四弹层迁移定案）**：①MP 端必须 **v-if 与 :show 双条件**（官方写法，条件编译内嵌标签）；②`position` 只控**滑入方向**不控布局——center 弹层须 custom-style 自设 `width/height:100%＋flex 居中`（实测容器默认钉左上角）；③**原生蒙层点按不自动关闭**，须绑 `@clickoverlay`→回传 `update:show=false`，`@afterleave` 兜底同步（含系统返回路径——拦截返回是原生赠送能力）；④定高弹层外观写 custom-style、sheet 改 flex:1；动态内容高弹层容器设 transparent、白卡由 sheet 自带；⑤**page-container 场景下 `.page >>> .xxx` DOM 探针不可靠**（缺席幻影/在场陈旧双假象），开合状态核验改 automator evaluate 读子组件 `$scope.data` 容器属性键；reLaunch 偶发 `Uncaught [object Object]` 时降级 `wx.restartMiniProgram({path})`
-- **组件宿主幻影副本（2026-09-22 实测，StickyTop 删除根因）**：本工程 mp-weixin VDOM 产物中，个别自定义组件的宿主节点会在其文档位置**再渲染一份整页模板**（空作用域：插值全空、wx:for 空、`.page` 高度虚增近一倍），且该组件自身 `v-if` 视图反而不渲染（StickyTop 双故障实测）；成对标签/置末位均无效。**排查法**：截图见「整页重复＋空插值」先量 `.page` 高度对照内容实高，再逐组件隔离（移除该组件重编译看 p7 式对照截图）；**约定**：fixed 遮罩类装饰一律页内内联视图，不轻建单视图小组件；组件标签统一成对书写（自闭合 `<X />` 改 `<X></X>`）
-- **ps1 中文路径编码坑**：PowerShell 5 按 ANSI 解码无 BOM 文件，含中文路径的 `.ps1` 必须**存为 UTF-8 with BOM**，否则运行时报"路径不存在"。修复：`[IO.File]::WriteAllText($f,$c,(New-Object Text.UTF8Encoding $true))`
-- 命令行调用必须显式传 `--token`（MCP Token）
-- `--path` 必须 `D:\` 开头（小写 `d:\` 报 project window not found）
-- HBuilderX 编译报错看 `cli logcat mp-weixin --project <源码项目> --mode lastBuild`（产物目录路径传给 wechatide、源码路径传给 HBuilderX cli，两者不同勿混）
+- 微信工具旧 JS 包/遮挡假象/幻影副本等调试坑位及排查规约，见 `docs/decisions/ADR-003-debug-chain-pitfalls.md`。
+  ① **严禁写 `min-height: 100%`**：官方仅支持 `number` 或 `pixel`，写百分比会直接触发 `[plugin:uni:app-uvue-css] ERROR` 致命编译中断。让页面铺满视口必须使用 `flex: 1` 配合父容器伸缩；
+  ② **严禁 `linear-gradient` 携带角度（如 `180deg` / `90deg`）**：原生端会发出 `WARNING: Invalid linear-gradient value`，必须写纯色标（如 `linear-gradient(#E2F5EC, #F6FCF9)`）；
+  ③ **App 原生端严禁后代选择器**：样式必须保持 class-only 单类定义，杜绝 `.a .b` 嵌套选择器；
+  ④ **`:style` 严禁拼接跨单位计算**：`calc(116rpx + px)` 在原生端会导致编译白屏报错，必须在 UTS/TS 层计算为确切数值后再传入 `:style`。
+- **UTS / <script setup> 变量唯一声明规范（2026-09-23 定案）**：
+  在页面顶层，`sbH` 等通用变量**严禁在不同位置（如文件顶部与方法区）重复 `let/const` 声明**，会导致 `Identifier 'xxx' has already been declared` 编译红灯。必须统一定义在 `<script setup>` 顶部单一位置，后续直接复用。
 
 ---
 

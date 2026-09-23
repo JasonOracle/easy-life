@@ -2,6 +2,27 @@
   [变更日志]
   修改时间：2026-09-23
   AI模型：Gemini 系列
+  修改内容：[彻底根除左上角多余圆圈与环形动效缺失 Bug：
+    1. 移除冗余的 CSS .sb-track 与 .sb-hole 双重圆环节点，杜绝与 Canvas 绘制冲突；
+    2. 将 Canvas 容器尺寸限定为 296rpx 正方并正中排布，圆心动态取中心 (w/2, h/2)，线宽等比缩放；
+    3. 小程序端采用 fields({ node: true, size: true }) 动态获取真实像素并结合 dpr 缩放，确保底轨与进度弧 100% 居中且动画流畅扫出]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：OpenCode / Gemini 底层
+  修改内容：[1. 彻底修复 Android/小程序环形转圈动效缺失 Bug：优化 Canvas 异步上下文就绪与重绘防抖机制，改用 Canvas 一体化绘制饱满圆头进度弧与浅薄荷绿底轨；2. 严格按图2设计稿校准环心与厚度（R=64, line=20）；3. 替换 sb_check 与 sb_alert 为矢量 SVG]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
+  修改内容：[实施方案A响应式重构：全量 px 尺寸、间距、宽高与字号按 1px=2rpx 换算为 750rpx 规范]
+-->
+<!--
+  [变更日志]
+  修改时间：2026-09-23
+  AI模型：Gemini 系列
   修改内容：[1. 遵循 uni-app x 原生规范，将 font-weight: 600 统一为 bold；2. 清理 Android 端不支持的 @keyframes 动画（sbFadeIn, sbBadgeIn, sbBadgeOut, sbRise, sbIcoPop）及相关 animation 属性，保持静态直出规范]
 -->
 <!--
@@ -52,10 +73,8 @@
 <template>
   <view class="sb-overlay" :class="{ 'sb-overlay-active': active }" v-if="render">
     <view class="sb-badge" :class="{ 'sb-badge-active': active, 'sb-badge-out': exiting, 'sb-badge-low': lowMode }">
-      <!-- 环：轨道圆 + 中心盖孔 + canvas绘制进度与双头帽 -->
-      <view class="sb-track"></view>
+      <!-- 环形进度画布：正中 296rpx 正方居中，底轨与进度条由 Canvas 一体化绘制，彻底消除左上角圆圈 -->
       <canvas class="sb-canvas" type="2d" id="sb-ring" @ready="onCanvasReady"></canvas>
-      <view class="sb-hole"></view>
       <view class="sb-num-stack">
         <text class="sb-big-num">{{ shownText }}</text>
         <text class="sb-unit">kcal</text>
@@ -64,7 +83,7 @@
         <text class="sb-budget-text" :class="{ 'sb-budget-text-over': overBudget }">{{ budgetText }}</text>
       </view>
       <view class="sb-meal-row">
-        <image class="sb-meal-ico" :src="overBudget ? '/static/settle/sb_alert.png' : '/static/settle/sb_check.png'" mode="aspectFit"></image>
+        <image class="sb-meal-ico" :src="overBudget ? '/static/settle/sb_alert.svg' : '/static/settle/sb_check.svg'" mode="aspectFit"></image>
         <text class="sb-meal-text">{{ mealText }}</text>
       </view>
     </view>
@@ -105,11 +124,6 @@ const RING_MS = 620
 const EXIT_AT = 2160
 const CLOSE_AT = 2380
 
-// —— 环几何（Dz3YV：环心 (132,100)，带 54..70，帽在带中线 r62） ——
-const CX = 132
-const CY = 100
-const BAND_MID_R = 62
-
 const progress = ref(0)
 const exiting = ref(false)
 const lowMode = ref(false)
@@ -121,6 +135,10 @@ let exitTimer = 0
 let closeTimer = 0
 let activeTimer = 0
 let animStart = 0
+
+// 画布尺寸状态记录
+let cvWidth = 148
+let cvHeight = 148
 
 const overBudget = computed<boolean>(() => props.after > props.goal)
 const ringColor = computed<string>(() => overBudget.value ? '#E8B54D' : '#1FBF8F')
@@ -151,14 +169,19 @@ const shownText = computed<string>(() => '' + Math.round(props.kcal * progress.v
 const budgetText = computed<string>(() => '今日 ' + fmt(props.after) + ' / ' + fmt(props.goal) + ' kcal')
 const mealText = computed<string>(() => props.meal + ' · 已加入')
 
-// —— Canvas 绘制逻辑（双端通用） ——
+// —— Canvas 绘制逻辑 ——
 let ringCtx: any | null = null
 
 function onCanvasReady(): void {
   // #ifdef APP
   try {
     const el = uni.getElementById('sb-ring') as UniCanvasElement | null
-    if (el != null) ringCtx = el.getContext('2d')
+    if (el != null) {
+      ringCtx = el.getContext('2d')
+      cvWidth = 148
+      cvHeight = 148
+      drawRing()
+    }
   } catch (e) {
     ringCtx = null
   }
@@ -171,16 +194,18 @@ function initCanvasMp(): void {
     uni.createSelectorQuery()
       .in(inst.proxy)
       .select('#sb-ring')
-      .node((res: any) => {
+      .fields({ node: true, size: true }, (res: any) => {
         if (res != null && res.node != null) {
           const canvas = res.node
-          // 适配高分屏
           const sys = uni.getSystemInfoSync()
-          const dpr = sys.pixelRatio
-          canvas.width = 264 * dpr
-          canvas.height = 256 * dpr
+          const dpr = sys.pixelRatio ?? 1
+          cvWidth = res.width > 0 ? res.width : 148
+          cvHeight = res.height > 0 ? res.height : 148
+          canvas.width = cvWidth * dpr
+          canvas.height = cvHeight * dpr
           ringCtx = canvas.getContext('2d')
           ringCtx.scale(dpr, dpr)
+          drawRing()
         }
       })
       .exec()
@@ -192,18 +217,29 @@ function drawRing(): void {
   const ctx = ringCtx
   if (ctx == null) return
   
-  // App 与微信的 CanvasRenderingContext2D 在清除方法上基本一致
+  const w = cvWidth
+  const h = cvHeight
+  const cx = w / 2
+  const cy = h / 2
+  const lineW = Math.max(12, Math.round(18 * (w / 148)))
+  const r = (w - lineW) / 2 - 2
+
   try {
-    ctx.clearRect(0, 0, 264, 256)
+    ctx.clearRect(0, 0, w, h)
   } catch (e) {}
 
-  // 轨道 (仅通过 view 渲染，或这里再补一层保险？不，使用 sb-track view 即可)
-  
-  // 进度（圆头由 lineCap round 天然给出）
+  // 1. 完整底轨圆环（浅薄荷透明绿）
+  ctx.beginPath()
+  ctx.arc(cx, cy, r, 0, Math.PI * 2)
+  ctx.lineWidth = lineW
+  ctx.strokeStyle = 'rgba(31, 191, 143, 0.16)'
+  ctx.stroke()
+
+  // 2. 顺时针进度条（带圆头，饱满轻律翡翠绿或超标暖橙）
   if (sweep.value > 0.001) {
     ctx.beginPath()
-    ctx.arc(CX, CY, BAND_MID_R, -Math.PI / 2, -Math.PI / 2 + sweep.value * Math.PI * 2)
-    ctx.lineWidth = 16
+    ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + sweep.value * Math.PI * 2)
+    ctx.lineWidth = lineW
     ctx.lineCap = 'round'
     ctx.strokeStyle = ringColor.value
     ctx.stroke()
@@ -213,10 +249,19 @@ function drawRing(): void {
 function tick(): void {
   const p = easeOutCubic((Date.now() - animStart) / RING_MS)
   progress.value = p
-  drawRing()
+  if (ringCtx != null) {
+    drawRing()
+  } else {
+    // 异步容错补测
+    initCanvasMp()
+    // #ifdef APP
+    onCanvasReady()
+    // #endif
+  }
   if (p >= 1) {
     clearInterval(ringTimer)
     ringTimer = 0
+    drawRing()
   }
 }
 
@@ -303,14 +348,14 @@ onUnmounted(() => { clearTimers() })
   opacity: 1;
 }
 
-/* —— L2 徽章：264×256 r28 —— */
+/* —— L2 徽章：528×512 r56 —— */
 .sb-badge {
-  width: 264px;
-  height: 256px;
-  border-radius: 28px;
+  width: 528rpx;
+  height: 512rpx;
+  border-radius: 56rpx;
   background-color: #F2FAF5;
   position: relative;
-  box-shadow: 0 14px 36px rgba(10, 79, 61, 0.14);
+  box-shadow: 0 28rpx 72rpx rgba(10, 79, 61, 0.14);
   flex-shrink: 0;
   transform: scale(0.9);
   opacity: 0;
@@ -330,69 +375,51 @@ onUnmounted(() => { clearTimers() })
   transition-timing-function: ease;
 }
 
-/* —— 环（MP：轨道 + conic 进度 + 盖孔 + 双圆头帽） —— */
-.sb-track {
-  position: absolute;
-  left: 62px;
-  top: 30px;
-  width: 140px;
-  height: 140px;
-  border-radius: 70px;
-  background-color: rgba(31, 191, 143, 0.15);
-}
-.sb-hole {
-  position: absolute;
-  left: 78px;
-  top: 46px;
-  width: 108px;
-  height: 108px;
-  border-radius: 54px;
-  background-color: #F2FAF5;
-}
+/* —— 环形画布：正中精准定位 —— */
 .sb-canvas {
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 264px;
-  height: 256px;
+  left: 116rpx;
+  top: 44rpx;
+  width: 296rpx;
+  height: 296rpx;
 }
 
-/* —— 中心数字栈（只占环心 108 见方，数字与单位上下排） —— */
+/* —— 中心数字栈 —— */
 .sb-num-stack {
   position: absolute;
   left: 0;
-  top: 70px;
-  width: 264px;
-  height: 60px;
+  top: 140rpx;
+  width: 528rpx;
+  height: 120rpx;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 .sb-big-num {
-  font-size: 34px;
+  font-size: 68rpx;
   font-weight: bold;
   color: #0A4F3D;
-  line-height: 41px;
+  line-height: 82rpx;
 }
 .sb-unit {
-  font-size: 11px;
+  font-size: 22rpx;
   font-weight: bold;
   color: rgba(15, 79, 61, 0.6);
-  line-height: 16px;
+  line-height: 32rpx;
 }
 
 /* —— L4 今日行 —— */
 .sb-budget-row {
   position: absolute;
   left: 0;
-  top: 182px;
-  width: 264px;
-  height: 20px;
+  top: 364rpx;
+  width: 528rpx;
+  height: 40rpx;
   justify-content: center;
   align-items: center;
 }
 .sb-budget-text {
-  font-size: 13px;
+  font-size: 26rpx;
   font-weight: bold;
   color: #0A7A5C;
 }
@@ -404,20 +431,20 @@ onUnmounted(() => { clearTimers() })
 .sb-meal-row {
   position: absolute;
   left: 0;
-  top: 208px;
-  width: 264px;
-  height: 18px;
+  top: 416rpx;
+  width: 528rpx;
+  height: 36rpx;
   flex-direction: row;
   align-items: center;
   justify-content: center;
 }
 .sb-meal-ico {
-  width: 12px;
-  height: 12px;
-  margin-right: 4px;
+  width: 24rpx;
+  height: 24rpx;
+  margin-right: 8rpx;
 }
 .sb-meal-text {
-  font-size: 12px;
+  font-size: 24rpx;
   color: #73918B;
 }
 </style>
