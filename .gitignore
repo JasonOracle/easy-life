@@ -38,6 +38,8 @@ venv/
 node_modules/
 # HBuilderX 编译产物：每次 watch 重生成，微信工具读的是本地磁盘而非 git
 app/unpackage/
+# HBuilderX cli launch 的运行日志（app-android 等），同理不入库
+app/dist/
 debug/
 
 # ── 会话数据与编辑器 ─────────────────────────────────────────────────────
