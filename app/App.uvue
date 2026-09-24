@@ -1,22 +1,29 @@
 
 <script setup lang="uts">
+// [变更日志] 2026-09-24: 新增 PRIVACY_DEV_BYPASS 开发期开关，屏蔽隐私弹窗对 adb 自动化验收链路的冷启动拦截
+
 import { onLaunch } from '@dcloudio/uni-app'
 import { useDeviceStore } from './stores/device'
+
+// App 端 agree() 仅 closeDialogPage，授权态不持久化，每次冷启动都会重弹并挡死截图/点击验收；上线前须置回 false
+const PRIVACY_DEV_BYPASS = true
 
 onLaunch(() => {
   // 触发 device store 初始化（state 内自调 detectDeviceCapability，无单独 detect 方法）
   useDeviceStore()
 
   // 检查并处理隐私授权状态
-  uni.getPrivacySetting({
-    success: (res) => {
-      if (res.needAuthorization) {
-        uni.openDialogPage({
-          url: '/pages/privacy/PrivacyDialog'
-        })
+  if (!PRIVACY_DEV_BYPASS) {
+    uni.getPrivacySetting({
+      success: (res) => {
+        if (res.needAuthorization) {
+          uni.openDialogPage({
+            url: '/pages/privacy/PrivacyDialog'
+          })
+        }
       }
-    }
-  })
+    })
+  }
 })
 </script>
 

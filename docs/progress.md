@@ -304,3 +304,5 @@
 **隐私弹窗开发期屏蔽**（`app/App.uvue`）：新增 `PRIVACY_DEV_BYPASS=true` 跳过 onLaunch 的 `getPrivacySetting→openDialogPage`。根因核验：App 端（非 MP）「同意」按钮仅 `closeDialogPage`、不落原生授权态 → 每次冷启动必重弹，挡死 adb 截图/点击验收链路（Boss 拍板：开发期屏蔽，用 adb/cli 唤醒）。**上线前必须置回 false**。
 
 **调试基座新坑**：上一个 `cli.exe launch` watch 会话结束后 HBuilderX 主体随之退出，后续 cli launch 报「未检测到已打开的HBuilderX」→ 须先 `cli.exe open`（等约 10s）再 launch。另：本会话「已停止运行」实为旧会话被新全量编译接管的重启周期尾巴，判活以 `dumpsys mCurrentFocus` ＋ `bytes/` mtime 为准。
+
+**验收（2026-09-24 20:09:30）**：完整重编（bytes mtime 19:57:31 晚于改动）→ `am force-stop`＋`am start` 冷启动 → 直达首页无任何弹窗（`debug/shots/noprivacy_cold.png`）→ PASS。
