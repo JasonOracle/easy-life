@@ -296,3 +296,11 @@
 - Hero 第一批：Boss 7:12 实拍确认珊瑚染色上屏、竖条成组、贴纸清晰、宏量降档
 
 **待办**：批次二（S4 右缘对齐轴／S6 vs S7 大结构二选一／贴纸矢量化）等 Boss 拍板；MP-WEIXIN 端全量回归未跑（automator ws://9420 当时未连）。
+
+### 2026-09-24 19:56:00 — Hero 第二批 S4 右缘对齐轴落地 + 开发期隐私弹窗屏蔽
+
+**S4**（`app/pages/home/Home.uvue`）：`.hero-text` right 20→28rpx，使贴纸／每日目标 pill 右缘并入全页既有卡片轴（margin-right 28）。安卓模拟器像素扫核验（`debug/shots/s4_axis4.png`）：贴纸 1228~1230、pill 峰值 1232、宏量卡 1232、餐次卡 1232，目标轴 x=1232（28rpx@1280w）→ 四者同轴闭环。
+
+**隐私弹窗开发期屏蔽**（`app/App.uvue`）：新增 `PRIVACY_DEV_BYPASS=true` 跳过 onLaunch 的 `getPrivacySetting→openDialogPage`。根因核验：App 端（非 MP）「同意」按钮仅 `closeDialogPage`、不落原生授权态 → 每次冷启动必重弹，挡死 adb 截图/点击验收链路（Boss 拍板：开发期屏蔽，用 adb/cli 唤醒）。**上线前必须置回 false**。
+
+**调试基座新坑**：上一个 `cli.exe launch` watch 会话结束后 HBuilderX 主体随之退出，后续 cli launch 报「未检测到已打开的HBuilderX」→ 须先 `cli.exe open`（等约 10s）再 launch。另：本会话「已停止运行」实为旧会话被新全量编译接管的重启周期尾巴，判活以 `dumpsys mCurrentFocus` ＋ `bytes/` mtime 为准。
