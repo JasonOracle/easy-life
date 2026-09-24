@@ -52,7 +52,7 @@
         <!-- 刻度层（最上）：水位上涨后刻度仍需可读，与玻璃层同源同几何 -->
         <image class="bottle-ticks" :src="bottleAsset('pingzi_tick')" mode="aspectFit"></image>
       </view>
-      <!-- 贴纸：高清重绘后挂瓶卡左上，DOM 序在瓶/叶之后＝层叠于瓶颈之上，完整可见 -->
+      <!-- 贴纸：高清重绘后挂 hero 顶部空白带右侧（与右列 28rpx 边距同轴），DOM 序在瓶/叶之后 -->
       <image class="hm-sticker" :src="stickerSrc" mode="aspectFit"></image>
       <view class="hero-text">
         <view class="remain-head">
@@ -651,10 +651,9 @@ const meals = computed<Meal[]>(() =>
   height: 336rpx;
   pointer-events: none;
 }
-/* 贴纸：挂 hero 顶部空白带（导航与瓶卡之间），下缘轻搭瓶卡顶缘成"贴"的动作；宽高比 840:620 与素材一致 */
 .hm-sticker {
   position: absolute;
-  left: 16rpx;
+  left: 582rpx;
   top: 0rpx;
   width: 140rpx;
   height: 103rpx;
