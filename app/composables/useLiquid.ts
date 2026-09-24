@@ -252,9 +252,11 @@ export class LiquidEngine {
     // Idle breathing (nonlinear: amp modulated by slow sine)
     if (this.idleActive && !this.agitated && !this.pouring) {
       this.idleTime += dtS
+      // 振幅随水深缩放：薄水层里同样的倾侧被圆底弧壁放大成显眼摆动，浅水应近乎安静；水深≥40rpx 恢复满呼吸
+      const depthScale = Math.min(1, (CAVITY_H * this.currentRatio) / 40)
       const breathMod = 0.5 + 0.5 * Math.sin(this.idleTime * 0.0017)
-      const idleM1 = IDLE_M1_AMP * breathMod * Math.sin(this.idleTime * IDLE_W)
-      const idleM2 = IDLE_M2_AMP * Math.sin(this.phase2)
+      const idleM1 = IDLE_M1_AMP * breathMod * Math.sin(this.idleTime * IDLE_W) * depthScale
+      const idleM2 = IDLE_M2_AMP * Math.sin(this.phase2) * depthScale
       // Blend idle into state (additive, doesn't override forced motion)
       if (Math.abs(this.m1) < 3 && Math.abs(this.v1) < 0.01) {
         this.m1 = this.m1 * 0.95 + idleM1 * 0.05

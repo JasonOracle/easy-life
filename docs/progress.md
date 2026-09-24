@@ -387,3 +387,8 @@ Boss 提出「两侧绿色树枝也做一套 SVG」。与瓶身适配合并为�
 - **位置**：按 Boss 指示贴纸移右上 `left:582rpx top:0`（与右列 28rpx 边距同轴），盒 140×103rpx 与素材比 840:620 精确匹配；回滚 hero 两个失败实验属性（border-top 圆角 0、overflow:visible）。
 - **清理**：删除连字符旧树叶文件（yezi-zuo/you-amber/coral.svg，下划线版已生效）。
 - **测试经理轮**：全量 `--cleanCache` 重编译（bytes 00:47 重生成）→ 冷启动截图 `debug/shots/s14_sticker_right.png` → 右上贴纸闭合椭圆/两行全文/对勾完整可见，绿档全组统一。
+
+### 2026-09-25 01:35:00 ｜ idle 液体振幅随水深缩放（空瓶近乎安静，App 端真机验收 PASS）
+- **诊断**：Boss 反馈空瓶平常态液体来回循环晃动。分析定案＝非 bug——idle 呼吸（3.8s 主晃 ±1.6rpx＋1.4s 副纹）为常驻设计，但振幅是绝对 rpx 值；0 摄入时保底水位仅 14.2rpx 深，圆底弧壁把 3.2rpx 两端高差放大成显眼绿带摆动（水位越浅越晃＝语义倒挂）。
+- **修复（A 方案）**：`useLiquid.ts` idle 注入振幅乘 `depthScale = min(1, 水深/40rpx)`——空瓶(0.06)衰减至 35%、水深≥40rpx 恢复满呼吸；tap/longpress/pour 三条用户主动激扰路径零改动。
+- **测试经理轮**：全量 cleanCache 重编译（bytes 01:10）→ 冷重启 → `debug/liquid_idle_measure.py` 16 帧量测液面顶：稳态 spread 0–3px（改前可见明显楔形摆动）；tap 回归＝点击后液面抬升 14px、约 1s 阻尼收敛，物理完整；特写 `debug/shots/s15_idle_calm_zoom.png` 绿带水平安静、气泡存活。
