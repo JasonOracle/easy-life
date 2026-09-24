@@ -360,3 +360,9 @@ Boss 提出「两侧绿色树枝也做一套 SVG」。与瓶身适配合并为�
 - **Home.uvue**：新增 `bottleSrc` computed（coral/amber/空）＋ `bottleAsset(base)` 函数，模板四个 `:src`（瓶身/刻度/左叶/右叶）改为走动态路径，状态切换时整组换色。
 - **色值映射**：瓶身绿系 `#58B984/#A9DCC2/#C8E9D6...` → 琥珀 `#D4A23E/#E8D080/#F0E6D0...` / 珊瑚 `#E66040/#FFC4A0/#FFE8D0...`；树叶绿系 `#3E9E63/#6FCB93/#8AD8A8/#4CB678` → 对应琥珀/珊瑚版。白色高光条与瓶身描边不动（保持玻璃通透感）。
 - **测试经理轮**：全量 `--cleanCache` 重编译（23:19:59 同步成功）→ 冷启动截图 `debug/shots/s5_bottle_coral.png`→ 瓶身/刻度/瓶盖/双叶/液体/文字 全部珊瑚色，整组视觉统一。
+
+### 2026-09-24 23:38:00 ｜ bg 卡底色适配 + 贴纸三档文案 + 液体底色修复（App 端真机验收 PASS）
+- **bg.svg**：生成 `bg_amber.svg` / `bg_coral.svg`（流体斑块/气泡/星芒全部换色，零绿色残留），走 `bottleAsset('bg')` 动态绑定——此前底部绿带是 bg.svg 斑块从半透明瓶身透出来。
+- **贴纸三档文案**：`sticker_green.png`（好好吃饭 也好好生活）/ `sticker_amber.png`（今天很棒，再坚持一下）/ `sticker_coral.png`（没关系，调整一下），新增 `stickerSrc` computed 按 calStatus.type 切换。珊瑚档用「没关系」卸 guilt、「调整一下」指向前程，符合轻律生活温和习惯工具定位。
+- **液体底色修复**：`BottleLiquid.uvue:213` 原来硬编码 `grad.addColorStop(1, '#0A7A5C')`（mint-deep 绿），无论状态如何底部都有一条绿带。PALETTES 扩为 5 级（新增 palette[4] 底深色：green `#0A7A5C` / amber `#A06820` / coral `#C04020`），渐变终点改走 palette[4]。
+- **测试经理轮**：全量 `--cleanCache` 重编译（23:33:54 同步成功）→ 冷启动截图 `debug/shots/s7_bottom_fix.png`→ 瓶底绿带消失，液体/瓶身/树叶/bg 卡/贴纸/文字 全珊瑚色统一。

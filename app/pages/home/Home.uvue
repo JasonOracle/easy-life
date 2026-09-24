@@ -25,9 +25,9 @@
     <!-- Hero（常驻标题块：紧接导航栏下方，纯净绿色渐变底） -->
     <view class="hero">
       <!-- 独立底层背景：柔和底色渐变 + 流体斑块 + 装饰气泡星芒（bg.svg） -->
-      <image class="bottle-bg" :src="'/static/home/bg.svg'" mode="aspectFit"></image>
+      <image class="bottle-bg" :src="bottleAsset('bg')" mode="aspectFit"></image>
       <!-- 贴纸：矢量感高清重绘后挂瓶卡左上空白带（DOM 序在瓶/叶之前＝层叠于瓶颈后） -->
-      <image class="hm-sticker" :src="'/static/home/sticker.png'" mode="aspectFit"></image>
+      <image class="hm-sticker" :src="stickerSrc" mode="aspectFit"></image>
       <!-- 左侧独立叶子（yezi-zuo.svg，旋转支点在茎底，自然微风往复微摆） -->
       <image
         class="leaf-left"
@@ -245,6 +245,13 @@ function bottleAsset(base: string): string {
   const s = bottleSrc.value
   return '/static/home/' + base + (s ? '_' + s : '') + '.svg'
 }
+/** 贴纸文案：三档对应不同鼓励语，绿版为原稿不动 */
+const stickerSrc = computed<string>(() => {
+  const t = calStatus.value.type
+  if (t === 'coral') return '/static/home/sticker_coral.png'
+  if (t === 'amber') return '/static/home/sticker_amber.png'
+  return '/static/home/sticker_green.png'
+})
 const liquidCmdRev = ref(0)
 const liquidCmdKind = ref('')
 

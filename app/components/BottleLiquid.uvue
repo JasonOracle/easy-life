@@ -23,10 +23,11 @@ let lastTime = 0
 let introDelayTimer: any = null
 
 // Color palettes (no new colors, all from DesignTokens)
+// 5 级渐变：palette[0] 顶光 → palette[3] 主体深 → palette[4] 底深（瓶底阴影）
 const PALETTES: Record<string, string[]> = {
-  green: ['#7DEBC7', '#3EDDB0', '#1FBF8F', '#0D9C73'],
-  amber: ['#F0E6D0', '#E8D080', '#E8B54D', '#D4A23E'],
-  coral: ['#FFE8D0', '#FFC4A0', '#FF9E7D', '#E66040']
+  green: ['#7DEBC7', '#3EDDB0', '#1FBF8F', '#0D9C73', '#0A7A5C'],
+  amber: ['#F0E6D0', '#E8D080', '#E8B54D', '#D4A23E', '#A06820'],
+  coral: ['#FFE8D0', '#FFC4A0', '#FF9E7D', '#E66040', '#C04020']
 }
 
 let readyFired = false
@@ -210,7 +211,7 @@ function draw(): void {
   grad.addColorStop(0.18, palette[1])
   grad.addColorStop(0.45, palette[2])
   grad.addColorStop(0.78, palette[3])
-  grad.addColorStop(1, '#0A7A5C')
+  grad.addColorStop(1, palette[4] ?? '#0A7A5C')
 
   // Draw liquid body polygon
   c.beginPath()
