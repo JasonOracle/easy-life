@@ -1,7 +1,7 @@
 
 <template>
   <view class="page">
-    <!-- [变更日志] 2026-09-24: Hero 水瓶液体由 CSS 水波图重构为 BottleLiquid Canvas 2D 物理引擎渲染；瓶身/刻度/叶片独立分层，废弃 liquid_wave 水体渐变头图。同日重排第一批：补定义 status-text-coral/amber/green 死类（超标报警色此前静默失效）、顶部带压缩（spacer 220→190 / hero 470→440）、贴纸由右上悬空改入右列流内（并清除整画布 alpha≈10 白雾层）、删悬空小 leaf 改状态色竖条、宏量/餐次字号降档拉开层级阶梯。第二批 S4：.hero-text right 20→28rpx，贴纸/pill 右缘与全页卡片 margin-right 28 统一对齐轴。S7：独立宏量卡并入 hero 底缘玻璃横条（hm-macro-strip，左右 28 同轴），hero 440→552、hero-text bottom 24→136，页面白卡 3→2 -->
+    <!-- [变更日志] 2026-09-24: Hero 水瓶液体由 CSS 水波图重构为 BottleLiquid Canvas 2D 物理引擎渲染；瓶身/刻度/叶片独立分层，废弃 liquid_wave 水体渐变头图。同日重排第一批：补定义 status-text-coral/amber/green 死类（超标报警色此前静默失效）、顶部带压缩（spacer 220→190 / hero 470→440）、贴纸由右上悬空改入右列流内（并清除整画布 alpha≈10 白雾层）、删悬空小 leaf 改状态色竖条、宏量/餐次字号降档拉开层级阶梯。第二批 S4：.hero-text right 20→28rpx，贴纸/pill 右缘与全页卡片 margin-right 28 统一对齐轴。S7：独立宏量卡并入 hero 底缘玻璃横条（hm-macro-strip，左右 28 同轴），hero 440→552、hero-text bottom 24→136，页面白卡 3→2。第三批：FAB 与左列垂直居中（top 35rpx）、hero 渐变翻转为上白下绿（重心下沉）、贴纸矢量感高清重绘（246px→840px 白椭圆+薄荷描边+行楷双行）并从右列流内迁挂瓶卡左上空白带、左组收拢（bg 卡 352→324 / 瓶左移 12 / 右叶左移 24）使叶-字间隙 2rpx→26rpx 且 goal-pill 退出卡片边线 -->
     <!-- 标题与操作栏（顶栏常驻+日期整合，对齐设计图规范，保证日期完全外露） -->
     <view class="hm-nav" :style="{ paddingTop: sbH + 'px' }">
       <view class="hm-nav-inner">
@@ -26,6 +26,8 @@
     <view class="hero">
       <!-- 独立底层背景：柔和底色渐变 + 流体斑块 + 装饰气泡星芒（bg.svg） -->
       <image class="bottle-bg" :src="'/static/home/bg.svg'" mode="aspectFit"></image>
+      <!-- 贴纸：矢量感高清重绘后挂瓶卡左上空白带（DOM 序在瓶/叶之前＝层叠于瓶颈后） -->
+      <image class="hm-sticker" :src="'/static/home/sticker.png'" mode="aspectFit"></image>
       <!-- 左侧独立叶子（yezi-zuo.svg，旋转支点在茎底，自然微风往复微摆） -->
       <image
         class="leaf-left"
@@ -53,7 +55,6 @@
         <image class="bottle-ticks" :src="'/static/home/pingzi_tick.svg'" mode="aspectFit"></image>
       </view>
       <view class="hero-text">
-        <image class="hm-sticker" :src="'/static/home/sticker.png'" mode="aspectFit"></image>
         <view class="remain-head">
           <view class="hm-status-bar" :style="{ backgroundColor: calStatus.color }"></view>
           <text class="remain-label" :class="calStatus.textClass">{{ remainCal >= 0 ? '还能吃' : '已超标' }}</text>
@@ -173,9 +174,9 @@ const headerSpacerH = (190 / 750 * winW + sbH) + 'px'
 // TabBar 随滚动渐显（#29）已于 2026-09-22 随液态玻璃胶囊重构整体废弃：新胶囊恒常可见，
 // 本页因此不再需要任何滚动监听（#28 定案的常驻标题块 .hm-nav 无阈值）
 
-// 右上加号位置：默认稿面位置；小程序端放到胶囊左侧防遮挡
+// 右上加号位置：默认与左侧标题列垂直居中（左列约 149rpx 高，FAB 80rpx → top 35rpx）；小程序端放到胶囊左侧防遮挡
 const fabRight = ref('14px')
-const fabTop = ref('2px')
+const fabTop = ref('35rpx')
 // #ifdef MP-WEIXIN
 try {
   const sys = uni.getSystemInfoSync()
@@ -559,23 +560,23 @@ const meals = computed<Meal[]>(() =>
   height: 552rpx;
   margin-top: 0;
   background-color: #E6F8EF;
-  background-image: linear-gradient( #E6F8EF 0%, #F2FAF5 100%);
+  background-image: linear-gradient( #F2FAF5 0%, #E6F8EF 100%);
   border-bottom-left-radius: 40rpx;
   border-bottom-right-radius: 40rpx;
 }
-/* 独立底层背景：柔和底色渐变 + 流体斑块 + 装饰气泡星芒（bg.svg） */
+/* 独立底层背景：柔和底色渐变 + 流体斑块 + 装饰气泡星芒（bg.svg）。收窄至 324 使卡片右缘退出右列文字（346）与 goal-pill 的领地 */
 .bottle-bg {
   position: absolute;
   left: 0rpx;
-  top: 88rpx;
-  width: 352rpx;
-  height: 352rpx;
+  top: 96rpx;
+  width: 324rpx;
+  height: 324rpx;
   pointer-events: none;
 }
 /* 左侧叶子：尺寸雅致（128x128），从瓶身左后方向左上方舒展，旋转支点在茎部右下方（112rpx 122rpx） */
 .leaf-left {
   position: absolute;
-  left: 12rpx;
+  left: 0rpx;
   top: 236rpx;
   width: 128rpx;
   height: 128rpx;
@@ -588,7 +589,7 @@ const meals = computed<Meal[]>(() =>
 /* 右侧叶子：尺寸雅致（124x124），从瓶身右后方向右上方舒展，旋转支点在茎部左下方（14rpx 118rpx） */
 .leaf-right {
   position: absolute;
-  left: 220rpx;
+  left: 196rpx;
   top: 240rpx;
   width: 124rpx;
   height: 124rpx;
@@ -600,7 +601,7 @@ const meals = computed<Meal[]>(() =>
 }
 .bottle-wrap {
   position: absolute;
-  left: 72rpx;
+  left: 60rpx;
   top: 76rpx;
   width: 208rpx;
   height: 336rpx;
@@ -634,12 +635,13 @@ const meals = computed<Meal[]>(() =>
   height: 336rpx;
   pointer-events: none;
 }
-/* 贴纸：由右上悬空改为右列流内首段（去整画布白雾层后按内容边渲染），填充右列上半空白 */
+/* 贴纸：挂 hero 顶部空白带（导航与瓶卡之间），下缘轻搭瓶卡顶缘成"贴"的动作；宽高比 840:620 与素材一致 */
 .hm-sticker {
-  width: 120rpx;
-  height: 118rpx;
-  align-self: flex-end;
-  margin-bottom: 8rpx;
+  position: absolute;
+  left: 16rpx;
+  top: 6rpx;
+  width: 140rpx;
+  height: 103rpx;
   pointer-events: none;
 }
 .hero-text {
