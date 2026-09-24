@@ -1,7 +1,7 @@
 
 <template>
   <view class="page">
-    <!-- [变更日志] 2026-09-24: Hero 水瓶液体由 CSS 水波图重构为 BottleLiquid Canvas 2D 物理引擎渲染；瓶身/刻度/叶片独立分层，废弃 liquid_wave 水体渐变头图 -->
+    <!-- [变更日志] 2026-09-24: Hero 水瓶液体由 CSS 水波图重构为 BottleLiquid Canvas 2D 物理引擎渲染；瓶身/刻度/叶片独立分层，废弃 liquid_wave 水体渐变头图。同日重排第一批：补定义 status-text-coral/amber/green 死类（超标报警色此前静默失效）、顶部带压缩（spacer 220→190 / hero 470→440）、贴纸由右上悬空改入右列流内（并清除整画布 alpha≈10 白雾层）、删悬空小 leaf 改状态色竖条、宏量/餐次字号降档拉开层级阶梯 -->
     <!-- 标题与操作栏（顶栏常驻+日期整合，对齐设计图规范，保证日期完全外露） -->
     <view class="hm-nav" :style="{ paddingTop: sbH + 'px' }">
       <view class="hm-nav-inner">
@@ -52,11 +52,11 @@
         <!-- 刻度层（最上）：水位上涨后刻度仍需可读，与玻璃层同源同几何 -->
         <image class="bottle-ticks" :src="'/static/home/pingzi_tick.svg'" mode="aspectFit"></image>
       </view>
-      <image class="sticker" :src="'/static/home/sticker.png'" mode="aspectFit"></image>
       <view class="hero-text">
+        <image class="hm-sticker" :src="'/static/home/sticker.png'" mode="aspectFit"></image>
         <view class="remain-head">
+          <view class="hm-status-bar" :style="{ backgroundColor: calStatus.color }"></view>
           <text class="remain-label" :class="calStatus.textClass">{{ remainCal >= 0 ? '还能吃' : '已超标' }}</text>
-          <image class="remain-leaf" :src="'/static/home/leaf.png'" mode="aspectFit"></image>
         </view>
         <view class="remain-num-row">
           <text class="remain-num" :class="calStatus.textClass">{{ Math.abs(remainCal) }}</text>
@@ -163,7 +163,7 @@ try {
 }
 
 // 顶栏占位高度：原生端 :style 不接受 rpx+px 跨单位 calc，按 750 稿宽在 UTS 侧折算为 px
-const headerSpacerH = (220 / 750 * winW + sbH) + 'px'
+const headerSpacerH = (190 / 750 * winW + sbH) + 'px'
 
 // TabBar 随滚动渐显（#29）已于 2026-09-22 随液态玻璃胶囊重构整体废弃：新胶囊恒常可见，
 // 本页因此不再需要任何滚动监听（#28 定案的常驻标题块 .hm-nav 无阈值）
@@ -551,7 +551,7 @@ const meals = computed<Meal[]>(() =>
 }
 .hero {
   position: relative;
-  height: 470rpx;
+  height: 440rpx;
   margin-top: 0;
   background-color: #E6F8EF;
   background-image: linear-gradient( #E6F8EF 0%, #F2FAF5 100%);
@@ -562,7 +562,7 @@ const meals = computed<Meal[]>(() =>
 .bottle-bg {
   position: absolute;
   left: 0rpx;
-  top: 116rpx;
+  top: 88rpx;
   width: 352rpx;
   height: 352rpx;
   pointer-events: none;
@@ -571,7 +571,7 @@ const meals = computed<Meal[]>(() =>
 .leaf-left {
   position: absolute;
   left: 12rpx;
-  top: 256rpx;
+  top: 236rpx;
   width: 128rpx;
   height: 128rpx;
   pointer-events: none;
@@ -584,7 +584,7 @@ const meals = computed<Meal[]>(() =>
 .leaf-right {
   position: absolute;
   left: 220rpx;
-  top: 260rpx;
+  top: 240rpx;
   width: 124rpx;
   height: 124rpx;
   pointer-events: none;
@@ -596,7 +596,7 @@ const meals = computed<Meal[]>(() =>
 .bottle-wrap {
   position: absolute;
   left: 72rpx;
-  top: 96rpx;
+  top: 76rpx;
   width: 208rpx;
   height: 336rpx;
 }
@@ -629,27 +629,33 @@ const meals = computed<Meal[]>(() =>
   height: 336rpx;
   pointer-events: none;
 }
-.sticker {
-  position: absolute;
-  right: 8rpx;
-  top: 80rpx;
-  width: 200rpx;
-  height: 196rpx;
+/* 贴纸：由右上悬空改为右列流内首段（去整画布白雾层后按内容边渲染），填充右列上半空白 */
+.hm-sticker {
+  width: 120rpx;
+  height: 118rpx;
+  align-self: flex-end;
+  margin-bottom: 8rpx;
+  pointer-events: none;
 }
 .hero-text {
   position: absolute;
   left: 346rpx;
-  bottom: 30rpx;
+  right: 20rpx;
+  top: 36rpx;
+  bottom: 24rpx;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 .remain-head {
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
   width: 220rpx;
 }
-.remain-leaf {
-  width: 38rpx;
-  height: 36rpx;
+.hm-status-bar {
+  width: 6rpx;
+  height: 34rpx;
+  border-radius: 3rpx;
+  margin-right: 12rpx;
 }
 .remain-label {
   font-size: 38rpx;
@@ -672,6 +678,17 @@ const meals = computed<Meal[]>(() =>
   color: #0A5A40;
   margin-left: 12rpx;
   margin-bottom: 20rpx;
+}
+/* 状态色类由 stores/goal.ts getCalorieStatus().textClass 动态绑定；
+   必须定义在 .remain-label/.remain-num 之后，同特异度后者胜出 */
+.status-text-coral {
+  color: #FF9E7D;
+}
+.status-text-amber {
+  color: #E8B54D;
+}
+.status-text-green {
+  color: #0A5A40;
 }
 .consumed {
   font-size: 26rpx;
@@ -723,7 +740,7 @@ const meals = computed<Meal[]>(() =>
   height: 48rpx;
 }
 .macro-num {
-  font-size: 42rpx;
+  font-size: 32rpx;
   font-weight: bold;
   color: #0A5A40;
   margin-top: 4rpx;
@@ -815,7 +832,7 @@ const meals = computed<Meal[]>(() =>
   color: #8FAEAF;
 }
 .meal-kcal {
-  font-size: 34rpx;
+  font-size: 30rpx;
   font-weight: bold;
   color: #0A5A40;
 }

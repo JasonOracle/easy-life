@@ -277,3 +277,22 @@
 - Shake 搅动：idle vs shake 22,111 像素 >30 diff → **PASS**
 - Pour 倒水：前序会话 V1~V6 帧序列已验收 → **PASS（本轮未复跑，代码路径无变更）**
 - 编译：bytes/GenComponentsBottleLiquidSharedData.*.bytes mtime=02:12 → **PASS**
+
+### 2026-09-24 19:34:00 — 首页 Hero 重排第一批落地 + SettleBadge/FoodPicker 安卓端全量验收
+
+**背景**：Boss 反馈 Hero「杂乱、上空白大、右侧背景图模糊」。经全页分析定案 S1+S2+S5+S8+S9 为第一批（S4/S6/S7/贴纸矢量化留待拍板）。先提交存量（`1928257`）再动刀。
+
+**交付物**（`app/pages/home/Home.uvue` + `app/static/home/sticker.png`）：
+1. **S1 死类修复**：`stores/goal.ts` 返回的 `status-text-coral/amber/green` 此前无任何 `<style>` 定义→超标珊瑚色静默失效。补齐三类定义，且置于 `.remain-label/.remain-num` 之后（同特异度后者胜）
+2. **S2 顶部带压缩**：`headerSpacerH` 220→190rpx 折算、`.hero` 470→440rpx；瓶底纹 116→88、瓶身 96→76、叶片 256/260→236/240 同步上移
+3. **S5 贴纸入列**：右上悬空 `<image class="sticker">` 删除，改为 `.hero-text` 流内首段（`align-self:flex-end`，120×118rpx）；`.hero-text` 由 bottom 锚定改为全高列（top36/bottom24 + `justify-content:flex-end`）
+4. **S8 状态头收组**：悬空小 leaf 删除，改 `.hm-status-bar` 6rpx 状态色竖条与「已超标」文字成组（`remain-head` 去 space-between）
+5. **S9 字号阶梯**：`.macro-num` 42→32rpx、`.meal-kcal` 34→30rpx，与 hero 数字拉开层级
+6. **贴纸模糊真因**：非透明留白，而是整画布 alpha≈10 白雾层（早期 PIL 判读把像素值当坐标致误诊，已纠正）。处置：alpha<60→0 去雾 + 按内容边裁切 252×248→246×242
+
+**安卓模拟器验收证据**（MuMu 1280×2772，完整 `cli.exe launch --cleanCache` 重编排除假绿）：
+- SettleBadge 环形：第一次添加 `debug/shots/settle_2.png`（琥珀环+滚动 210）、第二次连续添加 `settle2_b.png`（环在场 223/珊瑚底轨）→ **顽疾「第二次添加环消失」闭环**
+- FoodPicker 选中态去色块：详情步下划线 `picker_detail.png`；「更换」回列表左竖条 `picker_change.png` + 放大 `rice_row_zoom.png`（约 6px 薄荷竖条，扫色 #1FBF8F）
+- Hero 第一批：Boss 7:12 实拍确认珊瑚染色上屏、竖条成组、贴纸清晰、宏量降档
+
+**待办**：批次二（S4 右缘对齐轴／S6 vs S7 大结构二选一／贴纸矢量化）等 Boss 拍板；MP-WEIXIN 端全量回归未跑（automator ws://9420 当时未连）。
