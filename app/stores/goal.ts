@@ -1,4 +1,4 @@
-
+// [变更日志] 2026-09-24: 修复 catch 块残缺注释导致的编译格式塌陷（存储失败不阻塞写入）
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
@@ -27,7 +27,8 @@ export const useGoalStore = defineStore('goal', () => {
       try {
         uni.setStorageSync(STORAGE_KEY, JSON.stringify(calorieGoal.value))
       } catch (e) {
-        //       }
+        // 存储失败不阻塞
+      }
     }
   }
 

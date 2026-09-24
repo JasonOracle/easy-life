@@ -1,10 +1,9 @@
-<!-- [变更日志] 2026-09-24: 修复第二次添加时环形动画消失问题 → 给 canvas 绑定动态 :key="canvasKey"，每次 show=true 时递增 key 强制销毁重建 DOM 节点 -->
 <template>
   <view class="sb-overlay" :class="{ 'sb-overlay-active': active }" v-if="render">
     <view class="sb-badge" :class="{ 'sb-badge-active': active, 'sb-badge-out': exiting, 'sb-badge-low': lowMode }">
       <!-- 环形进度：底轨为纯 CSS 圆环（双端同构），画布只画进度弧 -->
       <view class="sb-track"></view>
-      <canvas class="sb-canvas" type="2d" id="sb-ring" :key="canvasKey" @ready="onCanvasReady"></canvas>
+      <canvas class="sb-canvas" type="2d" id="sb-ring" @ready="onCanvasReady"></canvas>
       <view class="sb-num-stack">
         <text class="sb-big-num">{{ shownText }}</text>
         <text class="sb-unit">kcal</text>
@@ -21,7 +20,8 @@
 </template>
 
 <script setup lang="uts">
-import { ref, computed, watch, getCurrentInstance, onMounted, onUnmounted, nextTick } from 'vue'
+// [变更日志] 2026-09-24: 环形动画根因修复 → 废弃 nextTick/200/400/600ms/tick 五路抢跑初始化（surface 未附加时 getContext 拿到死上下文并锁死 readyFired，真 @ready 反被吞），改为 @ready 唯一入口＋500ms 单次兜底（对齐 BottleLiquid 范式）；删除无响应性的 :key="canvasKey"；变更日志按 ADR-003 #7 落位 script 内，严禁 .uvue 根层 HTML 注释
+import { ref, computed, watch, getCurrentInstance, onUnmounted, nextTick } from 'vue'
 import { useDeviceStore } from '../stores/device'
 import { useSettingsStore } from '../stores/settings'
 
@@ -65,10 +65,7 @@ let exitTimer = 0
 let closeTimer = 0
 let activeTimer = 0
 let animStart = 0
-let canvasRetry1 = 0
-let canvasRetry2 = 0
-let canvasRetry3 = 0
-let canvasKey = 0
+let initFallback = 0
 
 // 画布尺寸状态记录
 let cvWidth = 148
@@ -107,9 +104,11 @@ const shownText = computed<string>(() => '' + Math.round(props.kcal * progress.v
 const budgetText = computed<string>(() => '今日 ' + fmt(props.after) + ' / ' + fmt(props.goal) + ' kcal')
 const mealText = computed<string>(() => props.meal + ' · 已加入')
 
-function onCanvasReady(): void {
-  if (readyFired) return
+/** App 端画布初始化：仅允许由 @ready（surface 附加信号）或 500ms 兜底触发，
+    严禁在挂载同帧抢跑——此时 getContext 会拿到绑在未附加缓冲区上的死上下文且非 null，判空失效 */
+function initAppCanvas(): void {
   // #ifdef APP
+  if (readyFired || !render.value) return
   try {
     const el = uni.getElementById('sb-ring') as UniCanvasElement | null
     if (el == null) return
@@ -132,8 +131,16 @@ function onCanvasReady(): void {
   // #endif
 }
 
+/** canvas @ready 事件：App 端 surface 就绪的唯一首选信号 */
+function onCanvasReady(): void {
+  // #ifdef APP
+  initAppCanvas()
+  // #endif
+}
+
 function initCanvasMp(): void {
   // #ifdef MP-WEIXIN
+  if (readyFired) return
   if (inst != null && inst.proxy != null) {
     uni.createSelectorQuery()
       .in(inst.proxy)
@@ -149,6 +156,7 @@ function initCanvasMp(): void {
           canvas.height = cvHeight * dpr
           ringCtx = canvas.getContext('2d')
           ringCtx.scale(dpr, dpr)
+          readyFired = true
           drawRing()
         }
       })
@@ -227,14 +235,9 @@ function drawRing(): void {
 function tick(): void {
   const p = easeOutCubic((Date.now() - animStart) / RING_MS)
   progress.value = p
-  if (!readyFired) {
-    initCanvasMp()
-    // #ifdef APP
-    onCanvasReady()
-    // #endif
-  }
   drawRing()
-  if (p >= 1 && ringCtx != null) {
+  if (p >= 1) {
+    // 收尾无条件停表；若 ctx 此刻仍未就绪，稍后初始化路径会以 progress=1 自补画终态
     clearInterval(ringTimer)
     ringTimer = 0
     drawRing()
@@ -246,9 +249,7 @@ function clearTimers(): void {
   if (exitTimer != 0) { clearInterval(exitTimer); exitTimer = 0 }
   if (closeTimer != 0) { clearInterval(closeTimer); closeTimer = 0 }
   if (activeTimer != 0) { clearTimeout(activeTimer); activeTimer = 0 }
-  if (canvasRetry1 != 0) { clearTimeout(canvasRetry1); canvasRetry1 = 0 }
-  if (canvasRetry2 != 0) { clearTimeout(canvasRetry2); canvasRetry2 = 0 }
-  if (canvasRetry3 != 0) { clearTimeout(canvasRetry3); canvasRetry3 = 0 }
+  if (initFallback != 0) { clearTimeout(initFallback); initFallback = 0 }
 }
 
 /** 离场结束，兜底同步父级关闭态 */
@@ -286,50 +287,27 @@ watch(
   (v: boolean) => {
     clearTimers()
     if (v) {
-      // Force new DOM node creation to avoid stale canvas context
-      canvasKey++
       render.value = true
       readyFired = false
       ringCtx = null
+      // #ifdef MP-WEIXIN
+      // 小程序端：节点挂载后走一次 selectorQuery（异步回调自带就绪语义）
       nextTick(() => {
         initCanvasMp()
-        // #ifdef APP
-        onCanvasReady()
-        // #endif
       })
+      // #endif
+      // #ifdef APP
+      // 原生端：@ready 为首选信号；500ms 后仍未就绪才手动补一次（App @ready 偶发不触发，BottleLiquid 同款兜底）
+      initFallback = setTimeout(() => {
+        initAppCanvas()
+        initFallback = 0
+      }, 500) as unknown as number
+      // #endif
       activeTimer = setTimeout(() => {
         active.value = true
         activeTimer = 0
       }, 50) as unknown as number
       open()
-      // Multi-round canvas init retries for Vapor bytecode timing
-      canvasRetry1 = setTimeout(() => {
-        if (!readyFired && render.value) {
-          initCanvasMp()
-          // #ifdef APP
-          onCanvasReady()
-          // #endif
-        }
-        canvasRetry1 = 0
-      }, 200) as unknown as number
-      canvasRetry2 = setTimeout(() => {
-        if (!readyFired && render.value) {
-          initCanvasMp()
-          // #ifdef APP
-          onCanvasReady()
-          // #endif
-        }
-        canvasRetry2 = 0
-      }, 400) as unknown as number
-      canvasRetry3 = setTimeout(() => {
-        if (!readyFired && render.value) {
-          initCanvasMp()
-          // #ifdef APP
-          onCanvasReady()
-          // #endif
-        }
-        canvasRetry3 = 0
-      }, 600) as unknown as number
     } else {
       progress.value = 0
       exiting.value = false
@@ -340,18 +318,6 @@ watch(
     }
   }
 )
-
-onMounted(() => {
-  // Fallback for initial mount (already covered by watch+retries, kept as safety net)
-  setTimeout(() => {
-    if (!readyFired && render.value) {
-      initCanvasMp()
-      // #ifdef APP
-      onCanvasReady()
-      // #endif
-    }
-  }, 800)
-})
 
 onUnmounted(() => { clearTimers() })
 </script>

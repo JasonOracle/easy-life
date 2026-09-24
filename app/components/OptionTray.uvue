@@ -11,11 +11,6 @@
     >
       <view class="float" :class="{ 'float-on': optItem.key === modelValue, 'float-card': optItem.key === modelValue && optItem.art === '' }">
         <view class="art-wrap" v-if="optItem.art !== ''">
-          <view
-            class="halo"
-            v-if="optItem.key === modelValue"
-            :style="{ width: haloW(optItem) + 'px', height: haloH(optItem) + 'px', marginLeft: (-haloW(optItem) / 2) + 'px', top: (optItem.artH - haloH(optItem)) / 2 + 'px' }"
-          ></view>
           <view class="art-row">
             <image
               class="opt-art"
@@ -26,26 +21,20 @@
               :style="{ width: optItem.artW + 'px', height: optItem.artH + 'px', opacity: optItem.key === modelValue ? 1 : (optItem.solid ? 0.85 : 0.62) }"
             ></image>
           </view>
-          <image
-            v-if="optItem.key === modelValue"
-            class="opt-shadow"
-            :src="'/static/common/shadow512.png'"
-            mode="scaleToFill"
-            :style="{ width: shadowW(optItem) + 'px', height: shadowH(optItem) + 'px', marginLeft: (-shadowW(optItem) / 2) + 'px', bottom: (2 - shadowH(optItem) / 2) + 'px' }"
-          ></image>
         </view>
         <text class="opt-name" :class="{ 'opt-name-on': optItem.key === modelValue }">{{ optItem.label }}</text>
         <text class="opt-sub" :class="{ 'opt-sub-on': optItem.key === modelValue }" v-if="optItem.sub !== ''">{{ optItem.sub }}</text>
+        <view class="opt-underline" v-if="optItem.key === modelValue"></view>
       </view>
     </view>
   </view>
 </template>
 
 <script setup lang="uts">
+// [变更日志] 2026-09-24: 选中态去色块 → 废弃 .halo 实心光晕与 shadow512.png 薄荷色落地影（贴图本身 #0A4F3D 调，白底渲染成绿光），选中态＝抬升＋文字加粗＋薄荷绿下划短线 .opt-underline；日志落位 script 内（ADR-003 #7）
 /**
  * 单选底槽（分量/糖包等单选组通用）。
- * 设计哲学（pOYw3）：「去卡片、用体积与光」——选中件不套白卡，靠 抬升＋光晕＋落地影＋文字加粗 表达；
- * 光晕/落地影按素材体积公式动态算（接触宽逐素材，由调用方随 TrayOption.contact 传入）。
+ * 设计哲学（pOYw3）：「去卡片」——选中件不套白卡、不用任何垫底色块，靠 抬升＋文字加粗＋薄荷绿下划短线 表达。
  * 未选中压暗：透明/浅色素材 0.62，实心不透明素材（金属砝码）0.85。
  * 动效：220ms 位移/透明过渡；选中 scale 0.94→1 弹性入场。
  */
@@ -75,29 +64,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', v: string): void
 }>()
-
-/** 组宽：多颗砝码按整排算（颗间 4px） */
-function groupW(opt: TrayOption): number {
-  return opt.artW * opt.count + 4 * (opt.count - 1)
-}
-
-function haloW(opt: TrayOption): number {
-  return Math.round(groupW(opt) * 1.5)
-}
-
-function haloH(opt: TrayOption): number {
-  return Math.round(Math.max(opt.artH * 1.35, groupW(opt) * 0.45))
-}
-
-function shadowW(opt: TrayOption): number {
-  const ar = groupW(opt) / opt.artH
-  const k = ar >= 1.6 ? 1.5 : 1.35
-  return Math.round(groupW(opt) * opt.contact * k)
-}
-
-function shadowH(opt: TrayOption): number {
-  return Math.max(10, Math.round(shadowW(opt) * 0.16))
-}
 
 function select(key: string): void {
   if (key === props.modelValue) {
@@ -130,12 +96,6 @@ function select(key: string): void {
   position: relative;
   align-items: center;
   overflow: visible;
-}
-.halo {
-  position: absolute;
-  left: 50%;
-  border-radius: 90rpx;
-  background-color: rgba(46, 207, 160, 0.22);
 }
 .art-row {
   flex-direction: row;
@@ -181,8 +141,13 @@ function select(key: string): void {
 .opt-sub-on {
   color: #0A7A5C;
 }
-.opt-shadow {
-  position: absolute;
-  left: 50%;
+/* 选中态唯一色彩信号：文字下方居中的薄荷绿短线（替代旧 halo 实心光晕色块，
+   白底器皿图叠色块观感差；uvue 无伪元素/radial-gradient，短线是最稳的表达） */
+.opt-underline {
+  width: 48rpx;
+  height: 6rpx;
+  border-radius: 3rpx;
+  background-color: #1FBF8F;
+  margin-top: 10rpx;
 }
 </style>

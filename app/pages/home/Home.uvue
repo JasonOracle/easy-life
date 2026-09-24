@@ -1,6 +1,7 @@
 
 <template>
   <view class="page">
+    <!-- [变更日志] 2026-09-24: Hero 水瓶液体由 CSS 水波图重构为 BottleLiquid Canvas 2D 物理引擎渲染；瓶身/刻度/叶片独立分层，废弃 liquid_wave 水体渐变头图 -->
     <!-- 标题与操作栏（顶栏常驻+日期整合，对齐设计图规范，保证日期完全外露） -->
     <view class="hm-nav" :style="{ paddingTop: sbH + 'px' }">
       <view class="hm-nav-inner">
@@ -19,7 +20,7 @@
     </view>
 
     <!-- 顶栏文档流占位层（为常驻导航栏腾出充足空间，确保日期完全外露不被切） -->
-    <view class="header-spacer" :style="{ height: 'calc(220rpx + ' + sbH + 'px)' }"></view>
+    <view class="header-spacer" :style="{ height: headerSpacerH }"></view>
 
     <!-- Hero（常驻标题块：紧接导航栏下方，纯净绿色渐变底） -->
     <view class="hero">
@@ -41,24 +42,15 @@
         :src="'/static/home/yezi-you.svg'"
         mode="aspectFit"
       ></image>
-      <!-- 倒水水流视觉条（pour 时激活，从左上切入瓶口） -->
-      <view class="pour-stream" :class="{ 'pour-stream-active': pourStreamActive }"></view>
       <!-- 水瓶交互主体：底层内胆流体 + 表层纯净瓶身本体（pingzi.svg，独立物理动效） -->
-      <view class="bottle-wrap" :style="bottleAnimStyle" @click="onBottleTap" @longpress="onBottleLongPress">
-        <view class="bottle-cavity">
-          <view class="bottle-liquid" :class="liquidClass" :style="liquidStyle">
-            <!-- 双层无缝正弦波浪液面 -->
-            <image class="wave-back" :style="{ transform: 'translateX(' + (-waveX) + 'rpx)' }" :src="'/static/home/wave_back.png'" mode="scaleToFill"></image>
-            <image class="wave-front" :style="{ transform: 'translateX(' + waveX + 'rpx)' }" @transitionend="onWaveEnd" :src="'/static/home/wave_front.png'" mode="scaleToFill"></image>
-            <!-- 液体深层流动晶莹反光带 -->
-            <view class="liquid-glare"></view>
-            <!-- 向上漂浮微气泡 -->
-            <view class="bubble bubble-1"></view>
-            <view class="bubble bubble-2"></view>
-          </view>
-        </view>
-        <!-- 纯净瓶身 SVG（含刻度线、侧高光、瓶盖与投影，完全无叶子粘连） -->
+      <view class="bottle-wrap" :style="bottleAnimStyle" @click="onBottleTap" @longpress="onBottleLongPress" @touchstart="onBottleTouchStart" @touchend="onBottleTouchEnd">
+        <!-- 玻璃层（最底）：App 端 SVG 渲染不识别 evenodd 镂空，瓶体在原生端是实心色块，故液体必须叠在它之上 -->
         <image class="bottle-mask" :src="'/static/home/pingzi.svg'" mode="aspectFit"></image>
+        <view class="bottle-cavity">
+          <BottleLiquid :ratio="liquidRatio" :color-mode="liquidColorMode" :cmd-rev="liquidCmdRev" :cmd-kind="liquidCmdKind"></BottleLiquid>
+        </view>
+        <!-- 刻度层（最上）：水位上涨后刻度仍需可读，与玻璃层同源同几何 -->
+        <image class="bottle-ticks" :src="'/static/home/pingzi_tick.svg'" mode="aspectFit"></image>
       </view>
       <image class="sticker" :src="'/static/home/sticker.png'" mode="aspectFit"></image>
       <view class="hero-text">
@@ -160,12 +152,18 @@ import { ref, onMounted } from 'vue'
 
 // 状态栏高度（自定义导航时顶栏避让）
 let sbH = 0
+let winW = 375
 try {
   const sysInfo = uni.getSystemInfoSync()
   sbH = sysInfo.statusBarHeight ?? 0
+  winW = sysInfo.windowWidth ?? 375
 } catch (e) {
   sbH = 0
+  winW = 375
 }
+
+// 顶栏占位高度：原生端 :style 不接受 rpx+px 跨单位 calc，按 750 稿宽在 UTS 侧折算为 px
+const headerSpacerH = (220 / 750 * winW + sbH) + 'px'
 
 // TabBar 随滚动渐显（#29）已于 2026-09-22 随液态玻璃胶囊重构整体废弃：新胶囊恒常可见，
 // 本页因此不再需要任何滚动监听（#28 定案的常驻标题块 .hm-nav 无阈值）
@@ -196,6 +194,7 @@ import { useFoodStore } from '../../stores/food'
 import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import { getFoodById, computeEntry } from '../../stores/food'
 import { playSound, triggerHaptic } from '../../stores/settings'
+import BottleLiquid from '../../components/BottleLiquid.uvue'
 
 /**
  * 接 store 读数（今日种子精确还原 v2 行：早 420 / 午 560 / 晚 390，宏量 68/156/42）。
@@ -211,18 +210,28 @@ const macroP = computed(() => Math.round(food.totalProtein))
 const macroC = computed(() => Math.round(food.totalCarbs))
 const macroF = computed(() => Math.round(food.totalFat))
 
-// 瓶身内胆几何参数与最高水位硬约束（Boss 规则：最高不超过 80% 高度）
+// 瓶身内胆几何参数与最高水位硬约束（Boss 规则：最高不超过肩线，视觉上液体不进入瓶颈收窄区）
 const CAVITY_HEIGHT = 236 // 与 CSS .bottle-cavity (236rpx) 一致
-const MAX_FILL_RATIO = 0.80
+const MAX_FILL_RATIO = 0.68 // 对应瓶身肩线位置（原 0.80 会溢出到瓶颈视觉区）
 
 // 瓶身流体动效状态
 const bottleScale = ref(1)
 const bottleRotate = ref(0)
 const bottleTranslateX = ref(0)
 const bottleTransition = ref('transform 0.08s ease-out')
-const liquidWave = ref(0) // 波浪微振位移 (rpx)
-const pourOffset = ref(0) // 倒水注入时的弹性超冲位移 (rpx)
-const pourStreamActive = ref(false) // 倒水水流条纹是否激活
+
+// New liquid engine props (replaces liquidWave/pourOffset/waveX)
+const liquidRatio = computed<number>(() => {
+  const g = goal.calorieGoal > 0 ? goal.calorieGoal : 2000
+  return Math.min(Math.max((food.totalCal / g) * MAX_FILL_RATIO, 0.06), MAX_FILL_RATIO)
+})
+const liquidColorMode = computed<string>(() => {
+  if (calStatus.value.type === 'coral') return 'coral'
+  if (calStatus.value.type === 'amber') return 'amber'
+  return 'green'
+})
+const liquidCmdRev = ref(0)
+const liquidCmdKind = ref('')
 
 const bottleAnimStyle = computed(() => {
   return {
@@ -239,11 +248,6 @@ const leafLeftDir = ref(1)
 const leafRightDir = ref(1)
 const leafSwinging = ref(false)
 
-// 水面波浪往复流动状态
-const waveX = ref(0)
-const waveDir = ref(1)
-const waveSwinging = ref(false)
-
 function onLeafLeftEnd(): void {
   if (!leafSwinging.value) return
   leafLeftDir.value = -leafLeftDir.value
@@ -256,61 +260,16 @@ function onLeafRightEnd(): void {
   leafRightDeg.value = -2.2 * leafRightDir.value
 }
 
-function onWaveEnd(): void {
-  if (!waveSwinging.value) return
-  waveDir.value = -waveDir.value
-  waveX.value = waveDir.value > 0 ? 0 : -128
-}
-
-// 入场注水动效：进页面先置为底部 (CAVITY_HEIGHT - 12)，挂载后平滑注水落位到真实水位
-const introReady = ref(false)
 onMounted(() => {
-  setTimeout(() => {
-    introReady.value = true
-  }, 100)
   leafSwinging.value = true
-  waveSwinging.value = true
   setTimeout(() => {
     leafLeftDeg.value = 2.5
     leafRightDeg.value = -2.2
   }, 200)
-  setTimeout(() => {
-    waveX.value = -128
-  }, 100)
 })
 
 onUnmounted(() => {
   leafSwinging.value = false
-  waveSwinging.value = false
-})
-
-// 液位高度计算：内腔有效高度 236rpx，根据已摄入/目标百分比映射为 translateY
-const liquidOffsetY = computed<number>(() => {
-  if (!introReady.value) {
-    return CAVITY_HEIGHT - 12 // 初始极低水位，等待注水升起
-  }
-  const g = goal.calorieGoal > 0 ? goal.calorieGoal : 2000
-  // 水位限制在 0.06 ~ 0.80 之间，严格遵守 80% 限高规则，预留 20% 注水冲击空腔
-  const ratio = Math.min(Math.max((food.totalCal / g) * MAX_FILL_RATIO, 0.06), MAX_FILL_RATIO)
-  // translateY = CAVITY_HEIGHT * (1 - ratio) + 微波动效偏移 + 倒水超冲位移
-  const baseOffset = CAVITY_HEIGHT * (1 - ratio)
-  return Math.max(0, baseOffset + liquidWave.value + pourOffset.value)
-})
-
-const liquidStyle = computed(() => {
-  // 水体受瓶身倾斜反作用力的惯性剪切（瓶身右倾时液体向左下倾斜）
-  const skewDeg = -bottleRotate.value * 0.45
-  return {
-    transform: `translateY(${liquidOffsetY.value}rpx) skewX(${skewDeg}deg)`,
-    transition: 'transform 0.65s cubic-bezier(0.34, 1.25, 0.64, 1)'
-  }
-})
-
-// 液体颜色与全局卡路里状态联动（保持薄荷治愈系清透轻绿设计）
-const liquidClass = computed(() => {
-  if (calStatus.value.type === 'coral') return 'liquid-coral'
-  if (calStatus.value.type === 'amber') return 'liquid-amber'
-  return 'liquid-green'
 })
 
 let tapTimers: any[] = []
@@ -327,49 +286,55 @@ function onBottleTap() {
   triggerHaptic('light')
   clearTapTimers()
 
+  // Bottle body pendulum kick (engine handles liquid response)
   bottleScale.value = 1
   bottleTranslateX.value = 0
   bottleTransition.value = 'transform 0.075s cubic-bezier(0.2, 0, 0, 1)'
-
-  // fluid-interaction-expert: 二阶欠阻尼钟摆甩水模型（总历时约 385ms）
-  // 1. 先向左蓄势 -14°
   bottleRotate.value = -14
-  liquidWave.value = 28
 
   tapTimers.push(setTimeout(() => {
-    // 2. 猛烈反向甩动过冲 +24°
     bottleRotate.value = 24
-    liquidWave.value = -32
     tapTimers.push(setTimeout(() => {
-      // 3. 回摆 -16°
       bottleRotate.value = -16
-      liquidWave.value = 20
       tapTimers.push(setTimeout(() => {
-        // 4. 余摆 +8°
         bottleRotate.value = 8
-        liquidWave.value = -10
         tapTimers.push(setTimeout(() => {
-          // 5. 微摆 -3°
           bottleRotate.value = -3
-          liquidWave.value = 4
           tapTimers.push(setTimeout(() => {
-            // 6. 归零平息
             bottleRotate.value = 0
-            liquidWave.value = 0
           }, 60))
         }, 65))
       }, 70))
     }, 75))
   }, 85))
+
+  // Send tap command to liquid engine
+  liquidCmdKind.value = 'tap'
+  liquidCmdRev.value++
 }
 
 let pressTimers: any[] = []
+let isHolding = false
 
 function clearPressTimers() {
   for (let i = 0; i < pressTimers.length; i++) {
     clearTimeout(pressTimers[i])
   }
   pressTimers = []
+}
+
+function onBottleTouchStart(): void {
+  isHolding = true
+}
+
+function onBottleTouchEnd(): void {
+  isHolding = false
+  liquidCmdKind.value = 'shake_end'
+  liquidCmdRev.value++
+  clearPressTimers()
+  // Decay bottle body motion
+  bottleTransition.value = 'transform 0.3s cubic-bezier(0.2, 0, 0, 1)'
+  bottleTranslateX.value = 0
 }
 
 function onBottleLongPress() {
@@ -381,30 +346,21 @@ function onBottleLongPress() {
   bottleRotate.value = 0
   bottleTransition.value = 'transform 0.035s ease-out'
 
-  // fluid-interaction-expert: 28Hz 高频密集微平移（纯 translateX: ±8rpx，不旋转不缩放）
-  bottleTranslateX.value = -8
-  liquidWave.value = 7
+  // Start agitation command
+  liquidCmdKind.value = 'shake_start'
+  liquidCmdRev.value++
 
-  pressTimers.push(setTimeout(() => {
-    bottleTranslateX.value = 8
-    liquidWave.value = -7
+  // Sustained body shake while held
+  let dir = 1
+  function shakeStep(amp: number): void {
+    if (!isHolding) return
+    bottleTranslateX.value = amp * dir
+    dir = -dir
     pressTimers.push(setTimeout(() => {
-      bottleTranslateX.value = -6
-      liquidWave.value = 5
-      pressTimers.push(setTimeout(() => {
-        bottleTranslateX.value = 6
-        liquidWave.value = -5
-        pressTimers.push(setTimeout(() => {
-          bottleTranslateX.value = -3
-          liquidWave.value = 2
-          pressTimers.push(setTimeout(() => {
-            bottleTranslateX.value = 0
-            liquidWave.value = 0
-          }, 25))
-        }, 25))
-      }, 30))
-    }, 30))
-  }, 35))
+      shakeStep(Math.max(3, amp - 1))
+    }, 50))
+  }
+  shakeStep(8)
 }
 
 function onDateClick() {
@@ -495,48 +451,9 @@ function onAddConfirm(payload: AddPayload): void {
 }
 
 function onSettleClose(): void {
-  // 结算徽章完全退场，不播放倒水特效（根据用户要求移除）
-}
-
-function triggerPourEffect(): void {
-  // 激活水流条纹视觉（从左滑入瓶口，CSS animation 自动执行 1.3s 后自动隐藏）
-  pourStreamActive.value = true
-  setTimeout(() => {
-    pourStreamActive.value = false
-  }, 1300)
-
-  // 3. 物理倒水注水模拟：水柱重力冲入液面，水面下砸凹陷（-28rpx）→ 回弹涌浪（+24rpx）→ 阻尼平息
-  // 先延迟 180ms 让水流条纹先切入瓶口，再触发水面重力下砸
-  setTimeout(() => {
-    // 冲击下凹：translateY 增加 28rpx（视觉凹陷）
-    pourOffset.value = 28
-    liquidWave.value = -16
-    bottleScale.value = 0.985
-
-    setTimeout(() => {
-      // 冲击反冲涌浪：translateY 减少 24rpx（视觉上浮涌浪）
-      pourOffset.value = -24
-      liquidWave.value = 24
-      bottleScale.value = 1.015
-      setTimeout(() => {
-        // 次级回荡
-        pourOffset.value = 10
-        liquidWave.value = -12
-        bottleScale.value = 0.995
-        setTimeout(() => {
-          pourOffset.value = -4
-          liquidWave.value = 6
-          bottleScale.value = 1.005
-          setTimeout(() => {
-            // 平息归零
-            pourOffset.value = 0
-            liquidWave.value = 0
-            bottleScale.value = 1
-          }, 320)
-        }, 280)
-      }, 280)
-    }, 280)
-  }, 180)
+  // Trigger pour animation when settle badge closes
+  liquidCmdKind.value = 'pour'
+  liquidCmdRev.value++
 }
 
 const meals = computed<Meal[]>(() =>
@@ -676,23 +593,6 @@ const meals = computed<Meal[]>(() =>
   transition-duration: 2600ms;
   transition-timing-function: ease-in-out;
 }
-/* 倒水水流条：pour 动效激活时从左侧倾倒 */
-.pour-stream {
-  position: absolute;
-  top: 40rpx;
-  left: 40rpx;
-  width: 10rpx;
-  height: 140rpx;
-  border-radius: 5rpx;
-  background-image: linear-gradient(to bottom, rgba(125, 235, 199, 0) 0%, rgba(125, 235, 199, 0.7) 20%, rgba(31, 191, 143, 0.9) 100%);
-  opacity: 0;
-  pointer-events: none;
-  transform-origin: top center;
-}
-.pour-stream-active {
-  opacity: 0.8;
-  transform: rotate(-26deg);
-}
 .bottle-wrap {
   position: absolute;
   left: 72rpx;
@@ -713,76 +613,15 @@ const meals = computed<Meal[]>(() =>
   overflow: hidden;
   background-color: rgba(235, 248, 243, 0.4);
 }
-.bottle-liquid {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 236rpx;
-}
-/* 主题色清透轻绿治愈系水体质感 */
-.liquid-green {
-  background-color: #1FBF8F;
-  background-image: linear-gradient( #7DEBC7 0%, #2CD8A5 28%, #1AA87D 75%, #108A64 100%);
-}
-.liquid-amber {
-  background-color: #24C999;
-  background-image: linear-gradient( #86ECC8 0%, #29D2A0 35%, #18A67B 100%);
-}
-.liquid-coral {
-  background-color: #1FBF8F;
-  background-image: linear-gradient( #94F0D2 0%, #25CE9C 35%, #16A277 100%);
-}
-/* 液体内部高光反光带，赋予水体真实晶莹通透折射感 */
-.liquid-glare {
-  position: absolute;
-  top: 20rpx;
-  left: 16rpx;
-  width: 24rpx;
-  bottom: 30rpx;
-  background-color: rgba(255, 255, 255, 0.22);
-  border-radius: 12rpx;
-}
-.wave-back {
-  position: absolute;
-  top: -18rpx;
-  left: 0;
-  width: 256rpx;
-  height: 32rpx;
-  opacity: 0.65;
-  transition-property: transform;
-  transition-duration: 2200ms;
-  transition-timing-function: linear;
-}
-.wave-front {
-  position: absolute;
-  top: -14rpx;
-  left: 0;
-  width: 256rpx;
-  height: 32rpx;
-  opacity: 0.95;
-  transition-property: transform;
-  transition-duration: 2200ms;
-  transition-timing-function: linear;
-}
-.bubble {
-  position: absolute;
-  background-color: rgba(255, 255, 255, 0.75);
-  border-radius: 20rpx;
-}
-.bubble-1 {
-  bottom: 24rpx;
-  left: 36rpx;
-  width: 8rpx;
-  height: 8rpx;
-}
-.bubble-2 {
-  bottom: 12rpx;
-  right: 36rpx;
-  width: 6rpx;
-  height: 6rpx;
-}
 .bottle-mask {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 208rpx;
+  height: 336rpx;
+  pointer-events: none;
+}
+.bottle-ticks {
   position: absolute;
   left: 0;
   top: 0;

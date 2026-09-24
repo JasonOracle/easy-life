@@ -49,7 +49,7 @@
 - **动画反馈**：按压 `scale(0.945)` 回弹、波纹从触点扩散、Tab 图标弹跳、Sheet stagger 入场、数字 odometer 滚动、Toast 弹入、删除右滑淡出、新增高亮扫入
 - **触觉反馈**：`uni.vibrateShort()` / `uni.vibrateLong()`，通过 `useDeviceStore().haptics` 按机型分档降级
 - **音效**：Web Audio API（`assets/sound/`），4 种——确认/取消/删除/成就，音量可调，设置页可关
-- **液体晃动**：34 段正弦波 + rAF 衰减，衰减系数 0.955（改了会晃 6s+ 变躁动）
+- **液体晃动**：Canvas 2D 实时渲染，双模强迫阻尼振荡器（M1 cos(πu) T=460ms ζ=0.14 + M2 sin(4πu+φ) 0.955 decay dt-normalized），34 段表面路径，气泡池 8 + 粒子池 12；引擎在 `composables/useLiquid.ts`，渲染在 `components/BottleLiquid.uvue`
 - **首次进入不晃动**（安静开场）
 
 ### 设备能力分档（全局 Pinia store: useDeviceStore）
@@ -366,16 +366,20 @@ app/src/
 - **含状态栏 padding 的渐变 Header，height 必须算进 :style**（2026-09-21 Records 页实拍定案）：`height` 是 border-box，CSS 写死 `height:108px` ＋ `:style{paddingTop:sbH}` 会把内容区压成 `108−sbH`，标题被裁/卡位全乱。正解＝`:style="{ paddingTop: sbH+'px', height: (108+sbH)+'px' }"`
 - **分隔线严禁 flex:1**（2026-09-21 DayDetail 营养分布实拍定案）：1px 分隔列写 `flex:1 + width:1px` 时 flex-basis 生效被拉成宽灰块；分隔线只写固定 width/height，父行用 `justify-content: space-between` 分布列
 - **automator 坐标 tap 命不中微信原生弹层**（ActionSheet/Modal 在原生层渲染，2026-09-21 DayDetail 删除验收定案）：长按后整页压暗可证弹层已开，但 `automation_element_action --x --y` 的点击穿透到页面底下；选项点击只能人工/真机复核，勿据此判「删除无效」
+- **App 端 Canvas 2D：`stroke()` 零输出，只有 `fill()` 可用（2026-09-24 安卓模拟器探针定案）**：探针（把 ctx／缓冲区／扫角写进屏上 `<text>`）证明 `uni.getElementById` 取到元素、`getContext('2d')` 非空、缓冲区 505px 正确、`stroke()` 正常返回且零异常——**画布上仍然一个像素都不出现**。故 App 端任何线条/环必须改写为填充路径：进度环＝外弧点列＋内弧逆序点列 `closePath()+fill()`，圆头＝中心线两端各补一个 `arc(0..2π)+fill()` 圆点（实测环带宽 60px 与 CSS 底轨 61px 同心同宽）。两条前置铁律：① **必须显式 `el.width = offsetWidth*dpr; el.height = offsetHeight*dpr`**，官方文档明示原生画布缓冲区不随 CSS 盒自动确定，未赋值时整条静默不落墨（dpr 取 `uni.getDeviceInfo().devicePixelRatio`）；② 底轨这类静态环用 CSS 圆环 view（`border-width`+`border-style:solid`+`border-radius` 半尺寸）承担，画布只画进度（见 `components/SettleBadge.uvue` 的 `.sb-track`）。小程序端 `stroke()+lineCap='round'` 正常，双端分支用 `#ifdef APP` 分开。另：`conic-gradient` 在 App 端渲染为空白圆——`pages/records/DayDetail.uvue` 的进度环已中招，待 Boss 拍板改造方案
+- **App 端 Canvas `@ready` 不可靠，必须 onMounted setTimeout 兜底（2026-09-24 BottleLiquid 定案）**：`<canvas @ready="onReady">` 在 App 端首次挂载时可能不触发回调，导致引擎永远不初始化、画布空白。**铁律：所有 canvas 组件必须在 `onMounted` 中加 `setTimeout(() => { if (!readyFired) onReady() }, 500)` 兜底**，并用 `readyFired` 标志防重复初始化。同时 `ellipse()` / `roundRect()` 在 App 端 Canvas 2D 可能不支持，需用 `scale+arc` / `arcTo` 替代
+- **安卓端自动化验收通道**：MuMu 自带 adb 必须走 `-P 5038` 独立 server（与 HBuilderX 的 5037 抢端口会踢掉其设备会话）；`cli.exe launch app-android` 重启应用后 **`input tap` 会彻底失效**（注入返回成功但页面无反应、零报错），改用 `input swipe x y x y 120` 当点击；截图为原生分辨率（1280×2772）故 PNG 像素==点击坐标，`uiautomator dump` 因单 surface 无节点不可用，定位一律用 PIL 扫色
+- **`cli.exe launch` 之后的「差量编译」不重编视图层字节码＝第三类假绿（2026-09-24 定案）**：watch 会话的差量编译只重写 `app/unpackage/dist/dev/app-android/app-service.js`，**不再生成 `bytes/GenComponents*SharedData.{kt,cpp,style}.bytes`**——而设备上 Vapor 字节码渲染跑的就是这份 bytes。表现＝改代码＋「编译成功」＋「同步手机端程序文件成功」，真机仍跑旧逻辑（本轮 SettleBadge 连续 5 轮验收无效即此因）。**规约：App 端的逻辑/模板/样式改动，验收前必须停掉 watch 会话重跑一次完整 `cli.exe launch`，并核对 `bytes/` 的 mtime 晚于源码改动时间**；只有纯 `app-service` 侧（无模板/样式）变更才可信任差量。另：完整 launch 拉起后首屏常为纯白假死（`#FAFAFA`、logcat 零报错），需 `am force-stop` ＋ `am start` ＋ 等 10s 才进入正常首页，勿据此判「白屏 Bug」
 - `backdrop-filter` 在 uni-app x 原生渲染大概率不支持 → 搭骨架后第一时间真机验证
 - **CSS 自定义属性（`var()`）在 uni-app x 原生端是否支持未经真机验证** → 现状＝**根本没有 tokens.css**（`app/src/styles/` 目录不存在，推倒重写时删除），色值按 `design/DesignTokens.md` 逐页内联进各 .uvue。将来若要建变量层，必须先真机验证 `var()` 支持度，勿先建文件
-- 液体 rAF 动画低端机可能要去掉波纹，只留水位 transition（已由 useDeviceStore.liquidWave 自动处理）
+- 液体 rAF 动画低端机由 useDeviceStore.liquidWave 控制波纹开关；Canvas 2D 渲染在 App 端已验证可用（fill-only，stroke 零输出）
 - 音效在静音模式下不应触发 → 加系统静音检测 `uni.getSystemInfoSync().audioStatus`
 - **uvue 模板 v-for 循环变量禁用单字母 `r`**（2026-09-19 Settings 页实测）：症状为该 v-for 块插值全空、行数错乱、同页其他 v-for 卡片消失，**控制台零报错**；静态对照实验定位后，改名 `item` 即愈。其余单字母 d/m/s/i/h/b 实测正常，`r` 高度疑似与 WXML 编译产物内部变量冲突 —— **v-for 变量一律语义化命名（item/row/drop）**
 
 - **uni-app x UTS 蒸汽模式严禁自闭合标签（2026-09-23 编译排错铁律）**：`<input />`、`<Component />` 等自闭合标签在 UTS 编译器中会导致语法树解析中断，抛出 `[plugin:uts] Element is missing end tag. at ...:1:0` 假象报错。所有标签必须严格写作 `<input></input>`、`<Component></Component>`。
 - **组件模板根层级闭合标签缺失级联报错**（2026-09-23 GoalModal 实测）：当子组件深层嵌套（如 `.overlay > .container > .sheet`）遗漏闭合 `</view>` 标签时，编译器无法匹配父级元素，往往不在子组件报错，而是直接导致引用它的父页面（如 `Settings.uvue:1:0`）报语法错误。排查排错第一步使用 AST/正则全量检查成对闭合。
 - **方案A单流程食物添加架构（2026-09-23 定案）**：微信原生 `page-container` 连续销毁重建有约 1500ms 冷启动白屏且状态机容易死锁。因此将「列表选择」与「分量添加」统一合并于 `FoodPicker.uvue` 内部（`step: 'list' | 'detail'`），单弹层原地无缝切换，点击「更换」秒回列表并回显当前项，宿主侧零冗余状态机。
-- **SettleBadge 结算徽章 2D Canvas 环形渲染（2026-09-23 定案）**：真机环境下 CSS `conic-gradient` 极易出现掉帧、卡顿与渲染异常。重构为标准 Canvas 2D 动效引擎驱动，确保双端 60fps 丝滑满帧扫环；同时结算弹窗关闭后去除倒水音效，保持交互干净明快。
+- **SettleBadge 结算徽章 2D Canvas 环形渲染（2026-09-23 定案，2026-09-24 安卓端补正）**：废弃 CSS `conic-gradient`（App 端渲染空白），改由 Canvas 2D 逐帧绘制；结算弹窗关闭后不再播放倒水音效，保持交互干净明快。**双端各走一条绘制路径**：底轨统一＝CSS 圆环 `.sb-track`；小程序端＝`stroke()+lineCap='round'`；安卓/iOS 原生端＝`stroke()` 零输出，改「环形扇区多边形 `fill()` ＋ 两端圆点 `fill()`」出圆头（详见「已知风险」同名条目）。验收基准＝图5：12 点起顺时针、圆头、与底轨同心同宽
 - **水瓶卡片物理比例与微风动效（2026-09-23 定案）**：水瓶尺寸（104x168）、背景卡片（176x176）与两侧托底叶片（64x64/62x62）回归黄金构图，腔体水位严格保持 80% 上限；单次点击播放轻脆 feedback，长按播放晃动音效，手势音效彻底解耦。
 
 ## 当前待办
@@ -388,6 +392,7 @@ app/src/
 - [x] **已完成（2026-09-23）：方案A单流程食物添加架构** —— `FoodPicker.uvue` 内置两态 `step: 'list' | 'detail'`，选食物原地切入 `AddFood`，消除双 `page-container` 造成的 1500ms 冷启动卡顿与互斥；宿主侧零冗余状态机；弹窗高度限制为标准半屏抽屉规格。
 - [x] **已完成（2026-09-23）：SettleBadge 升级 Canvas 2D 动效** —— 废弃 conic-gradient，重构为真双端统一的 Canvas 2D 动效渲染，移除弹层结束倒水音效。
 - [x] **已完成（2026-09-23）：首页水瓶与叶片物理动效与比例重构** —— 水瓶卡片回归黄金比例（瓶身 104x168，卡片 176x176，叶子 64x64/62x62）；单击播放轻脆 feedback，长按播放晃动音效；枝叶微风摆动与双层波浪往复动效；`stores/settings.ts` 集中管理全 App 音效。
+- [x] **已完成（2026-09-24）：水瓶液体 Canvas 2D 物理引擎** —— 废弃 CSS transition + wave 图片方案，重构为 `composables/useLiquid.ts` 非响应式引擎 + `components/BottleLiquid.uvue` Canvas 2D 渲染；四态完整实现（idle 微晃+气泡 / tap 真物理晃动 / longpress 持续搅动 / pour 倒水冲击回涌旋转）；App 端 fill-only 渲染验证通过。
 - [x] **已完成（2026-09-23）：全工程 UTS 语法合规与抗坑加固** —— 清理所有组件中的自闭合标签（`<input></input>`, `<AddFood></AddFood>`）；修复 `GoalModal.uvue` 缺失的根视图闭合标签；修复 `PrivacyDialog.uvue` 废弃属性与不兼容伪类。
 - [x] **已完成（2026-09-22，Boss 五条拍板）：TabBar 液态玻璃重构** —— 两 Tab 通栏 → **三 Tab 悬浮胶囊＋会跑的选中气泡**（四关键帧，MP 端 CSS transition）；Records 升一级 Tab（删返回钮、入口改 `redirectTo`）；#29 的 fade 渐显**整条废弃**；页底预留 40 → **78**；6 色值＋几何入 `DesignTokens.md` §7。小程序端验收（三格换页／暗态／四关键帧逐值吻合，证据见 `docs/progress.md` 同日前端进度与 `debug/shots/tab8~13*.png`）
 - [x] **已完成（2026-09-22，Boss 定稿）：浅色态「气泡隐身」修正** —— 胶囊底 88%→**60%**、气泡加白 60% 1px 描边（折射亮边）＋ 投影 `0 4 12 rgba(0,0,0,.06)`（悬浮高度差）；暗态与 low 降级档未动。验收＝三页浅底截图 ＋ 暗态回归 `debug/shots/f_prof_dark.png`

@@ -1,3 +1,4 @@
+// [变更日志] 2026-09-24: 注册 P0 探针页 pages/probe/LiquidProbe（App 端 canvas/rAF/gradient 能力验证，调试用）
 {
   "pages": [
     {
@@ -40,6 +41,13 @@
       "style": {
         "navigationStyle": "custom",
         "backgroundColor": "transparent"
+      }
+    },
+    {
+      "path": "pages/probe/LiquidProbe",
+      "style": {
+        "navigationStyle": "custom",
+        "backgroundColorContent": "#F2FAF5"
       }
     }
   ],

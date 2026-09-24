@@ -35,7 +35,6 @@
       <scroll-view class="fp-food-list" direction="vertical" :show-scrollbar="false" :scroll-into-view="intoView" @scrolltolower="onLoadMore">
         <view
           class="fp-row ui-pressable"
-          :class="{ 'fp-row-on': item.id === activeFoodId }"
           hover-class="ui-pressed"
           :hover-stay-time="120"
           :id="'row-' + item.id"
@@ -43,6 +42,7 @@
           :key="item.id"
           @click="pickFood(item.id)"
         >
+          <view class="fp-row-accent" v-if="item.id === activeFoodId"></view>
           <image class="fp-row-thumb" :src="'/static/icons/' + item.img" mode="aspectFill"></image>
           <view class="fp-row-text">
             <text class="fp-row-name">{{ item.name }}</text>
@@ -68,6 +68,7 @@
 </template>
 
 <script setup lang="uts">
+// [变更日志] 2026-09-24: 食物列表选中态重构 → 废弃整行绿底 .fp-row-on（白底图标叠绿底色块难看），改为左侧薄荷绿竖条 .fp-row-accent ＋ 既有文字加深加粗；日志落位 script 内（ADR-003 #7 禁 .uvue 根层 HTML 注释）
 import { ref, computed, watch } from 'vue'
 import { ALL_FOODS, searchFoods, vesselLabelOf, vesselSizesOf, type FoodBase } from '../stores/food'
 import { triggerHaptic, playSound } from '../stores/settings'
@@ -242,20 +243,26 @@ watch(
   background-color: #FFFFFF;
   border-top-left-radius: 68rpx;
   border-top-right-radius: 68rpx;
+  /* #ifdef MP-WEIXIN */
+  /* App 端带 transform 的浮层子树收不到触摸命中，位移入场仅保留小程序端 */
   transform: translateY(100%);
   transition-property: transform;
   transition-duration: 180ms;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  /* #endif */
   display: flex;
   flex-direction: column;
 }
+/* #ifdef MP-WEIXIN */
 .fp-container-active {
   transform: translateY(0);
 }
+/* #endif */
 .fp-container-detail {
-  height: 1240rpx;
+  /* 贴合分量弹层实内容高，超出部分交给内部 scroll-view，避免确认键下方留大片空白 */
+  height: 1080rpx;
   /* #ifdef MP-WEIXIN */
-  height: calc(1240rpx + env(safe-area-inset-bottom));
+  height: calc(1080rpx + env(safe-area-inset-bottom));
   /* #endif */
 }
 .fp-sheet {
@@ -358,8 +365,15 @@ watch(
   height: 152rpx;
   border-radius: 32rpx;
 }
-.fp-row-on {
-  background-color: #F2FAF5;
+/* 选中态＝左侧薄荷绿竖条（与缩略图等高、垂直居中），不再用整行绿底压白底图标 */
+.fp-row-accent {
+  position: absolute;
+  left: 0;
+  top: 28rpx;
+  width: 6rpx;
+  height: 96rpx;
+  border-radius: 3rpx;
+  background-color: #1FBF8F;
 }
 .fp-row-thumb {
   width: 96rpx;

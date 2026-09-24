@@ -4,16 +4,16 @@
       <view class="dialog-header">
         <text class="dialog-title">个人信息保护指引</text>
       </view>
-      <scroll-view class="dialog-scroll" direction="vertical">
+      <view class="dialog-body">
         <text class="dialog-text">
-          <text>欢迎使用 轻律生活。我们将通过</text>
+          <text class="dt-run">欢迎使用 轻律生活。我们将通过</text>
           <text class="dialog-href" @click="hrefClick('https://www.example.com/agreement')">《用户服务协议》</text>
-          <text>及</text>
+          <text class="dt-run">及</text>
           <text class="dialog-href" @click="hrefClick('https://www.example.com/privacy')">《隐私政策》</text>
-          <text>帮助您了解我们如何收集、处理个人信息。本应用将在征得您同意后使用震动反馈功能，并数据存本地设备上。</text>
-          <text>\n\n如您同意，请点击“同意”按钮接受我们的服务。</text>
+          <text class="dt-run">帮助您了解我们如何收集、处理个人信息。本应用将在征得您同意后使用震动反馈功能，并数据存本地设备上。</text>
+          <text class="dt-run">\n\n如您同意，请点击“同意”按钮接受我们的服务。</text>
         </text>
-      </scroll-view>
+      </view>
       <view class="dialog-actions">
         <button class="btn btn-reject" @click="reject">不同意</button>
         <!-- #ifdef MP-WEIXIN -->
@@ -28,6 +28,7 @@
 </template>
 
 <script setup lang="uts">
+// [变更日志] 2026-09-24: 正文 scroll-view 改普通 view；行高/字号下沉到每个 text 片段（原生端无样式继承，隐式 text 丢样式）
 
 const currentPage = getCurrentInstance()?.proxy?.$page
 
@@ -86,20 +87,28 @@ function hrefClick(href : string) {
   color: #0A4F3D;
 }
 
-.dialog-scroll {
-  height: 440rpx;
-  margin-bottom: 48rpx;
+.dialog-body {
+  margin-bottom: 32rpx;
 }
 
 .dialog-text {
   font-size: 28rpx;
   color: #333333;
-  line-height: 1.6;
+  /* 原生端无样式继承，行高必须写在实际渲染的 text 片段上 */
+  line-height: 44rpx;
+}
+
+.dt-run {
+  font-size: 28rpx;
+  color: #333333;
+  line-height: 44rpx;
 }
 
 .dialog-href {
   color: #1FBF8F;
   font-weight: bold;
+  font-size: 28rpx;
+  line-height: 44rpx;
 }
 
 .dialog-actions {

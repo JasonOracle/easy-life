@@ -53,6 +53,7 @@
 </template>
 
 <script setup lang="uts">
+// [变更日志] 2026-09-24: 刻度标签 absolute 悬于轨道下方被父盒默认裁切 → 父盒 overflow:visible，标签 margin 52→36rpx
 import { ref } from 'vue'
 import { computed } from 'vue'
 import { watch } from 'vue'
@@ -250,6 +251,8 @@ onUnmounted(() => {
   border-radius: 8rpx;
   background-color: #DCEDE6;
   margin: 28rpx 48rpx 0 48rpx;
+  /* 刻度标签以 absolute 悬在轨道下方，父盒默认裁切会让整组刻度消失 */
+  overflow: visible;
 }
 .fill {
   height: 16rpx;
@@ -277,6 +280,6 @@ onUnmounted(() => {
   font-size: 24rpx;
   color: #73918B;
   text-align: center;
-  margin-top: 52rpx;
+  margin-top: 36rpx;
 }
 </style>

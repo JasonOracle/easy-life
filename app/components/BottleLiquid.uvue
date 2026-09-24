@@ -1,0 +1,407 @@
+<template>
+  <canvas class="bl-canvas" type="2d" id="bl-cv" @ready="onReady"></canvas>
+</template>
+
+<script setup lang="ts">
+// [变更日志] 2026-09-24: 新增水瓶液体 Canvas 2D 渲染组件——非响应式引擎（useLiquid）逐帧 step+draw，@ready 主通道 + onMounted setTimeout 兜底（App 端 @ready 首挂可能不触发）
+import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { LiquidEngine, ColorMode } from '../composables/useLiquid'
+
+const props = defineProps<{
+  ratio: number
+  colorMode: ColorMode
+  cmdRev: number
+  cmdKind: string
+}>()
+
+let engine: LiquidEngine | null = null
+let ctx: any | null = null
+let cvW = 0
+let cvH = 0
+let rafId: number | null = null
+let lastTime = 0
+let introDelayTimer: any = null
+
+// Color palettes (no new colors, all from DesignTokens)
+const PALETTES: Record<string, string[]> = {
+  green: ['#7DEBC7', '#3EDDB0', '#1FBF8F', '#0D9C73'],
+  amber: ['#A8F0D8', '#42D8AA', '#1FBF8F', '#0D9C73'],
+  coral: ['#B8F4E0', '#50DDB5', '#25CE9C', '#16A277']
+}
+
+let readyFired = false
+
+function onReady(): void {
+  if (readyFired) return
+  readyFired = true
+  try {
+    const el = uni.getElementById('bl-cv') as UniCanvasElement | null
+    if (el == null) return
+    const dpr = uni.getDeviceInfo().devicePixelRatio ?? 1
+    const cssW = el.offsetWidth
+    const cssH = el.offsetHeight
+    if (cssW <= 0 || cssH <= 0) return
+    el.width = Math.round(cssW * dpr)
+    el.height = Math.round(cssH * dpr)
+    cvW = el.width
+    cvH = el.height
+    ctx = el.getContext('2d')
+    if (ctx == null) return
+    initEngine()
+  } catch (e) {
+    // silent
+  }
+}
+
+onMounted(() => {
+  setTimeout(() => {
+    if (!readyFired) onReady()
+  }, 500)
+})
+
+function initEngine(): void {
+  engine = new LiquidEngine()
+  engine.setRatio(props.ratio)
+  engine.startIntro()
+  lastTime = Date.now()
+  scheduleFrame()
+
+  // Intro settle after 600ms, then enable idle after 400ms more
+  introDelayTimer = setTimeout(() => {
+    if (engine != null) {
+      engine.finishIntro()
+      setTimeout(() => {
+        if (engine != null) engine.enableIdle()
+      }, 400)
+    }
+  }, 600)
+}
+
+function scheduleFrame(): void {
+  rafId = requestAnimationFrame(onFrame)
+}
+
+function onFrame(): void {
+  const now = Date.now()
+  const dt = now - lastTime
+  lastTime = now
+  if (engine != null && ctx != null) {
+    engine.step(dt)
+    draw()
+  }
+  scheduleFrame()
+}
+
+function drawStream(c: any, scaleX: number, scaleY: number, palette: string[], eng: any): void {
+  const streamP = eng.getStreamProgress()
+  if (streamP <= 0) return
+  const isOverflow = eng.pourMode === 'overflow'
+  const waterY = eng.getWaterLevelY() * scaleY
+  const streamEndY = waterY * streamP
+  // Stream starts from bottle mouth area (top of cavity), not canvas top
+  const streamStartY = 8 * scaleY
+  const startX = (CAVITY_W / 2 - 5 + Math.sin(Date.now() * 0.008) * 1.5) * scaleX
+  const endX = (CAVITY_W / 2) * scaleX
+  // Pulsating width (breathing effect like reference)
+  const pulse = Math.sin(Date.now() * 0.015) * 2 * scaleX
+  const baseW = isOverflow ? 4 * scaleX : 14 * scaleX
+  const topW = baseW + pulse
+  const botW = baseW * 0.6 + pulse * 0.5
+  const mainColor = palette[1]
+  // Bézier control point (midpoint with slight horizontal offset for natural arc)
+  const cpX = (startX + endX) / 2 + Math.sin(Date.now() * 0.01) * 2 * scaleX
+  const cpY = (streamStartY + streamEndY) / 2
+  // Left edge curve
+  c.beginPath()
+  c.moveTo(startX - topW / 2, streamStartY)
+  c.quadraticCurveTo(cpX - topW * 0.3, cpY, endX - botW / 2, streamEndY)
+  // Right edge curve (reverse direction)
+  c.lineTo(endX + botW / 2, streamEndY)
+  c.quadraticCurveTo(cpX + topW * 0.3, cpY, startX + topW / 2, streamStartY)
+  c.closePath()
+  c.fillStyle = mainColor
+  c.fill()
+  // Inner bright core (narrower Bézier)
+  const coreW = baseW * 0.35
+  c.beginPath()
+  c.moveTo(startX - coreW / 2, streamStartY)
+  c.quadraticCurveTo(cpX - coreW * 0.2, cpY, endX - coreW * 0.4, streamEndY)
+  c.lineTo(endX + coreW * 0.4, streamEndY)
+  c.quadraticCurveTo(cpX + coreW * 0.2, cpY, startX + coreW / 2, streamStartY)
+  c.closePath()
+  c.fillStyle = 'rgba(255,255,255,0.6)'
+  c.fill()
+  // Impact dent + ripple ring at water surface
+  const impactP = eng.getImpactPhase()
+  if (impactP >= 0 && !isOverflow) {
+    const iy = waterY
+    const ix = endX
+    const dentRx = (10 + impactP * 16) * scaleX
+    const dentRy = (3 + impactP * 5) * scaleY
+    const dentAlpha = 0.3 * (1 - impactP)
+    // Dent shadow
+    c.save()
+    c.translate(ix, iy)
+    c.scale(1, dentRy / dentRx)
+    c.beginPath()
+    c.arc(0, 0, dentRx, 0, Math.PI * 2)
+    c.restore()
+    c.fillStyle = 'rgba(10,79,61,' + dentAlpha.toFixed(2) + ')'
+    c.fill()
+    // Expanding ripple ring
+    const ripR = (6 + impactP * 28) * scaleX
+    const ripAlpha = 0.45 * (1 - impactP)
+    const ripW = 2 * scaleX * (1 - impactP * 0.4)
+    c.save()
+    c.translate(ix, iy)
+    c.scale(1, 0.3)
+    c.beginPath()
+    c.arc(0, 0, ripR, 0, Math.PI * 2)
+    c.restore()
+    c.fillStyle = 'rgba(255,255,255,' + ripAlpha.toFixed(2) + ')'
+    c.fill()
+    // Hollow center
+    const ripInner = ripR - ripW
+    if (ripInner > 0) {
+      c.save()
+      c.translate(ix, iy)
+      c.scale(1, 0.3)
+      c.beginPath()
+      c.arc(0, 0, ripInner, 0, Math.PI * 2)
+      c.restore()
+      c.fillStyle = mainColor
+      c.fill()
+    }
+  }
+  // Overflow scatter droplets
+  if (isOverflow && streamP > 0.5) {
+    for (let si = 0; si < 3; si++) {
+      const sx = endX + (Math.sin(Date.now() * 0.03 + si * 2.1) * 8 * scaleX)
+      const sy = streamEndY + (Math.cos(Date.now() * 0.025 + si * 1.7) * 4 * scaleY)
+      c.beginPath()
+      c.arc(sx, sy, 1.5 * scaleX, 0, Math.PI * 2)
+      c.fillStyle = 'rgba(125,235,199,0.4)'
+      c.fill()
+    }
+  }
+}
+
+function draw(): void {
+  const c = ctx
+  if (c == null || engine == null || cvW <= 0) return
+  const scaleX = cvW / 148
+  const scaleY = cvH / 236
+
+  try { c.clearRect(0, 0, cvW, cvH) } catch (e) {}
+
+  const pts = engine.surfacePoints
+  if (pts.length < 4) return
+
+  const palette = PALETTES[props.colorMode] ?? PALETTES['green']
+
+  // C: Pour stream FIRST (before liquid body, so it's visible above surface)
+  drawStream(c, scaleX, scaleY, palette, engine)
+
+  // G: Gradient body — 5-stop for richer depth
+  const waterTop = engine.getWaterLevelY() * scaleY
+  const bodyBottom = cvH
+  const grad = c.createLinearGradient(0, waterTop, 0, bodyBottom)
+  grad.addColorStop(0, palette[0])
+  grad.addColorStop(0.18, palette[1])
+  grad.addColorStop(0.45, palette[2])
+  grad.addColorStop(0.78, palette[3])
+  grad.addColorStop(1, '#0A7A5C')
+
+  // Draw liquid body polygon
+  c.beginPath()
+  c.moveTo(pts[0] * scaleX, pts[1] * scaleY)
+  for (let i = 2; i < pts.length; i += 2) {
+    c.lineTo(pts[i] * scaleX, pts[i + 1] * scaleY)
+  }
+  c.lineTo(cvW, bodyBottom)
+  c.lineTo(0, bodyBottom)
+  c.closePath()
+  c.fillStyle = grad
+  c.fill()
+
+  // Surface shimmer line (thin bright edge along wave crest)
+  const motionAmt = Math.abs(engine.m1) + Math.abs(engine.m2)
+  if (motionAmt > 0.3) {
+    const shimmerAlpha = Math.min(0.55, motionAmt * 0.06)
+    c.beginPath()
+    c.moveTo(pts[0] * scaleX, pts[1] * scaleY)
+    for (let i = 2; i < pts.length; i += 2) {
+      c.lineTo(pts[i] * scaleX, pts[i + 1] * scaleY)
+    }
+    c.lineWidth = 1.8 * scaleX
+    c.strokeStyle = 'rgba(255,255,255,' + shimmerAlpha.toFixed(2) + ')'
+    // stroke may be no-op on App; fallback: draw thin filled strip below surface
+    c.stroke()
+    // Fallback shimmer strip (fill-based, always works)
+    c.beginPath()
+    c.moveTo(pts[0] * scaleX, pts[1] * scaleY)
+    for (let i = 2; i < pts.length; i += 2) {
+      c.lineTo(pts[i] * scaleX, pts[i + 1] * scaleY)
+    }
+    for (let i = pts.length - 2; i >= 0; i -= 2) {
+      c.lineTo(pts[i] * scaleX, (pts[i + 1] + 3) * scaleY)
+    }
+    c.closePath()
+    c.fillStyle = 'rgba(255,255,255,' + (shimmerAlpha * 0.7).toFixed(2) + ')'
+    c.fill()
+  }
+
+  // A: Highlight band at wave peak (soft elliptical glow)
+  const peakX = engine.getPeakX() * scaleX
+  let peakY = 9999
+  for (let i = 1; i < pts.length; i += 2) {
+    if (pts[i] < peakY) peakY = pts[i]
+  }
+  peakY *= scaleY
+  if (motionAmt > 0.5) {
+    c.save()
+    c.translate(peakX, peakY - 2 * scaleY)
+    c.scale(1, 2.5 * scaleY / (22 * scaleX))
+    c.beginPath()
+    c.arc(0, 0, 22 * scaleX, 0, Math.PI * 2)
+    c.restore()
+    c.fillStyle = 'rgba(255,255,255,0.38)'
+    c.fill()
+  }
+
+  // Static glare strip (left side glass reflection, tapered)
+  const glareX = 14 * scaleX
+  const glareW = 10 * scaleX
+  const glareTop = (engine.getWaterLevelY() + 8) * scaleY
+  const glareH = Math.max(0, cvH - glareTop - 24 * scaleY)
+  if (glareH > 0) {
+    const gr = 5 * scaleX
+    // Top half brighter, bottom fades
+    const glareGrad = c.createLinearGradient(0, glareTop, 0, glareTop + glareH)
+    glareGrad.addColorStop(0, 'rgba(255,255,255,0.28)')
+    glareGrad.addColorStop(0.6, 'rgba(255,255,255,0.14)')
+    glareGrad.addColorStop(1, 'rgba(255,255,255,0)')
+    c.fillStyle = glareGrad
+    c.beginPath()
+    c.moveTo(glareX + gr, glareTop)
+    c.lineTo(glareX + glareW - gr, glareTop)
+    c.arcTo(glareX + glareW, glareTop, glareX + glareW, glareTop + gr, gr)
+    c.lineTo(glareX + glareW, glareTop + glareH - gr)
+    c.arcTo(glareX + glareW, glareTop + glareH, glareX + glareW - gr, glareTop + glareH, gr)
+    c.lineTo(glareX + gr, glareTop + glareH)
+    c.arcTo(glareX, glareTop + glareH, glareX, glareTop + glareH - gr, gr)
+    c.lineTo(glareX, glareTop + gr)
+    c.arcTo(glareX, glareTop, glareX + gr, glareTop, gr)
+    c.closePath()
+    c.fill()
+  }
+
+  // B: Bubbles (refraction-style: outer glow + offset highlight + tiny specular)
+  for (let i = 0; i < engine.bubbles.length; i++) {
+    const b = engine.bubbles[i]
+    if (!b.active) continue
+    const bx = (b.x + Math.sin(Date.now() * BUBBLE_DRIFT_FREQ + b.phase) * BUBBLE_DRIFT_AMP) * scaleX
+    const by = b.y * scaleY
+    const br = b.r * scaleX
+    // Outer soft glow
+    c.beginPath()
+    c.arc(bx, by, br * 1.15, 0, Math.PI * 2)
+    c.fillStyle = 'rgba(255,255,255,0.12)'
+    c.fill()
+    // Main bubble body (slightly transparent)
+    c.beginPath()
+    c.arc(bx, by, br, 0, Math.PI * 2)
+    c.fillStyle = 'rgba(255,255,255,0.15)'
+    c.fill()
+    // Upper-right refraction highlight
+    c.beginPath()
+    c.arc(bx + br * 0.28, by - br * 0.28, br * 0.35, 0, Math.PI * 2)
+    c.fillStyle = 'rgba(255,255,255,0.65)'
+    c.fill()
+    // Tiny specular dot
+    c.beginPath()
+    c.arc(bx + br * 0.15, by - br * 0.4, br * 0.12, 0, Math.PI * 2)
+    c.fillStyle = 'rgba(255,255,255,0.9)'
+    c.fill()
+  }
+
+  // D: Splash particles with trails
+  for (let i = 0; i < engine.particles.length; i++) {
+    const p = engine.particles[i]
+    if (!p.active) continue
+    const alpha = Math.max(0, p.life / p.maxLife)
+    // Trail (3 history positions, fading)
+    for (let h = 0; h < p.histX.length; h++) {
+      const ta = alpha * (0.06 + 0.07 * h)
+      c.beginPath()
+      c.arc(p.histX[h] * scaleX, p.histY[h] * scaleY, p.r * scaleX * 0.6, 0, Math.PI * 2)
+      c.fillStyle = 'rgba(255,255,255,' + ta.toFixed(2) + ')'
+      c.fill()
+    }
+    // Main droplet with slight elongation in velocity direction
+    c.beginPath()
+    c.arc(p.x * scaleX, p.y * scaleY, p.r * scaleX, 0, Math.PI * 2)
+    c.fillStyle = 'rgba(255,255,255,' + (alpha * 0.85).toFixed(2) + ')'
+    c.fill()
+  }
+
+  // E: Caustic light band during swirl (softer, wider)
+  const causticP = engine.getCausticPhase()
+  if (causticP >= 0) {
+    const causticX = (Math.sin(causticP * Math.PI * 2) * 28 + CAVITY_W / 2 - 28) * scaleX
+    const causticY = (cvH - 36 * scaleY)
+    const causticAlpha = 0.10 * (1 - causticP)
+    const causticGrad = c.createLinearGradient(causticX, causticY, causticX + 56 * scaleX, causticY)
+    causticGrad.addColorStop(0, 'rgba(255,255,255,0)')
+    causticGrad.addColorStop(0.3, 'rgba(255,255,255,' + causticAlpha.toFixed(2) + ')')
+    causticGrad.addColorStop(0.7, 'rgba(255,255,255,' + causticAlpha.toFixed(2) + ')')
+    causticGrad.addColorStop(1, 'rgba(255,255,255,0)')
+    c.fillStyle = causticGrad
+    c.fillRect(causticX, causticY, 56 * scaleX, 14 * scaleY)
+  }
+
+  // Ambient caustic at rest (very subtle moving light patch on bottle floor)
+  if (engine.idleActive && !engine.agitated && !engine.pouring && engine.currentRatio > 0.1) {
+    const t = Date.now() * 0.0008
+    const cx = (CAVITY_W / 2 + Math.sin(t) * 18) * scaleX
+    const cy = (cvH - 20 * scaleY)
+    const ca = 0.04 + 0.02 * Math.sin(t * 1.7)
+    c.fillStyle = 'rgba(255,255,255,' + ca.toFixed(3) + ')'
+    c.beginPath()
+    c.arc(cx, cy, 20 * scaleX, 0, Math.PI * 2)
+    c.fill()
+  }
+}
+
+// Watch for commands from parent
+watch(() => props.cmdRev, () => {
+  if (engine == null) return
+  if (props.cmdKind === 'tap') engine.impulse('tap', 12)
+  else if (props.cmdKind === 'shake_start') engine.setAgitating(true)
+  else if (props.cmdKind === 'shake_end') engine.setAgitating(false)
+  else if (props.cmdKind === 'pour') engine.impulse('pour', 0)
+})
+
+watch(() => props.ratio, (val) => {
+  if (engine != null) engine.setRatio(val)
+})
+
+onUnmounted(() => {
+  if (rafId != null) cancelAnimationFrame(rafId)
+  if (introDelayTimer != null) clearTimeout(introDelayTimer)
+})
+
+const BUBBLE_DRIFT_AMP = 3.0
+const BUBBLE_DRIFT_FREQ = 0.004
+const CAVITY_W = 148
+</script>
+
+<style>
+.bl-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 148rpx;
+  height: 236rpx;
+}
+</style>

@@ -1,7 +1,8 @@
 
 <template>
   <view class="page" :class="{ 'page-dark': dk }">
-    <!-- 头图（全App统一薄荷液滴水体渐变 + 纯矢量双水波） -->
+    <!-- [变更日志] 2026-09-24: 头图简化为与日历页顶栏同源的纯净绿色渐变，移除 liquid_wave 矢量水波层 -->
+    <!-- 头图（与日历页顶栏同源的纯净绿色渐变） -->
     <view class="header" :style="{ paddingTop: sbH + 'px' }">
       <view class="header-row">
         <view class="avatar-ring">
@@ -12,7 +13,6 @@
           <text class="sub">已连续记录  {{ user.streakDays }} 天  ·  每日目标  {{ goal.calorieGoal }} kcal</text>
         </view>
       </view>
-      <image class="header-wave" :src="'/static/common/liquid_wave.svg'" mode="widthFix"></image>
     </view>
     <!-- 设置齿轮：挂在页面根上相对 .page 定位（小程序端 .header 内的 absolute 基准实测会偏移一个状态栏高度） -->
     <view class="gear-circle" :style="{ right: gearRight, top: gearTop }" @click="goSettings">
@@ -415,8 +415,8 @@ const records = computed<Rec[]>(() => {
   /* #endif */
 }
 .header {
-  background-color: #1FBF8F;
-  background-image: linear-gradient(#4EE2B6, #1FBF8F, #0A7A5C);
+  background-color: #29B385;
+  background-image: linear-gradient( #32D0A0 0%, #1FBF8F 60%, #159C72 100%);
   position: relative;
   overflow: hidden;
 }
@@ -468,14 +468,6 @@ const records = computed<Rec[]>(() => {
 .gear {
   width: 26rpx;
   height: 26rpx;
-}
-.header-wave {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 72rpx;
 }
 .cal-card {
   position: relative;

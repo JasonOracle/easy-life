@@ -82,6 +82,7 @@
 </template>
 
 <script setup lang="uts">
+// [变更日志] 2026-09-24: 保存钮渐变带角度(135deg)在 App 原生端报 Invalid value → 角度版包入 #ifdef MP-WEIXIN，App 端用无色标渐变
 import { ref } from 'vue'
 import { computed } from 'vue'
 import { watch } from 'vue'
@@ -592,7 +593,10 @@ function save(): void {
   margin-top: 56rpx;
   border-radius: 52rpx;
   background-color: #1FBF8F;
+  background-image: linear-gradient(#1FBF8F, #0D9C73);
+  /* #ifdef MP-WEIXIN */
   background-image: linear-gradient(135deg, #1FBF8F, #0D9C73);
+  /* #endif */
   box-shadow: 0 12rpx 32rpx rgba(13, 156, 115, 0.35);
   justify-content: center;
   align-items: center;

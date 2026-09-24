@@ -1,0 +1,225 @@
+<template>
+  <view class="page">
+    <text class="title">Liquid Probe</text>
+    <text class="line" id="p0-raf">{{ rafText }}</text>
+    <text class="line" id="p0-setprop">{{ setPropText }}</text>
+    <text class="line" id="p0-gradient">{{ gradientText }}</text>
+    <text class="line" id="p0-fps">{{ fpsText }}</text>
+    <text class="line" id="p0-touch">{{ touchText }}</text>
+    <view class="box-row">
+      <view class="box" id="probe-box"></view>
+    </view>
+    <canvas class="cv" type="2d" id="probe-cv" @ready="onCanvasReady"></canvas>
+    <view class="touch-zone" @click="onTapZone" @touchstart="onTS" @touchend="onTE" @longpress="onLP">
+      <text class="hint">tap / longpress here</text>
+    </view>
+  </view>
+</template>
+
+<script setup lang="ts">
+// [变更日志] 2026-09-24: 新增 P0 探针页——验证 App 端 canvas/rAF/setProperty/gradient/touchend 原生能力边界，仅供调试不参与业务
+import { ref, onMounted } from 'vue'
+
+const rafText = ref('RAF: pending')
+const setPropText = ref('SET_PROP: pending')
+const gradientText = ref('GRADIENT: pending')
+const fpsText = ref('FPS: pending')
+const touchText = ref('TOUCH: idle')
+
+let cvCtx: any | null = null
+let cvW = 0
+let cvH = 0
+let frames = 0
+let lastT = 0
+let rafId: number | null = null
+let fallbackTimer: any = null
+let lpFired = false
+let teAfterLp = false
+
+function tick(now: number): void {
+  if (lastT === 0) lastT = now
+  const dt = now - lastT
+  if (dt >= 1000) {
+    const fps = Math.round((frames * 1000) / dt)
+    fpsText.value = 'FPS: ' + fps + ' (dt=' + Math.round(dt / frames) + 'ms)'
+    frames = 0
+    lastT = now
+  }
+  frames++
+  drawFrame()
+  scheduleNext()
+}
+
+function scheduleNext(): void {
+  // #ifdef APP
+  if (typeof requestAnimationFrame === 'function') {
+    rafId = requestAnimationFrame(tick)
+  } else {
+    fallbackTimer = setTimeout(() => {
+      tick(Date.now())
+    }, 16)
+  }
+  // #endif
+  // #ifndef APP
+  rafId = requestAnimationFrame(tick)
+  // #endif
+}
+
+function drawFrame(): void {
+  const ctx = cvCtx
+  if (ctx == null || cvW <= 0) return
+  try {
+    ctx.clearRect(0, 0, cvW, cvH)
+    // base rect
+    ctx.fillStyle = '#1FBF8F'
+    ctx.fillRect(10, 10, cvW - 20, cvH / 3)
+    // probe gradient
+    if (typeof ctx.createLinearGradient === 'function') {
+      const g = ctx.createLinearGradient(0, cvH / 2, 0, cvH)
+      g.addColorStop(0, '#7DEBC7')
+      g.addColorStop(1, '#108A64')
+      ctx.fillStyle = g
+      ctx.fillRect(10, cvH / 2, cvW - 20, cvH / 2 - 10)
+    }
+    // circle to confirm fill works
+    ctx.beginPath()
+    ctx.arc(cvW / 2, cvH / 2, 20, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(255,255,255,0.7)'
+    ctx.fill()
+  } catch (e) {
+    // silent
+  }
+}
+
+function onCanvasReady(): void {
+  // #ifdef APP
+  try {
+    const el = uni.getElementById('probe-cv') as UniCanvasElement | null
+    if (el == null) return
+    const dpr = uni.getDeviceInfo().devicePixelRatio ?? 1
+    const cssW = el.offsetWidth
+    const cssH = el.offsetHeight
+    if (cssW <= 0 || cssH <= 0) return
+    el.width = Math.round(cssW * dpr)
+    el.height = Math.round(cssH * dpr)
+    cvW = el.width
+    cvH = el.height
+    const ctx = el.getContext('2d')
+    if (ctx == null) return
+    cvCtx = ctx
+    gradientText.value = 'GRADIENT: ' + (typeof ctx.createLinearGradient === 'function' ? 'API_OK' : 'NO_API')
+    scheduleNext()
+  } catch (e) {
+    gradientText.value = 'GRADIENT: ERR'
+  }
+  // #endif
+}
+
+function probeSetProperty(): void {
+  try {
+    const el = uni.getElementById('probe-box') as UniElement | null
+    if (el == null) {
+      setPropText.value = 'SET_PROP: NO_EL'
+      return
+    }
+    if (typeof el.style.setProperty === 'function') {
+      el.style.setProperty('transform', 'translateX(60px) rotate(8deg)')
+      setPropText.value = 'SET_PROP: API_OK'
+    } else {
+      setPropText.value = 'SET_PROP: NO_METHOD'
+    }
+  } catch (e) {
+    setPropText.value = 'SET_PROP: ERR'
+  }
+}
+
+function onTapZone(): void {
+  touchText.value = 'TOUCH: click_fired'
+}
+
+function onTS(): void {
+  touchText.value = 'TOUCH: start'
+  lpFired = false
+  teAfterLp = false
+}
+
+function onLP(): void {
+  lpFired = true
+  touchText.value = 'TOUCH: longpress'
+}
+
+function onTE(): void {
+  if (lpFired) {
+    teAfterLp = true
+    touchText.value = 'TOUCH: end_after_lp=YES'
+  } else {
+    touchText.value = 'TOUCH: end(tap)'
+  }
+}
+
+onMounted(() => {
+  // RAF availability probe
+  // #ifdef APP
+  rafText.value = 'RAF: ' + (typeof requestAnimationFrame === 'function' ? 'YES' : 'NO')
+  // #endif
+  // #ifndef APP
+  rafText.value = 'RAF: YES(web)'
+  // #endif
+
+  setTimeout(probeSetProperty, 200)
+  // Fallback: if @ready doesn't fire on App, try manual init after delay
+  setTimeout(() => {
+    if (cvCtx == null) {
+      onCanvasReady()
+    }
+  }, 500)
+})
+</script>
+
+<style>
+.page {
+  flex-direction: column;
+  padding: 40rpx;
+  background-color: #F2FAF5;
+}
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #0A4F3D;
+  margin-bottom: 24rpx;
+}
+.line {
+  font-size: 28rpx;
+  color: #0F4F3D;
+  margin-bottom: 12rpx;
+}
+.box-row {
+  height: 80rpx;
+  margin-top: 20rpx;
+  margin-bottom: 20rpx;
+}
+.box {
+  width: 80rpx;
+  height: 80rpx;
+  background-color: #E8B54D;
+  border-radius: 12rpx;
+}
+.cv {
+  width: 300rpx;
+  height: 300rpx;
+  background-color: rgba(0,0,0,0.05);
+  margin-bottom: 20rpx;
+}
+.touch-zone {
+  width: 300rpx;
+  height: 120rpx;
+  background-color: #7DEBC7;
+  border-radius: 16rpx;
+  align-items: center;
+  justify-content: center;
+}
+.hint {
+  font-size: 24rpx;
+  color: #0A4F3D;
+}
+</style>
