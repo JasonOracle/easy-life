@@ -26,8 +26,6 @@
     <view class="hero">
       <!-- 独立底层背景：柔和底色渐变 + 流体斑块 + 装饰气泡星芒（bg.svg） -->
       <image class="bottle-bg" :src="bottleAsset('bg')" mode="aspectFit"></image>
-      <!-- 贴纸：矢量感高清重绘后挂瓶卡左上空白带（DOM 序在瓶/叶之前＝层叠于瓶颈后） -->
-      <image class="hm-sticker" :src="stickerSrc" mode="aspectFit"></image>
       <!-- 左侧独立叶子（yezi-zuo.svg，旋转支点在茎底，自然微风往复微摆） -->
       <image
         class="leaf-left"
@@ -54,6 +52,8 @@
         <!-- 刻度层（最上）：水位上涨后刻度仍需可读，与玻璃层同源同几何 -->
         <image class="bottle-ticks" :src="bottleAsset('pingzi_tick')" mode="aspectFit"></image>
       </view>
+      <!-- 贴纸：高清重绘后挂瓶卡左上，DOM 序在瓶/叶之后＝层叠于瓶颈之上，完整可见 -->
+      <image class="hm-sticker" :src="stickerSrc" mode="aspectFit"></image>
       <view class="hero-text">
         <view class="remain-head">
           <view class="hm-status-bar" :style="{ backgroundColor: calStatus.color }"></view>
