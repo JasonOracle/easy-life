@@ -25,8 +25,8 @@ let introDelayTimer: any = null
 // Color palettes (no new colors, all from DesignTokens)
 const PALETTES: Record<string, string[]> = {
   green: ['#7DEBC7', '#3EDDB0', '#1FBF8F', '#0D9C73'],
-  amber: ['#A8F0D8', '#42D8AA', '#1FBF8F', '#0D9C73'],
-  coral: ['#B8F4E0', '#50DDB5', '#25CE9C', '#16A277']
+  amber: ['#F0E6D0', '#E8D080', '#E8B54D', '#D4A23E'],
+  coral: ['#FFE8D0', '#FFC4A0', '#FF9E7D', '#E66040']
 }
 
 let readyFired = false

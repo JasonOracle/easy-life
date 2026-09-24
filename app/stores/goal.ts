@@ -56,7 +56,7 @@ export function getCalorieStatus(current: number, goalVal: number): CalorieStatu
     }
   }
   const ratio = current / goalVal
-  if (ratio > 1.15) {
+  if (ratio > 1.5) {
     return {
       type: 'coral',
       textClass: 'status-text-coral',

@@ -9,10 +9,10 @@
         <text class="sb-unit">kcal</text>
       </view>
       <view class="sb-budget-row">
-        <text class="sb-budget-text" :class="{ 'sb-budget-text-over': overBudget }">{{ budgetText }}</text>
+        <text class="sb-budget-text" :style="{ color: calStatus.color }">{{ budgetText }}</text>
       </view>
       <view class="sb-meal-row">
-        <image class="sb-meal-ico" :src="overBudget ? '/static/settle/sb_alert.svg' : '/static/settle/sb_check.svg'" mode="aspectFit"></image>
+        <image class="sb-meal-ico" :src="calStatus.type === 'coral' ? '/static/settle/sb_alert_coral.svg' : (calStatus.type === 'amber' ? '/static/settle/sb_alert.svg' : '/static/settle/sb_check.svg')" mode="aspectFit"></image>
         <text class="sb-meal-text">{{ mealText }}</text>
       </view>
     </view>
@@ -24,6 +24,7 @@
 import { ref, computed, watch, getCurrentInstance, onUnmounted, nextTick } from 'vue'
 import { useDeviceStore } from '../stores/device'
 import { useSettingsStore } from '../stores/settings'
+import { getCalorieStatus } from '../stores/goal'
 
 /**
  * 弹层③ 结算徽章（Pencil Dz3YV 结构 + MU1O4 动效时间轴）。
@@ -75,8 +76,13 @@ let cvHeight = 148
 let ringCtx: any | null = null
 let readyFired = false
 
-const overBudget = computed<boolean>(() => props.after > props.goal)
-const ringColor = computed<string>(() => overBudget.value ? 'rgba(232, 181, 77, 1)' : 'rgba(31, 191, 143, 1)')
+const calStatus = computed(() => getCalorieStatus(props.after, props.goal))
+const RING_COLOR: Record<string, string> = {
+  green: 'rgba(31, 191, 143, 1)',
+  amber: 'rgba(232, 181, 77, 1)',
+  coral: 'rgba(255, 158, 125, 1)'
+}
+const ringColor = computed<string>(() => RING_COLOR[calStatus.value.type])
 const finalRatio = computed<number>(() => {
   if (props.goal <= 0) return 1
   const r = props.after / props.goal

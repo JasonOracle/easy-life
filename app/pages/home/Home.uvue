@@ -697,6 +697,27 @@ const meals = computed<Meal[]>(() =>
 .status-text-green {
   color: #0A5A40;
 }
+/* 状态底色类（进度条填充用，实色）与圆环类（描边用，带透明）——
+   由 stores/goal.ts getCalorieStatus().bgClass/ringClass 动态绑定；
+   DayDetail.dd-fill / Records.lr-bar-green / 首页百分比圆环 均走此族 */
+.status-bg-green {
+  background-color: #1FBF8F;
+}
+.status-bg-amber {
+  background-color: #E8B54D;
+}
+.status-bg-coral {
+  background-color: #FF9E7D;
+}
+.status-ring-green {
+  border-color: rgba(31, 191, 143, 0.85);
+}
+.status-ring-amber {
+  border-color: rgba(232, 181, 77, 0.85);
+}
+.status-ring-coral {
+  border-color: rgba(255, 158, 125, 0.85);
+}
 .consumed {
   font-size: 26rpx;
   color: #618585;

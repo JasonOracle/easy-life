@@ -127,9 +127,10 @@ const ratio = computed<number>(() => (picked.value - MIN) / (MAX - MIN))
 const fillW = computed<number>(() => Math.round(ratio.value * TRACK_W * 10) / 10)
 
 const statusStyle = computed(() => {
-  if (picked.value <= 1800) {
+  // 阈值跟随滑块范围（MIN..MAX）的比例，不写死绝对值——范围变更时分档自动同步
+  if (ratio.value <= 0.5) {
     return { textClass: 'gm-clr-mint', bgClass: 'gm-bg-mint', hex: '#1FBF8F' }
-  } else if (picked.value <= 2100) {
+  } else if (ratio.value <= 0.75) {
     return { textClass: 'gm-clr-amber', bgClass: 'gm-bg-amber', hex: '#E8B54D' }
   } else {
     return { textClass: 'gm-clr-coral', bgClass: 'gm-bg-coral', hex: '#FF9E7D' }

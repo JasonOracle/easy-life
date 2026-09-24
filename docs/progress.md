@@ -343,3 +343,13 @@ Boss 提四条：①FAB 下移与左列垂直居中；②好好吃饭贴纸糊�
 - **③a 左组收拢**：bg 卡 352→324（top 88→96）、bottle-wrap 72→60、leaf-left 12→0、leaf-right 220→196。实测叶右缘 x521 vs 珊瑚字左缘 x590＝气隙 69px≈40rpx（原 2rpx）；goal-pill 左缘 591 退出卡片边线。BottleLiquid 运行时读 offsetWidth/Height，无屏幕坐标依赖，免改。
 - **④D1+D3**：hero 渐变翻转 `#F2FAF5→#E6F8EF`（上白下绿，重心下沉）；贴纸从右列流内迁挂 hero 左上空白带（absolute 16/6，140×103rpx 与素材同比例，DOM 序在瓶前＝层叠瓶颈后）。
 - **测试经理轮**：停 watch→`cli.exe launch --cleanCache` 全量（编译成功 21:46:25，bytes 同步）→force-stop 冷启动→截图 `debug/shots/b3_home.png`→上述像素核验→FAB 新位点击弹层开/关回归 PASS→logcat 无异常。
+
+### 2026-09-24 23:05:00 ｜ 状态色系统统一：三档阈值 + 四件套全通（App 端真机验收 PASS）
+Boss 拍板阈值＝**100% / 150% / >150%**（ratio ≤1.0 绿、1.0–1.5 琥珀、>1.5 珊瑚），并要求圆环/进度条/液体/文字同一规则。经 product-design:audit 走查聚类为 4 个机会点，本轮落地全部 Blocker＋高优先：
+- **goal.ts**：阈值 1.15→**1.5**（唯一 ratio 阈值源，目标变更时自动跟随）。
+- **BottleLiquid**：`PALETTES.amber/coral` 由绿色渐变改为 DesignTokens 真实色——amber `['#F0E6D0','#E8D080','#E8B54D','#D4A23E']`、coral `['#FFE8D0','#FFC4A0','#FF9E7D','#E66040']`，顶色带过渡避免 100%→超标 跳变。
+- **Home.uvue**：补定义 `status-bg-coral/amber/green`（实色，进度条填充）与 `status-ring-coral/amber/green`（0.85 透明，圆环描边）——此前 goal.ts 引用了六个类但全工程零定义，DayDetail.dd-fill / Records.lr-bar-green 绑定静默失效。
+- **GoalModal**：去掉写死的 1800/2100，改用滑块范围比例（≤0.5 绿 / ≤0.75 琥珀 / else 珊瑚），MIN/MAX 变更时分档自动同步。
+- **SettleBadge**：二态→三态，接入 `getCalorieStatus(after, goal)`；ringColor / 预算文字 / 餐图标三处同源；新增珊瑚态图标 `sb_alert_coral.svg`。
+- **测试经理轮**：全量 `--cleanCache` 重编译（bytes 23:00:40）→ 冷启动截图 `debug/shots/s4_color_fix.png`→ 液体区扫出 **50846 个珊瑚像素**（x153-404, y810-1020），液体/文字/贴纸/渐变/FAB 居中 全部正确。
+- **遗留（低优先）**：`CalorieStatus.ringClass` 仍为死代码（全工程零消费），Profile 圆环已直接用 `calStatus.color`；`status-ring-*` 类已定义待后续绑定。
