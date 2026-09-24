@@ -1,5 +1,6 @@
 <template>
   <view class="page">
+    <!-- [变更日志] 2026-09-25: 「主要食物」卡片接入百科页入口（携 foodId 跳 pages/encyclopedia/Detail） -->
     <scroll-view class="lr-scroll" direction="vertical" :show-scrollbar="false" @scroll="onScroll">
       <!-- Header（纯净自然的高级绿色平滑渐变） -->
       <view class="lr-header">
@@ -96,7 +97,7 @@
       </view>
     </view>
     <view class="lr-fcard-row">
-      <view class="lr-fcard" v-for="(fItem, fIdx) in foodCards" :key="fIdx">
+      <view class="lr-fcard" v-for="(fItem, fIdx) in foodCards" :key="fIdx" @click="openEncyclopedia(fItem.img)">
         <image class="lr-fphoto" :src="fItem.img" mode="aspectFill"></image>
         <text class="lr-fname">{{ fItem.name }}</text>
         <text class="lr-fkcal">{{ fItem.kcal }} kcal</text>
@@ -123,6 +124,8 @@ import { ref, computed } from 'vue'
 import { onPageScroll } from '@dcloudio/uni-app'
 import { useFoodStore, dayKeyOf, dayRange, MEAL_KEYS, MEAL_LABELS, FoodEntry } from '../../stores/food'
 import { useGoalStore, getCalorieStatus } from '../../stores/goal'
+import { foodIdFromImg } from '../../stores/encyclopedia'
+import { triggerHaptic } from '../../stores/settings'
 import Tabbar from '../../components/Tabbar.uvue'
 
 /**
@@ -365,6 +368,14 @@ const foodCards = computed<FoodCard[]>(() => {
 function goDetail(): void {
   food.viewDay = selKey.value
   uni.navigateTo({ url: '/pages/records/DayDetail' })
+}
+
+/** 百科入口：主要食物卡片图解析 foodId 跳详情页 */
+function openEncyclopedia(img: string): void {
+  const fid = foodIdFromImg(img)
+  if (fid.length == 0) return
+  triggerHaptic('light')
+  uni.navigateTo({ url: '/pages/encyclopedia/Detail?id=' + fid })
 }
 </script>
 

@@ -1,4 +1,4 @@
-// [变更日志] 2026-09-24: 注册 P0 探针页 pages/probe/LiquidProbe（App 端 canvas/rAF/gradient 能力验证，调试用）
+// [变更日志] 2026-09-25: 注册食物百科详情页 pages/encyclopedia/Detail（hero/营养/点评/相关/搜索态，通吃 ?id=pNNN 深链）
 {
   "pages": [
     {
@@ -45,6 +45,13 @@
     },
     {
       "path": "pages/probe/LiquidProbe",
+      "style": {
+        "navigationStyle": "custom",
+        "backgroundColorContent": "#F2FAF5"
+      }
+    },
+    {
+      "path": "pages/encyclopedia/Detail",
       "style": {
         "navigationStyle": "custom",
         "backgroundColorContent": "#F2FAF5"

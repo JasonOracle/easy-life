@@ -5,6 +5,7 @@
 #       输出 = toolchain/dist/food_encyclopedia.json → 同步 app/src/data/，
 #              另产出营养置信度侧车 toolchain/dist/nutrition_audit.json（不随包）。
 #       点评文案 = 六档规则模板（分类阈值见 meta 文件头），零手写、零生图。
+#       2026-09-25 增补：badges（cls 徽章双语）与 guidance（详情页三列指引模板）随伴生表一并产出。
 """build_encyclopedia.py — 食物百科伴生表打包
 
 用法：python -X utf8 toolchain/build_encyclopedia.py
@@ -84,6 +85,11 @@ def main():
     unknown_cat = {f["cat"] for f in lib["foods"]} - cats_zh
     if unknown_cat:
         errors.append(f"meta 缺类目定义：{sorted(unknown_cat)}")
+    cls_keys = set(meta["reviews"].keys())
+    for section in ("badges", "guidance"):
+        keys = set(meta.get(section, {}).keys())
+        if keys != cls_keys:
+            errors.append(f"meta.{section} 键集与 reviews 不一致：缺 {sorted(cls_keys - keys)} 多 {sorted(keys - cls_keys)}")
     if errors:
         print("校验失败：\n  " + "\n  ".join(errors), file=sys.stderr)
         return 1
@@ -132,6 +138,8 @@ def main():
         },
         "categories": meta["categories"],
         "reviews": meta["reviews"],
+        "badges": meta["badges"],
+        "guidance": meta["guidance"],
         "entries": entries,
     }
 

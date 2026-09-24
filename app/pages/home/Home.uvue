@@ -1,7 +1,7 @@
 
 <template>
   <view class="page">
-    <!-- [变更日志] 2026-09-24: Hero 水瓶液体由 CSS 水波图重构为 BottleLiquid Canvas 2D 物理引擎渲染；瓶身/刻度/叶片独立分层，废弃 liquid_wave 水体渐变头图。同日重排第一批：补定义 status-text-coral/amber/green 死类（超标报警色此前静默失效）、顶部带压缩（spacer 220→190 / hero 470→440）、贴纸由右上悬空改入右列流内（并清除整画布 alpha≈10 白雾层）、删悬空小 leaf 改状态色竖条、宏量/餐次字号降档拉开层级阶梯。第二批 S4：.hero-text right 20→28rpx，贴纸/pill 右缘与全页卡片 margin-right 28 统一对齐轴。S7：独立宏量卡并入 hero 底缘玻璃横条（hm-macro-strip，左右 28 同轴），hero 440→552、hero-text bottom 24→136，页面白卡 3→2。第三批：FAB 与左列垂直居中（top 35rpx）、hero 渐变翻转为上白下绿（重心下沉）、贴纸矢量感高清重绘（246px→840px 白椭圆+薄荷描边+行楷双行）并从右列流内迁挂瓶卡左上空白带、左组收拢（bg 卡 352→324 / 瓶左移 12 / 右叶左移 24）使叶-字间隙 2rpx→26rpx 且 goal-pill 退出卡片边线 -->
+    <!-- [变更日志] 2026-09-24: Hero 水瓶液体由 CSS 水波图重构为 BottleLiquid Canvas 2D 物理引擎渲染；瓶身/刻度/叶片独立分层，废弃 liquid_wave 水体渐变头图。同日重排第一批：补定义 status-text-coral/amber/green 死类（超标报警色此前静默失效）、顶部带压缩（spacer 220→190 / hero 470→440）、贴纸由右上悬空改入右列流内（并清除整画布 alpha≈10 白雾层）、删悬空小 leaf 改状态色竖条、宏量/餐次字号降档拉开层级阶梯。第二批 S4：.hero-text right 20→28rpx，贴纸/pill 右缘与全页卡片 margin-right 28 统一对齐轴。S7：独立宏量卡并入 hero 底缘玻璃横条（hm-macro-strip，左右 28 同轴），hero 440→552、hero-text bottom 24→136，页面白卡 3→2。第三批：FAB 与左列垂直居中（top 35rpx）、hero 渐变翻转为上白下绿（重心下沉）、贴纸矢量感高清重绘（246px→840px 白椭圆+薄荷描边+行楷双行）并从右列流内迁挂瓶卡左上空白带、左组收拢（bg 卡 352→324 / 瓶左移 12 / 右叶左移 24）使叶-字间隙 2rpx→26rpx 且 goal-pill 退出卡片边线。2026-09-25：餐次行食物图接入百科页入口（openEncyclopedia 携 foodId 跳 pages/encyclopedia/Detail）；食物图 hover 反馈由 <image> 迁到包裹 view（hover-stay-time 不支持 image，编译期 warn）；onShow 消费 ct_pending_add 一次性交接，百科「添加到本餐」回首页直接打开 FoodPicker 详情步预填该食物 -->
     <!-- 标题与操作栏（顶栏常驻+日期整合，对齐设计图规范，保证日期完全外露） -->
     <view class="hm-nav" :style="{ paddingTop: sbH + 'px' }">
       <view class="hm-nav-inner">
@@ -126,7 +126,9 @@
           <view v-else>
             <view v-for="(rowItem, rowIdx) in meal.rows" :key="rowIdx">
               <view class="meal-row" @longpress="onFoodLongPress(rowItem.id, rowItem.name)">
-                <image class="meal-thumb" :src="rowItem.img" mode="aspectFill"></image>
+                <view class="meal-thumb-hit" hover-class="icon-pressed" :hover-stay-time="120" @click="openEncyclopedia(rowItem.img)">
+                  <image class="meal-thumb" :src="rowItem.img" mode="aspectFill"></image>
+                </view>
                 <text class="meal-row-name">{{ rowItem.name }}</text>
                 <text class="meal-row-portion">{{ rowItem.portion }}</text>
                 <text class="meal-row-kcal">{{ rowItem.kcal }} kcal</text>
@@ -142,7 +144,7 @@
     <Tabbar active="home" ></Tabbar>
 
     <!-- 弹层⓪ 食物选择与添加单流程（列表+详情内部无缝切换） -->
-    <FoodPicker v-model:show="pickerShow" @confirm="onAddConfirm" ></FoodPicker>
+    <FoodPicker v-model:show="pickerShow" :selected-id="pickerSelectedId" :start-step="pickerStartStep" @confirm="onAddConfirm" ></FoodPicker>
     <SettleBadge v-model:show="settleShow" :kcal="settleKcal" :after="settleAfter" :goal="goal.calorieGoal" :meal="settleMeal" @close="onSettleClose" ></SettleBadge>
     <GoalModal v-model:show="goalShow" :initial="goal.calorieGoal" @save="goal.setGoal" ></GoalModal>
   </view>
@@ -150,6 +152,7 @@
 
 <script setup lang="uts">
 import { ref, onMounted } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
 
 /**
  * 演示数据（稿面静态值，store 重建后再接真实数据）。
@@ -200,6 +203,7 @@ import { useFoodStore } from '../../stores/food'
 import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import { getFoodById, computeEntry } from '../../stores/food'
 import { playSound, triggerHaptic } from '../../stores/settings'
+import { foodIdFromImg } from '../../stores/encyclopedia'
 import BottleLiquid from '../../components/BottleLiquid.uvue'
 
 /**
@@ -417,6 +421,8 @@ const MEAL_ICONS: Record<string, string> = {
 
 /** 弹层⓪ 选择并添加食物（确认写库＋弹弹层③ 结算徽章）；Pill 铅笔 → GoalModal */
 const pickerShow = ref(false)
+const pickerSelectedId = ref('')
+const pickerStartStep = ref('list')
 const settleShow = ref(false)
 const settleKcal = ref(0)
 const settleAfter = ref(0)
@@ -443,11 +449,12 @@ const MEAL_LABELS: Record<string, string> = {
 function openAdd(): void {
   playSound('click')
   triggerHaptic('light')
+  pickerSelectedId.value = ''
+  pickerStartStep.value = 'list'
   pickerShow.value = true
 }
 
-function onFoodLongPress(entryId: string, foodName: string): void {
-  triggerHaptic('medium')
+function onFoodLongPress(entryId: string, foodName: string): void {  triggerHaptic('medium')
   uni.showActionSheet({
     itemList: [`删除「${foodName}」`],
     itemColor: '#FA543A',
@@ -459,6 +466,27 @@ function onFoodLongPress(entryId: string, foodName: string): void {
     }
   })
 }
+
+/** 百科入口：食物图（"cat/pNNN.webp" 或全路径）解析出 id 后跳详情页 */
+function openEncyclopedia(img: string): void {
+  const fid = foodIdFromImg(img)
+  if (fid.length == 0) return
+  triggerHaptic('light')
+  uni.navigateTo({ url: '/pages/encyclopedia/Detail?id=' + fid })
+}
+
+/** 百科「添加到本餐」一次性交接：读到即清，避免二次 onShow 重复弹层 */
+onShow(() => {
+  const raw = uni.getStorageSync('ct_pending_add')
+  if (raw == null || raw == '') return
+  uni.removeStorageSync('ct_pending_add')
+  const pending = raw as UTSJSONObject
+  const pid = pending.getString('id') ?? ''
+  if (pid.length == 0 || getFoodById(pid) == null) return
+  pickerSelectedId.value = pid
+  pickerStartStep.value = 'detail'
+  pickerShow.value = true
+})
 
 function onAddConfirm(payload: AddPayload): void {
   // 落库（2026-09-21 Boss 拍板：确认即写真实记录，供首页/最近记录/单日详情消费）
@@ -908,6 +936,11 @@ const meals = computed<Meal[]>(() =>
   height: 80rpx;
 }
 .meal-thumb {
+  width: 74rpx;
+  height: 74rpx;
+  border-radius: 16rpx;
+}
+.meal-thumb-hit {
   width: 74rpx;
   height: 74rpx;
   border-radius: 16rpx;

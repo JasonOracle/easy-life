@@ -1,5 +1,6 @@
 
 
+// [变更日志] 食物库 store：searchFoods 新增第 4 参 enNames（英文名 Map），供百科搜索态命中英文；其余逻辑不变。
 import { defineStore } from 'pinia'
 import foodLibraryJson from '../src/data/food_library.json'
 
@@ -290,13 +291,14 @@ export function foodsByCat(cat: string): FoodBase[] {
   return ALL_FOODS.filter((f) => f.cat === cat)
 }
 
-/** 搜索食物（名称子串 / 全拼 / 首字母，均不区分大小写） */
-export function searchFoods(query: string): FoodBase[] {
+/** 搜索食物（名称子串 / 全拼 / 首字母，均不区分大小写）；enNames 可选传 id→英文名以支持英文检索 */
+export function searchFoods(query: string, enNames: Map<string, string> | null = null): FoodBase[] {
   const q = query.trim().toLowerCase()
   if (!q) return ALL_FOODS
   return ALL_FOODS.filter((f) =>
     f.name.toLowerCase().includes(q) ||
-    (f.py != null && (f.py.f.includes(q) || f.py.i.includes(q)))
+    (f.py != null && (f.py.f.includes(q) || f.py.i.includes(q))) ||
+    (enNames != null && (enNames.get(f.id) ?? '').toLowerCase().includes(q))
   )
 }
 

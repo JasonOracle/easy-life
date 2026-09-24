@@ -3,7 +3,8 @@
 #       1) categories：7 类目的双语显示名与类目介绍（通用叙述，不含具体热量数字）；
 #       2) reviews：6 档点评模板（light/balanced/protein_rich/carb_heavy/fat_heavy/dense），
 #          占位符 {cal} {p} {c} {f} 由 build_encyclopedia.py 按每 100g 营养值运行时填充；
-#       3) en_names：353 条食物英文名，AI 起草（text_review: draft），待 Boss 核对。
+#       3) en_names：353 条食物英文名，AI 起草（text_review: draft），待 Boss 核对；
+#       4) badges / guidance：详情页 cls 徽章与三列指引（适宜人群/注意事项/推荐吃法），按 6 档 cls 模板化。
 # 分类规则（以每 100g 计，pcal=p*4, ccal=c*4, fcal=f*9, tot=三者之和）：
 #   dense: cal>=300 → protein_rich: pcal/tot>=0.40 → fat_heavy: fcal/tot>=0.45
 #   → carb_heavy: ccal/tot>=0.65 → light: cal<=80 → 其余 balanced
@@ -66,6 +67,41 @@ reviews:
   dense:
     zh: "热量密集：每 100g 约 {cal} kcal，属于「少量多次」型选手，解馋后记得给当天留出额度。"
     en: "Calorie-dense: about {cal} kcal per 100g. A little-and-often food — budget for it after every treat."
+
+# 详情页徽章与三列指引：按 6 档 cls 模板化（稿面「适宜人群／注意事项／推荐吃法」），零逐条手写
+badges:
+  light: { zh: 热量友好, en: Light }
+  balanced: { zh: 均衡搭配, en: Balanced }
+  protein_rich: { zh: 优质蛋白, en: High Protein }
+  carb_heavy: { zh: 能量主力, en: Energy }
+  fat_heavy: { zh: 脂类偏高, en: Fat-Forward }
+  dense: { zh: 热量密集, en: Calorie-Dense }
+
+guidance:
+  light:
+    audience: { zh: 控重人群、日常大量食用, en: Weight management, everyday volume eating }
+    cautions: { zh: 单靠它营养不够，注意搭配蛋白与主食, en: Not a complete meal — pair with protein and staples }
+    serving: { zh: 蒸煮凉拌最佳, en: Steam, boil or toss raw }
+  balanced:
+    audience: { zh: 一般人群, en: General population }
+    cautions: { zh: 留意单次份量，累计不超当日目标, en: Watch portion size against your daily budget }
+    serving: { zh: 搭配主食与蛋白同食, en: Serve with a staple and a protein }
+  protein_rich:
+    audience: { zh: 健身人群、青少年、一般人群, en: Active adults, teens, general population }
+    cautions: { zh: 肾功能异常者请遵医嘱控制蛋白总量, en: Limit total protein under kidney disease }
+    serving: { zh: 蒸煮炖为主，少油烹调, en: Boil, steam or stew with little oil }
+  carb_heavy:
+    audience: { zh: 运动人群、脑力劳动者, en: Athletes and mentally active days }
+    cautions: { zh: 血糖偏高者建议控制份量并搭配膳食纤维, en: Control portions and add fiber if blood sugar is a concern }
+    serving: { zh: 优先安排在早午餐, en: Best placed at breakfast or lunch }
+  fat_heavy:
+    audience: { zh: 一般人群（小份量）, en: General population in small portions }
+    cautions: { zh: 胆固醇较高、高血脂人群建议适量食用, en: Go easy if cholesterol or blood lipids run high }
+    serving: { zh: 水煮、煎、烤（少油更健康）, en: Poach, pan-sear or grill with minimal oil }
+  dense:
+    audience: { zh: 高消耗日、运动前后, en: High-output days, around workouts }
+    cautions: { zh: 份量极易超标，建议分装小份食用, en: Portions add up fast — pre-portion before eating }
+    serving: { zh: 作为加餐少量食用, en: Treat it as a small snack }
 
 en_names:
   p001: Steamed Rice

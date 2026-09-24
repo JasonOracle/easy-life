@@ -1,0 +1,892 @@
+<!-- [变更日志] 百科详情页 SFC：详情+搜索双态、全 token 三主题/暗色、中英双语、餐次 CTA 交接 -->
+<template>
+  <view class="ec-page" :style="{ backgroundColor: theme.bg }">
+    <!-- 顶栏：返回 / 标题 / 搜索 -->
+    <view class="ec-header" :style="{ backgroundColor: theme.bg }">
+      <view :style="{ height: sbH + 'px' }"></view>
+      <view class="ec-nav">
+        <view class="ec-nav-btn" hover-class="ec-press" :hover-stay-time="100" @click="goBack">
+          <image v-if="isDark" class="ec-nav-icon" src="/static/encyclopedia/back_light.svg" mode="aspectFit"></image>
+          <image v-else class="ec-nav-icon" src="/static/encyclopedia/back_dark.svg" mode="aspectFit"></image>
+        </view>
+        <text class="ec-nav-title" :style="{ color: theme.ink1 }">{{ L('title') }}</text>
+        <view class="ec-nav-btn" hover-class="ec-press" :hover-stay-time="100" @click="openSearch">
+          <image v-if="isDark" class="ec-nav-icon" src="/static/encyclopedia/search_light.svg" mode="aspectFit"></image>
+          <image v-else class="ec-nav-icon" src="/static/encyclopedia/search_dark.svg" mode="aspectFit"></image>
+        </view>
+      </view>
+    </view>
+
+    <scroll-view v-if="food != null" class="ec-body" direction="vertical" :show-scrollbar="false" :style="{ height: bodyH + 'px' }">
+      <!-- Hero：图 + 名 + 徽章 + 热量 + 宏量标签 -->
+      <view class="ec-hero" :style="{ backgroundColor: theme.card }">
+        <view class="ec-hero-art" :style="{ backgroundColor: theme.cardSoft }">
+          <image class="ec-hero-img" :src="heroImg" mode="aspectFit"></image>
+        </view>
+        <view class="ec-hero-info">
+          <view class="ec-name-row">
+            <text class="ec-name" :style="{ color: theme.ink1 }">{{ zhName }}</text>
+            <view class="ec-badge" :style="{ backgroundColor: theme.chip }">
+              <text class="ec-badge-text" :style="{ color: theme.accentDeep }">{{ badgeText }}</text>
+            </view>
+          </view>
+          <view class="ec-cal-row">
+            <text class="ec-cal-num" :style="{ color: theme.accent }">{{ heroCalText }}</text>
+            <text class="ec-cal-unit" :style="{ color: theme.accent }">kcal</text>
+          </view>
+          <text class="ec-piece" :style="{ color: theme.ink3 }">{{ pieceText }}</text>
+          <view class="ec-chips">
+            <view class="ec-chip" v-for="(chip, chipIdx) in chipList" :key="chipIdx" :style="{ backgroundColor: theme.cardSoft }">
+              <text class="ec-chip-text" :style="{ color: theme.ink2 }">{{ chip }}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 主要营养成分（每 100g） -->
+      <view class="ec-card" :style="{ backgroundColor: theme.card }">
+        <text class="ec-card-title" :style="{ color: theme.ink1 }">{{ L('nutrition') }}<text class="ec-card-sub" :style="{ color: theme.ink3 }">{{ L('per100') }}</text></text>
+        <view class="ec-nut-row">
+          <view class="ec-nut-col" v-for="(col, colIdx) in nutCols" :key="colIdx">
+            <view class="ec-nut-icon" :style="{ backgroundColor: col.tint }">
+              <text class="ec-nut-emoji">{{ col.emoji }}</text>
+            </view>
+            <text class="ec-nut-label" :style="{ color: theme.ink2 }">{{ col.label }}</text>
+            <text class="ec-nut-value" :style="{ color: theme.ink1 }">{{ col.value }}</text>
+            <view class="ec-nut-track" :style="{ backgroundColor: theme.line }">
+              <view class="ec-nut-fill" :style="{ width: col.pctWidth, backgroundColor: col.tint }"></view>
+            </view>
+            <text class="ec-nut-pct" :style="{ color: theme.ink3 }">{{ col.pctText }}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 营养点评 + 三列指引 -->
+      <view class="ec-card" :style="{ backgroundColor: theme.card }">
+        <view class="ec-review-head">
+          <view class="ec-review-dot" :style="{ backgroundColor: theme.chip }">
+            <text class="ec-review-dot-emoji"></text>
+          </view>
+          <text class="ec-card-title" :style="{ color: theme.ink1 }">{{ L('review') }}</text>
+        </view>
+        <text class="ec-review-text" :style="{ color: theme.ink2 }">{{ reviewBody }}</text>
+        <view class="ec-guide" :style="{ borderTopColor: theme.line }">
+          <view class="ec-guide-col" v-for="(g, gIdx) in guideRows" :key="gIdx">
+            <text class="ec-guide-title" :style="{ color: theme.accentDeep }">{{ g.emoji }} {{ g.title }}</text>
+            <text class="ec-guide-text" :style="{ color: theme.ink3 }">{{ g.text }}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 相关食物 -->
+      <view class="ec-related-block">
+        <view class="ec-related-head">
+          <text class="ec-related-emoji">🍽</text>
+          <text class="ec-section-title" :style="{ color: theme.ink1 }">{{ L('related') }}</text>
+        </view>
+        <scroll-view class="ec-related-scroll" direction="horizontal" :show-scrollbar="false">
+          <view class="ec-related-row">
+            <view class="ec-rel-card" :class="{ 'ec-rel-current': rel.id == currentId }" v-for="(rel, relIdx) in relatedList" :key="relIdx" :style="{ backgroundColor: theme.card, borderColor: rel.id == currentId ? theme.accent : theme.card }" hover-class="ec-press" :hover-stay-time="100" @click="goFood(rel.id)">
+              <image class="ec-rel-img" :src="rel.img" mode="aspectFit"></image>
+              <text class="ec-rel-name" :style="{ color: theme.ink1 }">{{ rel.name }}</text>
+              <text class="ec-rel-cal" :style="{ color: theme.ink3 }">{{ rel.calText }}</text>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+      <view class="ec-bottom-space"></view>
+    </scroll-view>
+
+    <!-- 底部 CTA：添加到当前餐次 -->
+    <view v-if="food != null" class="ec-cta-wrap" :style="{ backgroundColor: theme.bg, paddingBottom: (20 + safeBottom) + 'px' }">
+      <view class="ec-cta" :style="{ backgroundImage: ctaGradient }" hover-class="ec-cta-press" :hover-stay-time="120" @click="addToMeal">
+        <text class="ec-cta-plus">＋</text>
+        <text class="ec-cta-text" :style="{ color: theme.onAccent }">{{ ctaText }}</text>
+      </view>
+    </view>
+
+    <!-- 搜索态（全屏覆盖） -->
+    <view v-if="searchOpen" class="ec-search" :style="{ backgroundColor: theme.bg }">
+      <view :style="{ height: sbH + 'px' }"></view>
+      <view class="ec-search-bar">
+        <view class="ec-nav-btn" hover-class="ec-press" :hover-stay-time="100" @click="closeSearch">
+          <image v-if="isDark" class="ec-nav-icon" src="/static/encyclopedia/back_light.svg" mode="aspectFit"></image>
+          <image v-else class="ec-nav-icon" src="/static/encyclopedia/back_dark.svg" mode="aspectFit"></image>
+        </view>
+        <view class="ec-input-box" :style="{ backgroundColor: theme.card }">
+          <text class="ec-input-glyph">⌕</text>
+          <input class="ec-input" :focus="searchFocus" :placeholder="L('searchPh')" :placeholder-style="'color:' + theme.ink3" v-model="query" confirm-type="search"></input>
+          <text v-if="query.length > 0" class="ec-input-clear" @click="clearQuery">✕</text>
+        </view>
+        <text class="ec-cancel" :style="{ color: theme.accentDeep }" @click="closeSearch">{{ L('cancel') }}</text>
+      </view>
+
+      <scroll-view class="ec-results" direction="vertical" :show-scrollbar="false" :style="{ height: (winH - sbH - 50) + 'px' }">
+        <view class="ec-result" v-for="(r, rIdx) in results" :key="rIdx" :style="{ backgroundColor: r.id == currentId ? theme.chip : theme.card }" hover-class="ec-press" :hover-stay-time="100" @click="pickResult(r.id)">
+          <image class="ec-result-img" :src="r.img" mode="aspectFit"></image>
+          <view class="ec-result-info">
+            <text class="ec-result-name" :style="{ color: theme.ink1 }">{{ r.name }}</text>
+            <text class="ec-result-sub" :style="{ color: theme.ink3 }">{{ r.sub }}</text>
+          </view>
+          <text v-if="r.id == currentId" class="ec-result-check" :style="{ color: theme.accent }">✓</text>
+          <text v-else class="ec-result-chev" :style="{ color: theme.ink3 }">›</text>
+        </view>
+        <text v-if="query.length > 0 && results.length == 0" class="ec-empty" :style="{ color: theme.ink3 }">{{ L('empty') }}</text>
+
+        <view class="ec-hot">
+          <text class="ec-hot-title" :style="{ color: theme.ink1 }">🔥 {{ L('hot') }}</text>
+          <view class="ec-hot-chips">
+            <view class="ec-hot-chip" v-for="(h, hIdx) in hotNames" :key="hIdx" :style="{ backgroundColor: theme.card }" hover-class="ec-press" :hover-stay-time="100" @click="searchHot(h)">
+              <text class="ec-hot-chip-text" :style="{ color: theme.ink2 }">{{ h }}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+// [变更日志] 页首摘要：百科详情页＋全屏搜索态单文件双态（viewMode），全 token 驱动三主题/暗色/双语。
+// [变更日志] 食物百科详情页：hero/营养四列/点评+三列指引/相关食物/添加到餐次 CTA + 全屏搜索态；
+//       数据 = food_library（营养与图）⊕ food_encyclopedia 伴生表（英文名/档位/模板），颜色全走 useTheme token。
+import { ref, computed } from 'vue'
+import { onLoad } from '@dcloudio/uni-app'
+import { useTheme, FIXED_COLORS } from '../../composables/useTheme'
+import { resolveLang } from '../../composables/useLocale'
+import { currentMealKey, mealLabel } from '../../composables/mealWindow'
+import { ALL_FOODS, getFoodById, searchFoods } from '../../stores/food'
+import type { FoodBase } from '../../stores/food'
+import { triggerHaptic, playSound } from '../../stores/settings'
+import {
+  getEncEntry, enNameOf, badgeOf, guidanceOf, reviewText, hotFoodIds,
+} from '../../stores/encyclopedia'
+import type { EncEntry } from '../../stores/encyclopedia'
+
+const { theme, isDark } = useTheme()
+
+const sbH = ref<number>(uni.getSystemInfoSync().statusBarHeight ?? 0)
+const insets = uni.getSystemInfoSync().safeAreaInsets
+const safeBottom = insets != null ? insets.bottom : 0
+// 滚动区高度 = 视口 − 顶栏 − CTA（rpx 按 750 稿宽折算 px，原生端 :style 禁跨单位 calc）
+const winH = uni.getSystemInfoSync().windowHeight
+const winW = uni.getSystemInfoSync().windowWidth
+const rpx = (v: number): number => v / 750 * winW
+const bodyH = ref<number>(winH - (sbH.value + rpx(280) + safeBottom))
+
+const currentId = ref(ALL_FOODS.length > 0 ? ALL_FOODS[0].id : '')
+const searchOpen = ref(false)
+const searchFocus = ref(false)
+const query = ref('')
+
+const lang = computed((): string => resolveLang())
+
+function L(key: string): string {
+  const en = lang.value == 'en'
+  switch (key) {
+    case 'title': return en ? 'Food Encyclopedia' : '食物百科'
+    case 'nutrition': return en ? 'Main Nutrition' : '主要营养成分'
+    case 'per100': return en ? ' (per 100g)' : '（每100g）'
+    case 'review': return en ? 'Nutrition Review' : '营养点评'
+    case 'related': return en ? 'Related Foods' : '相关食物'
+    case 'cancel': return en ? 'Cancel' : '取消'
+    case 'hot': return en ? 'Trending Searches' : '热门搜索'
+    case 'empty': return en ? 'No matches — try another name or pinyin' : '没有找到相关食物，换个关键词试试'
+    case 'searchPh': return en ? 'Search food, pinyin or alias' : '搜索食物名称 · 拼音 · 别名'
+    case 'protein': return en ? 'Protein' : '蛋白质'
+    case 'fat': return en ? 'Fat' : '脂肪'
+    case 'carb': return en ? 'Carbs' : '碳水'
+    case 'calorie': return en ? 'Calories' : '热量'
+    case 'hiP': return en ? 'High protein' : '高蛋白'
+    case 'loF': return en ? 'Low fat' : '低脂肪'
+    case 'hiF': return en ? 'Higher fat' : '脂肪偏高'
+    case 'loC': return en ? 'Low carb' : '低碳水'
+    case 'hiC': return en ? 'High carb' : '碳水偏高'
+    case 'audience': return en ? 'Good for' : '适宜人群'
+    case 'cautions': return en ? 'Take care' : '注意事项'
+    case 'serving': return en ? 'How to enjoy' : '推荐吃法'
+    case 'add': return en ? 'Add to ' : '添加到'
+    case 'mealBreakfast': return en ? 'Breakfast' : '早餐'
+    case 'mealLunch': return en ? 'Lunch' : '午餐'
+    case 'mealDinner': return en ? 'Dinner' : '晚餐'
+    case 'mealSnack': return en ? 'Late snack' : '夜宵'
+    default: return key
+  }
+}
+
+// ===== 当前条目 =====
+const food = computed((): FoodBase | null => {
+  const f = getFoodById(currentId.value)
+  return f != null ? f : null
+})
+
+const CAT_DIR: Record<string, string> = {
+  '主食': 'staple', '菜品': 'dish', '肉类蛋类': 'protein', '蔬菜': 'vegetable',
+  '水果': 'fruit', '饮品': 'drink', '零食': 'snack',
+}
+
+const heroImg = computed((): string => {
+  const f = food.value
+  if (f == null) return ''
+  return '/static/icons/' + (CAT_DIR[f.cat] ?? 'dish') + '/' + f.id + '.webp'
+})
+
+const zhName = computed((): string => {
+  const f = food.value
+  if (f == null) return ''
+  if (lang.value == 'en') {
+    const e = getEncEntry(f.id)
+    if (e != null) return e.en
+  }
+  return f.name
+})
+
+const entry = computed((): EncEntry | null => getEncEntry(currentId.value))
+
+const badgeText = computed((): string => {
+  const e = entry.value
+  if (e == null) return ''
+  const b = badgeOf(e.cls)
+  return lang.value == 'en' ? b.en : b.zh
+})
+
+/** 展示口径：有单块重则折算 1 个，否则按每 100g/ml */
+const heroCalText = computed((): string => {
+  const f = food.value
+  if (f == null) return '0'
+  if (f.unit == 'g' && f.pieceWeight != null && f.pieceWeight > 0) {
+    return Math.round(f.kcal * f.pieceWeight / 100).toString()
+  }
+  return Math.round(f.kcal).toString()
+})
+
+const pieceText = computed((): string => {
+  const f = food.value
+  if (f == null) return ''
+  const en = lang.value == 'en'
+  if (f.unit == 'g' && f.pieceWeight != null && f.pieceWeight > 0) {
+    return en ? '/ 1 pc (~' + f.pieceWeight + 'g)' : '/ 1 个（约' + f.pieceWeight + 'g）'
+  }
+  return en ? '/ per 100' + f.unit : '/ 每 100' + f.unit
+})
+
+/** 宏量标签：按供能比给 2-3 个短标签 */
+const chipList = computed((): string[] => {
+  const out: string[] = []
+  const f = food.value
+  if (f == null) return out
+  const pE = (f.protein ?? 0) * 4
+  const cE = (f.carb ?? 0) * 4
+  const fE = (f.fat ?? 0) * 9
+  const tot = pE + cE + fE
+  if (tot <= 0) {
+    out.push(L('loC'))
+    out.push(L('loF'))
+    return out
+  }
+  if (pE / tot >= 0.30) out.push(L('hiP'))
+  out.push(fE / tot <= 0.35 ? L('loF') : L('hiF'))
+  if (cE / tot <= 0.40) out.push(L('loC'))
+  else if (cE / tot >= 0.60) out.push(L('hiC'))
+  return out
+})
+
+// ===== 营养四列 =====
+type NutCol = { emoji: string; label: string; value: string; pctWidth: string; pctText: string; tint: string }
+
+const nutCols = computed((): NutCol[] => {
+  const out: NutCol[] = []
+  const f = food.value
+  if (f == null) return out
+  const p = f.protein ?? 0
+  const c = f.carb ?? 0
+  const fat = f.fat ?? 0
+  const pE = p * 4
+  const cE = c * 4
+  const fE = fat * 9
+  const tot = pE + cE + fE
+  const pct = (e: number): number => tot > 0 ? Math.round(e * 100 / tot) : 0
+  const mk = (emoji: string, labelKey: string, value: string, share: number, tint: string): NutCol => ({
+    emoji: emoji, label: L(labelKey), value: value,
+    pctWidth: (share < 3 ? 3 : share) + '%',
+    pctText: tot > 0 ? '(' + share + '%)' : '—',
+    tint: tint,
+  })
+  out.push(mk('💪', 'protein', p + 'g', pct(pE), theme.value.accent))
+  out.push(mk('💧', 'fat', fat + 'g', pct(fE), FIXED_COLORS.infoCarb))
+  out.push(mk('🌾', 'carb', c + 'g', pct(cE), theme.value.accentDeep))
+  out.push(mk('🔥', 'calorie', Math.round(f.kcal) + ' kcal', 100, FIXED_COLORS.infoCalorie))
+  return out
+})
+
+// ===== 点评 + 三列指引 =====
+const reviewBody = computed((): string => {
+  const f = food.value
+  const e = entry.value
+  if (f == null || e == null) return ''
+  return reviewText(e.cls, lang.value, Math.round(f.kcal), f.protein ?? 0, f.carb ?? 0, f.fat ?? 0)
+})
+
+type GuideRow = { emoji: string; title: string; text: string }
+
+const guideRows = computed((): GuideRow[] => {
+  const out: GuideRow[] = []
+  const e = entry.value
+  if (e == null) return out
+  const g = guidanceOf(e.cls)
+  const en = lang.value == 'en'
+  out.push({ emoji: '👥', title: L('audience'), text: en ? g.audience.en : g.audience.zh })
+  out.push({ emoji: '⚠️', title: L('cautions'), text: en ? g.cautions.en : g.cautions.zh })
+  out.push({ emoji: '🍳', title: L('serving'), text: en ? g.serving.en : g.serving.zh })
+  return out
+})
+
+// ===== 相关食物（当前项 + 同档近似 3 条） =====
+type RelItem = { id: string; name: string; img: string; calText: string }
+
+const relatedList = computed((): RelItem[] => {
+  const out: RelItem[] = []
+  const e = entry.value
+  if (e == null) return out
+  const ids: string[] = [currentId.value]
+  for (const rid of e.related) ids.push(rid)
+  for (const id of ids) {
+    const f = getFoodById(id)
+    if (f == null) continue
+    const en = lang.value == 'en'
+    const name = en ? (enNameOf(id).length > 0 ? enNameOf(id) : f.name) : f.name
+    let calText = Math.round(f.kcal) + ' kcal/100' + f.unit
+    if (f.unit == 'g' && f.pieceWeight != null && f.pieceWeight > 0) {
+      calText = Math.round(f.kcal * f.pieceWeight / 100) + ' kcal/' + (en ? 'pc' : '个')
+    }
+    out.push({ id: id, name: name, img: '/static/icons/' + (CAT_DIR[f.cat] ?? 'dish') + '/' + id + '.webp', calText: calText })
+  }
+  return out
+})
+
+// ===== CTA =====
+const mealKey = computed((): string => currentMealKey())
+
+const mealName = computed((): string => {
+  const k = mealKey.value
+  if (k == 'breakfast') return L('mealBreakfast')
+  if (k == 'lunch') return L('mealLunch')
+  if (k == 'dinner') return L('mealDinner')
+  return L('mealSnack')
+})
+
+const ctaText = computed((): string => {
+  const sep = lang.value == 'en' ? ' ' : ''
+  return L('add') + sep + mealName.value + ' · ' + heroCalText.value + ' kcal'
+})
+
+const ctaGradient = computed((): string => 'linear-gradient(' + theme.value.accent2 + ', ' + theme.value.accent + ')')
+
+function addToMeal(): void {
+  triggerHaptic('medium')
+  playSound('confirm')
+  // 一次性交接：回首页由 Home 消费 ct_pending_add，打开 FoodPicker 详情步预填该食物
+  uni.setStorageSync('ct_pending_add', JSON.parse(JSON.stringify({ id: currentId.value, meal: mealKey.value })))
+  uni.navigateBack({
+    fail: () => { uni.reLaunch({ url: '/pages/home/Home' }) },
+  })
+}
+
+// ===== 搜索态 =====
+function openSearch(): void {
+  triggerHaptic('light')
+  searchOpen.value = true
+  setTimeout(() => { searchFocus.value = true }, 300)
+}
+
+function closeSearch(): void {
+  searchFocus.value = false
+  searchOpen.value = false
+}
+
+function clearQuery(): void {
+  query.value = ''
+}
+
+type SearchResult = { id: string; name: string; img: string; sub: string }
+
+const enMap = computed((): Map<string, string> => {
+  const m = new Map<string, string>()
+  for (const f of ALL_FOODS) {
+    const en = enNameOf(f.id)
+    if (en.length > 0) m.set(f.id, en)
+  }
+  return m
+})
+
+const results = computed((): SearchResult[] => {
+  const q = query.value.trim()
+  if (q.length == 0) return []
+  const list = searchFoods(q, enMap.value)
+  const out: SearchResult[] = []
+  for (const f of list) {
+    if (out.length >= 40) break
+    const en = lang.value == 'en'
+    const name = en ? (enNameOf(f.id).length > 0 ? enNameOf(f.id) : f.name) : f.name
+    let sub = Math.round(f.kcal) + ' kcal / 100' + f.unit
+    if (f.unit == 'g' && f.pieceWeight != null && f.pieceWeight > 0) {
+      sub = Math.round(f.kcal * f.pieceWeight / 100) + ' kcal / ' + (en ? '1 pc (~' + f.pieceWeight + 'g)' : '1 个（约' + f.pieceWeight + 'g）')
+    }
+    out.push({ id: f.id, name: name, img: '/static/icons/' + (CAT_DIR[f.cat] ?? 'dish') + '/' + f.id + '.webp', sub: sub })
+  }
+  return out
+})
+
+const HOT_IDS = hotFoodIds()
+
+const hotNames = computed((): string[] => {
+  const out: string[] = []
+  for (const id of HOT_IDS) {
+    const f = getFoodById(id)
+    if (f == null) continue
+    out.push(lang.value == 'en' && enNameOf(id).length > 0 ? enNameOf(id) : f.name)
+  }
+  return out
+})
+
+function findIdByName(name: string): string {
+  for (const id of HOT_IDS) {
+    const f = getFoodById(id)
+    if (f != null && (f.name == name || enNameOf(id) == name)) return id
+  }
+  return ''
+}
+
+function searchHot(name: string): void {
+  triggerHaptic('light')
+  const id = findIdByName(name)
+  if (id.length > 0) {
+    pickResult(id)
+    return
+  }
+  query.value = name
+}
+
+function pickResult(id: string): void {
+  triggerHaptic('light')
+  currentId.value = id
+  closeSearch()
+}
+
+function goFood(id: string): void {
+  triggerHaptic('light')
+  currentId.value = id
+}
+
+function goBack(): void {
+  triggerHaptic('light')
+  uni.navigateBack({
+    fail: () => { uni.reLaunch({ url: '/pages/home/Home' }) },
+  })
+}
+
+onLoad((options: OnLoadOptions) => {
+  const id = options['id'] ?? ''
+  if (id.length == 6) {
+    const f = getFoodById(id)
+    if (f != null) currentId.value = id
+  }
+})
+</script>
+
+<style>
+.ec-page {
+  flex-direction: column;
+}
+.ec-header {
+  flex-shrink: 0;
+}
+.ec-nav {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  height: 96rpx;
+  padding-left: 16rpx;
+  padding-right: 16rpx;
+}
+.ec-nav-btn {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 36rpx;
+  align-items: center;
+  justify-content: center;
+}
+.ec-nav-icon {
+  width: 44rpx;
+  height: 44rpx;
+}
+.ec-nav-title {
+  font-size: 34rpx;
+  font-weight: bold;
+}
+.ec-press {
+  opacity: 0.7;
+  transform: scale(0.97);
+}
+.ec-body {
+  flex-shrink: 0;
+}
+.ec-hero {
+  flex-direction: row;
+  margin: 16rpx 32rpx 0 32rpx;
+  padding: 32rpx;
+  border-radius: 40rpx;
+  align-items: center;
+}
+.ec-hero-art {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 32rpx;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ec-hero-img {
+  width: 176rpx;
+  height: 176rpx;
+}
+.ec-hero-info {
+  flex: 1;
+  margin-left: 28rpx;
+}
+.ec-name-row {
+  flex-direction: row;
+  align-items: center;
+}
+.ec-name {
+  font-size: 40rpx;
+  font-weight: bold;
+  margin-right: 16rpx;
+}
+.ec-badge {
+  padding-left: 16rpx;
+  padding-right: 16rpx;
+  padding-top: 6rpx;
+  padding-bottom: 6rpx;
+  border-radius: 999rpx;
+}
+.ec-badge-text {
+  font-size: 22rpx;
+}
+.ec-cal-row {
+  flex-direction: row;
+  align-items: flex-end;
+  margin-top: 10rpx;
+}
+.ec-cal-num {
+  font-size: 92rpx;
+  font-weight: bold;
+  line-height: 96rpx;
+}
+.ec-cal-unit {
+  font-size: 30rpx;
+  font-weight: bold;
+  margin-left: 10rpx;
+  margin-bottom: 12rpx;
+}
+.ec-piece {
+  font-size: 24rpx;
+  margin-top: 2rpx;
+}
+.ec-chips {
+  flex-direction: row;
+  margin-top: 18rpx;
+  flex-wrap: wrap;
+}
+.ec-chip {
+  padding-left: 20rpx;
+  padding-right: 20rpx;
+  padding-top: 8rpx;
+  padding-bottom: 8rpx;
+  border-radius: 999rpx;
+  margin-right: 14rpx;
+}
+.ec-chip-text {
+  font-size: 23rpx;
+}
+.ec-card {
+  margin: 24rpx 32rpx 0 32rpx;
+  padding: 32rpx;
+  border-radius: 40rpx;
+}
+.ec-card-title {
+  font-size: 31rpx;
+  font-weight: bold;
+}
+.ec-card-sub {
+  font-size: 23rpx;
+  font-weight: normal;
+}
+.ec-nut-row {
+  flex-direction: row;
+  margin-top: 28rpx;
+}
+.ec-nut-col {
+  flex: 1;
+  align-items: center;
+}
+.ec-nut-icon {
+  width: 76rpx;
+  height: 76rpx;
+  border-radius: 38rpx;
+  align-items: center;
+  justify-content: center;
+}
+.ec-nut-emoji {
+  font-size: 34rpx;
+}
+.ec-nut-label {
+  font-size: 24rpx;
+  margin-top: 14rpx;
+}
+.ec-nut-value {
+  font-size: 28rpx;
+  font-weight: bold;
+  margin-top: 6rpx;
+}
+.ec-nut-track {
+  width: 104rpx;
+  height: 8rpx;
+  border-radius: 4rpx;
+  margin-top: 12rpx;
+  overflow: hidden;
+}
+.ec-nut-fill {
+  height: 8rpx;
+  border-radius: 4rpx;
+}
+.ec-nut-pct {
+  font-size: 21rpx;
+  margin-top: 8rpx;
+}
+.ec-review-head {
+  flex-direction: row;
+  align-items: center;
+}
+.ec-review-dot {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 28rpx;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16rpx;
+}
+.ec-review-dot-emoji {
+  font-size: 28rpx;
+}
+.ec-review-text {
+  font-size: 27rpx;
+  line-height: 44rpx;
+  margin-top: 22rpx;
+}
+.ec-guide {
+  flex-direction: row;
+  border-top-width: 1px;
+  border-top-style: solid;
+  padding-top: 24rpx;
+  margin-top: 26rpx;
+}
+.ec-guide-col {
+  flex: 1;
+  padding-right: 18rpx;
+}
+.ec-guide-title {
+  font-size: 24rpx;
+  font-weight: bold;
+}
+.ec-guide-text {
+  font-size: 22rpx;
+  line-height: 34rpx;
+  margin-top: 8rpx;
+}
+.ec-related-block {
+  margin-top: 32rpx;
+}
+.ec-related-head {
+  flex-direction: row;
+  align-items: center;
+  padding-left: 40rpx;
+  margin-bottom: 18rpx;
+}
+.ec-related-emoji {
+  font-size: 28rpx;
+  margin-right: 12rpx;
+}
+.ec-section-title {
+  font-size: 31rpx;
+  font-weight: bold;
+}
+.ec-related-scroll {
+  height: 320rpx;
+  width: 100%;
+}
+.ec-related-row {
+  flex-direction: row;
+  padding-left: 32rpx;
+  padding-right: 32rpx;
+}
+.ec-rel-card {
+  width: 220rpx;
+  border-radius: 32rpx;
+  padding: 22rpx;
+  margin-right: 20rpx;
+  border-width: 3rpx;
+  border-style: solid;
+  align-items: center;
+  flex-shrink: 0;
+}
+.ec-rel-current {
+  opacity: 1;
+}
+.ec-rel-img {
+  width: 128rpx;
+  height: 128rpx;
+}
+.ec-rel-name {
+  font-size: 25rpx;
+  font-weight: bold;
+  margin-top: 12rpx;
+}
+.ec-rel-cal {
+  font-size: 21rpx;
+  margin-top: 6rpx;
+}
+.ec-bottom-space {
+  height: 60rpx;
+}
+.ec-cta-wrap {
+  flex-shrink: 0;
+  padding: 20rpx 32rpx 20rpx 32rpx;
+}
+.ec-cta {
+  height: 104rpx;
+  border-radius: 52rpx;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+.ec-cta-plus {
+  font-size: 36rpx;
+  color: #FFFFFF;
+  margin-right: 12rpx;
+}
+.ec-cta-text {
+  font-size: 31rpx;
+  font-weight: bold;
+}
+.ec-cta-press {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+.ec-search {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  flex-direction: column;
+}
+.ec-search-bar {
+  flex-direction: row;
+  align-items: center;
+  padding-left: 16rpx;
+  padding-right: 24rpx;
+  height: 100rpx;
+  flex-shrink: 0;
+}
+.ec-input-box {
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  height: 76rpx;
+  border-radius: 38rpx;
+  padding-left: 24rpx;
+  padding-right: 24rpx;
+}
+.ec-input-glyph {
+  font-size: 32rpx;
+  margin-right: 12rpx;
+}
+.ec-input {
+  flex: 1;
+  font-size: 28rpx;
+}
+.ec-input-clear {
+  font-size: 28rpx;
+  padding-left: 12rpx;
+}
+.ec-cancel {
+  font-size: 29rpx;
+  margin-left: 20rpx;
+}
+.ec-results {
+  flex-shrink: 0;
+}
+.ec-result {
+  flex-direction: row;
+  align-items: center;
+  margin: 0 32rpx 20rpx 32rpx;
+  padding: 24rpx;
+  border-radius: 32rpx;
+}
+.ec-result-img {
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 24rpx;
+  flex-shrink: 0;
+}
+.ec-result-info {
+  flex: 1;
+  margin-left: 24rpx;
+}
+.ec-result-name {
+  font-size: 31rpx;
+  font-weight: bold;
+}
+.ec-result-sub {
+  font-size: 23rpx;
+  margin-top: 6rpx;
+}
+.ec-result-check {
+  font-size: 40rpx;
+  font-weight: bold;
+}
+.ec-result-chev {
+  font-size: 44rpx;
+}
+.ec-empty {
+  font-size: 26rpx;
+  text-align: center;
+  margin: 40rpx 60rpx 20rpx 60rpx;
+}
+.ec-hot {
+  padding: 16rpx 40rpx 40rpx 40rpx;
+}
+.ec-hot-title {
+  font-size: 27rpx;
+  font-weight: bold;
+}
+.ec-hot-chips {
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 20rpx;
+}
+.ec-hot-chip {
+  padding-left: 26rpx;
+  padding-right: 26rpx;
+  padding-top: 12rpx;
+  padding-bottom: 12rpx;
+  border-radius: 999rpx;
+  margin-right: 16rpx;
+  margin-bottom: 16rpx;
+}
+.ec-hot-chip-text {
+  font-size: 25rpx;
+}
+</style>
