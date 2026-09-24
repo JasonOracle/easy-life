@@ -1,4 +1,4 @@
-
+// [变更日志] 设置持久化 store：新增 accent（主题色 mint/ocean/lavender）与 locale（'' = 跟随系统）两字段，随 ct_settings_v1 一并落盘
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
@@ -12,6 +12,8 @@ interface SettingsState {
   mealReminders: boolean
   soundEnabled: boolean
   hapticsEnabled: boolean
+  accent: string
+  locale: string
 }
 
 function loadSettings(): SettingsState {
@@ -20,6 +22,8 @@ function loadSettings(): SettingsState {
     mealReminders: false,
     soundEnabled: true,
     hapticsEnabled: true,
+    accent: 'mint',
+    locale: '',
   }
   try {
     const raw = uni.getStorageSync(STORAGE_KEY)
@@ -39,6 +43,9 @@ export const useSettingsStore = defineStore('settings', () => {
   const mealReminders = ref(initial.mealReminders)
   const soundEnabled = ref(initial.soundEnabled)
   const hapticsEnabled = ref(initial.hapticsEnabled)
+  const accent = ref(initial.accent)
+  // '' 表示未显式选择，运行时按系统 locale 兜底；setLocale 后固定
+  const locale = ref(initial.locale)
 
   function persist(): void {
     try {
@@ -47,6 +54,8 @@ export const useSettingsStore = defineStore('settings', () => {
         mealReminders: mealReminders.value,
         soundEnabled: soundEnabled.value,
         hapticsEnabled: hapticsEnabled.value,
+        accent: accent.value,
+        locale: locale.value,
       }))
     } catch (e) {
       }
@@ -69,6 +78,16 @@ export const useSettingsStore = defineStore('settings', () => {
 
   function setDarkMode(v: boolean): void {
     darkMode.value = v
+    persist()
+  }
+
+  function setAccent(v: string): void {
+    accent.value = v
+    persist()
+  }
+
+  function setLocale(v: string): void {
+    locale.value = v
     persist()
   }
 
@@ -118,10 +137,14 @@ export const useSettingsStore = defineStore('settings', () => {
     mealReminders,
     soundEnabled,
     hapticsEnabled,
+    accent,
+    locale,
     setMealReminders,
     setSoundEnabled,
     setHapticsEnabled,
     setDarkMode,
+    setAccent,
+    setLocale,
     playSound,
     triggerHaptic,
   }

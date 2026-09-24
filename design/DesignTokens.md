@@ -189,6 +189,71 @@ Tab 页内容底部预留统一采用**方案 A 动态安全区全避让**：
 
 ---
 
+## 8. 主题 token 角色表（2026-09-25 定稿，三主题 × 亮/暗双态）
+
+> **来源**：Pencil「食物百科 · 详情页」`Nnctn`（fd-* 变量体系）与「食物百科 · 搜索态 v2」`POU8h`（旧 mint 直值）
+> 全量提取 + Mint Dark 13 帧聚合色板。两页色板不一致（fd-title `#0F172A` slate vs ink `#0A4F3D` 绿墨），
+> 由本表统一；搜索页向 fd-* 对齐。
+> **用法**：代码只写角色名，经 `composables/useTheme.ts` 按 `(角色, mode, accent)` 查表取 hex。
+> 严禁在页面里新增裸 hex——新色必须先登记为本表角色或 §8.3 固定色。
+
+### 8.1 角色 × 主题矩阵（18 角色）
+
+| 角色 | 用途 | mint·亮 | mint·暗 | ocean·亮 | ocean·暗 | lav·亮 | lav·暗 |
+|---|---|---|---|---|---|---|---|
+| `bg` | 页面底 | `#F6FBF8` | `#0A1612` | `#F5FAFD` | `#0A1218` | `#FAF8FE` | `#100D1A` |
+| `card` | 卡片底 | `#FFFFFF` | `#162924` | `#FFFFFF` | `#14232E` | `#FFFFFF` | `#1D1830` |
+| `card-soft` | 点评/次级卡底 | `#EEFAF6` | `#1A3B2F` | `#EAF4FB` | `#1A2E3B` | `#F3EFFC` | `#241E3C` |
+| `chip` | 标签/图标托底 | `#E6F9F6` | `#2A4238` | `#E1F0FA` | `#1E3A4C` | `#EFEAFC` | `#2B2350` |
+| `line` | 分隔线/描边 | `#D8EFE5` | `#24443A` | `#D2E7F3` | `#24424F` | `#E3DCF5` | `#372D5E` |
+| `ink-1` | 一级文字 | `#0F172A`* | `#FFFFFF` | `#0F2A3D` | `#FFFFFF` | `#241D47` | `#FFFFFF` |
+| `ink-2` | 二级文字 | `#475569`* | `#FFFFFFB8` | `#3D5A6E` | `#FFFFFFB8` | `#4E4675` | `#FFFFFFB8` |
+| `ink-3` | 辅助/占位文字 | `#8BA7A0`* | `#8B9E94` | `#7E96A6` | `#8FA6B2` | `#9A93B8` | `#9E96BC` |
+| `accent` | 品牌主色 | `#20C997` | `#52D6AC` | `#2F9FE0` | `#5BC8FF` | `#8B7BE8` | `#A99BFF` |
+| `accent-2` | 渐变亮端 | `#2BD6A3` | `#6FE3BF` | `#4FB8F0` | `#7AD6FF` | `#A48CF0` | `#BFB2FF` |
+| `accent-deep` | 强调深字/图标 | `#064E3B` | `#A7F0DA` | `#0B5E8F` | `#A8E4FF` | `#4F3FA8` | `#D6CCFF` |
+| `on-accent` | accent 底上文字 | `#FFFFFF` | `#0A1612` | `#FFFFFF` | `#0A1218` | `#FFFFFF` | `#100D1A` |
+| `glass-bg` | 玻璃面板底 | `#FFFFFFF2` | `#FFFFFF14` | `#FFFFFFF2` | `#FFFFFF14` | `#FFFFFFF2` | `#FFFFFF14` |
+| `glass-scrim` | 玻璃遮罩 | `#F6FBF8A6` | `#0A1612A6` | `#F5FAFDA6` | `#0A1218A6` | `#FAF8FEA6` | `#100D1AA6` |
+| `thumb-stroke` | 食物缩略图托边 | `#EAF9F3` | `#2A4238` | `#E3F0F9` | `#1E3A4C` | `#EEEAF9` | `#2B2350` |
+| `dash-line` | 虚线分隔 | `#0A4F3D1F` | `#FFFFFF1F` | `#0F2A3D1F` | `#FFFFFF1F` | `#241D471F` | `#FFFFFF1F` |
+| `hero-bg` | 首页 hero 渐变端 | `#E4F2E9` | `#0E211C` | `#E2F0F9` | `#0E1E26` | `#EDE7F7` | `#171126` |
+| `sys-indicator` | Home Indicator | `#B9C9C3` | `#3A4F47` | `#B4C6D1` | `#33464F` | `#C3BCD6` | `#413A55` |
+
+\* `ink-1/2/3` mint·亮列取百科稿 slate 值（`#0F172A`/`#475569`/`#8BA7A0`）。**A/B 待测**：测试轮将真机对比
+slate 墨（稿面新意图）vs 绿墨（现全 App `#0A4F3D`/`#0F4F3D99`/`#0F4F3D57`），按「与品牌色协调 + 长文可读性」
+择一锁定；未裁决前现有页面保持绿墨，百科新页用本表值。
+
+### 8.2 派生规则（ocean / lavender 的暗黑未手绘，按此公式从 mint 推导）
+
+- 暗态 `bg`/`card`/`card-soft`/`chip`/`line` = 对应亮态主题色相、饱和度压至 ~25%、明度按 mint 暗黑梯级（`#0A1612`→`#2A4238` 的 5 档）平移
+- 暗态 `accent` = 亮态 accent 明度 +18%、饱和 −10%（mint 校验：`#20C997`→`#52D6AC` ✓ 与 Pencil Mint Dark 实测一致）
+- 暗态 `accent-deep` 反转提亮（深底上强调字必须浅色）；暗态 `on-accent` 反转为该主题暗底（浅 accent 上白字对比不足）
+
+### 8.3 固定色（不随主题/模式变，与 accent 严格分轴）
+
+| Token | 值 | 用途 |
+|---|---|---|
+| `status-mint` | 即 `accent` 轴 | 热量正常档（跟随主题） |
+| `status-amber` | `#E8B54D` | 接近上限档（永不换） |
+| `status-coral` | `#FF9E7D` | 超标档（永不换） |
+| `danger` | `#FF6B6B`（暗态）/ `#FF9E7D`（亮态） | 破坏性操作警示 |
+| `info-carb` | `#FCA212` | 营养环·碳水图标 |
+| `info-calorie` | `#FC7130` | 营养环·热量图标 |
+| `info-protein` / `info-fat` | 即 `accent` | 营养环·蛋白/脂肪图标（跟随主题） |
+
+> 排除红/橙/黄系做主题色的原因：与 `status-amber`/`status-coral`/`info-*` 色相冲突，会让用户分不清
+> 「这是警告语义还是配色」。
+
+### 8.4 资产 × 主题矩阵
+
+- 瓶身/树叶/bg 卡 SVG：`status=amber/coral` 两套全局共用；正常态一套随主题换色相（toolchain 参数化重着色，零生图额度）
+- 贴纸 PNG：三档文案色中 green 档跟随 `accent`，amber/coral 档固定
+- 液体渐变（useLiquid PALETTES）：green 档基色改读 `accent` 轴
+- Tabbar 气泡/选中文字：`tb-text-on` 系列改读 `accent`（§7 值降级为 mint 主题的历史基准）
+
+---
+
 ## 附：Ardot 变量集原始导出（供核对）
 
 ```css

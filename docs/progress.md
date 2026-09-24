@@ -392,3 +392,11 @@ Boss 提出「两侧绿色树枝也做一套 SVG」。与瓶身适配合并为�
 - **诊断**：Boss 反馈空瓶平常态液体来回循环晃动。分析定案＝非 bug——idle 呼吸（3.8s 主晃 ±1.6rpx＋1.4s 副纹）为常驻设计，但振幅是绝对 rpx 值；0 摄入时保底水位仅 14.2rpx 深，圆底弧壁把 3.2rpx 两端高差放大成显眼绿带摆动（水位越浅越晃＝语义倒挂）。
 - **修复（A 方案）**：`useLiquid.ts` idle 注入振幅乘 `depthScale = min(1, 水深/40rpx)`——空瓶(0.06)衰减至 35%、水深≥40rpx 恢复满呼吸；tap/longpress/pour 三条用户主动激扰路径零改动。
 - **测试经理轮**：全量 cleanCache 重编译（bytes 01:10）→ 冷重启 → `debug/liquid_idle_measure.py` 16 帧量测液面顶：稳态 spread 0–3px（改前可见明显楔形摆动）；tap 回归＝点击后液面抬升 14px、约 1s 阻尼收敛，物理完整；特写 `debug/shots/s15_idle_calm_zoom.png` 绿带水平安静、气泡存活。
+
+### 2026-09-25 03:57:00 ｜ 通宵任务·阶段1收口：主题 token 层 + 设置 store 扩展 + 餐次时间窗（编译绿灯 + 首页无回归）
+- **角色：产品经理轮**——跑通 `product-design:audit` 对食物百科页三轴（暗黑/主题/i18n）走查（14 findings：0 blocker/5 major/9 minor，聚类 4 机会点，落 `spark-output/context/audit.json` + `spark-output/audit/food-encyclopedia.md` + 面板）。
+- **Pencil 取色 + token 定稿**：从百科详情页（`Nnctn`，$fd-* 变量）与搜索态 v2（`POU8h`，旧 mint 字面量）提取全部色值，统一归入 `design/DesignTokens.md` **§8 主题 token 角色表**：18 语义角色 × 6 色板（mint/ocean/lavender × 亮/暗）；§8.2 暗色推导公式（暗 accent＝亮 accent 提亮 18% 降饱和 10%，mint-dark 为 Pencil 手绘基准）；§8.3 固定色轴（status-amber/coral、info-carb/calorie 不随主题）；§8.4 资产×主题矩阵（瓶/叶/bg SVG 按 accent 重着色，走 toolchain 参数化生成线）。
+- **`composables/useTheme.ts`（新建）**：`PALETTES` 六色板查表（key＝accent+mode），`useTheme()` 返回 `{ theme, isDark, accentId }` 三个 computed；`FIXED_COLORS` 与 `ACCENT_OPTIONS` 导出。**遗留 A/B**：ink-1 百科稿 slate `#0F172A` vs 现 App green `#0A4F3D`，待真机双版渲染裁决（任务 #57）。
+- **`stores/settings.ts`**：`SettingsState` 新增 `accent: 'mint'`、`locale: ''`（'' ＝ 跟随系统），`setAccent`/`setLocale` 即点即持久化（ct_settings_v1）。
+- **`composables/mealWindow.ts`（新建）**：餐次时间窗定稿——早餐 05:00–10:59／午餐 11:00–16:59／晚餐 17:00–21:59／夜宵 22:00–04:59；键与 `stores/food.ts` 餐次 map 对齐（breakfast/lunch/dinner/snack）；`currentMealKey()` 供百科页 CTA「添加到 X 餐」判断。
+- **测试经理轮**：`hooks.py all` 5 闸全绿 → `cli.exe launch app-android --cleanCache` 全量重编译（bytes 03:48 重生成，非差量）→ force-stop＋冷启动 12s → 截图 `debug/shots/s1_home.png`：首页完整渲染、贴纸/瓶/Tabbar 无回归（阶段1为纯逻辑增量，零视觉变更，符合预期）。

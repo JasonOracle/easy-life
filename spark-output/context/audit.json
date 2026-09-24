@@ -1,0 +1,40 @@
+{
+  "_changelog": "[变更日志] product-design:audit 链式上下文输出：食物百科页暗黑/主题/i18n 三轴走查（14 findings / 4 机会点），供下游 Brief/Stories 读取。",
+  "skill": "audit",
+  "generated_at": "2026-09-25T02:30:00+08:00",
+  "project_name": "轻律生活-食物百科页",
+  "target": {
+    "type": "screenshots",
+    "reference": "C:\\Users\\Administrator\\.qoder\\tmp\\D--project-other-porject-kaluli\\images\\127278e0-2f40-4b46-b38d-868605346645\\{1e902694-16fa-47b2-b22b-5cd7fe4a1bc6,1946f09d-9f1b-43d9-bda8-26f3dc5caa4e}.png",
+    "pages_audited": ["food-encyclopedia-detail", "food-search-popup"]
+  },
+  "audit_framework": ["Nielsen-10", "responsive", "performance"],
+  "findings": [
+    {"id":"audit-1","heuristic":"consistency","severity":"major","description":"详情页主色（优质蛋白标签/营养tag/CTA按钮）硬编码薄荷绿，暗黑色板对应值未定义","evidence":"详情页截图：优质蛋白标签、高蛋白/低脂肪/低碳水三tag、底部添加到早餐按钮均为同一薄荷绿","suggestion":"Pencil 绑定到 accent token；Mint Dark frame 赋 #52D6AC","effort":"quick-win"},
+    {"id":"audit-2","heuristic":"consistency","severity":"major","description":"搜索弹窗热门搜索tag（灰底）与详情页营养tag（绿底）视觉语言不一致，暗黑下区分策略未定","evidence":"搜索页🔥热门搜索5tag vs 详情页3营养tag","suggestion":"定义 chip-neutral vs chip-accent 两个token角色；暗态分别赋值","effort":"quick-win"},
+    {"id":"audit-3","heuristic":"consistency","severity":"minor","description":"顶栏返回/搜索icon暗态是否反白未覆盖","evidence":"详情页顶栏左返回+右搜索icon","suggestion":"归入 ink-icon token，暗态 #FFFFFF；多主题下跟随 ink-1 不跟随 accent","effort":"quick-win"},
+    {"id":"audit-4","heuristic":"recognition","severity":"major","description":"热门搜索仅5固定词，无最近搜索；i18n后词条数翻倍可能溢出","evidence":"搜索页底部🔥热门搜索5项","suggestion":"hot-search词条做有序数组；UI自适应换行或横滚；加最近搜索（本地存储无需翻译）","effort":"medium"},
+    {"id":"audit-5","heuristic":"recognition","severity":"minor","description":"相关食物卡片单位混用（个/100g/5个），i18n需独立单位词条","evidence":"相关食物区4卡片","suggestion":"i18n词典预留 unit.piece/unit.per100g/unit.per5pieces；UI拼接{value}{unit}","effort":"medium"},
+    {"id":"audit-6","heuristic":"real-world-match","severity":"major","description":"营养点评长文本中文60字，译文×1.5-2倍可能溢出","evidence":"详情页营养点评段落","suggestion":"<text>组件+lines兜底；设计预留弹性高度；Pencil用auto-layout模拟最长译文","effort":"medium"},
+    {"id":"audit-7","heuristic":"real-world-match","severity":"minor","description":"推荐吃法括号补充说明在RTL语言下方向反转","evidence":"详情页推荐吃法列","suggestion":"括号内容拆为独立key；v1保证LTR多语言不破版，RTL作v2议题","effort":"medium"},
+    {"id":"audit-8","heuristic":"aesthetic","severity":"major","description":"详情页9视觉区块挤一屏，暗态对比度压缩后层级易糊","evidence":"详情页全貌","suggestion":"出Mint Dark详情页frame逐区块核对对比度≥3:1；多主题下accent色相变化同步验证圆环辨识度","effort":"major-rework"},
+    {"id":"audit-9","heuristic":"aesthetic","severity":"minor","description":"4营养圆环纯色填充，暗态是否需要描边未定义","evidence":"详情页主要营养素4圆环","suggestion":"ring-accent/ring-neutral token；暗态加1px #FFFFFF20内描边","effort":"quick-win"},
+    {"id":"audit-10","heuristic":"responsive","severity":"major","description":"搜索弹窗高度未标注，小屏可能遮挡列表；暗态遮罩透明度未定","evidence":"搜索页整体布局","suggestion":"max-height=min(60vh,480px)；遮罩暗态#000000B0；token overlay-mask-light/dark","effort":"medium"},
+    {"id":"audit-11","heuristic":"visibility","severity":"minor","description":"搜索框清空按钮三态未展示，暗态对比度需校验","evidence":"搜索栏右侧X图标","suggestion":"补空/聚焦/有词三态；X色归ink-icon-muted，暗态对比度≥4.5:1","effort":"quick-win"},
+    {"id":"audit-12","heuristic":"user-control","severity":"minor","description":"搜索弹窗关闭路径仅取消按钮，遮罩/下滑/ESC未明示","evidence":"搜索页顶栏取消按钮","suggestion":"明确三种关闭通道；取消文案复用全局action.cancel","effort":"quick-win"},
+    {"id":"audit-13","heuristic":"error-prevention","severity":"minor","description":"搜索无结果态未展示，i18n需插值词条","evidence":"搜索页仅有结果态","suggestion":"补空态设计；词条search.empty带{keyword}插值；插图用单色SVG跟随accent","effort":"medium"},
+    {"id":"audit-14","heuristic":"flexibility","severity":"minor","description":"CTA把餐次名写死，未动态跟随当前时段；i18n餐次名应复用store枚举","evidence":"详情页底部绿色按钮","suggestion":"模板化action.add_to_meal:{meal}{kcal}；meal从store取默认餐次","effort":"medium"}
+  ],
+  "opportunities": [
+    {"title":"建立食物百科页token角色映射表（暗黑+主题双轴一次到位）","addresses_findings":["audit-1","audit-2","audit-3","audit-8","audit-9","audit-10","audit-11"],"priority":"high","rationale":"7个finding指向颜色/样式未绑语义角色，是三轴预留根因；解决后暗黑色板和多主题扩展变填表工作"},
+    {"title":"i18n词条结构按模板+插值设计","addresses_findings":["audit-5","audit-6","audit-7","audit-13","audit-14"],"priority":"high","rationale":"5个finding都是文案写死导致翻译破版或无法复用；现在定schema避免700-800词条录入返工"},
+    {"title":"搜索弹窗交互态补全（三态+关闭通道+空态）","addresses_findings":["audit-4","audit-11","audit-12","audit-13"],"priority":"medium","rationale":"搜索是百科页入口，当前只覆盖理想路径；补异常态顺带定i18n空态词条和暗态遮罩"},
+    {"title":"信息密度与暗态层级复核","addresses_findings":["audit-8"],"priority":"low","rationale":"需出新设计稿Mint Dark详情页frame；建议在token表定完后用token驱动快速出暗态稿"}
+  ],
+  "summary": {
+    "total_findings": 14,
+    "by_severity": {"blocker": 0, "major": 5, "minor": 9},
+    "by_heuristic": {"consistency": 3, "recognition": 2, "real-world-match": 2, "aesthetic": 2, "responsive": 1, "visibility": 1, "user-control": 1, "error-prevention": 1, "flexibility": 1, "error-recovery": 0, "help-docs": 0, "performance": 0},
+    "top_opportunities": ["建立食物百科页token角色映射表（暗黑+主题双轴一次到位）", "i18n词条结构按模板+插值设计"]
+  }
+}
