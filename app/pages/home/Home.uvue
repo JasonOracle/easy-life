@@ -6,11 +6,11 @@
     <view class="hm-nav" :style="{ paddingTop: sbH + 'px' }">
       <view class="hm-nav-inner">
         <view class="hm-nav-left">
-          <text class="title">轻律生活</text>
-          <text class="subtitle">让健康饮食成为一种习惯</text>
+          <text class="title">{{ t('hm.brand') }}</text>
+          <text class="subtitle">{{ t('hm.tagline') }}</text>
           <view class="date-row" hover-class="icon-pressed" :hover-stay-time="120" @click="onDateClick">
             <image class="date-icon" :src="'/static/home/date_icon.svg'" mode="aspectFit"></image>
-            <text class="date-text">9月19日 · 周五</text>
+            <text class="date-text">{{ dateText }}</text>
           </view>
         </view>
         <view class="fab" :style="{ right: fabRight, top: fabTop }" hover-class="icon-pressed" :hover-stay-time="120" @click="openAdd">
@@ -57,16 +57,16 @@
       <view class="hero-text">
         <view class="remain-head">
           <view class="hm-status-bar" :style="{ backgroundColor: calStatus.color }"></view>
-          <text class="remain-label" :class="calStatus.textClass">{{ remainCal >= 0 ? '还能吃' : '已超标' }}</text>
+          <text class="remain-label" :class="calStatus.textClass">{{ remainCal >= 0 ? t('hm.remain') : t('pf.over') }}</text>
         </view>
         <view class="remain-num-row">
           <text class="remain-num" :class="calStatus.textClass">{{ Math.abs(remainCal) }}</text>
           <text class="remain-unit" :class="calStatus.textClass">kcal</text>
         </view>
-        <text class="consumed">已摄入 {{ food.totalCal }} / {{ goal.calorieGoal }} kcal</text>
+        <text class="consumed">{{ tf('hm.consumed', [food.totalCal.toString(), goal.calorieGoal.toString()]) }}</text>
         <view class="goal-pill ui-pressable" hover-class="ui-pressed" :hover-stay-time="120" @click="openGoal">
           <image class="pill-cal" :src="'/static/home/pill_calendar.svg'" mode="aspectFit"></image>
-          <text class="goal-pill-text">每日目标 {{ goal.calorieGoal }} kcal</text>
+          <text class="goal-pill-text">{{ tf('hm.goalPill', [goal.calorieGoal.toString()]) }}</text>
           <image class="pill-edit" :src="'/static/home/pill_edit.svg'" mode="aspectFit"></image>
         </view>
       </view>
@@ -76,7 +76,7 @@
           <image class="hm-macro-ic" :src="'/static/home/macro_protein.svg'" mode="aspectFit"></image>
           <view class="hm-macro-txt">
             <text class="hm-macro-val">{{ macroP }}g</text>
-            <text class="hm-macro-cap">蛋白质</text>
+            <text class="hm-macro-cap">{{ t('dd.protein') }}</text>
           </view>
         </view>
         <view class="hm-macro-sep"></view>
@@ -84,7 +84,7 @@
           <image class="hm-macro-ic" :src="'/static/home/macro_carb.svg'" mode="aspectFit"></image>
           <view class="hm-macro-txt">
             <text class="hm-macro-val">{{ macroC }}g</text>
-            <text class="hm-macro-cap">碳水</text>
+            <text class="hm-macro-cap">{{ t('dd.carb') }}</text>
           </view>
         </view>
         <view class="hm-macro-sep"></view>
@@ -92,7 +92,7 @@
           <image class="hm-macro-ic" :src="'/static/home/macro_fat.svg'" mode="aspectFit"></image>
           <view class="hm-macro-txt">
             <text class="hm-macro-val">{{ macroF }}g</text>
-            <text class="hm-macro-cap">脂肪</text>
+            <text class="hm-macro-cap">{{ t('dd.fat') }}</text>
           </view>
         </view>
       </view>
@@ -100,9 +100,9 @@
 
     <!-- 今日餐次 -->
     <view class="meal-section-head">
-      <text class="meal-section-title">今日餐次</text>
+      <text class="meal-section-title">{{ t('hm.mealSec') }}</text>
       <view class="all-records">
-        <text class="all-records-text">全部记录</text>
+        <text class="all-records-text">{{ t('hm.allRec') }}</text>
         <image class="chev-right" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
       </view>
     </view>
@@ -121,7 +121,7 @@
         </view>
         <view class="meal-card">
           <view v-if="meal.rows.length === 0" class="meal-empty">
-            <text class="meal-empty-txt">尚未添加</text>
+            <text class="meal-empty-txt">{{ t('dd.none') }}</text>
           </view>
           <view v-else>
             <view v-for="(rowItem, rowIdx) in meal.rows" :key="rowIdx">
@@ -201,6 +201,7 @@ import SettleBadge from '../../components/SettleBadge.uvue'
 import GoalModal from '../../components/GoalModal.uvue'
 import { useFoodStore } from '../../stores/food'
 import { useGoalStore, getCalorieStatus } from '../../stores/goal'
+import { t, tf } from '../../composables/i18n'
 import { getFoodById, computeEntry } from '../../stores/food'
 import { playSound, triggerHaptic } from '../../stores/settings'
 import { foodIdFromImg } from '../../stores/encyclopedia'
@@ -439,12 +440,6 @@ function openRecords(): void {
   uni.redirectTo({ url: '/pages/records/Records' })
 }
 
-const MEAL_LABELS: Record<string, string> = {
-  breakfast: '早餐',
-  lunch: '午餐',
-  dinner: '晚餐',
-  snack: '夜宵',
-}
 
 function openAdd(): void {
   playSound('click')
@@ -456,7 +451,7 @@ function openAdd(): void {
 
 function onFoodLongPress(entryId: string, foodName: string): void {  triggerHaptic('medium')
   uni.showActionSheet({
-    itemList: [`删除「${foodName}」`],
+    itemList: [tf('hm.del', [foodName])],
     itemColor: '#FA543A',
     success: (res) => {
       if (res.tapIndex === 0) {
@@ -494,7 +489,7 @@ function onAddConfirm(payload: AddPayload): void {
   if (f != null) food.addEntry(computeEntry(f, payload.amount, payload.unit, payload.meal, payload.extraKcal))
   settleKcal.value = payload.kcal
   settleAfter.value = food.totalCal
-  settleMeal.value = MEAL_LABELS[payload.meal] ?? ''
+  settleMeal.value = t('meal.' + payload.meal)
   settleShow.value = true
   
   playSound('success')
@@ -506,13 +501,21 @@ function onSettleClose(): void {
   liquidCmdRev.value++
 }
 
+/** 顶部日期：原为稿面占位「9月19日 · 周五」，现取真实当天并随语言出 中文/英文 两种格式 */
+const dateText = computed<string>(() => {
+  const nowD = new Date()
+  const idx = (nowD.getDay() + 6) % 7
+  const wd = idx == 6 ? t('pf.d0') : t('pf.d' + (idx + 1).toString())
+  return tf('hm.date', [(nowD.getMonth() + 1).toString(), nowD.getDate().toString(), wd])
+})
+
 const meals = computed<Meal[]>(() =>
   food.mealRows
     .filter((m) => m.key === 'breakfast' || m.key === 'lunch' || m.key === 'dinner' || m.key === 'snack')
     .map((m) => ({
       key: m.key,
       icon: MEAL_ICONS[m.key] ?? '/static/home/meal_sun.svg',
-      name: m.name,
+      name: t('meal.' + m.key),
       time: m.time,
       totalKcal: typeof m.cal === 'number' ? m.cal : 0,
       rows: m.details.map((d) => ({

@@ -22,6 +22,7 @@
 <script setup lang="uts">
 // [变更日志] 2026-09-24: 环形动画根因修复 → 废弃 nextTick/200/400/600ms/tick 五路抢跑初始化（surface 未附加时 getContext 拿到死上下文并锁死 readyFired，真 @ready 反被吞），改为 @ready 唯一入口＋500ms 单次兜底（对齐 BottleLiquid 范式）；删除无响应性的 :key="canvasKey"；变更日志按 ADR-003 #7 落位 script 内，严禁 .uvue 根层 HTML 注释
 import { ref, computed, watch, getCurrentInstance, onUnmounted, nextTick } from 'vue'
+import { tf } from '../composables/i18n'
 import { useDeviceStore } from '../stores/device'
 import { useSettingsStore } from '../stores/settings'
 import { getCalorieStatus } from '../stores/goal'
@@ -107,8 +108,8 @@ function fmt(n: number): string {
 }
 
 const shownText = computed<string>(() => '' + Math.round(props.kcal * progress.value))
-const budgetText = computed<string>(() => '今日 ' + fmt(props.after) + ' / ' + fmt(props.goal) + ' kcal')
-const mealText = computed<string>(() => props.meal + ' · 已加入')
+const budgetText = computed<string>(() => tf('sb.budget', [fmt(props.after), fmt(props.goal)]))
+const mealText = computed<string>(() => tf('sb.added', [props.meal]))
 
 /** App 端画布初始化：仅允许由 @ready（surface 附加信号）或 500ms 兜底触发，
     严禁在挂载同帧抢跑——此时 getContext 会拿到绑在未附加缓冲区上的死上下文且非 null，判空失效 */

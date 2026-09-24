@@ -48,13 +48,14 @@
       <text class="tick" :style="{ left: '70%' }">25</text>
       <text class="tick" :style="{ left: '100%' }">100</text>
     </view>
-    <text class="meta">每{{ unitLabel }} ≈ {{ gramsPerUnit }}g · {{ kcalPerUnit }} kcal</text>
+    <text class="meta">{{ tf('cs.meta', [unitLabel, gramsPerUnit.toString(), kcalPerUnit.toString()]) }}</text>
   </view>
 </template>
 
 <script setup lang="uts">
 // [变更日志] 2026-09-24: 刻度标签 absolute 悬于轨道下方被父盒默认裁切 → 父盒 overflow:visible，标签 margin 52→36rpx
 import { ref } from 'vue'
+import { tf } from '../composables/i18n'
 import { computed } from 'vue'
 import { watch } from 'vue'
 import { onUnmounted } from 'vue'

@@ -15,15 +15,15 @@
     <view class="dd-card">
       <view class="dd-card-head">
         <image class="dd-flame" :src="'/static/profile/flame.svg'" mode="aspectFit"></image>
-        <text class="dd-card-title">今日热量</text>
+        <text class="dd-card-title">{{ t('dd.today') }}</text>
         <view class="dd-overpill" v-if="dayOver > 0">
-          <text class="dd-overtxt">超标 {{ dayOver }} kcal</text>
+          <text class="dd-overtxt">{{ tf('rec.over', [dayOver.toString()]) }}</text>
         </view>
       </view>
       <view class="dd-ring" :style="ringStyle">
         <view class="dd-ring-hole"></view>
         <text class="dd-ring-pct">{{ ringPct }}%</text>
-        <text class="dd-ring-label">已摄入</text>
+        <text class="dd-ring-label">{{ t('dd.ring') }}</text>
       </view>
       <view class="dd-bignum-row">
         <text class="dd-bignum" :class="calStatus.textClass">{{ dayTotal }}</text>
@@ -34,24 +34,24 @@
       </view>
       <view class="dd-prog-foot">
         <view class="dd-prog-left">
-          <text class="dd-plabel">已摄入</text>
+          <text class="dd-plabel">{{ t('dd.ring') }}</text>
           <text class="dd-pnum">{{ dayTotal }}</text>
           <text class="dd-punit">kcal</text>
         </view>
         <view class="dd-prog-right">
-          <text class="dd-plabel">目标</text>
+          <text class="dd-plabel">{{ t('dd.goal') }}</text>
           <text class="dd-pnum dd-pnum-target">{{ goalVal }}</text>
           <text class="dd-punit">kcal</text>
         </view>
       </view>
       <view class="dd-stat">
-        <text class="dd-stat-title">营养分布</text>
+        <text class="dd-stat-title">{{ t('dd.nutrition') }}</text>
         <view class="dd-stat-row">
           <view class="dd-stat-col">
             <image class="dd-mg" :src="'/static/home/macro_protein.svg'" mode="aspectFit"></image>
             <view class="dd-stat-txt">
               <text class="dd-stat-num">{{ dayProtein }}g</text>
-              <text class="dd-stat-lbl">蛋白质</text>
+              <text class="dd-stat-lbl">{{ t('dd.protein') }}</text>
             </view>
           </view>
           <view class="dd-stat-div"></view>
@@ -59,7 +59,7 @@
             <image class="dd-mg" :src="'/static/home/macro_carb.svg'" mode="aspectFit"></image>
             <view class="dd-stat-txt">
               <text class="dd-stat-num">{{ dayCarb }}g</text>
-              <text class="dd-stat-lbl">碳水</text>
+              <text class="dd-stat-lbl">{{ t('dd.carb') }}</text>
             </view>
           </view>
           <view class="dd-stat-div"></view>
@@ -67,7 +67,7 @@
             <image class="dd-mg" :src="'/static/home/macro_fat.svg'" mode="aspectFit"></image>
             <view class="dd-stat-txt">
               <text class="dd-stat-num">{{ dayFat }}g</text>
-              <text class="dd-stat-lbl">脂肪</text>
+              <text class="dd-stat-lbl">{{ t('dd.fat') }}</text>
             </view>
           </view>
         </view>
@@ -77,10 +77,10 @@
     <!-- 餐次记录 -->
     <view class="dd-secrow">
       <view class="dd-acc"></view>
-      <text class="dd-sec">餐次记录</text>
+      <text class="dd-sec">{{ t('dd.meals') }}</text>
       <view class="dd-add" @click="openPicker">
         <image class="dd-add-ic" :src="'/static/records/dd_add.svg'" mode="aspectFit"></image>
-        <text class="dd-add-txt">添加食物</text>
+        <text class="dd-add-txt">{{ t('dd.add') }}</text>
       </view>
     </view>
     <view class="dd-meal" v-for="(mealItem, mealIdx) in mealGroups" :key="mealIdx">
@@ -96,7 +96,7 @@
         </view>
       </view>
       <view v-if="mealItem.rows.length === 0" class="dd-empty">
-        <text class="dd-empty-txt">尚未添加</text>
+        <text class="dd-empty-txt">{{ t('dd.none') }}</text>
       </view>
       <view
         v-else
@@ -118,8 +118,8 @@
         <image class="dd-band-ic" :src="'/static/records/dd_sum.svg'" mode="aspectFit"></image>
       </view>
       <view class="dd-band-txt">
-        <text class="dd-band-title">今日饮食总结</text>
-        <text class="dd-band-sub">继续保持，明天会更好！</text>
+        <text class="dd-band-title">{{ t('dd.sumTitle') }}</text>
+        <text class="dd-band-sub">{{ t('dd.sumSub') }}</text>
       </view>
     </view>
 
@@ -140,8 +140,9 @@
 
 <script setup lang="uts">
 import { ref, computed } from 'vue'
+import { t, tf } from '../../composables/i18n'
 import { onPageScroll } from '@dcloudio/uni-app'
-import { useFoodStore, dayKeyOf, dayRange, amountText, getFoodById, computeEntry, MEAL_KEYS, MEAL_LABELS } from '../../stores/food'
+import { useFoodStore, dayKeyOf, dayRange, amountText, getFoodById, computeEntry, MEAL_KEYS } from '../../stores/food'
 import type { FoodEntry } from '../../stores/food'
 import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import { foodIdFromImg } from '../../stores/encyclopedia'
@@ -172,7 +173,6 @@ onPageScroll((e) => {
   if (v !== scrolled.value) scrolled.value = v
 })
 
-const weekNames = ['一', '二', '三', '四', '五', '六', '日']
 
 const dayKey = computed<string>(() => {
   const v = food.viewDay
@@ -189,7 +189,8 @@ const dayEntries = computed<FoodEntry[]>(() => {
 const headerTitle = computed<string>(() => {
   const parts = dayKey.value.split('-')
   const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]))
-  return parseInt(parts[1]) + '月' + parseInt(parts[2]) + '日 · 周' + weekNames[(d.getDay() + 6) % 7]
+  const idx = (d.getDay() + 6) % 7
+  return tf('dd.mdw', [parts[1], parts[2], idx == 6 ? t('pf.d0') : t('pf.d' + (idx + 1).toString())])
 })
 
 const goalVal = computed<number>(() => goal.calorieGoal)
@@ -271,7 +272,7 @@ const mealGroups = computed<MealGroup[]>(() => {
     }
     out.push({
       icon: MEAL_ICONS[mk] ?? '',
-      name: MEAL_LABELS[mk] ?? mk,
+      name: t('meal.' + mk),
       time,
       cal,
       rows,
@@ -283,7 +284,7 @@ const mealGroups = computed<MealGroup[]>(() => {
 /** 长按删除（Boss 拍板：uni.showActionSheet 底部菜单加删除项） */
 function confirmDelete(row: Row): void {
   uni.showActionSheet({
-    itemList: ['删除这条记录'],
+    itemList: [t('dd.del')],
     success: () => {
       food.removeEntry(row.id)
     },
@@ -317,7 +318,7 @@ function onAddConfirm(payload: AddPayload): void {
   }
   settleKcal.value = payload.kcal
   settleAfter.value = food.totalCal
-  settleMeal.value = MEAL_LABELS[payload.meal] ?? ''
+  settleMeal.value = t('meal.' + payload.meal)
   settleShow.value = true
 }
 

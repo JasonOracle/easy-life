@@ -2,25 +2,25 @@
   <view class="dialog-container">
     <view class="dialog-content">
       <view class="dialog-header">
-        <text class="dialog-title">个人信息保护指引</text>
+        <text class="dialog-title">{{ t('pd.title') }}</text>
       </view>
       <view class="dialog-body">
         <text class="dialog-text">
-          <text class="dt-run">欢迎使用 轻律生活。我们将通过</text>
-          <text class="dialog-href" @click="hrefClick('https://www.example.com/agreement')">《用户服务协议》</text>
-          <text class="dt-run">及</text>
-          <text class="dialog-href" @click="hrefClick('https://www.example.com/privacy')">《隐私政策》</text>
-          <text class="dt-run">帮助您了解我们如何收集、处理个人信息。本应用将在征得您同意后使用震动反馈功能，并数据存本地设备上。</text>
-          <text class="dt-run">\n\n如您同意，请点击“同意”按钮接受我们的服务。</text>
+          <text class="dt-run">{{ t('pd.run1') }}</text>
+          <text class="dialog-href" @click="hrefClick('https://www.example.com/agreement')"> {{ t('pd.agreement') }}</text>
+          <text class="dt-run">{{ t('pd.run2') }}</text>
+          <text class="dialog-href" @click="hrefClick('https://www.example.com/privacy')"> {{ t('pd.policy') }}</text>
+          <text class="dt-run">{{ t('pd.run3') }}</text>
+          <text class="dt-run">{{ t('pd.run4') }}</text>
         </text>
       </view>
       <view class="dialog-actions">
-        <button class="btn btn-reject" @click="reject">不同意</button>
+        <button class="btn btn-reject" @click="reject">{{ t('pd.reject') }}</button>
         <!-- #ifdef MP-WEIXIN -->
-        <button class="btn btn-agree" type="primary" open-type="agreePrivacyAuthorization" @agreeprivacyauthorization="agree">同意</button>
+        <button class="btn btn-agree" type="primary" open-type="agreePrivacyAuthorization" @agreeprivacyauthorization="agree">{{ t('pd.agree') }}</button>
         <!-- #endif -->
         <!-- #ifndef MP-WEIXIN -->
-        <button class="btn btn-agree" type="primary" @click="agree">同意</button>
+        <button class="btn btn-agree" type="primary" @click="agree">{{ t('pd.agree') }}</button>
         <!-- #endif -->
       </view>
     </view>
@@ -29,6 +29,7 @@
 
 <script setup lang="uts">
 // [变更日志] 2026-09-24: 正文 scroll-view 改普通 view；行高/字号下沉到每个 text 片段（原生端无样式继承，隐式 text 丢样式）
+import { t, tf } from '../../composables/i18n'
 
 const currentPage = getCurrentInstance()?.proxy?.$page
 
@@ -51,7 +52,7 @@ function reject() {
 
 function hrefClick(href : string) {
   uni.showToast({
-    title: '请在外部浏览器访问: ' + href,
+    title: tf('pd.browser', [href]),
     icon: 'none'
   })
 }

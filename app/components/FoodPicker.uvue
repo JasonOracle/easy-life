@@ -9,7 +9,7 @@
           <input
             class="fp-search-input"
             v-model="keyword"
-            placeholder="搜索食物 · 支持拼音 / 别名"
+            :placeholder="t('fp.searchPh')"
             placeholder-style="color:#9CB8B0;font-size:13.5px;"
           ></input>
         </view>
@@ -28,7 +28,7 @@
           :key="catIdx"
           @click="pickCat(catItem)"
         >
-          <text class="fp-chip-text" :class="{ 'fp-chip-text-on': catItem === cat }">{{ catItem }}</text>
+          <text class="fp-chip-text" :class="{ 'fp-chip-text-on': catItem === cat }">{{ catLabel(catItem) }}</text>
         </view>
       </scroll-view>
 
@@ -72,6 +72,9 @@
 // [变更日志] 2026-09-24: 食物列表选中态重构 → 废弃整行绿底 .fp-row-on（白底图标叠绿底色块难看），改为左侧薄荷绿竖条 .fp-row-accent ＋ 既有文字加深加粗；日志落位 script 内（ADR-003 #7 禁 .uvue 根层 HTML 注释）
 // [变更日志] 2026-09-25: 新增 startStep 属性——百科「添加到本餐」经 ct_pending_add 交接后，Home 以 startStep='detail'+selectedId 直接打开该项详情步
 import { ref, computed, watch } from 'vue'
+import { t, tf } from '../composables/i18n'
+import { resolveLang } from '../composables/useLocale'
+import { categoryName } from '../stores/encyclopedia'
 import { ALL_FOODS, searchFoods, vesselLabelOf, vesselSizesOf, type FoodBase } from '../stores/food'
 import { triggerHaptic, playSound } from '../stores/settings'
 import AddFood from './AddFood.uvue'
@@ -104,12 +107,18 @@ const step = ref<'list' | 'detail'>('list')
 const activeFoodId = ref('')
 
 /** 分类 chips：全部 + 库内真实分类（按首次出现顺序去重） */
-const cats: string[] = ['全部']
+const cats: string[] = ['全部']  // 数据值＝food_library 原始 cat 字面量
 for (const f of ALL_FOODS) {
   if (!cats.includes(f.cat)) cats.push(f.cat)
 }
 
 const ALL_CAT = '全部'
+/** chip 展示名：数据值保持中文原样用于过滤，仅显示层按语言映射 */
+function catLabel(c: string): string {
+  if (c === ALL_CAT) return t('fp.all')
+  const n = categoryName(c)
+  return resolveLang() == 'en' ? n.en : n.zh
+}
 const keyword = ref('')
 const cat = ref(ALL_CAT)
 const displayLimit = ref(20)
@@ -140,14 +149,14 @@ function onLoadMore(): void {
 /** 副行：热量 + 一条有用提示（优先级：可选项 > 默认份量克重） */
 function subLine(food: FoodBase): string {
   let s = food.kcal.toString() + ' kcal / 100' + food.unit
-  if (food.opts != null && food.opts.length > 0) return s + ' · 支持杯型与甜度'
+  if (food.opts != null && food.opts.length > 0) return s + t('fp.optsHint')
   if (food.vessel != null) {
     const label = vesselLabelOf(food.vessel!)
     const sizes = vesselSizesOf(food.vessel!)
     const dft = sizes.length > 1 ? sizes[1] : sizes[0]
     // 计件类（个/片/串）档位单位不是 g/ml，不加后缀，与稿面香蕉/苹果行一致
     if (label !== '' && dft != null && (dft.unit === 'g' || dft.unit === 'ml')) {
-      s += ' · 一' + label + '约 ' + dft.amount.toString() + dft.unit
+      s += tf('fp.unitHint', [label, dft.amount.toString(), dft.unit])
     }
   }
   return s
@@ -343,8 +352,9 @@ watch(
   flex-shrink: 0;
 }
 .fp-chip {
-  width: 120rpx;
   height: 68rpx;
+  padding-left: 34rpx;
+  padding-right: 34rpx;
   border-radius: 34rpx;
   background-color: #F8F9FC;
   justify-content: center;

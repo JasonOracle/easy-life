@@ -8,8 +8,8 @@
           <image class="gm-badge-ic" :src="'/static/goal/gm_target.svg'" mode="aspectFit"></image>
         </view>
         <view class="gm-headtxt">
-          <text class="gm-title">设置每日热量目标</text>
-          <text class="gm-sub">根据你的目标，调整每日摄入热量</text>
+          <text class="gm-title">{{ t('gm.title') }}</text>
+          <text class="gm-sub">{{ t('gm.sub') }}</text>
         </view>
         <view class="gm-closebtn" @click="close">
           <image class="gm-close-ic" :src="'/static/goal/gm_close.svg'" mode="aspectFit"></image>
@@ -48,7 +48,7 @@
         </view>
       </view>
 
-      <text class="gm-qlabel">快速选择</text>
+      <text class="gm-qlabel">{{ t('gm.quick') }}</text>
       <view class="gm-qtray">
         <view
           class="gm-qslot ui-pressable"
@@ -67,14 +67,14 @@
       <view class="gm-tip">
         <image class="gm-tip-ic" :src="'/static/goal/gm_bulb.svg'" mode="aspectFit"></image>
         <view class="gm-tip-txt">
-          <text class="gm-tip-title">合理的热量目标有助于健康减重</text>
-          <text class="gm-tip-sub">建议根据你的性别、年龄、身高、体重和运动量进行设置</text>
+          <text class="gm-tip-title">{{ t('gm.tipT') }}</text>
+          <text class="gm-tip-sub">{{ t('gm.tipS') }}</text>
         </view>
         <image class="gm-tip-arrow" :src="'/static/goal/gm_chev.svg'" mode="aspectFit"></image>
       </view>
 
       <view class="gm-save ui-pressable" hover-class="gm-btn-pressed" :hover-stay-time="140" @click="save">
-        <text class="gm-save-txt">保存设置</text>
+        <text class="gm-save-txt">{{ t('gm.save') }}</text>
       </view>
     </view>
     </view>
@@ -84,6 +84,7 @@
 <script setup lang="uts">
 // [变更日志] 2026-09-24: 保存钮渐变带角度(135deg)在 App 原生端报 Invalid value → 角度版包入 #ifdef MP-WEIXIN，App 端用无色标渐变
 import { ref } from 'vue'
+import { t } from '../composables/i18n'
 import { computed } from 'vue'
 import { watch } from 'vue'
 import { nextTick } from 'vue'

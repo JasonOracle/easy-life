@@ -10,7 +10,7 @@
         </view>
         <view class="header-text">
           <text class="name">{{ user.name }}</text>
-          <text class="sub">已连续记录  {{ user.streakDays }} 天  ·  每日目标  {{ goal.calorieGoal }} kcal</text>
+          <text class="sub">{{ streakText }}</text>
         </view>
       </view>
     </view>
@@ -23,15 +23,15 @@
     <view class="cal-card">
       <view class="cal-head">
         <image class="cal-flame" :src="'/static/profile/flame.svg'" mode="aspectFit"></image>
-        <text class="cal-title">今日热量</text>
+        <text class="cal-title">{{ t('pf.todayCal') }}</text>
         <view class="pill">
-          <text class="pill-text">{{ remainCal > 0 ? '还可以吃' : '已超标' }}</text>
+          <text class="pill-text">{{ remainCal > 0 ? t('pf.remain') : t('pf.over') }}</text>
         </view>
       </view>
       <view class="ring" :style="ringStyleText">
         <view class="ring-inner">
           <text class="ring-pct">{{ progPct }}%</text>
-          <text class="ring-lbl">已摄入</text>
+          <text class="ring-lbl">{{ t('pf.consumed') }}</text>
         </view>
       </view>
       <view class="bignum-row">
@@ -43,12 +43,12 @@
       </view>
       <view class="prog-row">
         <view class="pl-side">
-          <text class="pl-txt">已摄入</text>
+          <text class="pl-txt">{{ t('pf.consumed') }}</text>
           <text class="pl-num">{{ food.totalCal }}</text>
           <text class="pl-txt pl-txt2">kcal</text>
         </view>
         <view class="pl-side pl-right">
-          <text class="pl-txt">目标</text>
+          <text class="pl-txt">{{ t('pf.goal') }}</text>
           <text class="pl-num">{{ goal.calorieGoal }}</text>
           <text class="pl-txt pl-txt2">kcal</text>
         </view>
@@ -61,7 +61,7 @@
             </view>
             <text class="stat-num">{{ goal.calorieGoal }}</text>
           </view>
-          <text class="stat-lbl">目标热量 / kcal</text>
+          <text class="stat-lbl">{{ t('pf.statGoal') }}</text>
         </view>
         <view class="stat-div"></view>
         <view class="stat-col">
@@ -71,7 +71,7 @@
             </view>
             <text class="stat-num">{{ food.totalCal }}</text>
           </view>
-          <text class="stat-lbl">已摄入 / kcal</text>
+          <text class="stat-lbl">{{ t('pf.statConsumed') }}</text>
         </view>
         <view class="stat-div"></view>
         <view class="stat-col">
@@ -81,7 +81,7 @@
             </view>
             <text :class="remainCal > 0 ? 'stat-num-green' : 'stat-num-coral'">{{ displayRemainCal }}</text>
           </view>
-          <text class="stat-lbl">还能吃 / kcal</text>
+          <text class="stat-lbl">{{ t('pf.statRemain') }}</text>
         </view>
       </view>
       <!-- 达标 Banner：支持达标绿态与超额橙态状态机自适应 -->
@@ -101,10 +101,10 @@
     <!-- 本周概览 -->
     <view class="card week-card">
       <view class="card-head">
-        <text class="card-title">本周概览</text>
+        <text class="card-title">{{ t('pf.weekTitle') }}</text>
         <view class="head-right">
           <text class="week-num">{{ weekOkCount }}/7</text>
-          <text class="week-lbl">天达标</text>
+          <text class="week-lbl">{{ t('pf.weekLbl') }}</text>
           <image class="chev-mini" :src="'/static/profile/chev_right.svg'" mode="aspectFit"></image>
         </view>
       </view>
@@ -123,9 +123,9 @@
     <view class="card trend-card">
       <view class="card-head">
         <image class="trend-icon" :src="'/static/profile/trend_icon.svg'" mode="aspectFit"></image>
-        <text class="card-title">热量趋势</text>
+        <text class="card-title">{{ t('pf.trend') }}</text>
         <view class="head-right">
-          <text class="view-all">查看全部</text>
+          <text class="view-all">{{ t('pf.viewAll') }}</text>
           <image class="chev-mini" :src="'/static/profile/chev_right.svg'" mode="aspectFit"></image>
         </view>
       </view>
@@ -147,7 +147,7 @@
             </view>
           </view>
           <view class="target-tag">
-            <text class="target-tag-text">目标</text>
+            <text class="target-tag-text">{{ t('pf.goal') }}</text>
             <text class="target-tag-text">{{ goal.calorieGoal }}</text>
           </view>
         </view>
@@ -157,9 +157,9 @@
     <!-- 最近记录 -->
     <view class="card rec-card">
       <view class="card-head">
-        <text class="card-title">最近记录</text>
+        <text class="card-title">{{ t('pf.recent') }}</text>
         <view class="head-right" @click="goRecords">
-          <text class="view-all">查看全部</text>
+          <text class="view-all">{{ t('pf.viewAll') }}</text>
           <image class="chev-mini" :src="'/static/profile/chev_right.svg'" mode="aspectFit"></image>
         </view>
       </view>
@@ -201,6 +201,7 @@ import { useFoodStore } from '../../stores/food'
 import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import { useUserStore } from '../../stores/user'
 import { useSettingsStore } from '../../stores/settings'
+import { t, tf } from '../../composables/i18n'
 
 /**
  * 接 store 读数（种子精确还原：历史 1950超+150/1720达/1580达；趋势 1580…1950/1368；
@@ -266,6 +267,8 @@ const food = useFoodStore()
 const goal = useGoalStore()
 const user = useUserStore()
 
+const streakText = computed<string>(() => tf('pf.streak', [user.streakDays.toString(), goal.calorieGoal.toString()]))
+
 const goSettings = () => {
   uni.navigateTo({ url: '/pages/settings/Settings' })
 }
@@ -310,8 +313,8 @@ const bannerState = computed(() => {
   if (isOver) {
     return {
       type: 'over',
-      title: '今日不达标',
-      sub: '请减少进食，加油啊',
+      title: t('pf.bannerOverT'),
+      sub: t('pf.bannerOverS'),
       cardClass: 'banner-over',
       circleClass: 'circle-orange',
       isOk: false,
@@ -320,8 +323,8 @@ const bannerState = computed(() => {
   if (activeMealCount.value >= 2 && food.totalCal > 0) {
     return {
       type: 'ok',
-      title: '今日已达标',
-      sub: '继续保持，做得很好！',
+      title: t('pf.bannerOkT'),
+      sub: t('pf.bannerOkS'),
       cardClass: 'banner-ok',
       circleClass: 'circle-green',
       isOk: true,
@@ -329,15 +332,18 @@ const bannerState = computed(() => {
   }
   return {
     type: 'pending',
-    title: '今日记录中',
-    sub: '记录 2 餐及以上且未超标即算达标',
+    title: t('pf.bannerPendT'),
+    sub: t('pf.bannerPendS'),
     cardClass: 'banner-pending',
     circleClass: 'circle-green',
     isOk: true,
   }
 })
 
-const WEEKDAY = ['日', '一', '二', '三', '四', '五', '六']
+/** 周几全名（getDay 0=周日）：zh 组「周X」，en 查 Mon..Sun，统一走 pf.dN 键 */
+function weekdayText(g: number): string {
+  return t('pf.d' + g.toString())
+}
 
 function fmtMD(ts: number): string {
   const d = new Date(ts)
@@ -346,17 +352,16 @@ function fmtMD(ts: number): string {
 
 function fmtMDLong(ts: number): string {
   const d = new Date(ts)
-  return (d.getMonth() + 1).toString() + '月' + d.getDate().toString() + '日'
+  return tf('pf.mdLong', [(d.getMonth() + 1).toString(), d.getDate().toString()])
 }
 
 type WeekDot = { state: string; bg: string; lbl: string }
 // 连续 7 天位置标签一..日；三态：绿底白勾达标 / 珊瑚底白「!」超标 / 灰圈空缺
 const weekDots = computed<WeekDot[]>(() => {
-  const labels = ['一', '二', '三', '四', '五', '六', '日']
   return food.weekTotals.map((d, i) => ({
     state: d.total === 0 ? 'none' : (d.total <= goal.calorieGoal ? 'ok' : 'over'),
     bg: d.total === 0 ? '#00000000' : (d.total <= goal.calorieGoal ? '#25AE8C' : '#FD6E4D'),
-    lbl: labels[i] ?? '',
+    lbl: t('pf.w' + (i == 6 ? '0' : (i + 1).toString())),
   }))
 })
 
@@ -396,9 +401,9 @@ const records = computed<Rec[]>(() => {
     const dt = new Date(d.ts)
     return {
       date: fmtMDLong(d.ts),
-      wday: '周' + WEEKDAY[dt.getDay()],
+      wday: weekdayText(dt.getDay()),
       num: d.total,
-      badge: over ? '超标 ' + (d.total - goal.calorieGoal) + ' kcal' : '达标',
+      badge: over ? tf('pf.badgeOver', [(d.total - goal.calorieGoal).toString()]) : t('pf.badgeOk'),
       over,
       chev: REC_CHEVS[i] ?? REC_CHEVS[0],
     }

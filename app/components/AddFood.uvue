@@ -13,19 +13,19 @@
         <text class="kcal-unit">kcal</text>
         <view class="change-btn ui-pressable" hover-class="ui-pressed" :hover-stay-time="120" @click="onChange">
           <image class="change-icon" :src="'/static/common/change_icon.svg'" mode="aspectFit"></image>
-          <text class="change-text">更换</text>
+          <text class="change-text">{{ t('af.change') }}</text>
         </view>
         <view class="af-closebtn" hover-class="icon-pressed" :hover-stay-time="120" @click="close">
           <image class="af-close-ic" :src="'/static/goal/gm_close.svg'" mode="aspectFit"></image>
         </view>
       </view>
       <view class="sub-row">
-        <text class="sub-plain">已按 </text>
+        <text class="sub-plain">{{ t('af.calcHead') }}</text>
         <text class="sub-bold">{{ calcBold }}</text>
         <text class="sub-plain">{{ calcTail }}</text>
       </view>
 
-      <text class="form-label" v-if="!isCountUnit">分量</text>
+      <text class="form-label" v-if="!isCountUnit">{{ t('af.portion') }}</text>
       <CountStepper
         v-if="isCountUnit"
         v-model="count"
@@ -65,7 +65,7 @@
         <OptionTray v-else :options="sweetOpts(grpItem)" :model-value="sweetPick(grpItem.key)" @update:modelValue="(v) => setSweet(grpItem.key, v)" ></OptionTray>
       </template>
 
-      <text class="form-label">餐次</text>
+      <text class="form-label">{{ t('af.mealSec') }}</text>
       <view class="af-meal-row">
         <view
           class="af-meal-card ui-pressable"
@@ -87,7 +87,7 @@
       </view>
 
       <view class="confirm-btn ui-pressable" hover-class="af-btn-pressed" :hover-stay-time="140" @click="confirm">
-        <text class="confirm-text">添加到{{ mealLabel }} · {{ totalKcal }} kcal</text>
+        <text class="confirm-text">{{ tf('af.confirm', [mealLabel, totalKcal.toString()]) }}</text>
       </view>
     </view>
   </scroll-view>
@@ -95,6 +95,7 @@
 
 <script setup lang="uts">
 import { ref } from 'vue'
+import { t, tf } from '../composables/i18n'
 import { computed } from 'vue'
 import { watch } from 'vue'
 import OptionTray from './OptionTray.uvue'
@@ -181,12 +182,13 @@ const ART_BOX_H = 72
 /** 甜度电量格数映射（展示层：三分/五分/七分/全糖 = 3/5/7/10 格） */
 const SWEET_BARS: Record<string, number> = { none: 0, light: 3, half: 5, less: 7, full: 10 }
 
-const MEAL_CARDS = [
-  { key: 'breakfast', label: '早餐', photo: '/static/meals/sky_breakfast.png' },
-  { key: 'lunch', label: '午餐', photo: '/static/meals/sky_lunch.png' },
-  { key: 'dinner', label: '晚餐', photo: '/static/meals/sky_dinner.png' },
-  { key: 'snack', label: '夜宵', photo: '/static/meals/sky_night.png' },
-]
+type MealCard = { key: string; label: string; photo: string }
+const MEAL_CARDS = computed<MealCard[]>((): MealCard[] => [
+  { key: 'breakfast', label: t('meal.breakfast'), photo: '/static/meals/sky_breakfast.png' },
+  { key: 'lunch', label: t('meal.lunch'), photo: '/static/meals/sky_lunch.png' },
+  { key: 'dinner', label: t('meal.dinner'), photo: '/static/meals/sky_dinner.png' },
+  { key: 'snack', label: t('meal.snack'), photo: '/static/meals/sky_night.png' },
+])
 
 function defaultMeal(): string {
   const h = new Date().getHours()
@@ -200,13 +202,14 @@ const food = computed<FoodBase | null>(() => getFoodById(props.foodId) ?? null)
 const vesselLabel = computed(() => {
   const f = food.value
   if (f == null || f.vessel == null) return ''
-  const labels: Record<string, string> = {
-    cup: '杯', cup_coffee: '杯', cup_soda: '杯', mug: '杯', glass: '杯',
-    glass_wine: '杯', shot: '杯', bottle: '瓶', can: '罐', bowl_rice: '碗',
-    bowl_noodle: '碗', bowl_soup: '碗', pot: '份', plate: '份', bag: '包',
-    piece: '个', slice: '片', skewer: '串',
+  const keys: Record<string, string> = {
+    cup: 'af.uCup', cup_coffee: 'af.uCup', cup_soda: 'af.uCup', mug: 'af.uCup', glass: 'af.uCup',
+    glass_wine: 'af.uCup', shot: 'af.uCup', bottle: 'af.uBottle', can: 'af.uCan', bowl_rice: 'af.uBowl',
+    bowl_noodle: 'af.uBowl', bowl_soup: 'af.uBowl', pot: 'af.uPot', plate: 'af.uPot', bag: 'af.uBag',
+    piece: 'af.uPiece', slice: 'af.uSlice', skewer: 'af.uSkewer',
   }
-  return labels[f.vessel] ?? ''
+  const k = keys[f.vessel]
+  return k != null ? t(k) : ''
 })
 const isCountUnit = computed(() => {
   const f = food.value
@@ -225,7 +228,7 @@ const count = ref(DEFAULT_COUNT)
 const sizeKey = ref('')
 const sweetSel = ref<Record<string, string>>({})
 const meal = ref(defaultMeal())
-const mealCards = MEAL_CARDS
+const mealCards = computed<MealCard[]>((): MealCard[] => MEAL_CARDS.value)
 
 function resetForFood(): void {
   const f = food.value
@@ -372,17 +375,14 @@ const calcBold = computed<string>(() => {
 
 const calcTail = computed<string>(() => {
   const f = food.value
-  if (f == null) return ' 计算'
+  if (f == null) return t('af.calcTail')
   if (isCountUnit.value && pieceWeight.value > 0) {
-    return '（约 ' + (count.value * pieceWeight.value).toString() + 'g） 计算'
+    return tf('af.calcTailP', [(count.value * pieceWeight.value).toString()])
   }
-  return ' 计算'
+  return t('af.calcTail')
 })
 
-const mealLabel = computed<string>(() => {
-  const hit = MEAL_CARDS.find((m) => m.key === meal.value)
-  return hit != null ? hit.label : ''
-})
+const mealLabel = computed<string>(() => t('meal.' + meal.value))
 
 function currentGrams(): number {
   const f = food.value

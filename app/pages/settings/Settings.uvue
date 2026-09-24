@@ -11,22 +11,22 @@
             <image class="hd-back-icon" :src="'/static/settings/chev_back.svg'" mode="aspectFit"></image>
           </view>
           <view class="hd-info">
-            <text class="hd-title">设置</text>
-            <text class="hd-sub">管理你的饮食记录与偏好</text>
+            <text class="hd-title">{{ t('st.title') }}</text>
+            <text class="hd-sub">{{ t('st.sub') }}</text>
           </view>
         </view>
       </view>
     </view>
 
     <!-- 偏好 -->
-    <text class="sec-title sec-first">偏好</text>
+    <text class="sec-title sec-first">{{ t('st.pref') }}</text>
     <view class="card">
       <view class="row">
         <view class="chip">
           <image class="chip-icon" :src="'/static/settings/icon_moon.svg'" mode="aspectFit"></image>
         </view>
         <view class="row-text">
-          <text class="row-title">深色模式</text>
+          <text class="row-title">{{ t('st.dark') }}</text>
         </view>
         <view class="toggle" :class="{ 'toggle-on': settings.darkMode }" @click="toggleDark">
           <view class="knob" :class="{ 'knob-on': settings.darkMode }"></view>
@@ -38,11 +38,11 @@
           <image class="chip-icon" :src="'/static/settings/icon_bell.svg'" mode="aspectFit"></image>
         </view>
         <view class="row-text">
-          <text class="row-title">用餐提醒</text>
-          <text class="row-sub">早中晚各提醒一次，敬请期待</text>
+          <text class="row-title">{{ t('st.remind') }}</text>
+          <text class="row-sub">{{ t('st.remindSub') }}</text>
         </view>
         <view class="soon-pill">
-          <text class="soon-pill-text">即将上线</text>
+          <text class="soon-pill-text">{{ t('st.soon') }}</text>
         </view> 
       </view>
       <view class="row-div"></view>
@@ -51,7 +51,7 @@
           <image class="chip-icon" :src="'/static/settings/icon_palette.svg'" mode="aspectFit"></image>
         </view>
         <view class="row-text">
-          <text class="row-title">主题切换</text>
+          <text class="row-title">{{ t('st.theme') }}</text>
           <text class="row-sub">{{ accentLabel }}</text>
         </view>
         <view class="pf-dot" :style="{ backgroundColor: theme.accent }"></view>
@@ -63,7 +63,7 @@
           <image class="chip-icon" :src="'/static/settings/icon_globe.svg'" mode="aspectFit"></image>
         </view>
         <view class="row-text">
-          <text class="row-title">语言切换</text>
+          <text class="row-title">{{ t('st.lang') }}</text>
           <text class="row-sub">{{ localeLabel }}</text>
         </view>
         <image class="chev" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
@@ -71,15 +71,15 @@
     </view>
 
     <!-- 目标管理 -->
-    <text class="sec-title">目标管理</text>
+    <text class="sec-title">{{ t('st.goalSec') }}</text>
     <view class="card">
       <view class="row" @click="openGoal">
         <view class="chip">
           <image class="chip-icon" :src="'/static/settings/icon_target.svg'" mode="aspectFit"></image>
         </view>
         <view class="row-text">
-          <text class="row-title">每日热量目标</text>
-          <text class="row-sub">当前目标 {{ goal.calorieGoal }} kcal</text>
+          <text class="row-title">{{ t('st.goalDaily') }}</text>
+          <text class="row-sub">{{ tf('st.goalCur', [goal.calorieGoal.toString()]) }}</text>
         </view>
         <image class="chev" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
       </view>
@@ -89,23 +89,23 @@
           <image class="chip-icon" :src="'/static/settings/icon_mega.svg'" mode="aspectFit"></image>
         </view>
         <view class="row-text">
-          <text class="row-title">自定义餐次</text>
-          <text class="row-sub">早餐、午餐、晚餐、加餐…</text>
+          <text class="row-title">{{ t('st.mealCustom') }}</text>
+          <text class="row-sub">{{ t('st.mealCustomSub') }}</text>
         </view>
         <image class="chev" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
       </view>
     </view>
 
     <!-- 数据管理 -->
-    <text class="sec-title">数据管理</text>
+    <text class="sec-title">{{ t('st.dataSec') }}</text>
     <view class="card">
       <view class="row">
         <view class="chip">
           <image class="chip-icon" :src="'/static/settings/icon_down.svg'" mode="aspectFit"></image>
         </view>
         <view class="row-text">
-          <text class="row-title">导出数据</text>
-          <text class="row-sub">备份到本地</text>
+          <text class="row-title">{{ t('st.export') }}</text>
+          <text class="row-sub">{{ t('st.exportSub') }}</text>
         </view>
         <image class="chev" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
       </view>
@@ -115,8 +115,8 @@
           <image class="chip-icon" :src="'/static/settings/icon_up.svg'" mode="aspectFit"></image>
         </view>
         <view class="row-text">
-          <text class="row-title">导入数据</text>
-          <text class="row-sub">从文件恢复</text>
+          <text class="row-title">{{ t('st.import') }}</text>
+          <text class="row-sub">{{ t('st.importSub') }}</text>
         </view>
         <image class="chev" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
       </view>
@@ -125,7 +125,7 @@
     <!-- 本机声明 -->
     <view class="shield-row">
       <image class="shield-icon" :src="'/static/settings/icon_shield.svg'" mode="aspectFit"></image>
-      <text class="shield-note">所有数据仅保存在本机</text>
+      <text class="shield-note">{{ t('st.shield') }}</text>
     </view>
 
     <!-- 危险区 -->
@@ -133,15 +133,15 @@
       <view class="chip-danger">
         <image class="chip-icon" :src="'/static/settings/icon_trash.svg'" mode="aspectFit"></image>
       </view>
-      <text class="danger-text">清空所有数据</text>
+      <text class="danger-text">{{ t('st.clear') }}</text>
     </view>
 
     <!-- 页脚 -->
     <view class="footer">
       <image class="brand-icon" :src="'/static/settings/icon_leaf.svg'" mode="aspectFit"></image>
-      <text class="brand">轻律生活  CalTrack</text>
+      <text class="brand">{{ t('st.brand') }}</text>
       <text class="ver">v1.0.0</text>
-      <text class="footnote">数据仅保存在本机</text>
+      <text class="footnote">{{ t('st.foot') }}</text>
     </view>
 
     <!-- 每日热量目标弹窗 -->
@@ -151,7 +151,7 @@
     <view class="pf-mask" :class="{ 'pf-mask-active': pfActive }" v-if="pfRender" @click="closePref">
       <view class="pf-sheet" :class="{ 'pf-sheet-active': pfActive }" :style="{ paddingBottom: (40 + safeBottom) + 'px' }" @click.stop="noop">
         <view class="pf-grip"></view>
-        <text class="pf-title">{{ pfKind == 'accent' ? '主题切换' : '语言切换' }}</text>
+        <text class="pf-title">{{ pfKind == 'accent' ? t('st.theme') : t('st.lang') }}</text>
         <view class="pf-opt" v-for="(opt, idx) in pfOptions" :key="idx" hover-class="pf-opt-pressed" :hover-stay-time="100" @click="pickPref(opt.id)">
           <view class="pf-swatch" v-if="opt.swatch.length > 0" :style="{ backgroundColor: opt.swatch }"></view>
           <view class="pf-opt-text">
@@ -168,7 +168,7 @@
       <view class="set-nav-back" @click="goBack">
         <image class="set-nav-icon" :src="'/static/settings/chev_back.svg'" mode="aspectFit"></image>
       </view>
-      <text class="set-nav-title">设置</text>
+      <text class="set-nav-title">{{ t('st.title') }}</text>
     </view>
   </view>
 </template>
@@ -183,6 +183,7 @@ import { useGoalStore } from '../../stores/goal'
 import { useSettingsStore } from '../../stores/settings'
 import { triggerHaptic } from '../../stores/settings'
 import { useTheme, ACCENT_OPTIONS } from '../../composables/useTheme'
+import { t, tf } from '../../composables/i18n'
 import { ref, computed } from 'vue'
 import { onPageScroll } from '@dcloudio/uni-app'
 import { onShow } from '@dcloudio/uni-app'
@@ -241,31 +242,33 @@ let safeBottom = 0
 const insets = uni.getSystemInfoSync().safeAreaInsets
 if (insets != null) safeBottom = insets.bottom
 
-const accentOpts: PrefOpt[] = [
-  { id: 'mint', label: '薄荷 Mint', sub: '清透绿意，品牌本色', swatch: '#20C997' },
-  { id: 'ocean', label: '海洋 Ocean', sub: '沉静蓝调，专注记录', swatch: '#2F9FE0' },
-  { id: 'lavender', label: '薰衣草 Lavender', sub: '柔和紫调，轻松氛围', swatch: '#8B7BE8' },
-]
-const localeOpts: PrefOpt[] = [
-  { id: '', label: '跟随系统', sub: '按手机语言自动选择', swatch: '' },
-  { id: 'zh', label: '简体中文', sub: 'Simplified Chinese', swatch: '' },
-  { id: 'en', label: 'English', sub: '英语', swatch: '' },
-]
+const accentOpts = computed<PrefOpt[]>((): PrefOpt[] => [
+  { id: 'mint', label: t('st.mint'), sub: t('st.mintSub'), swatch: '#20C997' },
+  { id: 'ocean', label: t('st.ocean'), sub: t('st.oceanSub'), swatch: '#2F9FE0' },
+  { id: 'lavender', label: t('st.lav'), sub: t('st.lavSub'), swatch: '#8B7BE8' },
+])
+const localeOpts = computed<PrefOpt[]>((): PrefOpt[] => [
+  { id: '', label: t('st.sys'), sub: t('st.sysSub'), swatch: '' },
+  { id: 'zh', label: t('st.zh'), sub: t('st.zhSub'), swatch: '' },
+  { id: 'en', label: t('st.en'), sub: t('st.enSub'), swatch: '' },
+])
 
-const pfOptions = computed((): PrefOpt[] => pfKind.value == 'accent' ? accentOpts : localeOpts)
+const pfOptions = computed((): PrefOpt[] => pfKind.value == 'accent' ? accentOpts.value : localeOpts.value)
 const pfCurrent = computed((): string => pfKind.value == 'accent' ? settings.accent : settings.locale)
 
 const accentLabel = computed((): string => {
-  for (let i = 0; i < accentOpts.length; i++) {
-    if (accentOpts[i].id == settings.accent) return accentOpts[i].label
+  const opts = accentOpts.value
+  for (let i = 0; i < opts.length; i++) {
+    if (opts[i].id == settings.accent) return opts[i].label
   }
-  return '薄荷 Mint'
+  return t('st.mint')
 })
 const localeLabel = computed((): string => {
-  for (let i = 0; i < localeOpts.length; i++) {
-    if (localeOpts[i].id == settings.locale) return localeOpts[i].label
+  const opts = localeOpts.value
+  for (let i = 0; i < opts.length; i++) {
+    if (opts[i].id == settings.locale) return opts[i].label
   }
-  return '跟随系统'
+  return t('st.sys')
 })
 
 function openPref(kind: string): void {

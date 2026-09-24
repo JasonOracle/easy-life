@@ -9,7 +9,7 @@
           <image v-if="isDark" class="ec-nav-icon" src="/static/encyclopedia/back_light.svg" mode="aspectFit"></image>
           <image v-else class="ec-nav-icon" src="/static/encyclopedia/back_dark.svg" mode="aspectFit"></image>
         </view>
-        <text class="ec-nav-title" :style="{ color: theme.ink1 }">{{ L('title') }}</text>
+        <text class="ec-nav-title" :style="{ color: theme.ink1 }">{{ t('ec.title') }}</text>
         <view class="ec-nav-btn" hover-class="ec-press" :hover-stay-time="100" @click="openSearch">
           <image v-if="isDark" class="ec-nav-icon" src="/static/encyclopedia/search_light.svg" mode="aspectFit"></image>
           <image v-else class="ec-nav-icon" src="/static/encyclopedia/search_dark.svg" mode="aspectFit"></image>
@@ -45,7 +45,7 @@
 
       <!-- 主要营养成分（每 100g） -->
       <view class="ec-card" :style="{ backgroundColor: theme.card }">
-        <text class="ec-card-title" :style="{ color: theme.ink1 }">{{ L('nutrition') }}<text class="ec-card-sub" :style="{ color: theme.ink3 }">{{ L('per100') }}</text></text>
+        <text class="ec-card-title" :style="{ color: theme.ink1 }">{{ t('ec.nutrition') }}<text class="ec-card-sub" :style="{ color: theme.ink3 }">{{ t('ec.per100') }}</text></text>
         <view class="ec-nut-row">
           <view class="ec-nut-col" v-for="(col, colIdx) in nutCols" :key="colIdx">
             <view class="ec-nut-icon" :style="{ backgroundColor: col.tint }">
@@ -67,7 +67,7 @@
           <view class="ec-review-dot" :style="{ backgroundColor: theme.chip }">
             <text class="ec-review-dot-emoji"></text>
           </view>
-          <text class="ec-card-title" :style="{ color: theme.ink1 }">{{ L('review') }}</text>
+          <text class="ec-card-title" :style="{ color: theme.ink1 }">{{ t('ec.review') }}</text>
         </view>
         <text class="ec-review-text" :style="{ color: theme.ink2 }">{{ reviewBody }}</text>
         <view class="ec-guide" :style="{ borderTopColor: theme.line }">
@@ -82,7 +82,7 @@
       <view class="ec-related-block">
         <view class="ec-related-head">
           <text class="ec-related-emoji">🍽</text>
-          <text class="ec-section-title" :style="{ color: theme.ink1 }">{{ L('related') }}</text>
+          <text class="ec-section-title" :style="{ color: theme.ink1 }">{{ t('ec.related') }}</text>
         </view>
         <scroll-view class="ec-related-scroll" direction="horizontal" :show-scrollbar="false">
           <view class="ec-related-row">
@@ -115,10 +115,10 @@
         </view>
         <view class="ec-input-box" :style="{ backgroundColor: theme.card }">
           <text class="ec-input-glyph">⌕</text>
-          <input class="ec-input" :focus="searchFocus" :placeholder="L('searchPh')" :placeholder-style="'color:' + theme.ink3" v-model="query" confirm-type="search"></input>
+          <input class="ec-input" :focus="searchFocus" :placeholder="t('ec.searchPh')" :placeholder-style="'color:' + theme.ink3" v-model="query" confirm-type="search"></input>
           <text v-if="query.length > 0" class="ec-input-clear" @click="clearQuery">✕</text>
         </view>
-        <text class="ec-cancel" :style="{ color: theme.accentDeep }" @click="closeSearch">{{ L('cancel') }}</text>
+        <text class="ec-cancel" :style="{ color: theme.accentDeep }" @click="closeSearch">{{ t('ec.cancel') }}</text>
       </view>
 
       <scroll-view class="ec-results" direction="vertical" :show-scrollbar="false" :style="{ height: (winH - sbH - 50) + 'px' }">
@@ -131,10 +131,10 @@
           <text v-if="r.id == currentId" class="ec-result-check" :style="{ color: theme.accent }">✓</text>
           <text v-else class="ec-result-chev" :style="{ color: theme.ink3 }">›</text>
         </view>
-        <text v-if="query.length > 0 && results.length == 0" class="ec-empty" :style="{ color: theme.ink3 }">{{ L('empty') }}</text>
+        <text v-if="query.length > 0 && results.length == 0" class="ec-empty" :style="{ color: theme.ink3 }">{{ t('ec.empty') }}</text>
 
         <view class="ec-hot">
-          <text class="ec-hot-title" :style="{ color: theme.ink1 }">🔥 {{ L('hot') }}</text>
+          <text class="ec-hot-title" :style="{ color: theme.ink1 }">🔥 {{ t('ec.hot') }}</text>
           <view class="ec-hot-chips">
             <view class="ec-hot-chip" v-for="(h, hIdx) in hotNames" :key="hIdx" :style="{ backgroundColor: theme.card }" hover-class="ec-press" :hover-stay-time="100" @click="searchHot(h)">
               <text class="ec-hot-chip-text" :style="{ color: theme.ink2 }">{{ h }}</text>
@@ -154,7 +154,8 @@ import { ref, computed } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { useTheme, FIXED_COLORS } from '../../composables/useTheme'
 import { resolveLang } from '../../composables/useLocale'
-import { currentMealKey, mealLabel } from '../../composables/mealWindow'
+import { t, tf } from '../../composables/i18n'
+import { currentMealKey } from '../../composables/mealWindow'
 import { ALL_FOODS, getFoodById, searchFoods } from '../../stores/food'
 import type { FoodBase } from '../../stores/food'
 import { triggerHaptic, playSound } from '../../stores/settings'
@@ -180,39 +181,6 @@ const searchFocus = ref(false)
 const query = ref('')
 
 const lang = computed((): string => resolveLang())
-
-function L(key: string): string {
-  const en = lang.value == 'en'
-  switch (key) {
-    case 'title': return en ? 'Food Encyclopedia' : '食物百科'
-    case 'nutrition': return en ? 'Main Nutrition' : '主要营养成分'
-    case 'per100': return en ? ' (per 100g)' : '（每100g）'
-    case 'review': return en ? 'Nutrition Review' : '营养点评'
-    case 'related': return en ? 'Related Foods' : '相关食物'
-    case 'cancel': return en ? 'Cancel' : '取消'
-    case 'hot': return en ? 'Trending Searches' : '热门搜索'
-    case 'empty': return en ? 'No matches — try another name or pinyin' : '没有找到相关食物，换个关键词试试'
-    case 'searchPh': return en ? 'Search food, pinyin or alias' : '搜索食物名称 · 拼音 · 别名'
-    case 'protein': return en ? 'Protein' : '蛋白质'
-    case 'fat': return en ? 'Fat' : '脂肪'
-    case 'carb': return en ? 'Carbs' : '碳水'
-    case 'calorie': return en ? 'Calories' : '热量'
-    case 'hiP': return en ? 'High protein' : '高蛋白'
-    case 'loF': return en ? 'Low fat' : '低脂肪'
-    case 'hiF': return en ? 'Higher fat' : '脂肪偏高'
-    case 'loC': return en ? 'Low carb' : '低碳水'
-    case 'hiC': return en ? 'High carb' : '碳水偏高'
-    case 'audience': return en ? 'Good for' : '适宜人群'
-    case 'cautions': return en ? 'Take care' : '注意事项'
-    case 'serving': return en ? 'How to enjoy' : '推荐吃法'
-    case 'add': return en ? 'Add to ' : '添加到'
-    case 'mealBreakfast': return en ? 'Breakfast' : '早餐'
-    case 'mealLunch': return en ? 'Lunch' : '午餐'
-    case 'mealDinner': return en ? 'Dinner' : '晚餐'
-    case 'mealSnack': return en ? 'Late snack' : '夜宵'
-    default: return key
-  }
-}
 
 // ===== 当前条目 =====
 const food = computed((): FoodBase | null => {
@@ -263,11 +231,10 @@ const heroCalText = computed((): string => {
 const pieceText = computed((): string => {
   const f = food.value
   if (f == null) return ''
-  const en = lang.value == 'en'
   if (f.unit == 'g' && f.pieceWeight != null && f.pieceWeight > 0) {
-    return en ? '/ 1 pc (~' + f.pieceWeight + 'g)' : '/ 1 个（约' + f.pieceWeight + 'g）'
+    return '/ ' + tf('ec.piece', [f.pieceWeight.toString()])
   }
-  return en ? '/ per 100' + f.unit : '/ 每 100' + f.unit
+  return '/ ' + tf('ec.per100u', [f.unit])
 })
 
 /** 宏量标签：按供能比给 2-3 个短标签 */
@@ -280,14 +247,14 @@ const chipList = computed((): string[] => {
   const fE = (f.fat ?? 0) * 9
   const tot = pE + cE + fE
   if (tot <= 0) {
-    out.push(L('loC'))
-    out.push(L('loF'))
+    out.push(t('ec.loC'))
+    out.push(t('ec.loF'))
     return out
   }
-  if (pE / tot >= 0.30) out.push(L('hiP'))
-  out.push(fE / tot <= 0.35 ? L('loF') : L('hiF'))
-  if (cE / tot <= 0.40) out.push(L('loC'))
-  else if (cE / tot >= 0.60) out.push(L('hiC'))
+  if (pE / tot >= 0.30) out.push(t('ec.hiP'))
+  out.push(fE / tot <= 0.35 ? t('ec.loF') : t('ec.hiF'))
+  if (cE / tot <= 0.40) out.push(t('ec.loC'))
+  else if (cE / tot >= 0.60) out.push(t('ec.hiC'))
   return out
 })
 
@@ -307,15 +274,15 @@ const nutCols = computed((): NutCol[] => {
   const tot = pE + cE + fE
   const pct = (e: number): number => tot > 0 ? Math.round(e * 100 / tot) : 0
   const mk = (emoji: string, labelKey: string, value: string, share: number, tint: string): NutCol => ({
-    emoji: emoji, label: L(labelKey), value: value,
+    emoji: emoji, label: t(labelKey), value: value,
     pctWidth: (share < 3 ? 3 : share) + '%',
     pctText: tot > 0 ? '(' + share + '%)' : '—',
     tint: tint,
   })
-  out.push(mk('💪', 'protein', p + 'g', pct(pE), theme.value.accent))
-  out.push(mk('💧', 'fat', fat + 'g', pct(fE), FIXED_COLORS.infoCarb))
-  out.push(mk('🌾', 'carb', c + 'g', pct(cE), theme.value.accentDeep))
-  out.push(mk('🔥', 'calorie', Math.round(f.kcal) + ' kcal', 100, FIXED_COLORS.infoCalorie))
+  out.push(mk('💪', 'dd.protein', p + 'g', pct(pE), theme.value.accent))
+  out.push(mk('💧', 'dd.fat', fat + 'g', pct(fE), FIXED_COLORS.infoCarb))
+  out.push(mk('🌾', 'dd.carb', c + 'g', pct(cE), theme.value.accentDeep))
+  out.push(mk('🔥', 'ec.calorie', Math.round(f.kcal) + ' kcal', 100, FIXED_COLORS.infoCalorie))
   return out
 })
 
@@ -335,9 +302,9 @@ const guideRows = computed((): GuideRow[] => {
   if (e == null) return out
   const g = guidanceOf(e.cls)
   const en = lang.value == 'en'
-  out.push({ emoji: '👥', title: L('audience'), text: en ? g.audience.en : g.audience.zh })
-  out.push({ emoji: '⚠️', title: L('cautions'), text: en ? g.cautions.en : g.cautions.zh })
-  out.push({ emoji: '🍳', title: L('serving'), text: en ? g.serving.en : g.serving.zh })
+  out.push({ emoji: '👥', title: t('ec.audience'), text: en ? g.audience.en : g.audience.zh })
+  out.push({ emoji: '⚠️', title: t('ec.cautions'), text: en ? g.cautions.en : g.cautions.zh })
+  out.push({ emoji: '🍳', title: t('ec.serving'), text: en ? g.serving.en : g.serving.zh })
   return out
 })
 
@@ -357,7 +324,7 @@ const relatedList = computed((): RelItem[] => {
     const name = en ? (enNameOf(id).length > 0 ? enNameOf(id) : f.name) : f.name
     let calText = Math.round(f.kcal) + ' kcal/100' + f.unit
     if (f.unit == 'g' && f.pieceWeight != null && f.pieceWeight > 0) {
-      calText = Math.round(f.kcal * f.pieceWeight / 100) + ' kcal/' + (en ? 'pc' : '个')
+      calText = Math.round(f.kcal * f.pieceWeight / 100) + ' kcal/' + t('ec.pcUnit')
     }
     out.push({ id: id, name: name, img: '/static/icons/' + (CAT_DIR[f.cat] ?? 'dish') + '/' + id + '.webp', calText: calText })
   }
@@ -369,15 +336,14 @@ const mealKey = computed((): string => currentMealKey())
 
 const mealName = computed((): string => {
   const k = mealKey.value
-  if (k == 'breakfast') return L('mealBreakfast')
-  if (k == 'lunch') return L('mealLunch')
-  if (k == 'dinner') return L('mealDinner')
-  return L('mealSnack')
+  if (k == 'breakfast') return t('meal.breakfast')
+  if (k == 'lunch') return t('meal.lunch')
+  if (k == 'dinner') return t('meal.dinner')
+  return t('meal.snack')
 })
 
 const ctaText = computed((): string => {
-  const sep = lang.value == 'en' ? ' ' : ''
-  return L('add') + sep + mealName.value + ' · ' + heroCalText.value + ' kcal'
+  return tf('af.confirm', [mealName.value, heroCalText.value])
 })
 
 const ctaGradient = computed((): string => 'linear-gradient(' + theme.value.accent2 + ', ' + theme.value.accent + ')')
@@ -430,7 +396,7 @@ const results = computed((): SearchResult[] => {
     const name = en ? (enNameOf(f.id).length > 0 ? enNameOf(f.id) : f.name) : f.name
     let sub = Math.round(f.kcal) + ' kcal / 100' + f.unit
     if (f.unit == 'g' && f.pieceWeight != null && f.pieceWeight > 0) {
-      sub = Math.round(f.kcal * f.pieceWeight / 100) + ' kcal / ' + (en ? '1 pc (~' + f.pieceWeight + 'g)' : '1 个（约' + f.pieceWeight + 'g）')
+      sub = Math.round(f.kcal * f.pieceWeight / 100) + ' kcal / ' + tf('ec.piece', [f.pieceWeight.toString()])
     }
     out.push({ id: f.id, name: name, img: '/static/icons/' + (CAT_DIR[f.cat] ?? 'dish') + '/' + f.id + '.webp', sub: sub })
   }

@@ -1,19 +1,19 @@
-
+<!-- [变更日志] 三 Tab 悬浮玻璃胶囊；2026-09-25 标签文案接入 i18n 字典层 t()，中英随 settings.locale 切换 -->
 <template>
   <view class="tb-bar" :class="barClass" :style="barStyle">
     <!-- 选中气泡：稿面完全内嵌于胶囊（上下各留 6、左右各留 4），几何由 :style 逐帧下发 -->
     <view class="tb-bubble" :class="bubbleClass" :style="bubbleStyle"></view>
     <view class="tb-item" @click="onTap(0)">
       <image class="tb-ic tb-ic-home" :src="iconSrc(0)" mode="aspectFit"></image>
-      <text class="tb-label" :class="labelClass(0)">首页</text>
+      <text class="tb-label" :class="labelClass(0)">{{ tabLabels.home }}</text>
     </view>
     <view class="tb-item" @click="onTap(1)">
       <image class="tb-ic tb-ic-rec" :src="iconSrc(1)" mode="aspectFit"></image>
-      <text class="tb-label" :class="labelClass(1)">日历</text>
+      <text class="tb-label" :class="labelClass(1)">{{ tabLabels.records }}</text>
     </view>
     <view class="tb-item" @click="onTap(2)">
       <image class="tb-ic tb-ic-me" :src="iconSrc(2)" mode="aspectFit"></image>
-      <text class="tb-label" :class="labelClass(2)">我的</text>
+      <text class="tb-label" :class="labelClass(2)">{{ tabLabels.me }}</text>
     </view>
   </view>
 </template>
@@ -21,6 +21,7 @@
 <script setup lang="uts">
 import { computed, ref, onMounted } from 'vue'
 import { useDeviceStore } from '../stores/device'
+import { t } from '../composables/i18n'
 
 const props = defineProps<{
   /** 当前激活页：home | records | profile */
@@ -32,6 +33,12 @@ const props = defineProps<{
 // ── 稿面几何（DesignTokens §7.2，按 750rpx 规范自适应，基准宽 750rpx 对应 375dp）────
 const device = useDeviceStore()
 const glass = computed((): boolean => device.backdropBlur)
+
+type TabLabels = { home: string, records: string, me: string }
+const tabLabels = computed((): TabLabels => {
+  const L: TabLabels = { home: t('tab.home'), records: t('tab.records'), me: t('tab.me') }
+  return L
+})
 
 const KEYS = ['home', 'records', 'profile']
 const PAGES = ['home/Home', 'records/Records', 'profile/Profile']
