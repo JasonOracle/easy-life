@@ -33,7 +33,7 @@
         class="leaf-left"
         :style="{ transform: 'rotate(' + leafLeftDeg + 'deg)' }"
         @transitionend="onLeafLeftEnd"
-        :src="'/static/home/yezi-zuo.svg'"
+        :src="bottleAsset('yezi-zuo')"
         mode="aspectFit"
       ></image>
       <!-- 右侧独立叶子（yezi-you.svg，旋转支点在茎底，自然微风错相往复微摆） -->
@@ -41,18 +41,18 @@
         class="leaf-right"
         :style="{ transform: 'rotate(' + leafRightDeg + 'deg)' }"
         @transitionend="onLeafRightEnd"
-        :src="'/static/home/yezi-you.svg'"
+        :src="bottleAsset('yezi-you')"
         mode="aspectFit"
       ></image>
       <!-- 水瓶交互主体：底层内胆流体 + 表层纯净瓶身本体（pingzi.svg，独立物理动效） -->
       <view class="bottle-wrap" :style="bottleAnimStyle" @click="onBottleTap" @longpress="onBottleLongPress" @touchstart="onBottleTouchStart" @touchend="onBottleTouchEnd">
         <!-- 玻璃层（最底）：App 端 SVG 渲染不识别 evenodd 镂空，瓶体在原生端是实心色块，故液体必须叠在它之上 -->
-        <image class="bottle-mask" :src="'/static/home/pingzi.svg'" mode="aspectFit"></image>
+        <image class="bottle-mask" :src="bottleAsset('pingzi')" mode="aspectFit"></image>
         <view class="bottle-cavity">
           <BottleLiquid :ratio="liquidRatio" :color-mode="liquidColorMode" :cmd-rev="liquidCmdRev" :cmd-kind="liquidCmdKind"></BottleLiquid>
         </view>
         <!-- 刻度层（最上）：水位上涨后刻度仍需可读，与玻璃层同源同几何 -->
-        <image class="bottle-ticks" :src="'/static/home/pingzi_tick.svg'" mode="aspectFit"></image>
+        <image class="bottle-ticks" :src="bottleAsset('pingzi_tick')" mode="aspectFit"></image>
       </view>
       <view class="hero-text">
         <view class="remain-head">
@@ -236,6 +236,15 @@ const liquidColorMode = computed<string>(() => {
   if (calStatus.value.type === 'amber') return 'amber'
   return 'green'
 })
+/** 瓶身/树叶 SVG 资产后缀：随状态色切换，绿版为原文件不带后缀 */
+const bottleSrc = computed<string>(() => {
+  const t = calStatus.value.type
+  return t === 'coral' ? 'coral' : t === 'amber' ? 'amber' : ''
+})
+function bottleAsset(base: string): string {
+  const s = bottleSrc.value
+  return '/static/home/' + base + (s ? '_' + s : '') + '.svg'
+}
 const liquidCmdRev = ref(0)
 const liquidCmdKind = ref('')
 

@@ -353,3 +353,10 @@ Boss 拍板阈值＝**100% / 150% / >150%**（ratio ≤1.0 绿、1.0–1.5 琥�
 - **SettleBadge**：二态→三态，接入 `getCalorieStatus(after, goal)`；ringColor / 预算文字 / 餐图标三处同源；新增珊瑚态图标 `sb_alert_coral.svg`。
 - **测试经理轮**：全量 `--cleanCache` 重编译（bytes 23:00:40）→ 冷启动截图 `debug/shots/s4_color_fix.png`→ 液体区扫出 **50846 个珊瑚像素**（x153-404, y810-1020），液体/文字/贴纸/渐变/FAB 居中 全部正确。
 - **遗留（低优先）**：`CalorieStatus.ringClass` 仍为死代码（全工程零消费），Profile 圆环已直接用 `calStatus.color`；`status-ring-*` 类已定义待后续绑定。
+
+### 2026-09-24 23:22:00 ｜ 瓶身+树叶颜色适配落地（App 端真机验收 PASS）
+Boss 提出「两侧绿色树枝也做一套 SVG」。与瓶身适配合并为同一套资产矩阵：
+- **新增 8 个 SVG 变体**（`app/static/home/`）：`pingzi_{amber,coral}.svg` / `pingzi_tick_{amber,coral}.svg` / `yezi-zuo-{amber,coral}.svg` / `yezi-you-{amber,coral}.svg`，原绿版保留不动。
+- **Home.uvue**：新增 `bottleSrc` computed（coral/amber/空）＋ `bottleAsset(base)` 函数，模板四个 `:src`（瓶身/刻度/左叶/右叶）改为走动态路径，状态切换时整组换色。
+- **色值映射**：瓶身绿系 `#58B984/#A9DCC2/#C8E9D6...` → 琥珀 `#D4A23E/#E8D080/#F0E6D0...` / 珊瑚 `#E66040/#FFC4A0/#FFE8D0...`；树叶绿系 `#3E9E63/#6FCB93/#8AD8A8/#4CB678` → 对应琥珀/珊瑚版。白色高光条与瓶身描边不动（保持玻璃通透感）。
+- **测试经理轮**：全量 `--cleanCache` 重编译（23:19:59 同步成功）→ 冷启动截图 `debug/shots/s5_bottle_coral.png`→ 瓶身/刻度/瓶盖/双叶/液体/文字 全部珊瑚色，整组视觉统一。
