@@ -204,6 +204,7 @@ import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import { t, tf } from '../../composables/i18n'
 import { getFoodById, computeEntry } from '../../stores/food'
 import { playSound, triggerHaptic } from '../../stores/settings'
+import { useSettingsStore } from '../../stores/settings'
 import { foodIdFromImg } from '../../stores/encyclopedia'
 import BottleLiquid from '../../components/BottleLiquid.uvue'
 
@@ -213,6 +214,7 @@ import BottleLiquid from '../../components/BottleLiquid.uvue'
  */
 const food = useFoodStore()
 const goal = useGoalStore()
+const settings = useSettingsStore()
 
 const remainCal = computed(() => goal.calorieGoal - food.totalCal)
 const calStatus = computed(() => getCalorieStatus(food.totalCal, goal.calorieGoal))
@@ -241,10 +243,13 @@ const liquidColorMode = computed<string>(() => {
   if (calStatus.value.type === 'amber') return 'amber'
   return 'green'
 })
-/** 瓶身/树叶 SVG 资产后缀：随状态色切换，绿版为原文件不带后缀 */
+/** 瓶身/树叶/底图 SVG 资产后缀：超标/临界走固定状态色档，常态随主题 accent 换色（§8.4 矩阵） */
 const bottleSrc = computed<string>(() => {
   const t = calStatus.value.type
-  return t === 'coral' ? 'coral' : t === 'amber' ? 'amber' : ''
+  if (t === 'coral') return 'coral'
+  if (t === 'amber') return 'amber'
+  const a = settings.accent
+  return a === 'ocean' || a === 'lavender' ? a : ''
 })
 function bottleAsset(base: string): string {
   const s = bottleSrc.value

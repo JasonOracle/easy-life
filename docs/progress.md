@@ -429,3 +429,10 @@ Boss 提出「两侧绿色树枝也做一套 SVG」。与瓶身适配合并为�
 - **裁决（产品经理轮）＝ B 绿**：① 一致性——AGENTS/DesignTokens 宪法 label-1 即 `#0A4F3D`，全 App 其他页标题均为绿，slate 会让百科页像"另一个 App"（Nielsen 一致性维度直接受损）；② 品牌情感——薄荷液滴人格下 slate 是通用仪表盘默认色，正是 design-by-committee 陷阱；绿标题与 accent chip、宏量环、CTA 同轴成组；③ 对比度——绿白底 ≈9.9:1，仍过 AAA，无牺牲。
 - **回归**：`useTheme` 消费方仅百科 Detail＋Settings 两页；Settings 绿 ink1 渲染无回归（`ink_B_settings.png`），设备状态确认＝薄荷/跟随系统/深色关。
 - **遗留观察（不擅自扩权）**：`ink2 #475569`/`ink3 #8BA7A0` 仍按 §8 Pencil 提取表为 slate 系——正文级与绿标题存在轻微异色相，是否整组转绿 label-2/3 待 Boss 对照 `DesignTokens.md` §8 拍板。
+
+### 2026-09-25 06:28:30 ｜ 通宵任务·#58 收口：瓶/叶/bg SVG 按 accent 重着色生成线 + 三主题真机验收 PASS
+- **生成线（新建 `toolchain/gen_theme_variants.py`）**：DesignTokens §8.4 矩阵落地——把五张 mint 底稿（bg/pingzi/pingzi_tick/yezi-zuo/yezi-you）按 HSL 色相整体旋转（锚点 #58B984 → ocean #2F9FE0 +54.8° / lavender #8B7BE8 +101.6°，明度/饱和度关系原样保留，s<0.03 近灰不动）产出 10 张变体入 `app/static/home/`。零 AI 生图，纯矢量参数化。
+- **接线（Home.uvue）**：`bottleSrc` 后缀规则改为「状态 coral/amber 优先（固定色轴 §8.3），常态随 settings.accent」；五处资产引用零改动（统一走 `bottleAsset()`）。
+- **测试经理轮（安卓真机，全量重编译 bytes 06:23 + 新 static 打包）**：海洋＝瓶玻璃/树叶/底图斑块全蓝（`theme_home_ocean.png`）；薰衣草＝整组紫、深紫叶片（`theme_home_lavender.png`）；复位薄荷＝原稿无回归（`theme_home_mint_back.png`）。设备终态＝mint/跟随系统/深色关。
+- **明示边界（不擅自扩权）**：液体（BottleLiquid PALETTES）、hero 渐变、贴纸 PNG、FAB 等页面 chrome 仍为 mint 固定色——§8.4 矩阵本轮范围＝瓶/叶/bg 三资产；液体是否随 accent 走属产品决策，留 Boss。
+- **闸门**：hooks all 全绿。
