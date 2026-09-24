@@ -366,3 +366,8 @@ Boss 提出「两侧绿色树枝也做一套 SVG」。与瓶身适配合并为�
 - **贴纸三档文案**：`sticker_green.png`（好好吃饭 也好好生活）/ `sticker_amber.png`（今天很棒，再坚持一下）/ `sticker_coral.png`（没关系，调整一下），新增 `stickerSrc` computed 按 calStatus.type 切换。珊瑚档用「没关系」卸 guilt、「调整一下」指向前程，符合轻律生活温和习惯工具定位。
 - **液体底色修复**：`BottleLiquid.uvue:213` 原来硬编码 `grad.addColorStop(1, '#0A7A5C')`（mint-deep 绿），无论状态如何底部都有一条绿带。PALETTES 扩为 5 级（新增 palette[4] 底深色：green `#0A7A5C` / amber `#A06820` / coral `#C04020`），渐变终点改走 palette[4]。
 - **测试经理轮**：全量 `--cleanCache` 重编译（23:33:54 同步成功）→ 冷启动截图 `debug/shots/s7_bottom_fix.png`→ 瓶底绿带消失，液体/瓶身/树叶/bg 卡/贴纸/文字 全珊瑚色统一。
+
+### 2026-09-24 23:44:00 ｜ 修复树叶不显示 + 贴纸文字色未随状态变（App 端真机验收 PASS）
+- **Bug 1 树叶不显示**：`bottleAsset()` 用下划线拼路径（`yezi-zuo_coral.svg`），但树叶文件复制时用了连字符（`yezi-zuo-coral.svg`）→ 路径不匹配，文件加载失败。已将四个树叶文件改为下划线命名，与瓶身/bg 对齐。
+- **Bug 2 贴纸文字三档全绿**：`gen_sticker_3state.py` 第 23 行有 `TEXT = (10, 122, 92, 255)` 覆盖了 tuple 里的状态色，三张贴纸文字全是 mint-deep 绿。已删除该行，按 tier 分别用 green `#0A7A5C` / amber `#D4A23E` / coral `#E66040`。
+- **测试经理轮**：全量 `--cleanCache` 重编译（23:40:23 同步成功）→ 冷启动截图 `debug/shots/s8_leaf_fix.png`→ 双叶恢复显示（珊瑚色）＋ 贴纸文字「没关系 调整一下」为珊瑚深色，整组视觉完全统一。
