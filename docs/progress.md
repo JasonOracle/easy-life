@@ -336,7 +336,7 @@
 ### 2026-09-24 21:12:00 ｜ App 侧重编译后终验（Boss 指令：优先 App，小程序端暂缓）
 - Boss 纠正方向：MP-WEIXIN 会话误启微信开发者工具窗口，已停会话并 `close_project_window` 关闭；**小程序端全量回归按 Boss 指令挂起，待另行安排**。
 - 测试经理轮（App）：完整 `cli.exe launch app-android --cleanCache`（bytes 21:07:29 晚于全部源码改动）→ 冷启动首页截图＝S7 横条/珊瑚超标色/贴纸清晰/右缘轴全部正常 → FAB 回归三轮：①打开遮罩变暗 PASS；②关闭后 0.5s 竞态重开＝弹层内容完整挂载（`debug/shots/r2_race_reopen.png`）PASS；③遮罩关闭回落纯白页 PASS。本轮零代码改动，验证对象＝已提交 `bbcaec2`＋`910a17c`。
-### 2026-09-24 21:56:00 ｜ Hero 第三批：Boss 四条实拍反馈全落地（App 端真机验收 PASS）
+### 2026-09-24 21:51:19 ｜ Hero 第三批：Boss 四条实拍反馈全落地（App 端真机验收 PASS）
 Boss 提四条：①FAB 下移与左列垂直居中；②好好吃饭贴纸糊；③瓶/叶与右列文字太近；④瓶上空区改上白下绿渐变或重排。设计意见（ai-worldclass-design，位点排布方案）获批后两批落地：
 - **①** `fabTop 2px→35rpx`（左列约 149rpx 高、FAB 80rpx 取中）；实测 FAB 中心 y213 vs 左列文字中心 y223，偏差 10px≈3rpx。
 - **②B1 程序化高清重绘**：原稿全画布仅 246px（笔画等效约 50px，AI 生图中文手写必糊、图库无此素材，均排除）。`debug/gen_sticker.py`（PIL 2x 超采样＋华文行楷＋白椭圆薄荷描边＋对勾）产出 840×620，旧稿备份 `debug/sticker_orig_backup.png`。描边为新增——白椭圆在浅底上原本就无轮廓，这是"糊"的另一半病因。
