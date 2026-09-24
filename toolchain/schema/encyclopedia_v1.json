@@ -1,0 +1,11 @@
+{
+  "$comment": "[变更日志] 食物百科伴生表 schema v1.0 —— 与 build_encyclopedia.py 产物结构一一对应；颜色不入库（页面按 DesignTokens.md §8 token 角色取色），本表仅存数据。",
+  "version": "1.0",
+  "required_top": ["_changelog", "v", "generated", "text_review", "fingerprint", "categories", "reviews", "entries"],
+  "fingerprint_required": ["version", "sources", "count", "generatedAt"],
+  "entry_required": ["id", "en", "cat", "cls", "conf", "related"],
+  "entry_optional": [],
+  "cls_enum": ["light", "balanced", "protein_rich", "carb_heavy", "fat_heavy", "dense"],
+  "conf_enum": ["verified", "derived", "draft"],
+  "related_max": 3
+}

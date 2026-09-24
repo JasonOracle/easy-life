@@ -42,6 +42,7 @@ SRC_EXT = (".uvue", ".uts", ".ts")
 # 生成物＝只能由 toolchain 脚本产出，手改即拒（AGENTS「绝对保护文件」）
 PROTECTED = [
     APP / "src" / "data" / "food_library.json",
+    APP / "src" / "data" / "food_encyclopedia.json",
     APP / "static" / "icons",
 ]
 

@@ -1,0 +1,423 @@
+# [变更日志]
+# 内容：食物百科伴生数据源（不触碰 food_library.json）。
+#       1) categories：7 类目的双语显示名与类目介绍（通用叙述，不含具体热量数字）；
+#       2) reviews：6 档点评模板（light/balanced/protein_rich/carb_heavy/fat_heavy/dense），
+#          占位符 {cal} {p} {c} {f} 由 build_encyclopedia.py 按每 100g 营养值运行时填充；
+#       3) en_names：353 条食物英文名，AI 起草（text_review: draft），待 Boss 核对。
+# 分类规则（以每 100g 计，pcal=p*4, ccal=c*4, fcal=f*9, tot=三者之和）：
+#   dense: cal>=300 → protein_rich: pcal/tot>=0.40 → fat_heavy: fcal/tot>=0.45
+#   → carb_heavy: ccal/tot>=0.65 → light: cal<=80 → 其余 balanced
+version: "1.0"
+text_review: draft
+
+categories:
+  主食:
+    name: { zh: 主食, en: Staples }
+    intro:
+      zh: 主食是每日能量的主要来源，以碳水化合物为主。粗细搭配、控制份量，是让主食吃不超标的关键。
+      en: Staples are your main daily energy source, centered on carbohydrates. Mix refined grains with whole grains and watch portions to stay within budget.
+  菜品:
+    name: { zh: 菜品, en: Dishes }
+    intro:
+      zh: 菜品是蛋白质与蔬菜的组合担当。同一食材，蒸、煮、炒、炸的热量可以差出数倍，做法比食材更值得留意。
+      en: Dishes combine protein and vegetables. The same ingredient can vary several-fold in calories depending on whether it is steamed, boiled, stir-fried or deep-fried.
+  肉类蛋类:
+    name: { zh: 肉类蛋类, en: Protein }
+    intro:
+      zh: 肉、蛋、鱼虾与豆制品是优质蛋白的主要来源，也是维持肌肉与饱腹感的关键。优先选择瘦肉与蒸煮做法。
+      en: Meat, eggs, seafood and soy products are your best sources of quality protein, key to muscle maintenance and satiety. Prefer lean cuts and gentle cooking.
+  蔬菜:
+    name: { zh: 蔬菜, en: Vegetables }
+    intro:
+      zh: 蔬菜热量低、纤维高，是餐盘里可以放心放大份额的部分。深色蔬菜的微量营养素通常更丰富。
+      en: Vegetables are low in calories and high in fiber — the part of your plate you can safely enlarge. Darker vegetables generally carry more micronutrients.
+  水果:
+    name: { zh: 水果, en: Fruits }
+    intro:
+      zh: 水果提供维生素与纤维，但果糖同样计入热量。每天一份拳头大小为宜，果汁不能替代鲜果。
+      en: Fruits deliver vitamins and fiber, but their sugars still count toward calories. A fist-sized daily portion is a good guide; juice is not a substitute for whole fruit.
+  饮品:
+    name: { zh: 饮品, en: Drinks }
+    intro:
+      zh: 液体热量最容易被忽略——一杯奶茶可能抵得上一顿饭。点单时留意糖度、奶盖与加料。
+      en: Liquid calories are the easiest to overlook — one milk tea can rival a full meal. Watch sugar level, cheese foam and toppings when ordering.
+  零食:
+    name: { zh: 零食, en: Snacks }
+    intro:
+      zh: 零食是幸福感来源，也是热量重灾区。解馋讲究「少量、慢吃、留额度」，不必完全戒断。
+      en: Snacks bring joy and calories in equal measure. Enjoy small portions slowly and keep them within your daily budget — no need to quit entirely.
+
+reviews:
+  light:
+    zh: "热量友好：每 100g 约 {cal} kcal，水分与纤维占比高，是可以放心放进餐盘的选择。"
+    en: "Calorie-friendly: about {cal} kcal per 100g, high in water and fiber — an easy add to your plate."
+  balanced:
+    zh: "搭配均衡：每 100g 约 {cal} kcal，蛋白 {p}g / 碳水 {c}g / 脂肪 {f}g，三大营养素比例平稳。"
+    en: "Well balanced: about {cal} kcal per 100g with {p}g protein, {c}g carbs and {f}g fat — an even macro split."
+  protein_rich:
+    zh: "蛋白担当：每 100g 提供约 {p}g 蛋白质，是肌肉与饱腹感的好帮手，控制好总热量即可放心吃。"
+    en: "Protein powerhouse: about {p}g of protein per 100g — great for muscle and satiety. Just keep the total ({cal} kcal/100g) in check."
+  carb_heavy:
+    zh: "能量主力：碳水约 {c}g/100g（{cal} kcal），优先安排在早餐与午餐；运动日更合适，久坐时段建议减半。"
+    en: "Energy workhorse: about {c}g carbs per 100g ({cal} kcal). Best at breakfast or lunch, especially on training days — halve it when you are mostly sitting."
+  fat_heavy:
+    zh: "脂肪偏高：每 100g 脂肪约 {f}g（{cal} kcal），小份品尝、避开油炸做法会更友好。"
+    en: "Fat-forward: about {f}g fat per 100g ({cal} kcal). Keep portions small and skip the deep-fried versions."
+  dense:
+    zh: "热量密集：每 100g 约 {cal} kcal，属于「少量多次」型选手，解馋后记得给当天留出额度。"
+    en: "Calorie-dense: about {cal} kcal per 100g. A little-and-often food — budget for it after every treat."
+
+en_names:
+  p001: Steamed Rice
+  p002: Egg Fried Rice
+  p003: Yangzhou Fried Rice
+  p004: Curry Rice
+  p005: Sauced Rice Bowl
+  p006: Clay Pot Rice
+  p007: Braised Pork over Rice
+  p008: Braised Chicken over Rice
+  p009: Xinjiang Pilaf
+  p010: Stone Pot Bibimbap
+  p011: Plain Congee
+  p012: Century Egg & Pork Congee
+  p013: Millet Congee
+  p014: Eight Treasure Congee
+  p015: Pumpkin Congee
+  p016: Mung Bean Congee
+  p017: Steamed Bun (Mantou)
+  p018: Steamed Twisted Roll
+  p019: Steamed Pork Bun
+  p020: Steamed Vegetable Bun
+  p021: Xiaolongbao (Soup Dumpling)
+  p022: Pan-fried Pork Bun
+  p023: Shaomai
+  p024: Pork & Cabbage Dumpling
+  p025: Chive & Egg Dumpling
+  p026: Wonton
+  p027: Tangyuan (Glutinous Rice Ball)
+  p028: Zongzi (Sticky Rice Dumpling)
+  p029: Plain Noodle Soup
+  p030: Beef Noodle Soup
+  p031: Hand-pulled Noodles (Lamian)
+  p032: Zhajiang Noodles
+  p033: Wuhan Hot Dry Noodles
+  p034: Dandan Noodles
+  p035: Knife-cut Noodles
+  p036: Chili Oil Noodles (You Po Mian)
+  p037: Luosifen (River Snail Noodles)
+  p038: Guilin Rice Noodles
+  p039: Yunnan Crossing-bridge Noodles
+  p040: Hot & Sour Glass Noodles
+  p041: Liangpi (Cold Noodle Wraps)
+  p042: Rice Noodle Roll (Cheung Fun)
+  p043: Stir-fried Rice Noodles
+  p044: Youtiao (Fried Dough Stick)
+  p045: Jianbing Guozi (Savory Crepe)
+  p046: Flaky Scallion Pancake
+  p047: Egg-stuffed Pancake
+  p048: Scallion Oil Pancake
+  p049: Baked Sesame Flatbread
+  p050: Spaghetti
+  p051: Pizza
+  p052: Hamburger
+  p053: Sandwich
+  p054: Toast
+  p055: Croissant
+  p056: Boiled Corn
+  p057: Steamed Sweet Potato
+  p058: Steamed Purple Sweet Potato
+  p059: Steamed Chinese Yam
+  p060: Mashed Potato
+  p061: Niangao (Rice Cake)
+  p062: Stir-fried Tomato & Egg
+  p063: Shredded Pork with Green Pepper
+  p064: Fish-fragrant Shredded Pork
+  p065: Kung Pao Chicken
+  p066: Mapo Tofu
+  p067: Twice-cooked Pork
+  p068: Farmhouse Stir-fried Pork
+  p069: Braised Pork Belly
+  p070: Sweet & Sour Ribs
+  p071: Cola Chicken Wings
+  p072: Braised Chicken Drumstick
+  p073: Potato & Beef Stew
+  p074: Braised Radish with Pork Ribs
+  p075: Poached Pork Slices in Chili Oil
+  p076: Poached Fish in Chili Oil
+  p077: Pickled Cabbage Fish
+  p078: Steamed Fish Head with Chopped Chili
+  p079: Chili Chicken (Laziji)
+  p080: Steamed Fish
+  p081: Braised Fish
+  p082: Sweet & Sour Pork Tenderloin
+  p083: Dry-pot Cauliflower
+  p084: Dry-fried Green Beans
+  p085: Di San Xian (Potato, Eggplant & Pepper)
+  p086: Hot & Sour Shredded Potato
+  p087: Vinegar-braised Napa Cabbage
+  p088: Hand-torn Stir-fried Cabbage
+  p089: Garlic Broccoli
+  p090: Stir-fried Seasonal Vegetables
+  p091: Baby Cabbage in Broth
+  p092: Boiled Shrimp
+  p093: Braised Shrimp in Oil
+  p094: Spicy Shrimp
+  p095: Smashed Cucumber Salad
+  p096: Cold Tossed Wood Ear
+  p097: Mouthwatering Chicken
+  p098: Fuqi Feipian (Sliced Beef in Chili Oil)
+  p099: White-cut Chicken
+  p100: Salt-baked Chicken
+  p101: Roast Duck
+  p102: Char Siu (BBQ Pork)
+  p103: Roast Goose
+  p104: Malatang (Spicy Hot Soup)
+  p105: Hot Pot
+  p106: Maocai (Spicy Bowl)
+  p107: Spicy Skewer Soup
+  p108: Mala Dry Pot
+  p109: Big Plate Chicken
+  p110: Iron-pot Stewed Chicken
+  p111: Huangmen Braised Chicken
+  p112: Seaweed & Egg Drop Soup
+  p113: Tomato Egg Soup
+  p114: Winter Melon Pork Rib Soup
+  p115: Corn Pork Rib Soup
+  p116: Aged Duck Soup
+  p117: Garden Salad
+  p118: Lamb Skewers
+  p119: Roasted Chicken Wings
+  p120: Lean Pork
+  p121: Pork Belly
+  p122: Pork Tenderloin
+  p123: Pork Ribs
+  p124: Pig's Trotter
+  p125: Pork Liver
+  p126: Pork Blood Curd
+  p127: Lean Beef
+  p128: Beef Brisket
+  p129: Beef Shank
+  p130: Steak
+  p131: Thin-sliced Beef (Hot Pot)
+  p132: Lamb
+  p133: Lamb Chops
+  p134: Chicken Breast
+  p135: Chicken Drumstick
+  p136: Chicken Wing
+  p137: Chicken Feet
+  p138: Whole Chicken
+  p139: Chicken Gizzard
+  p140: Duck Meat
+  p141: Duck Leg
+  p142: Duck Neck
+  p143: Egg
+  p144: Fried Egg
+  p145: Poached Egg
+  p146: Salted Duck Egg
+  p147: Century Egg
+  p148: Grass Carp
+  p149: Sea Bass
+  p150: Salmon
+  p151: Hairtail
+  p152: Cod
+  p153: Tuna
+  p154: Vannamei Shrimp
+  p155: Crayfish
+  p156: Peeled Shrimp
+  p157: Crab
+  p158: Clam
+  p159: Oyster
+  p160: Squid
+  p161: Bacon
+  p162: Ham
+  p163: Sausage
+  p164: Luncheon Meat
+  p165: Chinese Cured Sausage
+  p166: Tofu
+  p167: Dried Tofu (Dougan)
+  p168: Beancurd Stick (Fuzhu)
+  p169: Fried Tofu Puff
+  p170: Tofu Sheet (Qianzhang)
+  p171: Napa Cabbage
+  p172: Baby Cabbage
+  p173: Bok Choy
+  p174: Shanghai Bok Choy
+  p175: Spinach
+  p176: Lettuce
+  p177: A-Choy (You Mai Cai)
+  p178: Water Spinach
+  p179: Chinese Broccoli
+  p180: Choy Sum
+  p181: Crown Daisy
+  p182: Celery
+  p183: Chinese Chives
+  p184: Cilantro
+  p185: Garlic Sprouts
+  p186: Broccoli
+  p187: Cauliflower
+  p188: Potato
+  p189: Iron-stick Yam
+  p190: Lotus Root
+  p191: Taro
+  p192: Water Chestnut
+  p193: White Radish
+  p194: Carrot
+  p195: Green Radish
+  p196: Tomato
+  p197: Cucumber
+  p198: Winter Melon
+  p199: Pumpkin
+  p200: Luffa
+  p201: Bitter Melon
+  p202: Zucchini
+  p203: Eggplant
+  p204: Green Pepper
+  p205: Bell Pepper
+  p206: Bird's Eye Chili
+  p207: Green Bean (Siji Dou)
+  p208: Yardlong Bean
+  p209: Snow Pea
+  p210: Pea
+  p211: Edamame
+  p212: Soy Bean Sprouts
+  p213: Mung Bean Sprouts
+  p214: Shiitake
+  p215: Enoki Mushroom
+  p216: King Oyster Mushroom
+  p217: Oyster Mushroom
+  p218: Wood Ear
+  p219: Silver Ear (White Fungus)
+  p220: Kelp
+  p221: Seaweed (Nori)
+  p222: Bamboo Shoot
+  p223: Celtuce
+  p224: Asparagus
+  p225: Okra
+  p226: Onion
+  p227: Garlic
+  p228: Ginger
+  p229: Scallion
+  p230: Apple
+  p231: Banana
+  p232: Orange
+  p233: Mandarin
+  p234: Pomelo
+  p235: Lemon
+  p236: Grape
+  p237: Table Grape
+  p238: Strawberry
+  p239: Blueberry
+  p240: Mulberry
+  p241: Watermelon
+  p242: Hami Melon
+  p243: Musk Melon
+  p244: Peach
+  p245: Nectarine
+  p246: Plum
+  p247: Apricot
+  p248: Cherry
+  p249: Big Cherry (Imported)
+  p250: Snow Pear
+  p251: Fragrant Pear
+  p252: Mango
+  p253: Pineapple
+  p254: Papaya
+  p255: Dragon Fruit
+  p256: Kiwi
+  p257: Passion Fruit
+  p258: Durian
+  p259: Mangosteen
+  p260: Coconut
+  p261: Lychee
+  p262: Longan
+  p263: Loquat
+  p264: Pomegranate
+  p265: Persimmon
+  p266: Fresh Jujube
+  p267: Avocado
+  p268: Fig
+  p269: Bayberry (Yumberry)
+  p270: Bubble Milk Tea
+  p271: Cheese Foam Tea
+  p272: Fruit Tea
+  p273: Lemon Tea
+  p274: Mango Pomelo Sago
+  p275: Grass Jelly Drink
+  p276: Americano
+  p277: Latte
+  p278: Cappuccino
+  p279: Mocha
+  p280: Instant Coffee
+  p281: Cola
+  p282: Sprite
+  p283: Sparkling Water
+  p284: Milk
+  p285: Yogurt
+  p286: Fresh Soy Milk (Doujiang)
+  p287: Soy Milk Drink
+  p288: Coconut Milk
+  p289: Orange Juice
+  p290: Apple Juice
+  p291: Watermelon Juice
+  p292: Coconut Water
+  p293: Green Tea
+  p294: Black Tea
+  p295: Oolong Tea
+  p296: Pu'er Tea
+  p297: Jasmine Tea
+  p298: Beer
+  p299: Baijiu (Chinese Liquor)
+  p300: Red Wine
+  p301: Cocktail
+  p302: Energy Drink
+  p303: Sports Drink
+  p304: Herbal Tea (Liangcha)
+  p305: Sour Plum Drink
+  p306: Milkshake
+  p307: Smoothie
+  p308: Mineral Water
+  p309: Potato Chips
+  p310: French Fries
+  p311: Shrimp Crackers
+  p312: Rice Crust Snack (Guoba)
+  p313: Popcorn
+  p314: Biscuit
+  p315: Cookie
+  p316: Wafer
+  p317: Egg Roll
+  p318: Dark Chocolate
+  p319: Milk Chocolate
+  p320: Cream Cake
+  p321: Cheesecake
+  p322: Mousse Cake
+  p323: Donut
+  p324: Egg Tart
+  p325: Cream Puff
+  p326: Ice Cream
+  p327: Ice Cream Bar
+  p328: Popsicle
+  p329: Mixed Nuts
+  p330: Sunflower Seeds
+  p331: Peanuts
+  p332: Pistachio
+  p333: Cashew
+  p334: Walnut
+  p335: Jelly
+  p336: Pudding
+  p337: Marshmallow
+  p338: Spicy Gluten Strip (Latiao)
+  p339: Beef Jerky
+  p340: Dried Pork Jerky
+  p341: Fish Tofu Snack
+  p342: Mooncake
+  p343: Sachima
+  p344: Fried Dough Twist (Mahua)
+  p345: Hawthorn Slice
+  p346: Candied Fruit
+  p347: Chewing Gum
+  p348: Oatmeal
+  p349: Boiled Egg
+  p350: Whole Milk
+  p351: Chicken Breast Salad
+  p352: Brown Rice
+  p353: Stir-fried Broccoli

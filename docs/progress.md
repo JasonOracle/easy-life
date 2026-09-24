@@ -400,3 +400,9 @@ Boss 提出「两侧绿色树枝也做一套 SVG」。与瓶身适配合并为�
 - **`stores/settings.ts`**：`SettingsState` 新增 `accent: 'mint'`、`locale: ''`（'' ＝ 跟随系统），`setAccent`/`setLocale` 即点即持久化（ct_settings_v1）。
 - **`composables/mealWindow.ts`（新建）**：餐次时间窗定稿——早餐 05:00–10:59／午餐 11:00–16:59／晚餐 17:00–21:59／夜宵 22:00–04:59；键与 `stores/food.ts` 餐次 map 对齐（breakfast/lunch/dinner/snack）；`currentMealKey()` 供百科页 CTA「添加到 X 餐」判断。
 - **测试经理轮**：`hooks.py all` 5 闸全绿 → `cli.exe launch app-android --cleanCache` 全量重编译（bytes 03:48 重生成，非差量）→ force-stop＋冷启动 12s → 截图 `debug/shots/s1_home.png`：首页完整渲染、贴纸/瓶/Tabbar 无回归（阶段1为纯逻辑增量，零视觉变更，符合预期）。
+
+### 2026-09-25 04:08:46 ｜ 通宵任务·阶段2收口：设置页主题/语言 cell + 半屏 sheet（真机验收 PASS）+ 百科伴生数据生成线落地
+- **设置页（Settings.uvue）**：偏好卡新增「主题切换」「语言切换」两 row（palette/globe 手绘线性 SVG 图标，风格对齐 icon_moon）；点击弹 pf- 前缀半屏 sheet（仿 GoalModal render+active 双态，App 端零 v-if 动画竞态）；主题三档带色板圆点（薄荷/海洋/薰衣草），语言三档（跟随系统/简体中文/English）；即点即换 → `settings.setAccent/setLocale` 落盘 ct_settings_v1；行右侧 accent 圆点实时反映当前主题色。
+- **测试经理轮（安卓真机 1280×2772）**：cleanCache 全量编译（bytes 04:01）→ 冷启动 → 齿轮(1170,144)进设置 → 两 cell 渲染正确（`s2_settings2.png`）→ 开主题 sheet、扫色定行心 y=2102/2325/2548 → 点海洋：sheet ✓ 迁移 + 行值「海洋 Ocean」+ 圆点变蓝（`s2_ocean_picked.png`）→ 返回再进：圆点仍 (47,159,224)＝持久化 OK → 语言 sheet 选 English 行值即变 → 全部复位 mint/跟随系统。踩坑一枚：Read 显示图缩放 0.72×，按显示坐标直点会打在蒙层（sheet 被点关而值不变），一律以原图坐标/扫色为准。
+- **百科伴生数据（阶段3 提前铺路，#50）**：新增 `toolchain/sources/encyclopedia_meta.yaml`（7 类目双语名+介绍、6 档点评规则模板、353 条英文食物名——翻译专家起草，`text_review: draft` 待 Boss 核对）；`toolchain/build_encyclopedia.py`（只读 food_library.json，id 全对齐校验、宏量分类 cls、source→conf 映射 verified/derived/draft、related=同 cat 热量最近 3 条、双写 dist+app 副本 sha 互校）；产出 `app/src/data/food_encyclopedia.json` 353 条 45.7KB；侧车 `toolchain/dist/nutrition_audit.json`（不随包）；`schema/encyclopedia_v1.json` 登记结构；hooks.py PROTECTED 增 food_encyclopedia.json。
+- **闸门**：hooks all 全绿（含 class-prefix-collision：pf- 前缀零冲突）。

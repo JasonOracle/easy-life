@@ -45,6 +45,29 @@
           <text class="soon-pill-text">即将上线</text>
         </view> 
       </view>
+      <view class="row-div"></view>
+      <view class="row" hover-class="row-pressed" :hover-stay-time="120" @click="openPref('accent')">
+        <view class="chip">
+          <image class="chip-icon" :src="'/static/settings/icon_palette.svg'" mode="aspectFit"></image>
+        </view>
+        <view class="row-text">
+          <text class="row-title">主题切换</text>
+          <text class="row-sub">{{ accentLabel }}</text>
+        </view>
+        <view class="pf-dot" :style="{ backgroundColor: theme.accent }"></view>
+        <image class="chev" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
+      </view>
+      <view class="row-div"></view>
+      <view class="row" hover-class="row-pressed" :hover-stay-time="120" @click="openPref('locale')">
+        <view class="chip">
+          <image class="chip-icon" :src="'/static/settings/icon_globe.svg'" mode="aspectFit"></image>
+        </view>
+        <view class="row-text">
+          <text class="row-title">语言切换</text>
+          <text class="row-sub">{{ localeLabel }}</text>
+        </view>
+        <image class="chev" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
+      </view>
     </view>
 
     <!-- 目标管理 -->
@@ -124,6 +147,22 @@
     <!-- 每日热量目标弹窗 -->
     <GoalModal :show="goalShow" @update:show="updateGoalShow" :initial="goal.calorieGoal" @save="goal.setGoal"></GoalModal>
 
+    <!-- 主题/语言选择半屏 sheet（仿 GoalModal：v-if render + active 两态，即点即换） -->
+    <view class="pf-mask" :class="{ 'pf-mask-active': pfActive }" v-if="pfRender" @click="closePref">
+      <view class="pf-sheet" :class="{ 'pf-sheet-active': pfActive }" :style="{ paddingBottom: (40 + safeBottom) + 'px' }" @click.stop="noop">
+        <view class="pf-grip"></view>
+        <text class="pf-title">{{ pfKind == 'accent' ? '主题切换' : '语言切换' }}</text>
+        <view class="pf-opt" v-for="(opt, idx) in pfOptions" :key="idx" hover-class="pf-opt-pressed" :hover-stay-time="100" @click="pickPref(opt.id)">
+          <view class="pf-swatch" v-if="opt.swatch.length > 0" :style="{ backgroundColor: opt.swatch }"></view>
+          <view class="pf-opt-text">
+            <text class="pf-opt-label">{{ opt.label }}</text>
+            <text class="pf-opt-sub" v-if="opt.sub.length > 0">{{ opt.sub }}</text>
+          </view>
+          <text class="pf-check" v-if="pfCurrent == opt.id" :style="{ color: theme.accent }">✓</text>
+        </view>
+      </view>
+    </view>
+
     <!-- 常驻导航栏（#28：替代 P1 遮罩＋fx-back 两件套）：滚动跨阈后整栏出现＝末色底＋返回箭＋标题，三端生效 -->
     <view v-if="scrolled" class="set-nav" :style="{ height: navBarH + 'px', paddingTop: sbH + 'px', backgroundColor: dk ? '#162924' : '#39AD95' }">
       <view class="set-nav-back" @click="goBack">
@@ -142,13 +181,18 @@
  */
 import { useGoalStore } from '../../stores/goal'
 import { useSettingsStore } from '../../stores/settings'
+import { triggerHaptic } from '../../stores/settings'
+import { useTheme, ACCENT_OPTIONS } from '../../composables/useTheme'
 import { ref, computed } from 'vue'
 import { onPageScroll } from '@dcloudio/uni-app'
 import { onShow } from '@dcloudio/uni-app'
 import GoalModal from '../../components/GoalModal.uvue'
 
+type PrefOpt = { id: string; label: string; sub: string; swatch: string }
+
 const goal = useGoalStore()
 const settings = useSettingsStore()
+const { theme } = useTheme()
 const goalShow = ref(false)
 const dk = computed((): boolean => settings.darkMode)
 
@@ -186,6 +230,74 @@ function toggleDark(): void {
   settings.setDarkMode(!settings.darkMode)
   syncBar()
 }
+
+/* ===== 主题 / 语言 半屏选择 sheet（即点即换 + 持久化在 store 层） ===== */
+const pfRender = ref(false)
+const pfActive = ref(false)
+const pfKind = ref('accent')
+let pfTimer = 0
+
+let safeBottom = 0
+const insets = uni.getSystemInfoSync().safeAreaInsets
+if (insets != null) safeBottom = insets.bottom
+
+const accentOpts: PrefOpt[] = [
+  { id: 'mint', label: '薄荷 Mint', sub: '清透绿意，品牌本色', swatch: '#20C997' },
+  { id: 'ocean', label: '海洋 Ocean', sub: '沉静蓝调，专注记录', swatch: '#2F9FE0' },
+  { id: 'lavender', label: '薰衣草 Lavender', sub: '柔和紫调，轻松氛围', swatch: '#8B7BE8' },
+]
+const localeOpts: PrefOpt[] = [
+  { id: '', label: '跟随系统', sub: '按手机语言自动选择', swatch: '' },
+  { id: 'zh', label: '简体中文', sub: 'Simplified Chinese', swatch: '' },
+  { id: 'en', label: 'English', sub: '英语', swatch: '' },
+]
+
+const pfOptions = computed((): PrefOpt[] => pfKind.value == 'accent' ? accentOpts : localeOpts)
+const pfCurrent = computed((): string => pfKind.value == 'accent' ? settings.accent : settings.locale)
+
+const accentLabel = computed((): string => {
+  for (let i = 0; i < accentOpts.length; i++) {
+    if (accentOpts[i].id == settings.accent) return accentOpts[i].label
+  }
+  return '薄荷 Mint'
+})
+const localeLabel = computed((): string => {
+  for (let i = 0; i < localeOpts.length; i++) {
+    if (localeOpts[i].id == settings.locale) return localeOpts[i].label
+  }
+  return '跟随系统'
+})
+
+function openPref(kind: string): void {
+  pfKind.value = kind
+  if (pfTimer > 0) { clearTimeout(pfTimer); pfTimer = 0 }
+  pfRender.value = true
+  triggerHaptic('light')
+  setTimeout(() => {
+    pfActive.value = true
+  }, 16)
+}
+
+function closePref(): void {
+  pfActive.value = false
+  if (pfTimer > 0) { clearTimeout(pfTimer); pfTimer = 0 }
+  pfTimer = setTimeout(() => {
+    pfRender.value = false
+    pfTimer = 0
+  }, 220) as unknown as number
+}
+
+function pickPref(id: string): void {
+  triggerHaptic('light')
+  if (pfKind.value == 'accent') {
+    settings.setAccent(id)
+  } else {
+    settings.setLocale(id)
+  }
+  closePref()
+}
+
+function noop(): void { }
 
 const goBack = () => {
   uni.navigateBack()
@@ -424,6 +536,97 @@ const goBack = () => {
   color: #8FAEAF;
   margin-top: 6rpx;
 }
+/* ===== 主题/语言 sheet（pf- 前缀避跨文件类名冲突） ===== */
+.row-pressed {
+  opacity: 0.75;
+}
+.pf-dot {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 12rpx;
+  margin-right: 16rpx;
+}
+.pf-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 900;
+  justify-content: flex-end;
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: 220ms;
+}
+.pf-mask-active {
+  opacity: 1;
+}
+.pf-sheet {
+  background-color: #FFFFFF;
+  border-top-left-radius: 68rpx;
+  border-top-right-radius: 68rpx;
+  padding-left: 40rpx;
+  padding-right: 40rpx;
+  padding-top: 20rpx;
+  transform: translateY(100%);
+  transition-property: transform;
+  transition-duration: 260ms;
+}
+.pf-sheet-active {
+  transform: translateY(0%);
+}
+.pf-grip {
+  width: 72rpx;
+  height: 8rpx;
+  border-radius: 4rpx;
+  background-color: #D5E5DD;
+  margin-left: 295rpx;
+  margin-bottom: 24rpx;
+}
+.pf-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #0A4F3D;
+  margin-bottom: 8rpx;
+}
+.pf-opt {
+  flex-direction: row;
+  align-items: center;
+  padding-top: 28rpx;
+  padding-bottom: 28rpx;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: #EAF3EF;
+}
+.pf-opt-pressed {
+  background-color: #F3FBF7;
+}
+.pf-swatch {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 28rpx;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #E3EFE8;
+  margin-right: 24rpx;
+}
+.pf-opt-text {
+  flex: 1;
+}
+.pf-opt-label {
+  font-size: 30rpx;
+  color: #0A4F3D;
+}
+.pf-opt-sub {
+  font-size: 22rpx;
+  color: #8FAEAF;
+  margin-top: 4rpx;
+}
+.pf-check {
+  font-size: 36rpx;
+  font-weight: bold;
+}
 /* ===== 深色模式（Boss P2：与个人中心同薄荷深色板；后代选择器仅 mp 端生效，App 端须改逐元素 :class） ===== */
 /* #ifdef MP-WEIXIN */
 .page-dark {
@@ -473,6 +676,25 @@ const goBack = () => {
 }
 .page-dark .danger-text {
   color: #FF8266;
+}
+.page-dark .pf-sheet {
+  background-color: #162924;
+}
+.page-dark .pf-title,
+.page-dark .pf-opt-label {
+  color: #EAF9F3;
+}
+.page-dark .pf-opt-sub {
+  color: rgba(234, 249, 243, 0.5);
+}
+.page-dark .pf-opt {
+  border-bottom-color: #1E352F;
+}
+.page-dark .pf-opt-pressed {
+  background-color: #1E3B33;
+}
+.page-dark .pf-grip {
+  background-color: #2A4238;
 }
 /* #endif */
 </style>
