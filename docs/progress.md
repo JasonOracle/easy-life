@@ -423,3 +423,9 @@ Boss 提出「两侧绿色树枝也做一套 SVG」。与瓶身适配合并为�
 - **翻译专家轮（EN 文案审校记录，待 Boss 复核）**：①「Based on 中碗 200g computed」语序为模板直译，可接受但非母语级；② sheet 行「System / Follows phone language」措辞已选保守版；③ `hm.date` EN 用 `9/25 · Fri` 美式日期。①②③与 `encyclopedia_meta.yaml`（text_review: draft）同批过 Boss。
 - **已知挂起（非本阶段缺陷，明示不脑补）**：贴纸 PNG 上「好好吃饭 也好好生活」为素材文字，EN 态不变（零生图约束下不可动态换）；记录/选择器内食物名＝食物库 zh 快照（EN 名仅百科伴生表有）；vessel 单位「碗」为数据值；`FoodToast.uvue` 含中文但全工程零引用（孤儿组件，去留待 Boss）；DayDetail 点「番茄炒蛋」行打开百科显示 Steamed Rice——疑似 `foodIdFromImg` 配对错位，非 i18n 问题，留待复核。
 - **闸门**：`hooks.py all` 5 闸全绿。
+
+### 2026-09-25 06:20:40 ｜ 通宵任务·#57 收口：ink-1 A/B 真机裁决 ＝ 绿 `#0A4F3D` 胜出（slate 废止）
+- **方法**：同一百科详情页（米饭）真机双版渲染——A＝Pencil 稿 slate `#0F172A`（`ink_A_slate.png`），B＝App 宪法绿 `#0A4F3D`（`ink_B_green.png`）；仅改 `useTheme.ts` mint-light `ink1` 单值，差量编译即生效（纯脚本改动，watch 会话绿灯 06:17:34）。
+- **裁决（产品经理轮）＝ B 绿**：① 一致性——AGENTS/DesignTokens 宪法 label-1 即 `#0A4F3D`，全 App 其他页标题均为绿，slate 会让百科页像"另一个 App"（Nielsen 一致性维度直接受损）；② 品牌情感——薄荷液滴人格下 slate 是通用仪表盘默认色，正是 design-by-committee 陷阱；绿标题与 accent chip、宏量环、CTA 同轴成组；③ 对比度——绿白底 ≈9.9:1，仍过 AAA，无牺牲。
+- **回归**：`useTheme` 消费方仅百科 Detail＋Settings 两页；Settings 绿 ink1 渲染无回归（`ink_B_settings.png`），设备状态确认＝薄荷/跟随系统/深色关。
+- **遗留观察（不擅自扩权）**：`ink2 #475569`/`ink3 #8BA7A0` 仍按 §8 Pencil 提取表为 slate 系——正文级与绿标题存在轻微异色相，是否整组转绿 label-2/3 待 Boss 对照 `DesignTokens.md` §8 拍板。

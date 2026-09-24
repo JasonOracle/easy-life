@@ -29,7 +29,7 @@ export type ThemeTokens = {
 const PALETTES: Record<string, ThemeTokens> = {
   'mint-light': {
     bg: '#F6FBF8', card: '#FFFFFF', cardSoft: '#EEFAF6', chip: '#E6F9F6', line: '#D8EFE5',
-    ink1: '#0F172A', ink2: '#475569', ink3: '#8BA7A0',
+    ink1: '#0A4F3D', ink2: '#475569', ink3: '#8BA7A0',
     accent: '#20C997', accent2: '#2BD6A3', accentDeep: '#064E3B', onAccent: '#FFFFFF',
     glassBg: '#FFFFFFF2', glassScrim: '#F6FBF8A6', thumbStroke: '#EAF9F3', dashLine: '#0A4F3D1F',
     heroBg: '#E4F2E9', sysIndicator: '#B9C9C3',
