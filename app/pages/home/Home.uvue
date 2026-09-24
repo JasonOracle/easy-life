@@ -1,7 +1,7 @@
 
 <template>
   <view class="page">
-    <!-- [变更日志] 2026-09-24: Hero 水瓶液体由 CSS 水波图重构为 BottleLiquid Canvas 2D 物理引擎渲染；瓶身/刻度/叶片独立分层，废弃 liquid_wave 水体渐变头图。同日重排第一批：补定义 status-text-coral/amber/green 死类（超标报警色此前静默失效）、顶部带压缩（spacer 220→190 / hero 470→440）、贴纸由右上悬空改入右列流内（并清除整画布 alpha≈10 白雾层）、删悬空小 leaf 改状态色竖条、宏量/餐次字号降档拉开层级阶梯。第二批 S4：.hero-text right 20→28rpx，贴纸/pill 右缘与全页卡片 margin-right 28 统一对齐轴 -->
+    <!-- [变更日志] 2026-09-24: Hero 水瓶液体由 CSS 水波图重构为 BottleLiquid Canvas 2D 物理引擎渲染；瓶身/刻度/叶片独立分层，废弃 liquid_wave 水体渐变头图。同日重排第一批：补定义 status-text-coral/amber/green 死类（超标报警色此前静默失效）、顶部带压缩（spacer 220→190 / hero 470→440）、贴纸由右上悬空改入右列流内（并清除整画布 alpha≈10 白雾层）、删悬空小 leaf 改状态色竖条、宏量/餐次字号降档拉开层级阶梯。第二批 S4：.hero-text right 20→28rpx，贴纸/pill 右缘与全页卡片 margin-right 28 统一对齐轴。S7：独立宏量卡并入 hero 底缘玻璃横条（hm-macro-strip，左右 28 同轴），hero 440→552、hero-text bottom 24→136，页面白卡 3→2 -->
     <!-- 标题与操作栏（顶栏常驻+日期整合，对齐设计图规范，保证日期完全外露） -->
     <view class="hm-nav" :style="{ paddingTop: sbH + 'px' }">
       <view class="hm-nav-inner">
@@ -69,26 +69,31 @@
           <image class="pill-edit" :src="'/static/home/pill_edit.svg'" mode="aspectFit"></image>
         </view>
       </view>
-    </view>
-
-    <!-- 宏量卡 -->
-    <view class="macro-card">
-      <view class="macro-col">
-        <image class="macro-icon" :src="'/static/home/macro_protein.svg'" mode="aspectFit"></image>
-        <text class="macro-num">{{ macroP }}g</text>
-        <text class="macro-label">蛋白质</text>
-      </view>
-      <view class="macro-div"></view>
-      <view class="macro-col">
-        <image class="macro-icon" :src="'/static/home/macro_carb.svg'" mode="aspectFit"></image>
-        <text class="macro-num">{{ macroC }}g</text>
-        <text class="macro-label">碳水</text>
-      </view>
-      <view class="macro-div"></view>
-      <view class="macro-col">
-        <image class="macro-icon" :src="'/static/home/macro_fat.svg'" mode="aspectFit"></image>
-        <text class="macro-num">{{ macroF }}g</text>
-        <text class="macro-label">脂肪</text>
+      <!-- 宏量横条（S7）：原独立宏量卡收进 hero 底缘第三段，页面白卡 3→2，打破三连同族卡 -->
+      <view class="hm-macro-strip">
+        <view class="hm-macro-cell">
+          <image class="hm-macro-ic" :src="'/static/home/macro_protein.svg'" mode="aspectFit"></image>
+          <view class="hm-macro-txt">
+            <text class="hm-macro-val">{{ macroP }}g</text>
+            <text class="hm-macro-cap">蛋白质</text>
+          </view>
+        </view>
+        <view class="hm-macro-sep"></view>
+        <view class="hm-macro-cell">
+          <image class="hm-macro-ic" :src="'/static/home/macro_carb.svg'" mode="aspectFit"></image>
+          <view class="hm-macro-txt">
+            <text class="hm-macro-val">{{ macroC }}g</text>
+            <text class="hm-macro-cap">碳水</text>
+          </view>
+        </view>
+        <view class="hm-macro-sep"></view>
+        <view class="hm-macro-cell">
+          <image class="hm-macro-ic" :src="'/static/home/macro_fat.svg'" mode="aspectFit"></image>
+          <view class="hm-macro-txt">
+            <text class="hm-macro-val">{{ macroF }}g</text>
+            <text class="hm-macro-cap">脂肪</text>
+          </view>
+        </view>
       </view>
     </view>
 
@@ -551,7 +556,7 @@ const meals = computed<Meal[]>(() =>
 }
 .hero {
   position: relative;
-  height: 440rpx;
+  height: 552rpx;
   margin-top: 0;
   background-color: #E6F8EF;
   background-image: linear-gradient( #E6F8EF 0%, #F2FAF5 100%);
@@ -642,7 +647,7 @@ const meals = computed<Meal[]>(() =>
   left: 346rpx;
   right: 28rpx;
   top: 36rpx;
-  bottom: 24rpx;
+  bottom: 136rpx;
   flex-direction: column;
   justify-content: flex-end;
 }
@@ -720,41 +725,45 @@ const meals = computed<Meal[]>(() =>
   height: 26rpx;
   margin-left: 20rpx;
 }
-.macro-card {
+/* 宏量横条（S7）：hero 底缘第三段，玻璃白胶囊与 goal-pill 同语言，左右 28rpx 并入全页右缘轴 */
+.hm-macro-strip {
+  position: absolute;
+  left: 28rpx;
+  right: 28rpx;
+  bottom: 24rpx;
+  height: 96rpx;
   flex-direction: row;
-  background-color: #FFFFFF;
-  border-radius: 38rpx;
-  margin-left: 28rpx;
-  margin-right: 28rpx;
-  margin-top: 12rpx;
-  padding-top: 38rpx;
-  padding-bottom: 28rpx;
-  box-shadow: 0 10rpx 26rpx rgba(26, 102, 77, 0.07);
-}
-.macro-col {
-  flex: 1;
   align-items: center;
+  background-color: rgba(255, 255, 255, 0.55);
+  border-radius: 48rpx;
 }
-.macro-icon {
-  width: 48rpx;
-  height: 48rpx;
+.hm-macro-cell {
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 }
-.macro-num {
-  font-size: 32rpx;
+.hm-macro-ic {
+  width: 36rpx;
+  height: 36rpx;
+  margin-right: 10rpx;
+}
+.hm-macro-txt {
+  flex-direction: column;
+}
+.hm-macro-val {
+  font-size: 30rpx;
   font-weight: bold;
   color: #0A5A40;
-  margin-top: 4rpx;
 }
-.macro-label {
-  font-size: 24rpx;
+.hm-macro-cap {
+  font-size: 22rpx;
   color: #73918B;
-  margin-top: 8rpx;
 }
-.macro-div {
+.hm-macro-sep {
   width: 1px;
+  height: 48rpx;
   background-color: #E3F0EA;
-  margin-top: 50rpx;
-  margin-bottom: 50rpx;
 }
 .meal-section-head {
   flex-direction: row;
