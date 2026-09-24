@@ -655,7 +655,7 @@ const meals = computed<Meal[]>(() =>
 .hm-sticker {
   position: absolute;
   left: 16rpx;
-  top: 6rpx;
+  top: 0rpx;
   width: 140rpx;
   height: 103rpx;
   pointer-events: none;

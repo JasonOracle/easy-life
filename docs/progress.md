@@ -371,3 +371,8 @@ Boss 提出「两侧绿色树枝也做一套 SVG」。与瓶身适配合并为�
 - **Bug 1 树叶不显示**：`bottleAsset()` 用下划线拼路径（`yezi-zuo_coral.svg`），但树叶文件复制时用了连字符（`yezi-zuo-coral.svg`）→ 路径不匹配，文件加载失败。已将四个树叶文件改为下划线命名，与瓶身/bg 对齐。
 - **Bug 2 贴纸文字三档全绿**：`gen_sticker_3state.py` 第 23 行有 `TEXT = (10, 122, 92, 255)` 覆盖了 tuple 里的状态色，三张贴纸文字全是 mint-deep 绿。已删除该行，按 tier 分别用 green `#0A7A5C` / amber `#D4A23E` / coral `#E66040`。
 - **测试经理轮**：全量 `--cleanCache` 重编译（23:40:23 同步成功）→ 冷启动截图 `debug/shots/s8_leaf_fix.png`→ 双叶恢复显示（珊瑚色）＋ 贴纸文字「没关系 调整一下」为珊瑚深色，整组视觉完全统一。
+
+### 2026-09-24 23:58:00 ｜ 贴纸圆环去绿 + 文案遮挡修复（App 端真机验收 PASS）
+- **圆环仍绿**：`gen_sticker_3state.py` 椭圆描边写死 `(125,235,199,255)` = `#7DEBC7` 绿，三档均未随状态变。改为按 tier 分别用 green `#7DEBC7` / amber `#E8D080` / coral `#FFC4A0`。
+- **文案遮挡**：`.hm-sticker` `top:6rpx` 偏低，瓶肩压住「调整一下」下半截与对勾。改为 `top:0rpx` 上移 6rpx，底部避开瓶肩。
+- **测试经理轮**：全量 `--cleanCache` 重编译（23:55:58 同步成功）→ 冷启动截图 `debug/shots/s9_sticker_fix.png`→ 贴纸描边珊瑚色、文字完整可见、双叶恢复，整组完全统一。
