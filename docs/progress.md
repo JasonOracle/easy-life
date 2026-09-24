@@ -332,3 +332,7 @@
 - **产品经理**：S6 vs S7 裁决＝**S7**。依据＝S7 同时治病因 2（三连同族白卡）＋5（宏量孤儿卡），S6 只治半条病因 3 且破坏已验证的 S4 右缘轴与瓶卡构图；与 S2 冲突实为置换（hero +112rpx < 删卡 ~250rpx，净页面更短）。**贴纸矢量化＝销项**：糊因白雾层已除、Boss 实拍确认清晰，仓内无矢量源，描图重绘属质量赌博。
 - **设计经理**：`.hero` 440→552rpx、`.hero-text` bottom 24→136（内容列高 380 不变零重排）；新增 `.hm-macro-strip`（absolute left/right 28 同 S4 轴、bottom 24、高 96、玻璃白 55% 胶囊与 goal-pill 同语言）三格＝icon36＋(值30粗/标22)竖对，分隔 1px×48 #E3F0EA；删除 `.macro-card` 全套。**二轮复审**：pill 与横条间距 26rpx 偏紧，但放宽需压文本列致贴纸上溢，风险>收益，裁决维持。
 - **测试经理**：完整 `cli.exe launch --cleanCache`（bytes 20:55:53 晚于改动）→ 冷启动截图 `debug/shots/s7_home.png`（白卡 3→2、横条右缘 x≈1232 同轴、瓶底与横条无碰撞、宏量在浅底可读）→ `fab_flow2` 完整四轮 4/4 PASS（打开 0.77~0.83s、确认→结算→复位链路正常）→ logcat 零应用报错。**PASS 收口**。
+
+### 2026-09-24 21:12:00 ｜ App 侧重编译后终验（Boss 指令：优先 App，小程序端暂缓）
+- Boss 纠正方向：MP-WEIXIN 会话误启微信开发者工具窗口，已停会话并 `close_project_window` 关闭；**小程序端全量回归按 Boss 指令挂起，待另行安排**。
+- 测试经理轮（App）：完整 `cli.exe launch app-android --cleanCache`（bytes 21:07:29 晚于全部源码改动）→ 冷启动首页截图＝S7 横条/珊瑚超标色/贴纸清晰/右缘轴全部正常 → FAB 回归三轮：①打开遮罩变暗 PASS；②关闭后 0.5s 竞态重开＝弹层内容完整挂载（`debug/shots/r2_race_reopen.png`）PASS；③遮罩关闭回落纯白页 PASS。本轮零代码改动，验证对象＝已提交 `bbcaec2`＋`910a17c`。
