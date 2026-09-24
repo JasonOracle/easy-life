@@ -306,3 +306,22 @@
 **调试基座新坑**：上一个 `cli.exe launch` watch 会话结束后 HBuilderX 主体随之退出，后续 cli launch 报「未检测到已打开的HBuilderX」→ 须先 `cli.exe open`（等约 10s）再 launch。另：本会话「已停止运行」实为旧会话被新全量编译接管的重启周期尾巴，判活以 `dumpsys mCurrentFocus` ＋ `bytes/` mtime 为准。
 
 **验收（2026-09-24 20:09:30）**：完整重编（bytes mtime 19:57:31 晚于改动）→ `am force-stop`＋`am start` 冷启动 → 直达首页无任何弹窗（`debug/shots/noprivacy_cold.png`）→ PASS。
+
+### 2026-09-24 20:43:01 — FAB→FoodPicker「打开慢＋二次点击吞击」顽疾闭环（方案：常驻不卸＋离场窗重开）
+
+**Phase 1 有效复现**（前几轮被脚本污染作废后重建探针 `debug/fab_flow2.py`，全部坐标在 1280×2772 原图上 PIL 扫色实测：确认钮＝绿胶囊 bbox 中心 (640,2650)，FAB 命中环 (1080,161)）：
+1. 完整四轮流程（FAB→行选→详情→确认→结算自动关）每轮打开探针延迟 0.86~1.11s，流程本身零死锁；
+2. **吞击复现**：mask 关闭后 0ms 立即点 FAB → 6s 弹层不出现（`ff2_race_stuck_0.0.png`＝首页无冻结），随后单点 0.87s 正常开 → 判死「状态机死锁」旧假设，真凶＝**离场 180ms 内遮罩仍挂载，把 FAB 点击吞进 onOverlayTap→close() 空转**；
+3. 计时噪声标定：adb screencap 单帧 0.37s＋tap 0.2s → 探针分辨率 ±0.42s，改用**设备端自计时录屏法**（`debug/fab_video.py`：screenrecord 与 tap 同 shell 命令按设备时钟排序，ffmpeg 抽帧找首个遮罩帧）取得毫秒级真值。
+
+**根因**：① `v-if="render"` 每次打开整棵弹层子树（20 行列表+图+AddFood）冷挂载 → 真实 tap→visible 0.43~0.85s；② 离场窗口遮罩吞击＋旧延迟叠加 → 用户连点全部被吞，感知「二次点击卡死」。
+
+**修复**（`app/components/FoodPicker.uvue`）：① 弹层根常驻，隐藏改 `.fp-hidden{display:none}`（不再卸 DOM，重开＝纯 class 切换）；② `onOverlayTap` 在 `!active`（淡出窗口内）时改为 `emit('update:show', true)` 立即重开，吞击变恢复。watch 状态机与 180ms 离场时序未动。
+
+**A/B 验收**（MuMu，两轮均完整 `cli.exe launch --cleanCache`＋bytes mtime 核验＋`am force-stop` 冷启动）：
+- 基线（回退 HEAD v-if 版实测）：tap→遮罩出现 **0.853 / 0.433 / 0.600s**；
+- 修复版 5 次：**0.638 / 0.222 / 0.353 / 0.231 / 0.248s**（中位 0.25，≈2.5× 提速；逐帧证据 `debug/shots/fabvid_fixed_r5_before/first_dark.png`）；
+- 竞态探针 gap 0/0.2/0.6s 三档重开全部成功（修复前 gap0 直接不出现）；四轮完整流程回归零死锁、结算/确认链路正常。
+- 注：screencap 探针法修复前后均显示 ~0.9s，系其 ±0.42s 量化下限饱和，勿以此法判延迟。
+
+**遗留**：MP-WEIXIN 端常驻挂载改动未回归（automator ws://9420 未连）；gap0 重开真实延迟未单独录屏计时（探针含噪声下界）。

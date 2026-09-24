@@ -1,6 +1,6 @@
 
 <template>
-  <view class="fp-overlay" :class="{ 'fp-overlay-active': active }" v-if="render" @click="onOverlayTap">
+  <view class="fp-overlay" :class="{ 'fp-overlay-active': active, 'fp-hidden': !render }" @click="onOverlayTap">
     <view class="fp-container" :class="{ 'fp-container-active': active, 'fp-container-detail': step === 'detail' }" @click.stop>
     <view class="fp-sheet" v-if="step === 'list'">
       <view class="fp-top-row">
@@ -68,6 +68,7 @@
 </template>
 
 <script setup lang="uts">
+// [变更日志] 2026-09-24: FAB 顽疾修复——弹层根由 v-if 挂载改为常驻＋display:none 隐藏（消除每次约 1s 冷启动重挂载）；离场淡出窗口内蒙层点击改为 emit show=true 立即重开（不再吞击）
 // [变更日志] 2026-09-24: 食物列表选中态重构 → 废弃整行绿底 .fp-row-on（白底图标叠绿底色块难看），改为左侧薄荷绿竖条 .fp-row-accent ＋ 既有文字加深加粗；日志落位 script 内（ADR-003 #7 禁 .uvue 根层 HTML 注释）
 import { ref, computed, watch } from 'vue'
 import { ALL_FOODS, searchFoods, vesselLabelOf, vesselSizesOf, type FoodBase } from '../stores/food'
@@ -172,8 +173,12 @@ function onDetailConfirm(payload: AddPayload): void {
   close()
 }
 
-/** 原生蒙层点按时回传 show=false 触发离场动画 */
+/** 原生蒙层点按时回传 show=false 触发离场动画；离场淡出窗口内（active 已 false、尚未 display:none）再点＝立即重开，避免吞击 */
 function onOverlayTap(): void {
+  if (!active.value) {
+    emit('update:show', true)
+    return
+  }
   close()
 }
 
@@ -230,6 +235,10 @@ watch(
 }
 .fp-overlay-active {
   opacity: 1;
+}
+/* 常驻不卸载：隐藏态用 display:none 摘掉命中与绘制，重开＝纯 class 切换，免去整棵子树重挂载的约 1s 冷启动 */
+.fp-hidden {
+  display: none;
 }
 .fp-container {
   position: absolute;
