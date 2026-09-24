@@ -436,3 +436,16 @@ Boss 提出「两侧绿色树枝也做一套 SVG」。与瓶身适配合并为�
 - **测试经理轮（安卓真机，全量重编译 bytes 06:23 + 新 static 打包）**：海洋＝瓶玻璃/树叶/底图斑块全蓝（`theme_home_ocean.png`）；薰衣草＝整组紫、深紫叶片（`theme_home_lavender.png`）；复位薄荷＝原稿无回归（`theme_home_mint_back.png`）。设备终态＝mint/跟随系统/深色关。
 - **明示边界（不擅自扩权）**：液体（BottleLiquid PALETTES）、hero 渐变、贴纸 PNG、FAB 等页面 chrome 仍为 mint 固定色——§8.4 矩阵本轮范围＝瓶/叶/bg 三资产；液体是否随 accent 走属产品决策，留 Boss。
 - **闸门**：hooks all 全绿。
+
+### 2026-09-25 06:29:00 ｜ 通宵任务·总交接（阶段1-4 + #57 + #58 全部收口，dev 提交链完整）
+- **提交链（dev，未碰 main）**：`195b42f` 全 App i18n（14 文件 +498/−250）→ `7cde14d` ink-1 A/B 裁决绿胜出 → `16ef426` 主题资产重着色线（10 SVG + 生成脚本 + Home 接线）。每笔提交均过 5 闸 hooks；工作区干净。
+- **设备终态**：安卓模拟器＝薄荷 / 跟随系统 / 深色关 / 今日 0 记录，与冷启动默认一致；无残留调试探针（DBG 全清）。
+- **待 Boss 决策清单（本夜明示挂起，AI 不擅自扩权）**：
+  1. **翻译专家复核包**：`toolchain/sources/encyclopedia_meta.yaml`（353 英文名＋类目双语，text_review: draft）＋ 本夜新增 EN 微文案（`hm.date` 美式「9/25 · Fri」、语言 sheet「System / Follows phone language」、「Based on 中碗 200g computed」语序）——同批过目。
+  2. **液体是否随 accent**：§8.4 本轮只落瓶/叶/bg；BottleLiquid PALETTES 仍 mint/amber/coral 固定，海洋/薰衣草主题下绿液是产品决策点。
+  3. **ink2/ink3 色相**：正文级仍 slate 系（§8 Pencil 提取表），与绿 ink1 轻微异色相，是否整组转 label-2/3 绿待拍板。
+  4. **贴纸 PNG 素材文字**：「好好吃饭 也好好生活」为图内文字，EN 态不变（零生图约束）；如需双语要重出素材。
+  5. **FoodToast.uvue**：含中文串但全工程零引用（孤儿组件），去留待定。
+  6. **foodIdFromImg 配对疑点**：Records/DayDetail 点「五花肉」「番茄炒蛋」缩略图均打开「米饭」百科——疑似按图路径反查 id 的映射错位，非 i18n 问题，需单独排查。
+- **小程序端**：按 Boss 指令整夜未碰微信工具；所有改动（i18n/主题/资产）MP 端表现待下次统一回归。
+- **隐私开关**：`PRIVACY_DEV_BYPASS=true` 仍在（上线前必须还原，见任务 #29 备注）。
