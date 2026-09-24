@@ -1,9 +1,10 @@
-
+<!-- [变更日志] 2026-09-24: 修复第二次添加时环形动画消失问题 → 给 canvas 绑定动态 :key="canvasKey"，每次 show=true 时递增 key 强制销毁重建 DOM 节点 -->
 <template>
   <view class="sb-overlay" :class="{ 'sb-overlay-active': active }" v-if="render">
     <view class="sb-badge" :class="{ 'sb-badge-active': active, 'sb-badge-out': exiting, 'sb-badge-low': lowMode }">
-      <!-- 环形进度画布：正中 296rpx 正方居中，底轨与进度条由 Canvas 一体化绘制，彻底消除左上角圆圈 -->
-      <canvas class="sb-canvas" type="2d" id="sb-ring" @ready="onCanvasReady"></canvas>
+      <!-- 环形进度：底轨为纯 CSS 圆环（双端同构），画布只画进度弧 -->
+      <view class="sb-track"></view>
+      <canvas class="sb-canvas" type="2d" id="sb-ring" :key="canvasKey" @ready="onCanvasReady"></canvas>
       <view class="sb-num-stack">
         <text class="sb-big-num">{{ shownText }}</text>
         <text class="sb-unit">kcal</text>
@@ -20,7 +21,7 @@
 </template>
 
 <script setup lang="uts">
-import { ref, computed, watch, getCurrentInstance, onUnmounted, nextTick } from 'vue'
+import { ref, computed, watch, getCurrentInstance, onMounted, onUnmounted, nextTick } from 'vue'
 import { useDeviceStore } from '../stores/device'
 import { useSettingsStore } from '../stores/settings'
 
@@ -64,13 +65,21 @@ let exitTimer = 0
 let closeTimer = 0
 let activeTimer = 0
 let animStart = 0
+let canvasRetry1 = 0
+let canvasRetry2 = 0
+let canvasRetry3 = 0
+let canvasKey = 0
 
 // 画布尺寸状态记录
 let cvWidth = 148
 let cvHeight = 148
 
+// —— Canvas 绘制逻辑 ——
+let ringCtx: any | null = null
+let readyFired = false
+
 const overBudget = computed<boolean>(() => props.after > props.goal)
-const ringColor = computed<string>(() => overBudget.value ? '#E8B54D' : '#1FBF8F')
+const ringColor = computed<string>(() => overBudget.value ? 'rgba(232, 181, 77, 1)' : 'rgba(31, 191, 143, 1)')
 const finalRatio = computed<number>(() => {
   if (props.goal <= 0) return 1
   const r = props.after / props.goal
@@ -98,19 +107,25 @@ const shownText = computed<string>(() => '' + Math.round(props.kcal * progress.v
 const budgetText = computed<string>(() => '今日 ' + fmt(props.after) + ' / ' + fmt(props.goal) + ' kcal')
 const mealText = computed<string>(() => props.meal + ' · 已加入')
 
-// —— Canvas 绘制逻辑 ——
-let ringCtx: any | null = null
-
 function onCanvasReady(): void {
+  if (readyFired) return
   // #ifdef APP
   try {
     const el = uni.getElementById('sb-ring') as UniCanvasElement | null
-    if (el != null) {
-      ringCtx = el.getContext('2d')
-      cvWidth = 148
-      cvHeight = 148
-      drawRing()
-    }
+    if (el == null) return
+    const dpr = uni.getDeviceInfo().devicePixelRatio ?? 1
+    const cssW = el.offsetWidth
+    const cssH = el.offsetHeight
+    if (cssW <= 0 || cssH <= 0) return
+    el.width = Math.round(cssW * dpr)
+    el.height = Math.round(cssH * dpr)
+    cvWidth = el.width
+    cvHeight = el.height
+    const ctx = el.getContext('2d')
+    if (ctx == null) return
+    ringCtx = ctx
+    readyFired = true
+    drawRing()
   } catch (e) {
     ringCtx = null
   }
@@ -145,7 +160,7 @@ function initCanvasMp(): void {
 function drawRing(): void {
   const ctx = ringCtx
   if (ctx == null) return
-  
+
   const w = cvWidth
   const h = cvHeight
   const cx = w / 2
@@ -157,37 +172,69 @@ function drawRing(): void {
     ctx.clearRect(0, 0, w, h)
   } catch (e) {}
 
-  // 1. 完整底轨圆环（浅薄荷透明绿）
-  ctx.beginPath()
-  ctx.arc(cx, cy, r, 0, Math.PI * 2)
-  ctx.lineWidth = lineW
-  ctx.strokeStyle = 'rgba(31, 191, 143, 0.16)'
-  ctx.stroke()
+  // 底轨由 .sb-track（CSS 圆环）承担，画布每帧只负责进度弧
+  if (sweep.value <= 0.001) return
 
-  // 2. 顺时针进度条（带圆头，饱满轻律翡翠绿或超标暖橙）
-  if (sweep.value > 0.001) {
-    ctx.beginPath()
-    ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + sweep.value * Math.PI * 2)
-    ctx.lineWidth = lineW
-    ctx.lineCap = 'round'
-    ctx.strokeStyle = ringColor.value
-    ctx.stroke()
+  // 满圈时起止角恰好相差 2π，按零弧长处理会整条不绘制，故封顶 0.9995 圈
+  const turn = sweep.value > 0.9995 ? 0.9995 : sweep.value
+  const a0 = 0 - Math.PI / 2
+  const a1 = a0 + turn * Math.PI * 2
+
+  // #ifdef APP
+  // App 端 gcanvas 的 stroke() 实测零输出（缓冲区与几何均正确、调用无异常），fill() 可用，
+  // 故进度弧以「外弧点列 + 内弧逆序点列」的环形扇区多边形填充实现，两端再补圆头。
+  const rOut = r + lineW / 2
+  const rIn = r - lineW / 2
+  const segs = Math.max(2, Math.round((a1 - a0) / 0.1047197551))
+  ctx.beginPath()
+  for (let k = 0; k <= segs; k++) {
+    const a = a0 + (a1 - a0) * (k / segs)
+    const ox = cx + rOut * Math.cos(a)
+    const oy = cy + rOut * Math.sin(a)
+    if (k == 0) {
+      ctx.moveTo(ox, oy)
+    } else {
+      ctx.lineTo(ox, oy)
+    }
   }
+  for (let k2 = segs; k2 >= 0; k2--) {
+    const a2 = a0 + (a1 - a0) * (k2 / segs)
+    ctx.lineTo(cx + rIn * Math.cos(a2), cy + rIn * Math.sin(a2))
+  }
+  ctx.closePath()
+  ctx.fillStyle = ringColor.value
+  ctx.fill()
+
+  const capR = lineW / 2
+  ctx.beginPath()
+  ctx.arc(cx + r * Math.cos(a0), cy + r * Math.sin(a0), capR, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.beginPath()
+  ctx.arc(cx + r * Math.cos(a1), cy + r * Math.sin(a1), capR, 0, Math.PI * 2)
+  ctx.fill()
+  // #endif
+
+  // #ifndef APP
+  ctx.beginPath()
+  ctx.arc(cx, cy, r, Math.PI * 1.5, Math.PI * 1.5 + turn * Math.PI * 2)
+  ctx.lineWidth = lineW
+  ctx.lineCap = 'round'
+  ctx.strokeStyle = ringColor.value
+  ctx.stroke()
+  // #endif
 }
 
 function tick(): void {
   const p = easeOutCubic((Date.now() - animStart) / RING_MS)
   progress.value = p
-  if (ringCtx != null) {
-    drawRing()
-  } else {
-    // 异步容错补测
+  if (!readyFired) {
     initCanvasMp()
     // #ifdef APP
     onCanvasReady()
     // #endif
   }
-  if (p >= 1) {
+  drawRing()
+  if (p >= 1 && ringCtx != null) {
     clearInterval(ringTimer)
     ringTimer = 0
     drawRing()
@@ -199,6 +246,9 @@ function clearTimers(): void {
   if (exitTimer != 0) { clearInterval(exitTimer); exitTimer = 0 }
   if (closeTimer != 0) { clearInterval(closeTimer); closeTimer = 0 }
   if (activeTimer != 0) { clearTimeout(activeTimer); activeTimer = 0 }
+  if (canvasRetry1 != 0) { clearTimeout(canvasRetry1); canvasRetry1 = 0 }
+  if (canvasRetry2 != 0) { clearTimeout(canvasRetry2); canvasRetry2 = 0 }
+  if (canvasRetry3 != 0) { clearTimeout(canvasRetry3); canvasRetry3 = 0 }
 }
 
 /** 离场结束，兜底同步父级关闭态 */
@@ -236,23 +286,72 @@ watch(
   (v: boolean) => {
     clearTimers()
     if (v) {
+      // Force new DOM node creation to avoid stale canvas context
+      canvasKey++
       render.value = true
+      readyFired = false
+      ringCtx = null
       nextTick(() => {
         initCanvasMp()
+        // #ifdef APP
+        onCanvasReady()
+        // #endif
       })
       activeTimer = setTimeout(() => {
         active.value = true
         activeTimer = 0
       }, 50) as unknown as number
       open()
+      // Multi-round canvas init retries for Vapor bytecode timing
+      canvasRetry1 = setTimeout(() => {
+        if (!readyFired && render.value) {
+          initCanvasMp()
+          // #ifdef APP
+          onCanvasReady()
+          // #endif
+        }
+        canvasRetry1 = 0
+      }, 200) as unknown as number
+      canvasRetry2 = setTimeout(() => {
+        if (!readyFired && render.value) {
+          initCanvasMp()
+          // #ifdef APP
+          onCanvasReady()
+          // #endif
+        }
+        canvasRetry2 = 0
+      }, 400) as unknown as number
+      canvasRetry3 = setTimeout(() => {
+        if (!readyFired && render.value) {
+          initCanvasMp()
+          // #ifdef APP
+          onCanvasReady()
+          // #endif
+        }
+        canvasRetry3 = 0
+      }, 600) as unknown as number
     } else {
       progress.value = 0
       exiting.value = false
       active.value = false
       render.value = false
+      readyFired = false
+      ringCtx = null
     }
   }
 )
+
+onMounted(() => {
+  // Fallback for initial mount (already covered by watch+retries, kept as safety net)
+  setTimeout(() => {
+    if (!readyFired && render.value) {
+      initCanvasMp()
+      // #ifdef APP
+      onCanvasReady()
+      // #endif
+    }
+  }, 800)
+})
 
 onUnmounted(() => { clearTimers() })
 </script>
@@ -288,9 +387,12 @@ onUnmounted(() => { clearTimers() })
   flex-shrink: 0;
   transform: scale(0.9);
   opacity: 0;
+  /* #ifdef MP-WEIXIN */
+  /* 逗号多值 transition 在原生渲染为非法语法，仅小程序端启用 */
   transition-property: transform, opacity;
   transition-duration: 400ms, 220ms;
   transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1), ease;
+  /* #endif */
 }
 .sb-badge-active {
   transform: scale(1);
@@ -299,9 +401,24 @@ onUnmounted(() => { clearTimers() })
 .sb-badge-out {
   transform: scale(0.94);
   opacity: 0;
+  /* #ifdef MP-WEIXIN */
   transition-property: transform, opacity;
   transition-duration: 220ms;
   transition-timing-function: ease;
+  /* #endif */
+}
+
+/* —— 环形底轨：与画布进度弧同心同宽（中心线半径 128rpx / 线宽 36rpx） —— */
+.sb-track {
+  position: absolute;
+  left: 118rpx;
+  top: 46rpx;
+  width: 292rpx;
+  height: 292rpx;
+  border-width: 36rpx;
+  border-style: solid;
+  border-color: rgba(31, 191, 143, 0.16);
+  border-radius: 146rpx;
 }
 
 /* —— 环形画布：正中精准定位 —— */
