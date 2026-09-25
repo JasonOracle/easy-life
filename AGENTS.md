@@ -34,7 +34,7 @@
   - 圆角 card 20 ／ chip 18 ／ sheet 34；字号 hero 46 ／ title 17 ／ section 15.5 ／ body 13.5 ／ caption 12
 - 小字（≤15px）必须用 `mint-deep #0A7A5C`，因为 `#1FBF8F` 在白底只有 2.3:1 对比度
 - **玻璃面（TabBar）**：三 Tab 悬浮液态玻璃胶囊。参数见 `design/DesignTokens.md` §7。（决策推演见 `docs/decisions/ADR-001-tabbar-glass-capsule.md`）
-- **深色模式**：仅个人中心＋设置两页随动，临时色板。（决策推演见 `docs/decisions/ADR-005-dark-mode-scope.md`）
+- **深色模式**：**全 App 逐元素随动**，不再是「仅个人中心＋设置两页」。7 个业务页面＋8 个组件全部接 `composables/useTheme.ts`（仅 `pages/probe/LiquidProbe` 探针与 `BottleLiquid` 画布引擎例外），由设置页开关手动切换（**不跟随系统**）。色板以 `design/DesignTokens.md` §8 的「三主题 × 亮暗 ＝ 6 档 × 20 角色」矩阵为唯一事实来源，经 `paletteFor()` 查表后以行内 `:style` 逐元素绑定（uni-app x 原生端无可靠层叠与 CSS 变量通道，写死 hex 即为设计债）；暗态图标走 `toolchain/gen_theme_variants.py` 产出的 `_dark` 变体
 - **页底预留**：方案 A 动态安全区全避让（无小白条 92px / 有小白条 calc(82px + env())）
 ### 交互
 - **每个交互点击都要有反馈**：动画 + 触觉 + 音效，三选一不可省
@@ -91,6 +91,7 @@
 2. **第二步：校准 `AGENTS.md`（架构与实现规范）**
    - 定位：项目技术宪法
    - 动作：确认技术栈、核心约束、目录结构与当前状态一致
+   - **组件合同 / 存储键 / 路由表 / 类名前缀 / 平台坑位**：详见 `project-map.md`（AI 专用结构事实，半自动再生）
 3. **第三步：按需查阅辅助文档**
    - `docs/PRD.md`（产品需求）：作为原始业务愿景参考
    - `docs/Review.md`（评审复盘）：作为决策依据参考
@@ -396,7 +397,7 @@ app/src/
 - [x] **已完成（2026-09-23）：全工程 UTS 语法合规与抗坑加固** —— 清理所有组件中的自闭合标签（`<input></input>`, `<AddFood></AddFood>`）；修复 `GoalModal.uvue` 缺失的根视图闭合标签；修复 `PrivacyDialog.uvue` 废弃属性与不兼容伪类。
 - [x] **已完成（2026-09-22，Boss 五条拍板）：TabBar 液态玻璃重构** —— 两 Tab 通栏 → **三 Tab 悬浮胶囊＋会跑的选中气泡**（四关键帧，MP 端 CSS transition）；Records 升一级 Tab（删返回钮、入口改 `redirectTo`）；#29 的 fade 渐显**整条废弃**；页底预留 40 → **78**；6 色值＋几何入 `DesignTokens.md` §7。小程序端验收（三格换页／暗态／四关键帧逐值吻合，证据见 `docs/progress.md` 同日前端进度与 `debug/shots/tab8~13*.png`）
 - [x] **已完成（2026-09-22，Boss 定稿）：浅色态「气泡隐身」修正** —— 胶囊底 88%→**60%**、气泡加白 60% 1px 描边（折射亮边）＋ 投影 `0 4 12 rgba(0,0,0,.06)`（悬浮高度差）；暗态与 low 降级档未动。验收＝三页浅底截图 ＋ 暗态回归 `debug/shots/f_prof_dark.png`
-- [ ] **暗态染色图标未产出**（深色模式下仍用浅底那套矢量图标，需专门出暗态版本）
+- [x] **已完成（2026-09-25）：暗态／多主题染色图标产出** —— `toolchain/gen_theme_variants.py` 以主绿锚点 `#58B984` 做全库同一 delta 的色相旋转，为 53 张可染色底稿各产出 `_dark`／`_ocean`／`_ocean_dark`／`_lavender`／`_lavender_dark` 五档变体（磁盘共 161 份带后缀资产，含 TabBar 三图标及其 `_sel` 态），并生成运行时白名单 `app/composables/themeAssetList.ts`（自动生成禁手改）；页面经 `themeAsset(accent, dark, src)` 查表替换，**未登记的资产原样回落底稿**（App 端引用缺失资源是静默空白图标、零报错）。语义色资产（超标橙红／删除红／火焰橙）与无彩稿按判定规则整体跳过，不做「只转一半」的破坏性改写。三主题 × 亮暗矩阵已安卓真机验收
 - [ ] **App／Web 端真机回归**：气泡动画的 **Worklet 实现**（现仅 MP 端 CSS transition，App 端阶段跳变＋TODO）、`backdrop-filter` 原生端支持度（未验，代码用 `#ifdef MP-WEIXIN` 包住）
 - [ ] **p348–p353 六条后补食物的图标是 92×92**（其余 353−6＝347 张为 512×512），且 `assets/icons-gen/` 里没有它们的原始 PNG。要提清晰度须跑 `gen_icons.py`（花生图额度）→ **等 Boss 拍板**
 - [ ] `toolchain/gen_tab_icons.py` 现无任何文档/脚本引用（疑似一次性工具）→ 去留待 Boss
