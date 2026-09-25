@@ -1,5 +1,18 @@
 <!--
   [变更日志]
+  修改时间：2026-09-26
+  AI模型：CodeBuddy (GLM)
+  修改内容：[§3 字号正式重写为 Typography v2 —— 来源由「Ardot 变量集导出」改为「反向测绘当前实施事实」
+    （207 条 font-size 规则 / 31 档 / 16 个 .uvue，稿面口径 稿面 1pt@375 = 代码 2rpx）。
+    Boss 已拍板五项：①Body 26 / Body Strong 28 / Body Small 24 / Caption 22，旧 body 27rpx 退役但代码不动、
+    登记为 Input Text；②Micro 19 / Micro Dense 18 / Micro Tight 17 三档并存不统一；③34 固定为 Title 家族，
+    35＝Stat Number·DayDetail 与 36＝Stat Number·Profile 暂时并存（P2 Backlog）；④104rpx＝Hero XL，
+    scope: Home only，已有真机验收，禁止降为 92；⑤采纳 Unit Modifier（派生 + ±2rpx 容差 + Exception 登记）。
+    本章分层为 A 正式全局 / B Component-specific / C 不进入 Typography（Glyph・Chart・Modifier）。
+    **本轮 .uvue 字号实际改动 = 0**；§1 颜色 / §2 圆角 / §4 / §5 / §6 / §7 / §8 及附录均未改动]
+-->
+<!--
+  [变更日志]
   修改时间：2026-09-22
   AI模型：Qoder (Claude)
   修改内容：[§7.2 浅色态材质定稿修正（Boss 拍板「不接受气泡隐身」）：胶囊底 88% → **60%**（88% 系稿面文字标注漏改）；
@@ -68,15 +81,104 @@
 | `radius-chip` | `18px` | 标签 / chip |
 | `radius-sheet` | `34px` | 底部 Sheet |
 
-## 3. 字号（5 个）
+## 3. 字号（Typography v2 · 2026-09-26 定稿）
 
-| Token | 值 | 用途 |
+> **本章自 v2 起不再是「Ardot 变量集导出值」，而是反向测绘得到的「当前实施事实」。**
+> 测绘口径：`app/**/*.uvue` 的 `<style>` 块，共 **207 条 `font-size` 规则 / 31 个不同字号 / 16 个文件**；
+> 稿面对照口径 `稿面 1pt @375 = 代码 2rpx`（Pencil Home / Profile / Records / DayDetail 四板可读）。
+> 旧导出值保留在文末附录「Ardot 变量集原始导出（供核对）」，不删不改，仅作历史追溯。
+>
+> ⚠️ **本章的作用是「登记」，不是「规范」。** v2 定稿时**未修改任何 `.uvue` 字号（实际改动 = 0）**。
+> 凡代码中与本章登记值不同者，**以代码现有值为准**，登记为 Component-specific 或 Exception。
+> **严禁因为「不符合本章」而直接改代码** —— 这正是 v1（5 档）造成的误判来源。
+>
+> 🔒 **单位换算**：`1px = 2rpx`（即 46px = 92rpx）。下表统一以 `rpx（px）` 双写。
+
+### 3.1 A · 正式全局 Token（跨页面复用同一语义）
+
+| 分类 | Token | rpx | px | 现状使用位置 | 稿面证据 |
+|---|---|---:|---:|---|---|
+| Display | `type-display-hero` | 92 | 46 | `Profile.bignum` / `DayDetail.dd-bignum` / `GoalModal.gm-bignum` / `Detail.ec-cal-num`（4 文件，对象＝当日总量） | ✔ 双板 45.5pt |
+| Title | `type-title-page` | 48 | 24 | `Home.title`「轻律生活」（单点，但语义唯一） | ✔ 23.8pt |
+| Title | `type-title-screen` | 38 | 19 | `Records.lr-title` / `DayDetail.dd-title` / `Settings.hd-title`（＋`Home.remain-label`、`Home.remain-unit`） | ✔ |
+| Title | `type-title-nav` | 34 | 17 | `*-nav-title` **跨 4 页一致**，＋`Home.meal-section-title`、`GoalModal.gm-title`、`AddFood.food-name`、`Home.meal-name`、`DayDetail.dd-meal-num`（10 处 / 7 文件） | ✔ |
+| Title | `type-title-card` | 31 | 15.5 | `FoodPicker.fp-row-name`、`AddFood.form-label`、`Detail.ec-card-title` 等卡片标题（6 处） | 间接 |
+| Title | `type-title-block` | 30 | 15 | `DayDetail.dd-sec` / `Settings.sec-title` / `Home.meal-kcal` / `Home.hm-macro-val` / `GoalModal.gm-qnum` / `Detail.ec-cal-unit` / `AddFood.confirm-text`（9 处 / 6 文件） | 间接 |
+| Body | `type-body-strong` | 28 | 14 | `Records.lr-mkcal` / `lr-mlabel`、`Profile.rec-num` / `ring-pct`、`Settings.row-title` / `danger-text`、`Dialog.dialog-text`（18 处 / 8 文件，语义＝数值・强调・行标题） | ✔ 14pt |
+| Body | `type-body` | 26 | 13 | `Home.subtitle` / `meal-row-name`、`DayDetail.dd-row-name`、`Records.lr-sum-date`、`OptionTray.opt-name`、`Profile.card-title`（**21 处 / 12 文件**，语义＝列表正文） | ✔✔ 双板 13pt |
+| Body | `type-body-sm` | 24 | 12 | `Tabbar.tb-label`、`FoodPicker.fp-row-sub`、`AddFood.change-text`、`GoalModal.gm-sub`、`DayDetail.dd-empty-txt`（**25 处 / 13 文件**） | ✔✔ |
+| Body | `type-caption` | 22 | 11 | `Home.hm-macro-cap`、`Records.lr-wd` / `lr-sub`、`OptionTray.opt-sub`、`Detail.ec-guide-text`、`Settings.hd-sub`（20 处 / 10 文件） | ✔✔ |
+| Micro | `type-micro` | 19 | 9.5 | `DayDetail.dd-plabel` / `dd-punit` / `dd-stat-title`、`Records.lr-sum-in` / `lr-overtxt` | ✔ |
+| Micro | `type-micro-dense` | 18 | 9 | `Profile` 全部 7 条（`stat-lbl` / `week-lbl` / `rec-unit` / `bar-val-over` …，页内自洽） | ✔ 9pt × 7 逐条对应 |
+| Micro | `type-micro-tight` | 17 | 8.5 | `Records.lr-mtime` / `lr-mcount`、`DayDetail.dd-stat-lbl` / `dd-overtxt` | ✔ |
+
+**旧 5 档 Token 去向（追溯用）**
+
+| 旧 Token | 值 | v2 处置 |
+|---|---:|---|
+| `type-hero` | 46px = 92rpx | ✅ **仍然有效** → 继承为 `type-display-hero` |
+| `type-title` | 17px = 34rpx | ⚠ **语义已变窄** → 改名 `type-title-nav`（只覆盖导航栏标题，未覆盖页面主标题）；真・页面标题另设 `Page 48` / `Screen 38` |
+| `type-section` | 15.5px = 31rpx | ⚠ **语义已变窄** → 改名 `type-title-card`；通用分节标题实际主力是 `Block 30` / `Nav 34` |
+| `type-body` | 13.5px = 27rpx | ❌ **退役** → 正文由 `26rpx` 接任；27rpx 转 Component-specific `type-input-text`（代码值不动） |
+| `type-caption` | 12px = 24rpx | ⚠ **语义拆分** → 旧值成为 `type-body-sm 24`；真正的 caption 由 **22rpx** 新设 |
+
+### 3.2 B · Component-specific Token（有稳定语义，但不跨页复用）
+
+| Token | rpx | px | scope | 备注 |
+|---|---:|---:|---|---|
+| `type-hero-xl` | 104 | 52 | **Home only（page-private）** | 🔒 **冻结**：已有真机验收记录，**禁止因体系统一降为 92**。承载对象＝「剩余额度」，与 Hero＝「当日总量」是不同对象 |
+| `type-hero-number` | 72 | 36 | `AddFood.big-kcal` | |
+| `type-serving-number` | 68 | 34 | `CountStepper.capsule-num`、`SettleBadge.sb-big-num` | |
+| `type-stepper-number` | 60 | 30 | `CountStepper.capsule-input` / `capsule-num-small`、`FoodToast.ft-plus-num` | |
+| `type-records-hero` | 42 | 21 | `Records.lr-sum-num` | 稿面 21pt |
+| `type-stat-number` | 35 | 17.5 | `DayDetail.dd-stat-num` | 稿面 17.5pt × 3 逐项吻合 |
+| `type-stat-number-alt` | 36 | 18 | `Profile.stat-num` | ⚠ **P2 Backlog**：同一语义角色两值并存；稿面双板均为 35rpx，疑 Profile 侧 1rpx 漂移。**现阶段不改代码**（1rpx = 0.5 逻辑像素，无视觉证据） |
+| `type-tab-label` | 24 | 12 | `Tabbar.tb-label` | |
+| `type-ring-pct` | 29 | 14.5 | `DayDetail.dd-ring-pct`、`dd-bigunit` | Profile 同角色用 28（落在 Body Strong 带内） |
+| `type-ring-label` | 16 | 8 | `DayDetail.dd-ring-label`、`Profile.ring-lbl` | |
+| `type-input-text` | 27 | 13.5 | `FoodPicker.fp-search-input`、`Detail.ec-review-text` / `ec-hot-title`、`GoalModal.gm-tip-title` | **旧 `type-body` 值的继任。代码中的 27rpx 保持不动** —— 它是输入框的 comfortable 命中档，不是正文 |
+| `type-body-long` | 28 | 14 | `PrivacyDialog.dialog-text`（`lh 44rpx`，ratio 1.57） | 长段落；字号虽同 Body Strong，换档时必须单独考虑 |
+
+### 3.3 C · 不进入 Typography Token 的值
+
+| 项 | 值 | 为什么不进 Typography Token |
 |---|---|---|
-| `type-hero` | `46px` | 首页大数字 |
-| `type-title` | `17px` | 标题 |
-| `type-section` | `15.5px` | 分节标题 |
-| `type-body` | `13.5px` | 正文 |
-| `type-caption` | `12px` | 说明文字 |
+| **Glyph Scale** | 17 条装饰字符，跨 20–68rpx（`＋ − ✓ › ⌕ ✕ !` 及 emoji） | 是「视觉图标」而非文字，按其自身视觉尺寸档位管理。**注意 44rpx 整档只有一条 `Detail.ec-result-chev`（字符 `›`）**，该档在字号体系中不应存在 |
+| **Chart Axis** | 14rpx（7px） | `Profile.ax` / `ax-green` / `bar-val` / `target-tag-text` —— 纯图表刻度，稿面 7pt；**明确不并入正文体系** |
+| **Chart Label** | 16rpx（8px） | `Profile.bar-date`（柱状图日期） |
+| **Unit Modifier** | 派生值，见 3.4 | 单位字号随宿主数字变化，**不建静态字号 Token** |
+
+### 3.4 Modifier · 单位字号派生规则（机制，不是数值）
+
+```
+unit-size 由 host（相邻数字）档位派生，禁止直接书写固定字号：
+
+  host ≥ 92rpx        → unit 28rpx   （容差 27–30）
+  host 60–72rpx       → unit 26rpx   （容差 22–28）
+  host 22–42rpx       → unit 19rpx   （容差 16–20）
+  host ≤ 21rpx        → 与 host 同字（inline）
+
+  · 容差规则：±2rpx 以内可按版面需要调整；越出必须登记为 Exception
+  · 现状核对：全项目 15 处单位字号中，14 处落在上述容差带内
+  · 禁止新增 `kcal-unit` / `unit` / `unit-sm` 之类的独立字号 Token
+```
+
+**Exception 登记（唯一一处）**
+
+| 值 | 位置 | 理由 |
+|---|---|---|
+| `Home.remain-unit` 38rpx | `Home.remain-unit` | 属 **Hero XL 组合构图**（连同 `.remain-label 38rpx`、`.remain-num` 的 `lh 116rpx` 一并冻结），不是普通「单位」；**保持不变** |
+
+### 3.5 未登记值说明（防止后人误读为 Bug）
+
+代码中还有 **25 / 23 / 21 / 20rpx** 四档（共 24 条规则）未进入本章。它们均落在相邻正式 Token 的
+**±2rpx 容差带内**（Body 26 / Caption 22 / Body Small 24 / Micro 19），属版面局部微调，
+**现阶段不动**；未来重绘稿面时可自然收敛。
+
+### 3.6 已知未 Token 化的维度（本章只记录事实，不处理）
+
+- **`line-height`**：207 条字号规则中仅 **19 条（9%）** 声明行高；同为 92rpx 的 4 处 lh 分别为 `96 / 100 / 110 / 112` —— **纵向节奏尚未 token 化**。
+- **`font-weight`**：未声明 106 条 / `bold` 79 条 / `700` 16 条 / `800` 4 条 / `normal` 2 条 —— `bold` 与 `700` 数值同义却两种写法。
 
 ## 4. 文字/背景分级规则（重要）
 

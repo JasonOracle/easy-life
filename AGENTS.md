@@ -20,7 +20,7 @@
 | 状态管理 | Pinia |
 | 本地存储 | uni-app x 原生本地存储 |
 | 数据处理 | Python（toolchain/） |
-| 设计工具 | Pencil（当前视觉准绳）+ Figma/Pixso（外部）<br>_注：Ardot 已于 2026-09-21 废止，仅作为早期规格的历史参考。_ |
+| 设计工具 | Pencil（视觉设计与视觉尺度**取证**依据）+ Figma/Pixso（外部）<br>_注：Ardot 已于 2026-09-21 废止，仅作为早期规格的历史参考。**职责边界见「防幻觉铁律／2. 设计幻觉 · 设计基准分工」** —— 它是取证依据，不是实现细节的无条件唯一真相。_ |
 
 ## 核心约束
 
@@ -31,7 +31,11 @@
   - 页面底 bg `#F2FAF5`，超标用珊瑚 `#FF9E7D`（不用红），接近上限用琥珀 `#E8B54D`
   - 文字三级：label-1 `#0A4F3D` ／ label-2 `#0F4F3D`@60% ／ label-3 `#0F4F3D`@34%
   - 玻璃底 glass-bg `#FFFFFF`@74%（**带透明度，实现时不能丢 alpha**）
-  - 圆角 card 20 ／ chip 18 ／ sheet 34；字号 hero 46 ／ title 17 ／ section 15.5 ／ body 13.5 ／ caption 12
+  - 圆角 card 20 ／ chip 18 ／ sheet 34（单位 px，`1px = 2rpx`）
+  - **字号以 `design/DesignTokens.md` §3「Typography v2」（2026-09-26 定稿）为唯一事实来源**。该节由**反向测绘当前实施事实**得出（207 条 `font-size` 规则 / 31 档 / 16 个 `.uvue`，口径 `稿面 1pt@375 = 2rpx`），作用是**登记而非规范**：代码值与登记值不同时**以代码为准**、登记为 Component-specific，**严禁据文档反向修改代码字号**
+    - **全局 Token（rpx／px）**：Hero 92／46 · Page Title 48／24 · Screen Title 38／19 · Nav Title 34／17 · Card Title 31／15.5 · Block Title 30／15 · Body Strong 28／14 · **Body 26／13** · Body Small 24／12 · **Caption 22／11** · Micro 19／9.5 · Micro Dense 18／9 · Micro Tight 17／8.5
+    - **Component-specific（不可跨页复用）**：**Hero XL 104rpx ＝ Home 私有，已真机验收冻结，禁止因体系统一降为 92** · Hero Number 72 · Serving 68 · Stepper 60 · Records Hero 42 · Stat Number **35(DayDetail)／36(Profile) 并存，P2 待稿面裁定** · Tab Label 24 · Ring Pct 29 · Ring Label 16 · Input Text 27 · Body Long 28
+    - **旧五阶去向（追溯）**：`hero 46` ＝ 今 `Hero 92rpx` ｜ `title 17` → 语义变窄，改名 **`Nav Title 34rpx`** ｜ `section 15.5` → 对应今 **`Card Title 31rpx`** ｜ **`body 13.5`(27rpx) 已退役，由 `Body 26rpx` 接任**（代码中仍在用 27rpx 的输入框等不作迁移，登记为 Input Text） ｜ `caption 12` → 对应今 **`Body Small 24rpx`**，而当前真正的 `Caption` 是 **`22rpx`**
 - 小字（≤15px）必须用 `mint-deep #0A7A5C`，因为 `#1FBF8F` 在白底只有 2.3:1 对比度
 - **玻璃面（TabBar）**：三 Tab 悬浮液态玻璃胶囊。参数见 `design/DesignTokens.md` §7。（决策推演见 `docs/decisions/ADR-001-tabbar-glass-capsule.md`）
 - **深色模式**：**全 App 逐元素随动**，不再是「仅个人中心＋设置两页」。7 个业务页面＋8 个组件全部接 `composables/useTheme.ts`（仅 `pages/probe/LiquidProbe` 探针与 `BottleLiquid` 画布引擎例外），由设置页开关手动切换（**不跟随系统**）。色板以 `design/DesignTokens.md` §8 的「三主题 × 亮暗 ＝ 6 档 × 20 角色」矩阵为唯一事实来源，经 `paletteFor()` 查表后以行内 `:style` 逐元素绑定（uni-app x 原生端无可靠层叠与 CSS 变量通道，写死 hex 即为设计债）；暗态图标走 `toolchain/gen_theme_variants.py` 产出的 `_dark` 变体
@@ -257,7 +261,10 @@ $tok  = "<微信工具 设置→安全 里的 MCP Token>"
 - **不编品牌/品类**：v1.0 只有「奶茶」一个品类（Boss 已拍板）。不许 AI 自行追加咖啡/果汁/快餐等品类——哪怕「感觉用户会需要」。
 
 ### 2. 设计幻觉
-- **以 Pencil 设计稿 + 原型为唯一视觉准绳**：`app/prototype/CalTrack_Protoype.html`（Ardot 及其链接已于 2026-09-21 废止，不再作为参考）。
+- **设计基准分工（三层不得跨层取用）**：
+  - **视觉设计 / 视觉尺度取证** → 以 Pencil 设计稿 + 原型 `app/prototype/CalTrack_Protoype.html` 为准（Ardot 及其链接已于 2026-09-21 废止，不再作为参考）。稿面的作用是**取证依据**（用来核对字号、间距、色值「应当是多少」），**不是实现细节的无条件唯一真相**。
+  - **Typography / 字号体系** → 以 `design/DesignTokens.md` §3「Typography v2」的登记体系为准。该节以**当前代码实施事实**为登记来源，Pencil 稿面在其中只承担**字号证据**角色。
+  - **布局与实现状态** → 以**当前代码实际状态 + 最近人工验收结果**为准。**Pencil 布局已确认滞后于当前代码时（2026-09-25 审计结论），不得据此反向修改代码**——不因为稿里有旧布局，就把代码回退成旧布局。
 - **不在设计稿上的元素不许加**：设计稿里没有的 tab、按钮、卡片、动效，AI 不许「顺手补上」。觉得应该加 → 先问 Boss。
 - **不编色值**：色板已在 `AGENTS.md` 核心约束里固化，不许 AI 自行调一个「看起来差不多」的颜色。
 
