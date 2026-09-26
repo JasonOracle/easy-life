@@ -1,73 +1,73 @@
 <template>
-  <view class="page">
+  <view class="page" :style="{ backgroundColor: theme.bg, backgroundImage: pageGradient }">
     <!-- [变更日志] 2026-09-24: Header 简化为与日历页同源的纯净绿色渐变，移除 liquid_wave 矢量水波层 -->
     <!-- [变更日志] 2026-09-25: 记录行食物图接入百科页入口（携 foodId 跳 pages/encyclopedia/Detail） -->
     <!-- Header（与日历页顶栏同源的纯净绿色渐变） -->
-    <view class="dd-header">
+    <view class="dd-header" :style="headerStyle">
       <view :style="{ height: sbH + 'px' }"></view>
       <view class="dd-nav">
-        <image class="dd-back" :src="'/static/records/lr_back.svg'" mode="aspectFit" @click="goBack"></image>
-        <text class="dd-title">{{ headerTitle }}</text>
+        <image class="dd-back" :src="asset('records/lr_back.svg')" mode="aspectFit" @click="goBack"></image>
+        <text class="dd-title" :style="{ color: headerTitleColor }">{{ headerTitle }}</text>
       </view>
     </view>
 
     <!-- 今日热量卡 -->
-    <view class="dd-card">
+    <view class="dd-card" :style="{ backgroundColor: theme.card }">
       <view class="dd-card-head">
-        <image class="dd-flame" :src="'/static/profile/flame.svg'" mode="aspectFit"></image>
-        <text class="dd-card-title">{{ t('dd.today') }}</text>
-        <view class="dd-overpill" v-if="dayOver > 0">
-          <text class="dd-overtxt">{{ tf('rec.over', [dayOver.toString()]) }}</text>
+        <image class="dd-flame" :src="asset('profile/flame.svg')" mode="aspectFit"></image>
+        <text class="dd-card-title" :style="{ color: theme.ink1 }">{{ t('dd.today') }}</text>
+        <view class="dd-overpill" v-if="dayOver > 0" :style="{ backgroundColor: overpillFill }">
+          <text class="dd-overtxt" :style="{ color: overTextColor }">{{ tf('rec.over', [dayOver.toString()]) }}</text>
         </view>
       </view>
       <view class="dd-ring" :style="ringStyle">
-        <view class="dd-ring-hole"></view>
-        <text class="dd-ring-pct">{{ ringPct }}%</text>
-        <text class="dd-ring-label">{{ t('dd.ring') }}</text>
+        <view class="dd-ring-hole" :style="{ backgroundColor: theme.card }"></view>
+        <text class="dd-ring-pct" :style="{ color: theme.ink1 }">{{ ringPct }}%</text>
+        <text class="dd-ring-label" :style="{ color: theme.accentDeep }">{{ t('dd.ring') }}</text>
       </view>
       <view class="dd-bignum-row">
-        <text class="dd-bignum" :class="calStatus.textClass">{{ dayTotal }}</text>
-        <text class="dd-bigunit" :class="calStatus.textClass">kcal</text>
+        <text class="dd-bignum" :style="{ color: statusTextColor }">{{ dayTotal }}</text>
+        <text class="dd-bigunit" :style="{ color: statusUnitColor }">kcal</text>
       </view>
-      <view class="dd-track">
-        <view class="dd-fill" :class="calStatus.bgClass" :style="{ width: fillW + 'rpx' }"></view>
+      <view class="dd-track" :style="{ backgroundColor: theme.line }">
+        <view class="dd-fill" :style="barFillStyle"></view>
       </view>
       <view class="dd-prog-foot">
         <view class="dd-prog-left">
-          <text class="dd-plabel">{{ t('dd.ring') }}</text>
-          <text class="dd-pnum">{{ dayTotal }}</text>
-          <text class="dd-punit">kcal</text>
+          <text class="dd-plabel" :style="{ color: theme.ink2 }">{{ t('dd.ring') }}</text>
+          <text class="dd-pnum" :style="{ color: theme.ink1 }">{{ dayTotal }}</text>
+          <text class="dd-punit" :style="{ color: theme.ink3 }">kcal</text>
         </view>
         <view class="dd-prog-right">
-          <text class="dd-plabel">{{ t('dd.goal') }}</text>
-          <text class="dd-pnum dd-pnum-target">{{ goalVal }}</text>
-          <text class="dd-punit">kcal</text>
+          <text class="dd-plabel" :style="{ color: theme.ink2 }">{{ t('dd.goal') }}</text>
+          <text class="dd-pnum dd-pnum-target" :style="{ color: theme.ink2 }">{{ goalVal }}</text>
+          <text class="dd-punit" :style="{ color: theme.ink3 }">kcal</text>
         </view>
       </view>
-      <view class="dd-stat">
-        <text class="dd-stat-title">{{ t('dd.nutrition') }}</text>
+      <view class="dd-stat" :style="{ backgroundColor: theme.cardSoft }">
+        <text class="dd-stat-title" :style="{ color: theme.accentDeep }">{{ t('dd.nutrition') }}</text>
         <view class="dd-stat-row">
           <view class="dd-stat-col">
-            <image class="dd-mg" :src="'/static/home/macro_protein.svg'" mode="aspectFit"></image>
+            <image class="dd-mg" :src="asset('home/macro_protein.svg')" mode="aspectFit"></image>
             <view class="dd-stat-txt">
-              <text class="dd-stat-num">{{ dayProtein }}g</text>
-              <text class="dd-stat-lbl">{{ t('dd.protein') }}</text>
+              <text class="dd-stat-num" :style="{ color: theme.ink1 }">{{ dayProtein }}g</text>
+              <text class="dd-stat-lbl" :style="{ color: theme.ink3 }">{{ t('dd.protein') }}</text>
             </view>
           </view>
-          <view class="dd-stat-div"></view>
+          <view class="dd-stat-div" :style="{ backgroundColor: theme.line }"></view>
           <view class="dd-stat-col">
-            <image class="dd-mg" :src="'/static/home/macro_carb.svg'" mode="aspectFit"></image>
+            <image class="dd-mg" :src="asset('home/macro_carb.svg')" mode="aspectFit"></image>
             <view class="dd-stat-txt">
-              <text class="dd-stat-num">{{ dayCarb }}g</text>
-              <text class="dd-stat-lbl">{{ t('dd.carb') }}</text>
+              <text class="dd-stat-num" :style="{ color: theme.ink1 }">{{ dayCarb }}g</text>
+              <text class="dd-stat-lbl" :style="{ color: theme.ink3 }">{{ t('dd.carb') }}</text>
             </view>
           </view>
-          <view class="dd-stat-div"></view>
+          <view class="dd-stat-div" :style="{ backgroundColor: theme.line }"></view>
           <view class="dd-stat-col">
-            <image class="dd-mg" :src="'/static/home/macro_fat.svg'" mode="aspectFit"></image>
+            <image class="dd-mg" :src="asset('home/macro_fat.svg')" mode="aspectFit"></image>
             <view class="dd-stat-txt">
-              <text class="dd-stat-num">{{ dayFat }}g</text>
-              <text class="dd-stat-lbl">{{ t('dd.fat') }}</text>
+              <text class="dd-stat-num" :style="{ color: theme.ink1 }">{{ dayFat }}g</text>
+              <text class="dd-stat-lbl" :style="{ color: theme.ink3 }">{{ t('dd.fat') }}</text>
             </view>
           </view>
         </view>
@@ -76,27 +76,27 @@
 
     <!-- 餐次记录 -->
     <view class="dd-secrow">
-      <view class="dd-acc"></view>
-      <text class="dd-sec">{{ t('dd.meals') }}</text>
+      <view class="dd-acc" :style="{ backgroundColor: theme.accent }"></view>
+      <text class="dd-sec" :style="{ color: theme.ink1 }">{{ t('dd.meals') }}</text>
       <view class="dd-add" @click="openPicker">
-        <image class="dd-add-ic" :src="'/static/records/dd_add.svg'" mode="aspectFit"></image>
-        <text class="dd-add-txt">{{ t('dd.add') }}</text>
+        <image class="dd-add-ic" :src="asset('records/dd_add.svg')" mode="aspectFit"></image>
+        <text class="dd-add-txt" :style="{ color: theme.accentDeep }">{{ t('dd.add') }}</text>
       </view>
     </view>
-    <view class="dd-meal" v-for="(mealItem, mealIdx) in mealGroups" :key="mealIdx">
+    <view class="dd-meal" v-for="(mealItem, mealIdx) in mealGroups" :key="mealIdx" :style="{ backgroundColor: theme.card }">
       <view class="dd-meal-head">
-        <view class="dd-meal-circ">
-          <image class="dd-meal-ic" :src="mealItem.icon" mode="aspectFit"></image>
+        <view class="dd-meal-circ" :style="{ backgroundColor: theme.chip }">
+          <image class="dd-meal-ic" :src="asset(mealItem.icon)" mode="aspectFit"></image>
         </view>
-        <text class="dd-meal-name">{{ mealItem.name }}</text>
-        <text class="dd-meal-time" v-if="mealItem.time !== ''">{{ mealItem.time }}</text>
+        <text class="dd-meal-name" :style="{ color: theme.ink1 }">{{ mealItem.name }}</text>
+        <text class="dd-meal-time" :style="{ color: theme.ink3 }" v-if="mealItem.time !== ''">{{ mealItem.time }}</text>
         <view class="dd-meal-cal">
-          <text class="dd-meal-num">{{ mealItem.cal }}</text>
-          <text class="dd-meal-unit">kcal</text>
+          <text class="dd-meal-num" :style="{ color: theme.ink1 }">{{ mealItem.cal }}</text>
+          <text class="dd-meal-unit" :style="{ color: theme.ink3 }">kcal</text>
         </view>
       </view>
       <view v-if="mealItem.rows.length === 0" class="dd-empty">
-        <text class="dd-empty-txt">{{ t('dd.none') }}</text>
+        <text class="dd-empty-txt" :style="{ color: theme.ink3 }">{{ t('dd.none') }}</text>
       </view>
       <view
         v-else
@@ -106,20 +106,20 @@
         @longpress="confirmDelete(rowItem)"
       >
         <image class="dd-row-ph" :src="rowItem.img" mode="aspectFill" @click="openEncyclopedia(rowItem.img)"></image>
-        <text class="dd-row-name">{{ rowItem.name }}</text>
-        <text class="dd-row-portion">{{ rowItem.portion }}</text>
-        <text class="dd-row-kcal">{{ rowItem.kcal }} kcal</text>
+        <text class="dd-row-name" :style="{ color: theme.ink1 }">{{ rowItem.name }}</text>
+        <text class="dd-row-portion" :style="{ color: theme.ink3 }">{{ rowItem.portion }}</text>
+        <text class="dd-row-kcal" :style="{ color: theme.accentDeep }">{{ rowItem.kcal }} kcal</text>
       </view>
     </view>
 
     <!-- 今日饮食总结 -->
-    <view class="dd-band">
-      <view class="dd-band-circ">
-        <image class="dd-band-ic" :src="'/static/records/dd_sum.svg'" mode="aspectFit"></image>
+    <view class="dd-band" :style="{ backgroundColor: theme.card }">
+      <view class="dd-band-circ" :style="{ backgroundColor: theme.chip }">
+        <image class="dd-band-ic" :src="asset('records/dd_sum.svg')" mode="aspectFit"></image>
       </view>
       <view class="dd-band-txt">
-        <text class="dd-band-title">{{ t('dd.sumTitle') }}</text>
-        <text class="dd-band-sub">{{ t('dd.sumSub') }}</text>
+        <text class="dd-band-title" :style="{ color: theme.accentDeep }">{{ t('dd.sumTitle') }}</text>
+        <text class="dd-band-sub" :style="{ color: theme.ink2 }">{{ t('dd.sumSub') }}</text>
       </view>
     </view>
 
@@ -129,11 +129,11 @@
     <SettleBadge v-model:show="settleShow" :kcal="settleKcal" :after="settleAfter" :goal="goal.calorieGoal" :meal="settleMeal" ></SettleBadge>
 
     <!-- 常驻导航栏（#28：替代 P1 遮罩＋fx-back 两件套）：滚动跨阈后整栏出现＝末色底＋返回箭＋日期标题，三端生效 -->
-    <view v-if="scrolled" class="dd-nav-fixed" :style="{ height: navBarH + 'px', paddingTop: sbH + 'px' }">
+    <view v-if="scrolled" class="dd-nav-fixed" :style="navBarStyle">
       <view class="dd-nav-back" @click="goBack">
-        <image class="dd-nav-icon" :src="'/static/records/lr_back.svg'" mode="aspectFit"></image>
+        <image class="dd-nav-icon" :src="asset('records/lr_back.svg')" mode="aspectFit"></image>
       </view>
-      <text class="dd-nav-title">{{ headerTitle }}</text>
+      <text class="dd-nav-title" :style="{ color: navBarTitleColor }">{{ headerTitle }}</text>
     </view>
   </view>
 </template>
@@ -147,6 +147,7 @@ import type { FoodEntry } from '../../stores/food'
 import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import { foodIdFromImg } from '../../stores/encyclopedia'
 import { triggerHaptic } from '../../stores/settings'
+import { useTheme, themeAsset, FIXED_COLORS } from '../../composables/useTheme'
 import FoodPicker from '../../components/FoodPicker.uvue'
 import type { AddPayload } from '../../components/FoodPicker.uvue'
 import SettleBadge from '../../components/SettleBadge.uvue'
@@ -206,11 +207,65 @@ const ringPct = computed<number>(() => {
 
 const calStatus = computed(() => getCalorieStatus(dayTotal.value, goalVal.value))
 
+const { theme, isDark, accentId } = useTheme()
+
+/** 资产按 (accent, mode) 取五档变体；未登记底稿（语义色／无彩稿）自动回落原路径 */
+function asset(path: string): string {
+  return themeAsset(accentId.value, isDark.value, '/static/' + path)
+}
+
+/** 页底：浅态走 hero→bg 柔和渐变，暗态改纯色免脏底 */
+const pageGradient = computed((): string => isDark.value ? 'none' : 'linear-gradient(' + theme.value.heroBg + ', ' + theme.value.bg + ')')
+
+/** 品牌渐变头：浅态走该档 accent 三档渐变，暗态改 card 纯色（同首页／日历页既定处理） */
+const headerStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  if (isDark.value) {
+    st['background-color'] = theme.value.card
+  } else {
+    st['background-color'] = theme.value.accent
+    st['background-image'] = 'linear-gradient(' + theme.value.accent2 + ' 0%, ' + theme.value.accent + ' 60%, ' + theme.value.accentDeep + ' 100%)'
+  }
+  return st
+})
+const headerTitleColor = computed((): string => isDark.value ? theme.value.ink1 : theme.value.onAccent)
+
+/** 常驻导航栏＝滚动后与头图末色无缝接续的实底栏，几何与配色一并运行时下发 */
+const navBarStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  st['height'] = navBarH.value + 'px'
+  st['padding-top'] = sbH.value + 'px'
+  st['background-color'] = isDark.value ? theme.value.card : theme.value.accent
+  if (!isDark.value) st['box-shadow'] = '0 4rpx 20rpx rgba(10, 79, 61, 0.10)'
+  return st
+})
+const navBarTitleColor = computed((): string => isDark.value ? theme.value.ink1 : theme.value.onAccent)
+
+/** 绿档文字跟主题 ink 轴；接近上限／超标落全局语义色（§8.3 状态色不随主题轮值） */
+const statusTextColor = computed((): string => calStatus.value.type == 'green' ? theme.value.ink1 : calStatus.value.color)
+const statusUnitColor = computed((): string => calStatus.value.type == 'green' ? theme.value.ink2 : statusTextColor.value)
+
+/** 超标胶囊＝珊瑚语义色浅底，暗态改同色低透明度以免整块刺眼 */
+const overpillFill = computed((): string => isDark.value ? 'rgba(255, 158, 125, 0.18)' : 'rgba(255, 158, 125, 0.25)')
+const overTextColor = computed((): string => isDark.value ? FIXED_COLORS.statusCoral : '#FA543A')
+
+const barFillStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  st['width'] = fillW.value + 'rpx'
+  if (calStatus.value.type == 'green') {
+    st['background-color'] = theme.value.accent
+    st['background-image'] = 'linear-gradient(to right, ' + theme.value.accent2 + ', ' + theme.value.accent + ')'
+  } else {
+    st['background-color'] = calStatus.value.color
+  }
+  return st
+})
+
 /** 进度环：MP 端 conic-gradient（SettleBadge 同款通路），App 端 canvas 未接（真机待验，见 DayDetail.md） */
 const ringStyle = computed<any>(() => {
   const turn = (dayTotal.value > goalVal.value ? 1 : dayTotal.value / (goalVal.value > 0 ? goalVal.value : 1))
   return {
-    backgroundImage: `conic-gradient(from -90deg, ${calStatus.value.hex} 0turn, ${calStatus.value.hex} ${(turn * 0.9999).toString()}turn, #E5F1F0 ${(turn * 0.9999).toString()}turn)`,
+    backgroundImage: `conic-gradient(from -90deg, ${calStatus.value.color} 0turn, ${calStatus.value.color} ${(turn * 0.9999).toString()}turn, ${theme.value.line} ${(turn * 0.9999).toString()}turn)`,
   }
 })
 
@@ -241,10 +296,10 @@ interface MealGroup {
 }
 
 const MEAL_ICONS: Record<string, string> = {
-  breakfast: '/static/records/lr_meal_breakfast.svg',
-  lunch: '/static/records/lr_meal_lunch.svg',
-  dinner: '/static/records/lr_meal_dinner.svg',
-  snack: '/static/records/lr_meal_snack.svg',
+  breakfast: 'records/lr_meal_breakfast.svg',
+  lunch: 'records/lr_meal_lunch.svg',
+  dinner: 'records/lr_meal_dinner.svg',
+  snack: 'records/lr_meal_snack.svg',
 }
 
 const mealGroups = computed<MealGroup[]>(() => {
@@ -329,16 +384,12 @@ function goBack(): void {
 
 <style>
 .page {
-  background-color: #F6FCF9;
-  background-image: linear-gradient(#E2F5EC, #F6FCF9);
   flex: 1;
 }
 
 /* ===== Header（与日历页同源的纯净绿色平滑渐变） ===== */
 .dd-header {
   position: relative;
-  background-color: #29B385;
-  background-image: linear-gradient( #32D0A0 0%, #1FBF8F 60%, #159C72 100%);
   overflow: hidden;
   padding-bottom: 64rpx;
 }
@@ -355,7 +406,6 @@ function goBack(): void {
 .dd-title {
   font-size: 38rpx;
   font-weight: bold;
-  color: #FFFFFF;
   height: 52rpx;
   line-height: 52rpx;
   margin-left: 20rpx;
@@ -365,7 +415,6 @@ function goBack(): void {
 .dd-card {
   margin: -32rpx 28rpx 0 28rpx;
   height: 458rpx;
-  background-color: #FFFFFF;
   border-radius: 36rpx;
   flex-shrink: 0;
   position: relative;
@@ -383,21 +432,18 @@ function goBack(): void {
 .dd-card-title {
   font-size: 23rpx;
   font-weight: 700;
-  color: #002920;
   margin-left: 16rpx;
 }
 .dd-overpill {
   height: 28rpx;
   padding: 0 14rpx 0 16rpx;
   border-radius: 14rpx;
-  background-color: #FDF0ED;
   justify-content: center;
   margin-left: 16rpx;
 }
 .dd-overtxt {
   font-size: 17rpx;
   font-weight: bold;
-  color: #FA543A;
 }
 .dd-ring {
   position: absolute;
@@ -406,7 +452,6 @@ function goBack(): void {
   width: 144rpx;
   height: 144rpx;
   border-radius: 72rpx;
-  background-color: #E5F1F0;
   align-items: center;
 }
 .dd-ring-hole {
@@ -416,18 +461,15 @@ function goBack(): void {
   right: 8rpx;
   bottom: 8rpx;
   border-radius: 64rpx;
-  background-color: #FFFFFF;
 }
 .dd-ring-pct {
   font-size: 29rpx;
   font-weight: 700;
-  color: #003826;
   margin-top: 36rpx;
   z-index: 1;
 }
 .dd-ring-label {
   font-size: 16rpx;
-  color: #16A880;
   margin-top: 2rpx;
   z-index: 1;
 }
@@ -437,15 +479,13 @@ function goBack(): void {
   padding: 0 0 0 26rpx;
 }
 .dd-bignum {
-  font-size: 91rpx;
+  font-size: 92rpx;
   font-weight: 700;
-  color: #003428;
   line-height: 110rpx;
 }
 .dd-bigunit {
   font-size: 29rpx;
   font-weight: 700;
-  color: #00835F;
   margin-left: 10rpx;
   margin-bottom: 12rpx;
 }
@@ -453,13 +493,10 @@ function goBack(): void {
   margin: 28rpx 30rpx 0 28rpx;
   height: 18rpx;
   border-radius: 9rpx;
-  background-color: #E5F1F0;
 }
 .dd-fill {
   height: 18rpx;
   border-radius: 9rpx;
-  background-color: #23B391;
-  background-image: linear-gradient(#12A581, #23B391);
 }
 .dd-prog-foot {
   flex-direction: row;
@@ -479,34 +516,28 @@ function goBack(): void {
 .dd-plabel {
   font-size: 19rpx;
   font-weight: bold;
-  color: #4A6171;
 }
 .dd-pnum {
   font-size: 22rpx;
   font-weight: 700;
-  color: #00222B;
   margin-left: 12rpx;
 }
 .dd-pnum-target {
   font-weight: 400;
-  color: #1C4455;
 }
 .dd-punit {
   font-size: 19rpx;
-  color: #465F69;
   margin-left: 4rpx;
 }
 .dd-stat {
   margin: 24rpx 20rpx 0 20rpx;
   height: 152rpx;
   border-radius: 22rpx;
-  background-color: #F2F8F9;
   padding: 14rpx 24rpx 0 24rpx;
 }
 .dd-stat-title {
   font-size: 19rpx;
   font-weight: 700;
-  color: #0A7A5C;
 }
 .dd-stat-row {
   flex-direction: row;
@@ -529,18 +560,15 @@ function goBack(): void {
 .dd-stat-num {
   font-size: 35rpx;
   font-weight: 700;
-  color: #082731;
 }
 .dd-stat-lbl {
   font-size: 17rpx;
   font-weight: bold;
-  color: #5A7380;
   margin-top: 2rpx;
 }
 .dd-stat-div {
   width: 1px;
   height: 72rpx;
-  background-color: #E3EAEB;
 }
 
 /* ===== 餐次记录分区 ===== */
@@ -554,12 +582,10 @@ function goBack(): void {
   width: 6rpx;
   height: 28rpx;
   border-radius: 4rpx;
-  background-color: #0A7A5C;
 }
 .dd-sec {
   font-size: 30rpx;
   font-weight: 700;
-  color: #0F5B44;
   margin-left: 12rpx;
   flex: 1;
 }
@@ -574,14 +600,12 @@ function goBack(): void {
 .dd-add-txt {
   font-size: 23rpx;
   font-weight: bold;
-  color: #0A7A5C;
   margin-left: 6rpx;
 }
 
 /* ===== 餐次卡 347 r16（高随行数：122 + 46*(n-1)） ===== */
 .dd-meal {
   margin: 32rpx 28rpx 0 28rpx;
-  background-color: #FFFFFF;
   border-radius: 32rpx;
   padding-bottom: 42rpx;
   flex-shrink: 0;
@@ -596,7 +620,6 @@ function goBack(): void {
   width: 68rpx;
   height: 68rpx;
   border-radius: 34rpx;
-  background-color: #E7F7EF;
   justify-content: center;
   align-items: center;
 }
@@ -607,12 +630,10 @@ function goBack(): void {
 .dd-meal-name {
   font-size: 30rpx;
   font-weight: 700;
-  color: #0F5B44;
   margin-left: 20rpx;
 }
 .dd-meal-time {
   font-size: 23rpx;
-  color: #8FAEAF;
   margin-left: 16rpx;
   flex: 1;
 }
@@ -623,12 +644,10 @@ function goBack(): void {
 .dd-meal-num {
   font-size: 34rpx;
   font-weight: 800;
-  color: #0A5A40;
 }
 .dd-meal-unit {
   font-size: 19rpx;
   font-weight: bold;
-  color: #8FAEAF;
   margin-left: 6rpx;
   margin-bottom: 4rpx;
 }
@@ -640,7 +659,6 @@ function goBack(): void {
 }
 .dd-empty-txt {
   font-size: 24rpx;
-  color: #8FAEAF;
 }
 .dd-row {
   flex-direction: row;
@@ -657,19 +675,16 @@ function goBack(): void {
 .dd-row-name {
   font-size: 26rpx;
   font-weight: bold;
-  color: #0F5B44;
   margin-left: 20rpx;
 }
 .dd-row-portion {
   font-size: 22rpx;
-  color: #8FAEAF;
   margin-left: 28rpx;
   flex: 1;
 }
 .dd-row-kcal {
   font-size: 25rpx;
   font-weight: bold;
-  color: #12A87B;
   margin-right: 28rpx;
 }
 
@@ -677,7 +692,6 @@ function goBack(): void {
 .dd-band {
   margin: 40rpx 28rpx 0 28rpx;
   height: 152rpx;
-  background-color: #FFFFFF;
   border-radius: 32rpx;
   flex-direction: row;
   align-items: center;
@@ -688,7 +702,6 @@ function goBack(): void {
   width: 80rpx;
   height: 80rpx;
   border-radius: 40rpx;
-  background-color: #E7F7EF;
   justify-content: center;
   align-items: center;
 }
@@ -702,11 +715,9 @@ function goBack(): void {
 .dd-band-title {
   font-size: 26rpx;
   font-weight: 700;
-  color: #0A7A5C;
 }
 .dd-band-sub {
   font-size: 22rpx;
-  color: #46706B;
   margin-top: 6rpx;
 }
 .dd-bottom-space {
@@ -721,8 +732,6 @@ function goBack(): void {
   z-index: 45;
   flex-direction: row;
   align-items: center;
-  background-color: #39AD95;
-  box-shadow: 0 4rpx 20rpx rgba(10, 79, 61, 0.10);
 }
 .dd-nav-back {
   width: 88rpx;
@@ -738,6 +747,5 @@ function goBack(): void {
 .dd-nav-title {
   font-size: 34rpx;
   font-weight: bold;
-  color: #FFFFFF;
 }
 </style>

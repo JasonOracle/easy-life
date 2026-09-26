@@ -1,17 +1,18 @@
 
 <template>
   <view class="ft-mask" v-if="show" @click="dismiss">
+    <!-- [变更日志] App 原生渲染无样式继承，toast 全部色值（卡面/强调底/文字/描边）逐元素绑 useTheme token，切主题与暗黑即时生效 -->
     <view class="ft-toast">
-      <view class="ft-cup-circle">
-        <text class="ft-cup-glyph">✓</text>
+      <view class="ft-cup-circle" :style="{ backgroundColor: theme.accent }">
+        <text class="ft-cup-glyph" :style="{ color: theme.onAccent }">✓</text>
       </view>
-      <view class="ft-toast-card">
-        <text class="ft-plus-num">+{{ kcal }}</text>
-        <text class="ft-plus-unit">kcal</text>
-        <text class="ft-sub">已加入{{ mealLabel }}</text>
+      <view class="ft-toast-card" :style="{ backgroundColor: theme.card }">
+        <text class="ft-plus-num" :style="{ color: theme.ink1 }">+{{ kcal }}</text>
+        <text class="ft-plus-unit" :style="{ color: theme.ink1 }">kcal</text>
+        <text class="ft-sub" :style="{ color: theme.ink3 }">{{ tf('ft.added', [mealLabel]) }}</text>
       </view>
-      <view class="ft-pill">
-        <text class="ft-pill-text">已添加</text>
+      <view class="ft-pill" :style="{ backgroundColor: theme.accent }">
+        <text class="ft-pill-text" :style="{ color: theme.onAccent }">{{ t('ft.done') }}</text>
       </view>
     </view>
   </view>
@@ -23,6 +24,8 @@ import { watch } from 'vue'
 import { onUnmounted } from 'vue'
 import { useDeviceStore } from '../stores/device'
 import { useSettingsStore } from '../stores/settings'
+import { t, tf } from '../composables/i18n'
+import { useTheme } from '../composables/useTheme'
 
 /**
  * 添加成功 toast（设计稿 弹窗③）。
@@ -41,6 +44,7 @@ const emit = defineEmits<{
 
 const device = useDeviceStore()
 const settings = useSettingsStore()
+const { theme } = useTheme()
 const timer = ref(0)
 
 function dismiss(): void {
@@ -89,19 +93,16 @@ onUnmounted(() => {
   width: 144rpx;
   height: 144rpx;
   border-radius: 72rpx;
-  background-color: #1FBF8F;
   justify-content: center;
   align-items: center;
   box-shadow: 0 16rpx 40rpx rgba(31, 191, 143, 0.4);
 }
 .ft-cup-glyph {
   font-size: 68rpx;
-  color: #FFFFFF;
 }
 .ft-toast-card {
   flex-direction: row;
   align-items: center;
-  background-color: #FFFFFF;
   border-radius: 36rpx;
   padding: 28rpx 44rpx;
   margin-top: 28rpx;
@@ -109,20 +110,16 @@ onUnmounted(() => {
 .ft-plus-num {
   font-size: 60rpx;
   font-weight: bold;
-  color: #0A4F3D;
 }
 .ft-plus-unit {
   font-size: 28rpx;
-  color: #0A4F3D;
   margin-left: 8rpx;
 }
 .ft-sub {
   font-size: 26rpx;
-  color: #73918B;
   margin-left: 20rpx;
 }
 .ft-pill {
-  background-color: #1FBF8F;
   border-radius: 28rpx;
   padding-left: 36rpx;
   padding-right: 36rpx;
@@ -132,6 +129,5 @@ onUnmounted(() => {
 }
 .ft-pill-text {
   font-size: 26rpx;
-  color: #FFFFFF;
 }
 </style>

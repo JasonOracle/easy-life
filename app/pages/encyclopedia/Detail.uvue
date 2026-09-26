@@ -175,7 +175,8 @@ const winW = uni.getSystemInfoSync().windowWidth
 const rpx = (v: number): number => v / 750 * winW
 const bodyH = ref<number>(winH - (sbH.value + rpx(280) + safeBottom))
 
-const currentId = ref(ALL_FOODS.length > 0 ? ALL_FOODS[0].id : '')
+// 空串起步：库内首条兜底会让「参数没接上」伪装成「显示了米饭」，零报错难查
+const currentId = ref('')
 const searchOpen = ref(false)
 const searchFocus = ref(false)
 const query = ref('')
@@ -452,8 +453,9 @@ function goBack(): void {
 }
 
 onLoad((options: OnLoadOptions) => {
+  // 深链 id 形如 pNNN（4 位），只按「能否查到条目」判定；长度校验会把有效 id 全判死
   const id = options['id'] ?? ''
-  if (id.length == 6) {
+  if (id.length > 0) {
     const f = getFoodById(id)
     if (f != null) currentId.value = id
   }

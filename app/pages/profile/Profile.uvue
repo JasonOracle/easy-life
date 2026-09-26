@@ -1,192 +1,192 @@
 
 <template>
-  <view class="page" :class="{ 'page-dark': dk }">
+  <view class="page" :style="{ backgroundColor: theme.bg }">
     <!-- [变更日志] 2026-09-24: 头图简化为与日历页顶栏同源的纯净绿色渐变，移除 liquid_wave 矢量水波层 -->
     <!-- 头图（与日历页顶栏同源的纯净绿色渐变） -->
-    <view class="header" :style="{ paddingTop: sbH + 'px' }">
+    <view class="header" :style="headerStyle">
       <view class="header-row">
         <view class="avatar-ring">
-          <image class="avatar" :src="'/static/profile/avatar.png'" mode="aspectFill"></image>
+          <image class="avatar" :src="asset('profile/avatar.png')" mode="aspectFill"></image>
         </view>
         <view class="header-text">
-          <text class="name">{{ user.name }}</text>
-          <text class="sub">{{ streakText }}</text>
+          <text class="name" :style="{ color: headerTitleColor }">{{ user.name }}</text>
+          <text class="sub" :style="{ color: headerSubColor }">{{ streakText }}</text>
         </view>
       </view>
     </view>
     <!-- 设置齿轮：挂在页面根上相对 .page 定位（小程序端 .header 内的 absolute 基准实测会偏移一个状态栏高度） -->
     <view class="gear-circle" :style="{ right: gearRight, top: gearTop }" @click="goSettings">
-      <image class="gear" :src="'/static/profile/gear.svg'" mode="aspectFit"></image>
+      <image class="gear" :src="asset('profile/gear.svg')" mode="aspectFit"></image>
     </view>
 
     <!-- 今日热量卡 -->
-    <view class="cal-card">
+    <view class="cal-card" :style="{ backgroundColor: theme.card }">
       <view class="cal-head">
-        <image class="cal-flame" :src="'/static/profile/flame.svg'" mode="aspectFit"></image>
-        <text class="cal-title">{{ t('pf.todayCal') }}</text>
-        <view class="pill">
-          <text class="pill-text">{{ remainCal > 0 ? t('pf.remain') : t('pf.over') }}</text>
+        <image class="cal-flame" :src="asset('profile/flame.svg')" mode="aspectFit"></image>
+        <text class="cal-title" :style="{ color: theme.ink1 }">{{ t('pf.todayCal') }}</text>
+        <view class="pill" :style="{ backgroundColor: theme.chip }">
+          <text class="pill-text" :style="{ color: theme.accentDeep }">{{ remainCal > 0 ? t('pf.remain') : t('pf.over') }}</text>
         </view>
       </view>
       <view class="ring" :style="ringStyleText">
-        <view class="ring-inner">
-          <text class="ring-pct">{{ progPct }}%</text>
-          <text class="ring-lbl">{{ t('pf.consumed') }}</text>
+        <view class="ring-inner" :style="{ backgroundColor: theme.card }">
+          <text class="ring-pct" :style="{ color: theme.ink1 }">{{ progPct }}%</text>
+          <text class="ring-lbl" :style="{ color: theme.ink3 }">{{ t('pf.consumed') }}</text>
         </view>
       </view>
       <view class="bignum-row">
-        <text class="bignum">{{ Math.abs(remainCal) }}</text>
-        <text class="bignum-unit">kcal</text>
+        <text class="bignum" :style="{ color: theme.ink1 }">{{ Math.abs(remainCal) }}</text>
+        <text class="bignum-unit" :style="{ color: theme.ink1 }">kcal</text>
       </view>
-      <view class="prog-track">
-        <view class="prog-fill" :style="'width: ' + progPct + '%; background-color: ' + calStatus.color + ';'"></view>
+      <view class="prog-track" :style="{ backgroundColor: theme.line }">
+        <view class="prog-fill" :style="progFillStyle"></view>
       </view>
       <view class="prog-row">
         <view class="pl-side">
-          <text class="pl-txt">{{ t('pf.consumed') }}</text>
-          <text class="pl-num">{{ food.totalCal }}</text>
-          <text class="pl-txt pl-txt2">kcal</text>
+          <text class="pl-txt" :style="{ color: theme.ink3 }">{{ t('pf.consumed') }}</text>
+          <text class="pl-num" :style="{ color: theme.ink1 }">{{ food.totalCal }}</text>
+          <text class="pl-txt pl-txt2" :style="{ color: theme.ink3 }">kcal</text>
         </view>
         <view class="pl-side pl-right">
-          <text class="pl-txt">{{ t('pf.goal') }}</text>
-          <text class="pl-num">{{ goal.calorieGoal }}</text>
-          <text class="pl-txt pl-txt2">kcal</text>
+          <text class="pl-txt" :style="{ color: theme.ink3 }">{{ t('pf.goal') }}</text>
+          <text class="pl-num" :style="{ color: theme.ink1 }">{{ goal.calorieGoal }}</text>
+          <text class="pl-txt pl-txt2" :style="{ color: theme.ink3 }">kcal</text>
         </view>
       </view>
-      <view class="stat-panel">
+      <view class="stat-panel" :style="{ backgroundColor: theme.cardSoft }">
         <view class="stat-col">
           <view class="stat-top">
-            <view class="stat-chip">
-              <image class="stat-ico" :src="'/static/profile/stat_target.svg'" mode="aspectFit"></image>
+            <view class="stat-chip" :style="{ backgroundColor: theme.chip }">
+              <image class="stat-ico" :src="asset('profile/stat_target.svg')" mode="aspectFit"></image>
             </view>
-            <text class="stat-num">{{ goal.calorieGoal }}</text>
+            <text class="stat-num" :style="{ color: theme.ink1 }">{{ goal.calorieGoal }}</text>
           </view>
-          <text class="stat-lbl">{{ t('pf.statGoal') }}</text>
+          <text class="stat-lbl" :style="{ color: theme.ink3 }">{{ t('pf.statGoal') }}</text>
         </view>
-        <view class="stat-div"></view>
+        <view class="stat-div" :style="{ backgroundColor: theme.line }"></view>
         <view class="stat-col">
           <view class="stat-top">
-            <view class="stat-chip">
-              <image class="stat-ico" :src="'/static/profile/stat_consumed.svg'" mode="aspectFit"></image>
+            <view class="stat-chip" :style="{ backgroundColor: theme.chip }">
+              <image class="stat-ico" :src="asset('profile/stat_consumed.svg')" mode="aspectFit"></image>
             </view>
-            <text class="stat-num">{{ food.totalCal }}</text>
+            <text class="stat-num" :style="{ color: theme.ink1 }">{{ food.totalCal }}</text>
           </view>
-          <text class="stat-lbl">{{ t('pf.statConsumed') }}</text>
+          <text class="stat-lbl" :style="{ color: theme.ink3 }">{{ t('pf.statConsumed') }}</text>
         </view>
-        <view class="stat-div"></view>
+        <view class="stat-div" :style="{ backgroundColor: theme.line }"></view>
         <view class="stat-col">
           <view class="stat-top">
-            <view class="stat-chip">
-              <image class="stat-ico" :src="'/static/profile/stat_remain.svg'" mode="aspectFit"></image>
+            <view class="stat-chip" :style="{ backgroundColor: theme.chip }">
+              <image class="stat-ico" :src="asset('profile/stat_remain.svg')" mode="aspectFit"></image>
             </view>
-            <text :class="remainCal > 0 ? 'stat-num-green' : 'stat-num-coral'">{{ displayRemainCal }}</text>
+            <text class="stat-num" :style="{ color: remainNumColor }">{{ displayRemainCal }}</text>
           </view>
-          <text class="stat-lbl">{{ t('pf.statRemain') }}</text>
+          <text class="stat-lbl" :style="{ color: theme.ink3 }">{{ t('pf.statRemain') }}</text>
         </view>
       </view>
       <!-- 达标 Banner：支持达标绿态与超额橙态状态机自适应 -->
-      <view class="banner" :class="bannerState.cardClass">
-        <view class="check-circle" :class="bannerState.circleClass">
-          <image v-if="bannerState.isOk" class="check" :src="'/static/profile/check_white.svg'" mode="aspectFit"></image>
+      <view class="banner" :style="{ backgroundColor: bannerFill }">
+        <view class="check-circle" :style="{ backgroundColor: bannerCircleFill }">
+          <image v-if="bannerState.isOk" class="check" :src="asset('profile/check_white.svg')" mode="aspectFit"></image>
           <text v-else class="banner-excl">!</text>
         </view>
         <view class="banner-text">
-          <text class="banner-title" :class="{ 'banner-title-over': !bannerState.isOk }">{{ bannerState.title }}</text>
-          <text class="banner-sub">{{ bannerState.sub }}</text>
+          <text class="banner-title" :style="{ color: bannerTitleColor }">{{ bannerState.title }}</text>
+          <text class="banner-sub" :style="{ color: theme.ink3 }">{{ bannerState.sub }}</text>
         </view>
-        <image class="banner-chev" :src="'/static/profile/chev_right.svg'" mode="aspectFit"></image>
+        <image class="banner-chev" :src="asset('profile/chev_right.svg')" mode="aspectFit"></image>
       </view>
     </view>
 
     <!-- 本周概览 -->
-    <view class="card week-card">
+    <view class="card week-card" :style="{ backgroundColor: theme.card }">
       <view class="card-head">
-        <text class="card-title">{{ t('pf.weekTitle') }}</text>
+        <text class="card-title" :style="{ color: theme.ink1 }">{{ t('pf.weekTitle') }}</text>
         <view class="head-right">
-          <text class="week-num">{{ weekOkCount }}/7</text>
-          <text class="week-lbl">{{ t('pf.weekLbl') }}</text>
-          <image class="chev-mini" :src="'/static/profile/chev_right.svg'" mode="aspectFit"></image>
+          <text class="week-num" :style="{ color: theme.accentDeep }">{{ weekOkCount }}/7</text>
+          <text class="week-lbl" :style="{ color: theme.accentDeep }">{{ t('pf.weekLbl') }}</text>
+          <image class="chev-mini" :src="asset('profile/chev_right.svg')" mode="aspectFit"></image>
         </view>
       </view>
       <view class="dots-row">
         <view class="dot-col" v-for="(dayItem, dayIdx) in weekDots" :key="dayIdx">
-          <view class="dot" :class="{ 'dot-empty': dayItem.state === 'none' }" :style="{ backgroundColor: dayItem.bg }">
-            <image v-if="dayItem.state === 'ok'" class="dot-check" :src="'/static/profile/check.svg'" mode="aspectFit"></image>
+          <view class="dot" :class="{ 'dot-empty': dayItem.state === 'none' }" :style="{ backgroundColor: dayItem.bg, borderColor: theme.line }">
+            <image v-if="dayItem.state === 'ok'" class="dot-check" :src="asset('profile/check.svg')" mode="aspectFit"></image>
             <text v-else-if="dayItem.state === 'over'" class="dot-excl">!</text>
           </view>
-          <text class="dot-lbl">{{ dayItem.lbl }}</text>
+          <text class="dot-lbl" :style="{ color: theme.ink3 }">{{ dayItem.lbl }}</text>
         </view>
       </view>
     </view>
 
     <!-- 热量趋势 -->
-    <view class="card trend-card">
+    <view class="card trend-card" :style="{ backgroundColor: theme.card }">
       <view class="card-head">
-        <image class="trend-icon" :src="'/static/profile/trend_icon.svg'" mode="aspectFit"></image>
-        <text class="card-title">{{ t('pf.trend') }}</text>
+        <image class="trend-icon" :src="asset('profile/trend_icon.svg')" mode="aspectFit"></image>
+        <text class="card-title" :style="{ color: theme.ink1 }">{{ t('pf.trend') }}</text>
         <view class="head-right">
-          <text class="view-all">{{ t('pf.viewAll') }}</text>
-          <image class="chev-mini" :src="'/static/profile/chev_right.svg'" mode="aspectFit"></image>
+          <text class="view-all" :style="{ color: theme.ink3 }">{{ t('pf.viewAll') }}</text>
+          <image class="chev-mini" :src="asset('profile/chev_right.svg')" mode="aspectFit"></image>
         </view>
       </view>
       <view class="chart">
         <view class="yaxis">
-          <text class="ax">2400</text>
-          <text class="ax-green">1800</text>
-          <text class="ax">1200</text>
-          <text class="ax">600</text>
-          <text class="ax">0</text>
+          <text class="ax" :style="{ color: theme.ink3 }">2400</text>
+          <text class="ax-green" :style="{ color: theme.accentDeep }">1800</text>
+          <text class="ax" :style="{ color: theme.ink3 }">1200</text>
+          <text class="ax" :style="{ color: theme.ink3 }">600</text>
+          <text class="ax" :style="{ color: theme.ink3 }">0</text>
         </view>
         <view class="bars-area">
-          <view class="target-line"></view>
+          <view class="target-line" :style="{ borderTopColor: theme.dashLine }"></view>
           <view class="bars-row">
             <view class="bar-col" v-for="(barItem, barIdx) in bars" :key="barIdx">
-              <text class="bar-val" :class="{ 'bar-val-over': barItem.over }">{{ barItem.val }}</text>
-              <view class="bar" :class="{ 'bar-over': barItem.over }" :style="{ height: barItem.h + 'rpx' }"></view>
-              <text class="bar-date">{{ barItem.date }}</text>
+              <text class="bar-val" :style="{ color: barValColor(barItem.over) }">{{ barItem.val }}</text>
+              <view class="bar" :style="{ height: barItem.h + 'rpx', backgroundColor: barFillColor(barItem.over) }"></view>
+              <text class="bar-date" :style="{ color: theme.ink3 }">{{ barItem.date }}</text>
             </view>
           </view>
           <view class="target-tag">
-            <text class="target-tag-text">{{ t('pf.goal') }}</text>
-            <text class="target-tag-text">{{ goal.calorieGoal }}</text>
+            <text class="target-tag-text" :style="{ color: theme.ink3 }">{{ t('pf.goal') }}</text>
+            <text class="target-tag-text" :style="{ color: theme.ink3 }">{{ goal.calorieGoal }}</text>
           </view>
         </view>
       </view>
     </view>
 
     <!-- 最近记录 -->
-    <view class="card rec-card">
+    <view class="card rec-card" :style="{ backgroundColor: theme.card }">
       <view class="card-head">
-        <text class="card-title">{{ t('pf.recent') }}</text>
+        <text class="card-title" :style="{ color: theme.ink1 }">{{ t('pf.recent') }}</text>
         <view class="head-right" @click="goRecords">
-          <text class="view-all">{{ t('pf.viewAll') }}</text>
-          <image class="chev-mini" :src="'/static/profile/chev_right.svg'" mode="aspectFit"></image>
+          <text class="view-all" :style="{ color: theme.ink3 }">{{ t('pf.viewAll') }}</text>
+          <image class="chev-mini" :src="asset('profile/chev_right.svg')" mode="aspectFit"></image>
         </view>
       </view>
       <view v-for="(recItem, recIdx) in records" :key="recIdx">
         <view class="rec-row">
           <view class="rec-left">
-            <text class="rec-date">{{ recItem.date }}</text>
-            <text class="rec-wday">{{ recItem.wday }}</text>
+            <text class="rec-date" :style="{ color: theme.ink1 }">{{ recItem.date }}</text>
+            <text class="rec-wday" :style="{ color: theme.ink3 }">{{ recItem.wday }}</text>
           </view>
           <view class="rec-right">
-            <text class="rec-num">{{ recItem.num }}</text>
-            <text class="rec-unit">kcal</text>
-            <view class="rec-badge" :class="{ 'rec-badge-over': recItem.over }">
-              <text class="rec-badge-text" :class="{ 'rec-badge-text-over': recItem.over }">{{ recItem.badge }}</text>
+            <text class="rec-num" :style="{ color: theme.ink1 }">{{ recItem.num }}</text>
+            <text class="rec-unit" :style="{ color: theme.ink3 }">kcal</text>
+            <view class="rec-badge" :style="{ backgroundColor: recBadgeFill(recItem.over) }">
+              <text class="rec-badge-text" :style="{ color: recBadgeTextColor(recItem.over) }">{{ recItem.badge }}</text>
             </view>
           </view>
-          <image class="chev-row" :src="recItem.chev" mode="aspectFit"></image>
+          <image class="chev-row" :src="asset(recItem.chev)" mode="aspectFit"></image>
         </view>
-        <view class="rec-div" v-if="recIdx < records.length - 1"></view>
+        <view class="rec-div" :style="{ backgroundColor: theme.line }" v-if="recIdx < records.length - 1"></view>
       </view>
     </view>
 
     <!-- 底部 Tab（共享组件，我的激活） -->
-    <Tabbar active="profile" :dark="dk" ></Tabbar>
+    <Tabbar active="profile" ></Tabbar>
 
     <!-- 滚动防穿透遮罩：页内内联 fixed 视图（StickyTop 组件实测双故障：遮罩不渲染＋宿主内渲染整页幻影副本） -->
-    <view v-if="scrolled" class="pf-st-mask" :style="{ height: sbH + 'px', backgroundColor: dk ? '#162924' : '#EEF7F4' }"></view>
+    <view v-if="scrolled" class="pf-st-mask" :style="{ height: sbH + 'px', backgroundColor: isDark ? theme.card : theme.bg }"></view>
   </view>
 </template>
 
@@ -202,6 +202,7 @@ import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import { useUserStore } from '../../stores/user'
 import { useSettingsStore } from '../../stores/settings'
 import { t, tf } from '../../composables/i18n'
+import { useTheme, themeAsset } from '../../composables/useTheme'
 
 /**
  * 接 store 读数（种子精确还原：历史 1950超+150/1720达/1580达；趋势 1580…1950/1368；
@@ -217,6 +218,28 @@ try {
 
 const settings = useSettingsStore()
 const dk = computed((): boolean => settings.darkMode)
+
+const { theme, isDark, accentId } = useTheme()
+
+/** 资产按 (accent, mode) 取五档变体；未登记底稿（语义色／无彩稿／png）自动回落原路径 */
+function asset(path: string): string {
+  return themeAsset(accentId.value, isDark.value, '/static/' + path)
+}
+
+/** 品牌渐变头：浅态走 accent 三档渐变，暗态改该档 card 纯色（同首页／日历页既定处理） */
+const headerStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  st['padding-top'] = sbH.toString() + 'px'
+  if (isDark.value) {
+    st['background-color'] = theme.value.card
+  } else {
+    st['background-color'] = theme.value.accent
+    st['background-image'] = 'linear-gradient(' + theme.value.accent2 + ' 0%, ' + theme.value.accent + ' 60%, ' + theme.value.accentDeep + ' 100%)'
+  }
+  return st
+})
+const headerTitleColor = computed((): string => isDark.value ? theme.value.ink1 : theme.value.onAccent)
+const headerSubColor = computed((): string => isDark.value ? theme.value.ink2 : 'rgba(255, 255, 255, 0.85)')
 
 // 滚动防穿透两态：跨阈值才翻一次，避免逐帧 setData
 const scrolled = ref<boolean>(false)
@@ -294,8 +317,18 @@ const ringStyleText = computed<string>(() => {
   if (progPct.value >= 100) {
     return 'background-color: ' + c + ';'
   }
-  return 'background-image: conic-gradient(' + c + ' 0% ' + progPct.value + '%, #E5F0EC ' + progPct.value + '% 100%);'
+  return 'background-image: conic-gradient(' + c + ' 0% ' + progPct.value + '%, ' + theme.value.line + ' ' + progPct.value + '% 100%);'
 })
+
+/** 进度条：绿档跟随 accent（§8.3 status-mint 与 accent 同轴），amber/coral 为固定语义色 */
+const progFillStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  st['width'] = progPct.value.toString() + '%'
+  st['background-color'] = calStatus.value.type == 'green' ? theme.value.accent : calStatus.value.color
+  return st
+})
+/** 剩余量数字：有余额＝accent-deep 强调字，已超额＝珊瑚语义色（原 .stat-num-coral 字面值） */
+const remainNumColor = computed((): string => remainCal.value > 0 ? theme.value.accentDeep : '#FF7043')
 
 /** 今日吃过的有效餐次数 */
 const activeMealCount = computed<number>(() => {
@@ -315,8 +348,6 @@ const bannerState = computed(() => {
       type: 'over',
       title: t('pf.bannerOverT'),
       sub: t('pf.bannerOverS'),
-      cardClass: 'banner-over',
-      circleClass: 'circle-orange',
       isOk: false,
     }
   }
@@ -325,8 +356,6 @@ const bannerState = computed(() => {
       type: 'ok',
       title: t('pf.bannerOkT'),
       sub: t('pf.bannerOkS'),
-      cardClass: 'banner-ok',
-      circleClass: 'circle-green',
       isOk: true,
     }
   }
@@ -334,11 +363,30 @@ const bannerState = computed(() => {
     type: 'pending',
     title: t('pf.bannerPendT'),
     sub: t('pf.bannerPendS'),
-    cardClass: 'banner-pending',
-    circleClass: 'circle-green',
     isOk: true,
   }
 })
+
+/** 超额＝珊瑚语义浅底（暗态降透明度免刺眼），其余＝card-soft 次级卡底 */
+const bannerFill = computed((): string => bannerState.value.type == 'over' ? (isDark.value ? 'rgba(255, 158, 125, 0.18)' : '#FFF2EC') : theme.value.cardSoft)
+const bannerCircleFill = computed((): string => bannerState.value.type == 'over' ? '#FF7043' : theme.value.accent)
+const bannerTitleColor = computed((): string => bannerState.value.type == 'over' ? '#D94826' : theme.value.accentDeep)
+
+/** 趋势柱／数值：正常档随主题走 accent 轴，超标档保留原珊瑚字面值 */
+function barFillColor(over: boolean): string {
+  return over ? '#FF7D5C' : theme.value.accent
+}
+function barValColor(over: boolean): string {
+  return over ? '#FA5C38' : theme.value.accentDeep
+}
+
+/** 最近记录徽章：达标态托底＝chip、文字＝accent-deep；超标态沿用原珊瑚对 */
+function recBadgeFill(over: boolean): string {
+  return over ? (isDark.value ? '#3A221C' : '#FDE9E4') : theme.value.chip
+}
+function recBadgeTextColor(over: boolean): string {
+  return over ? (isDark.value ? '#FF8266' : '#FA543A') : theme.value.accentDeep
+}
 
 /** 周几全名（getDay 0=周日）：zh 组「周X」，en 查 Mon..Sun，统一走 pf.dN 键 */
 function weekdayText(g: number): string {
@@ -360,7 +408,7 @@ type WeekDot = { state: string; bg: string; lbl: string }
 const weekDots = computed<WeekDot[]>(() => {
   return food.weekTotals.map((d, i) => ({
     state: d.total === 0 ? 'none' : (d.total <= goal.calorieGoal ? 'ok' : 'over'),
-    bg: d.total === 0 ? '#00000000' : (d.total <= goal.calorieGoal ? '#25AE8C' : '#FD6E4D'),
+    bg: d.total === 0 ? '#00000000' : (d.total <= goal.calorieGoal ? theme.value.accent : '#FD6E4D'),
     lbl: t('pf.w' + (i == 6 ? '0' : (i + 1).toString())),
   }))
 })
@@ -389,9 +437,9 @@ type Rec = {
   chev: string
 }
 const REC_CHEVS = [
-  '/static/profile/chev_right.svg',
-  '/static/profile/chev_right.svg',
-  '/static/profile/chev_right.svg',
+  'profile/chev_right.svg',
+  'profile/chev_right.svg',
+  'profile/chev_right.svg',
 ]
 // 最近 3 天（不含今天）：日期/周几/总量/达标态（超标态徽章内含超出值，按 Pencil 稿「超标 150 kcal」）
 const records = computed<Rec[]>(() => {
@@ -413,15 +461,12 @@ const records = computed<Rec[]>(() => {
 
 <style>
 .page {
-  background-color: #EEF7F4;
   padding-bottom: 184rpx;
   /* #ifdef MP-WEIXIN */
   padding-bottom: calc(164rpx + env(safe-area-inset-bottom));
   /* #endif */
 }
 .header {
-  background-color: #29B385;
-  background-image: linear-gradient( #32D0A0 0%, #1FBF8F 60%, #159C72 100%);
   position: relative;
   overflow: hidden;
 }
@@ -454,11 +499,9 @@ const records = computed<Rec[]>(() => {
 .name {
   font-size: 32rpx;
   font-weight: bold;
-  color: #FFFFFF;
 }
 .sub {
   font-size: 21rpx;
-  color: rgba(255, 255, 255, 0.85);
   margin-top: 6rpx;
 }
 .gear-circle {
@@ -476,7 +519,6 @@ const records = computed<Rec[]>(() => {
 }
 .cal-card {
   position: relative;
-  background-color: #F7FCFA;
   border-radius: 36rpx;
   margin-left: 28rpx;
   margin-right: 28rpx;
@@ -495,11 +537,9 @@ const records = computed<Rec[]>(() => {
 .cal-title {
   font-size: 24rpx;
   font-weight: bold;
-  color: #003528;
   margin-left: 12rpx;
 }
 .pill {
-  background-color: #E7F2ED;
   border-radius: 14rpx;
   padding-left: 16rpx;
   padding-right: 16rpx;
@@ -510,7 +550,6 @@ const records = computed<Rec[]>(() => {
 }
 .pill-text {
   font-size: 16rpx;
-  color: #009465;
 }
 .ring {
   position: absolute;
@@ -526,7 +565,6 @@ const records = computed<Rec[]>(() => {
   width: 104rpx;
   height: 104rpx;
   border-radius: 52rpx;
-  background-color: #F7FCFA;
   justify-content: center;
   align-items: center;
   flex-direction: column;
@@ -534,11 +572,9 @@ const records = computed<Rec[]>(() => {
 .ring-pct {
   font-size: 28rpx;
   font-weight: bold;
-  color: #003528;
 }
 .ring-lbl {
   font-size: 16rpx;
-  color: #617B85;
   margin-top: 2rpx;
 }
 .bignum-row {
@@ -547,35 +583,27 @@ const records = computed<Rec[]>(() => {
   margin-top: 12rpx;
 }
 .bignum {
-  font-size: 90rpx;
+  font-size: 92rpx;
   font-weight: bold;
-  color: #003528;
   line-height: 100rpx;
 }
 .bignum-unit {
   font-size: 28rpx;
-  color: #003528;
   margin-left: 8rpx;
   margin-bottom: 10rpx;
 }
 .prog-track {
   height: 18rpx;
   border-radius: 10rpx;
-  background-color: #E5F0EC;
   margin-top: 8rpx;
   overflow: hidden;
 }
 .prog-fill {
   height: 18rpx;
   border-radius: 10rpx;
-  background-color: #1FBF8F;
 }
-.prog-fill.bg-amber {
-  background-color: #E8B54D;
-}
-.prog-fill.bg-coral {
-  background-color: #FF9E7D;
-}
+
+
 .prog-row {
   flex-direction: row;
   justify-content: space-between;
@@ -587,12 +615,10 @@ const records = computed<Rec[]>(() => {
 }
 .pl-txt {
   font-size: 20rpx;
-  color: #617B85;
 }
 .pl-num {
   font-size: 22rpx;
   font-weight: bold;
-  color: #00222B;
   margin-left: 6rpx;
 }
 .pl-txt2 {
@@ -601,7 +627,6 @@ const records = computed<Rec[]>(() => {
 .stat-panel {
   flex-direction: row;
   align-items: center;
-  background-color: #FFFFFF;
   border-radius: 22rpx;
   margin-top: 26rpx;
   padding-top: 24rpx;
@@ -619,7 +644,6 @@ const records = computed<Rec[]>(() => {
   width: 42rpx;
   height: 42rpx;
   border-radius: 12rpx;
-  background-color: #E7F2ED;
   justify-content: center;
   align-items: center;
 }
@@ -630,30 +654,17 @@ const records = computed<Rec[]>(() => {
 .stat-num {
   font-size: 36rpx;
   font-weight: bold;
-  color: #082731;
   margin-left: 16rpx;
 }
-.stat-num-green {
-  font-size: 36rpx;
-  font-weight: bold;
-  color: #008561;
-  margin-left: 16rpx;
-}
-.stat-num-coral {
-  font-size: 36rpx;
-  font-weight: bold;
-  color: #FF7043;
-  margin-left: 16rpx;
-}
+
+
 .stat-lbl {
   font-size: 18rpx;
-  color: #5A737D;
   margin-top: 12rpx;
 }
 .stat-div {
   width: 1px;
   height: 72rpx;
-  background-color: #E5EFEA;
 }
 .banner {
   flex-direction: row;
@@ -664,15 +675,8 @@ const records = computed<Rec[]>(() => {
   margin-top: 26rpx;
   padding: 20rpx 24rpx;
 }
-.banner-ok {
-  background-color: #EBF8F5;
-}
-.banner-over {
-  background-color: #FFF2EC;
-}
-.banner-pending {
-  background-color: #F0F7F4;
-}
+
+
 .check-circle {
   width: 54rpx;
   height: 54rpx;
@@ -680,12 +684,8 @@ const records = computed<Rec[]>(() => {
   justify-content: center;
   align-items: center;
 }
-.circle-green {
-  background-color: #1FBF8F;
-}
-.circle-orange {
-  background-color: #FF7043;
-}
+
+
 .banner-excl {
   font-size: 32rpx;
   font-weight: 800;
@@ -702,14 +702,10 @@ const records = computed<Rec[]>(() => {
 .banner-title {
   font-size: 22rpx;
   font-weight: bold;
-  color: #00865C;
 }
-.banner-title-over {
-  color: #D94826;
-}
+
 .banner-sub {
   font-size: 16rpx;
-  color: #57747E;
   margin-top: 4rpx;
 }
 .banner-chev {
@@ -717,7 +713,6 @@ const records = computed<Rec[]>(() => {
   height: 50rpx;
 }
 .card {
-  background-color: #FBFDFD;
   border-radius: 32rpx;
   margin-left: 26rpx;
   margin-right: 26rpx;
@@ -731,7 +726,6 @@ const records = computed<Rec[]>(() => {
 .card-title {
   flex: 1;
   font-size: 26rpx;
-  color: #001521;
 }
 .head-right {
   flex-direction: row;
@@ -740,16 +734,13 @@ const records = computed<Rec[]>(() => {
 .week-num {
   font-size: 20rpx;
   font-weight: bold;
-  color: #087156;
 }
 .week-lbl {
   font-size: 18rpx;
-  color: #087A5C;
   margin-left: 4rpx;
 }
 .view-all {
   font-size: 18rpx;
-  color: #6F8491;
 }
 .chev-mini {
   width: 14rpx;
@@ -774,7 +765,6 @@ const records = computed<Rec[]>(() => {
 .dot-empty {
   border-width: 1.5px;
   border-style: solid;
-  border-color: #C9D9D4;
 }
 .dot-check {
   width: 18rpx;
@@ -787,7 +777,6 @@ const records = computed<Rec[]>(() => {
 }
 .dot-lbl {
   font-size: 18rpx;
-  color: #93A3AD;
   margin-top: 10rpx;
 }
 .trend-icon {
@@ -808,11 +797,9 @@ const records = computed<Rec[]>(() => {
 }
 .ax {
   font-size: 14rpx;
-  color: #738B99;
 }
 .ax-green {
   font-size: 14rpx;
-  color: #096751;
 }
 .bars-area {
   flex: 1;
@@ -826,7 +813,6 @@ const records = computed<Rec[]>(() => {
   height: 0;
   border-top-width: 1px;
   border-top-style: dashed;
-  border-top-color: #BFE3D6;
 }
 .bars-row {
   flex-direction: row;
@@ -841,25 +827,19 @@ const records = computed<Rec[]>(() => {
 }
 .bar-val {
   font-size: 14rpx;
-  color: #4BA38F;
   margin-bottom: 6rpx;
 }
 .bar-val-over {
   font-size: 18rpx;
   font-weight: bold;
-  color: #FA5C38;
 }
 .bar {
   width: 40rpx;
   border-radius: 12rpx;
-  background-color: #23A889;
 }
-.bar-over {
-  background-color: #FF7D5C;
-}
+
 .bar-date {
   font-size: 16rpx;
-  color: #7D929D;
   margin-top: 8rpx;
   height: 22rpx;
 }
@@ -872,7 +852,6 @@ const records = computed<Rec[]>(() => {
 .target-tag-text {
   font-size: 14rpx;
   line-height: 22rpx;
-  color: #647B87;
 }
 .rec-row {
   flex-direction: row;
@@ -885,11 +864,9 @@ const records = computed<Rec[]>(() => {
 }
 .rec-date {
   font-size: 22rpx;
-  color: #001521;
 }
 .rec-wday {
   font-size: 18rpx;
-  color: #6A8391;
   margin-top: 4rpx;
 }
 .rec-right {
@@ -899,15 +876,12 @@ const records = computed<Rec[]>(() => {
 .rec-num {
   font-size: 28rpx;
   font-weight: bold;
-  color: #001521;
 }
 .rec-unit {
   font-size: 18rpx;
-  color: #6A8391;
   margin-left: 4rpx;
 }
 .rec-badge {
-  background-color: #E2F5EE;
   border-radius: 14rpx;
   padding-left: 12rpx;
   padding-right: 12rpx;
@@ -915,16 +889,11 @@ const records = computed<Rec[]>(() => {
   justify-content: center;
   margin-left: 12rpx;
 }
-.rec-badge-over {
-  background-color: #FDE9E4;
-}
+
 .rec-badge-text {
   font-size: 16rpx;
-  color: #129C77;
 }
-.rec-badge-text-over {
-  color: #FA543A;
-}
+
 .chev-row {
   width: 16rpx;
   height: 28rpx;
@@ -932,102 +901,8 @@ const records = computed<Rec[]>(() => {
 }
 .rec-div {
   height: 1px;
-  background-color: #F0F5F2;
 }
 
-/* ===== 深色模式（Boss 拍板：Settings 开关点击切换；色板为薄荷深色临时方案，Pencil 暂无暗色稿） =====
-   后代选择器仅 mp 端生效——uvue 原生端不支持，App 端适配时须改逐元素 :class 方案 */
-/* #ifdef MP-WEIXIN */
-.page-dark {
-  background-color: #0E211C;
-}
-.page-dark .cal-card {
-  background-color: #162924;
-}
-.page-dark .ring-inner {
-  background-color: #162924;
-}
-.page-dark .cal-title,
-.page-dark .ring-pct,
-.page-dark .bignum,
-.page-dark .bignum-unit,
-.page-dark .pl-num,
-.page-dark .stat-num,
-.page-dark .card-title,
-.page-dark .rec-date,
-.page-dark .rec-num {
-  color: #EAF9F3;
-}
-.page-dark .pill {
-  background-color: #1E3B33;
-}
-.page-dark .pill-text,
-.page-dark .stat-num-green,
-.page-dark .week-num,
-.page-dark .ax-green,
-.page-dark .bar-val,
-.page-dark .banner-title {
-  color: #52D6AC;
-}
-.page-dark .prog-track {
-  background-color: #23443B;
-}
-.page-dark .ring-lbl,
-.page-dark .pl-txt,
-.page-dark .stat-lbl,
-.page-dark .banner-sub,
-.page-dark .view-all,
-.page-dark .dot-lbl,
-.page-dark .ax,
-.page-dark .bar-date,
-.page-dark .rec-wday,
-.page-dark .rec-unit,
-.page-dark .target-tag-text {
-  color: rgba(234, 249, 243, 0.5);
-}
-.page-dark .stat-panel {
-  background-color: #10201B;
-}
-.page-dark .stat-chip {
-  background-color: #1E3B33;
-}
-.page-dark .stat-div {
-  background-color: #23443B;
-}
-.page-dark .banner {
-  background-color: #12332B;
-}
-.page-dark .card {
-  background-color: #162924;
-}
-.page-dark .week-lbl {
-  color: #8FE8CB;
-}
-.page-dark .dot-empty {
-  border-color: #35564C;
-}
-.page-dark .target-line {
-  border-top-color: #2E5A4C;
-}
-.page-dark .rec-badge {
-  background-color: #1E3B33;
-}
-.page-dark .rec-badge-text {
-  color: #52D6AC;
-}
-.page-dark .rec-badge-over {
-  background-color: #3A221C;
-}
-.page-dark .rec-badge-text-over {
-  color: #FF8266;
-}
-.page-dark .rec-div {
-  background-color: #1E352F;
-}
-.page-dark .header {
-  background-color: #162924;
-}
-/* #endif */
 .pf-st-mask {
   position: fixed;
   top: 0;

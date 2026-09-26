@@ -1,20 +1,20 @@
 
 <template>
-  <view class="page">
+  <view class="page" :style="{ backgroundColor: theme.bg }">
     <!-- [变更日志] 2026-09-24: Hero 水瓶液体由 CSS 水波图重构为 BottleLiquid Canvas 2D 物理引擎渲染；瓶身/刻度/叶片独立分层，废弃 liquid_wave 水体渐变头图。同日重排第一批：补定义 status-text-coral/amber/green 死类（超标报警色此前静默失效）、顶部带压缩（spacer 220→190 / hero 470→440）、贴纸由右上悬空改入右列流内（并清除整画布 alpha≈10 白雾层）、删悬空小 leaf 改状态色竖条、宏量/餐次字号降档拉开层级阶梯。第二批 S4：.hero-text right 20→28rpx，贴纸/pill 右缘与全页卡片 margin-right 28 统一对齐轴。S7：独立宏量卡并入 hero 底缘玻璃横条（hm-macro-strip，左右 28 同轴），hero 440→552、hero-text bottom 24→136，页面白卡 3→2。第三批：FAB 与左列垂直居中（top 35rpx）、hero 渐变翻转为上白下绿（重心下沉）、贴纸矢量感高清重绘（246px→840px 白椭圆+薄荷描边+行楷双行）并从右列流内迁挂瓶卡左上空白带、左组收拢（bg 卡 352→324 / 瓶左移 12 / 右叶左移 24）使叶-字间隙 2rpx→26rpx 且 goal-pill 退出卡片边线。2026-09-25：餐次行食物图接入百科页入口（openEncyclopedia 携 foodId 跳 pages/encyclopedia/Detail）；食物图 hover 反馈由 <image> 迁到包裹 view（hover-stay-time 不支持 image，编译期 warn）；onShow 消费 ct_pending_add 一次性交接，百科「添加到本餐」回首页直接打开 FoodPicker 详情步预填该食物 -->
     <!-- 标题与操作栏（顶栏常驻+日期整合，对齐设计图规范，保证日期完全外露） -->
-    <view class="hm-nav" :style="{ paddingTop: sbH + 'px' }">
+    <view class="hm-nav" :style="{ paddingTop: sbH + 'px', backgroundColor: theme.bg }">
       <view class="hm-nav-inner">
         <view class="hm-nav-left">
-          <text class="title">{{ t('hm.brand') }}</text>
-          <text class="subtitle">{{ t('hm.tagline') }}</text>
+          <text class="title" :style="{ color: theme.ink1 }">{{ t('hm.brand') }}</text>
+          <text class="subtitle" :style="{ color: theme.ink2 }">{{ t('hm.tagline') }}</text>
           <view class="date-row" hover-class="icon-pressed" :hover-stay-time="120" @click="onDateClick">
-            <image class="date-icon" :src="'/static/home/date_icon.svg'" mode="aspectFit"></image>
-            <text class="date-text">{{ dateText }}</text>
+            <image class="date-icon" :src="asset('home/date_icon.svg')" mode="aspectFit"></image>
+            <text class="date-text" :style="{ color: theme.ink2 }">{{ dateText }}</text>
           </view>
         </view>
-        <view class="fab" :style="{ right: fabRight, top: fabTop }" hover-class="icon-pressed" :hover-stay-time="120" @click="openAdd">
-          <text class="fab-plus">＋</text>
+        <view class="fab" :style="{ right: fabRight, top: fabTop, backgroundImage: fabGradient }" hover-class="icon-pressed" :hover-stay-time="120" @click="openAdd">
+          <text class="fab-plus" :style="{ color: theme.onAccent }">＋</text>
         </view>
       </view>
     </view>
@@ -23,7 +23,7 @@
     <view class="header-spacer" :style="{ height: headerSpacerH }"></view>
 
     <!-- Hero（常驻标题块：紧接导航栏下方，纯净绿色渐变底） -->
-    <view class="hero">
+    <view class="hero" :style="{ backgroundImage: heroGradient }">
       <!-- 独立底层背景：柔和底色渐变 + 流体斑块 + 装饰气泡星芒（bg.svg） -->
       <image class="bottle-bg" :src="bottleAsset('bg')" mode="aspectFit"></image>
       <!-- 左侧独立叶子（yezi-zuo.svg，旋转支点在茎底，自然微风往复微摆） -->
@@ -46,7 +46,7 @@
       <view class="bottle-wrap" :style="bottleAnimStyle" @click="onBottleTap" @longpress="onBottleLongPress" @touchstart="onBottleTouchStart" @touchend="onBottleTouchEnd">
         <!-- 玻璃层（最底）：App 端 SVG 渲染不识别 evenodd 镂空，瓶体在原生端是实心色块，故液体必须叠在它之上 -->
         <image class="bottle-mask" :src="bottleAsset('pingzi')" mode="aspectFit"></image>
-        <view class="bottle-cavity">
+        <view class="bottle-cavity" :style="{ backgroundColor: cavityFill }">
           <BottleLiquid :ratio="liquidRatio" :color-mode="liquidColorMode" :cmd-rev="liquidCmdRev" :cmd-kind="liquidCmdKind"></BottleLiquid>
         </view>
         <!-- 刻度层（最上）：水位上涨后刻度仍需可读，与玻璃层同源同几何 -->
@@ -56,43 +56,43 @@
       <image class="hm-sticker" :src="stickerSrc" mode="aspectFit"></image>
       <view class="hero-text">
         <view class="remain-head">
-          <view class="hm-status-bar" :style="{ backgroundColor: calStatus.color }"></view>
-          <text class="remain-label" :class="calStatus.textClass">{{ remainCal >= 0 ? t('hm.remain') : t('pf.over') }}</text>
+          <view class="hm-status-bar" :style="{ backgroundColor: statusAccentColor }"></view>
+          <text class="remain-label" :style="{ color: statusTextColor }">{{ remainCal >= 0 ? t('hm.remain') : t('pf.over') }}</text>
         </view>
         <view class="remain-num-row">
-          <text class="remain-num" :class="calStatus.textClass">{{ Math.abs(remainCal) }}</text>
-          <text class="remain-unit" :class="calStatus.textClass">kcal</text>
+          <text class="remain-num" :style="{ color: statusTextColor }">{{ Math.abs(remainCal) }}</text>
+          <text class="remain-unit" :style="{ color: statusTextColor }">kcal</text>
         </view>
-        <text class="consumed">{{ tf('hm.consumed', [food.totalCal.toString(), goal.calorieGoal.toString()]) }}</text>
-        <view class="goal-pill ui-pressable" hover-class="ui-pressed" :hover-stay-time="120" @click="openGoal">
-          <image class="pill-cal" :src="'/static/home/pill_calendar.svg'" mode="aspectFit"></image>
-          <text class="goal-pill-text">{{ tf('hm.goalPill', [goal.calorieGoal.toString()]) }}</text>
-          <image class="pill-edit" :src="'/static/home/pill_edit.svg'" mode="aspectFit"></image>
+        <text class="consumed" :style="{ color: theme.ink3 }">{{ tf('hm.consumed', [food.totalCal.toString(), goal.calorieGoal.toString()]) }}</text>
+        <view class="goal-pill ui-pressable" :style="{ backgroundColor: theme.card }" hover-class="ui-pressed" :hover-stay-time="120" @click="openGoal">
+          <image class="pill-cal" :src="asset('home/pill_calendar.svg')" mode="aspectFit"></image>
+          <text class="goal-pill-text" :style="{ color: theme.accentDeep }">{{ tf('hm.goalPill', [goal.calorieGoal.toString()]) }}</text>
+          <image class="pill-edit" :src="asset('home/pill_edit.svg')" mode="aspectFit"></image>
         </view>
       </view>
       <!-- 宏量横条（S7）：原独立宏量卡收进 hero 底缘第三段，页面白卡 3→2，打破三连同族卡 -->
-      <view class="hm-macro-strip">
+      <view class="hm-macro-strip" :style="{ backgroundColor: stripFill }">
         <view class="hm-macro-cell">
-          <image class="hm-macro-ic" :src="'/static/home/macro_protein.svg'" mode="aspectFit"></image>
+          <image class="hm-macro-ic" :src="asset('home/macro_protein.svg')" mode="aspectFit"></image>
           <view class="hm-macro-txt">
-            <text class="hm-macro-val">{{ macroP }}g</text>
-            <text class="hm-macro-cap">{{ t('dd.protein') }}</text>
+            <text class="hm-macro-val" :style="{ color: theme.ink1 }">{{ macroP }}g</text>
+            <text class="hm-macro-cap" :style="{ color: theme.ink3 }">{{ t('dd.protein') }}</text>
           </view>
         </view>
-        <view class="hm-macro-sep"></view>
+        <view class="hm-macro-sep" :style="{ backgroundColor: theme.line }"></view>
         <view class="hm-macro-cell">
-          <image class="hm-macro-ic" :src="'/static/home/macro_carb.svg'" mode="aspectFit"></image>
+          <image class="hm-macro-ic" :src="asset('home/macro_carb.svg')" mode="aspectFit"></image>
           <view class="hm-macro-txt">
-            <text class="hm-macro-val">{{ macroC }}g</text>
-            <text class="hm-macro-cap">{{ t('dd.carb') }}</text>
+            <text class="hm-macro-val" :style="{ color: theme.ink1 }">{{ macroC }}g</text>
+            <text class="hm-macro-cap" :style="{ color: theme.ink3 }">{{ t('dd.carb') }}</text>
           </view>
         </view>
-        <view class="hm-macro-sep"></view>
+        <view class="hm-macro-sep" :style="{ backgroundColor: theme.line }"></view>
         <view class="hm-macro-cell">
-          <image class="hm-macro-ic" :src="'/static/home/macro_fat.svg'" mode="aspectFit"></image>
+          <image class="hm-macro-ic" :src="asset('home/macro_fat.svg')" mode="aspectFit"></image>
           <view class="hm-macro-txt">
-            <text class="hm-macro-val">{{ macroF }}g</text>
-            <text class="hm-macro-cap">{{ t('dd.fat') }}</text>
+            <text class="hm-macro-val" :style="{ color: theme.ink1 }">{{ macroF }}g</text>
+            <text class="hm-macro-cap" :style="{ color: theme.ink3 }">{{ t('dd.fat') }}</text>
           </view>
         </view>
       </view>
@@ -100,28 +100,28 @@
 
     <!-- 今日餐次 -->
     <view class="meal-section-head">
-      <text class="meal-section-title">{{ t('hm.mealSec') }}</text>
+      <text class="meal-section-title" :style="{ color: theme.ink1 }">{{ t('hm.mealSec') }}</text>
       <view class="all-records">
-        <text class="all-records-text">{{ t('hm.allRec') }}</text>
-        <image class="chev-right" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
+        <text class="all-records-text" :style="{ color: theme.ink3 }">{{ t('hm.allRec') }}</text>
+        <image class="chev-right" :src="asset('home/chev_right.svg')" mode="aspectFit"></image>
       </view>
     </view>
 
     <view class="meal-block" v-for="(meal, mealIdx) in meals" :key="mealIdx">
       <view class="meal-rail">
-        <view class="meal-circle">
+        <view class="meal-circle" :style="{ backgroundColor: theme.accent }">
           <image class="meal-circle-icon" :src="meal.icon" mode="aspectFit"></image>
         </view>
-        <view class="rail-line" v-if="mealIdx < meals.length - 1"></view>
+        <view class="rail-line" v-if="mealIdx < meals.length - 1" :style="{ backgroundColor: theme.line }"></view>
       </view>
       <view class="meal-main">
         <view class="meal-head">
-          <text class="meal-name">{{ meal.name }}<text class="meal-time"> · {{ meal.time }}</text></text>
-          <text class="meal-kcal">{{ meal.totalKcal }} kcal</text>
+          <text class="meal-name" :style="{ color: theme.ink1 }">{{ meal.name }}<text class="meal-time" :style="{ color: theme.ink3 }"> · {{ meal.time }}</text></text>
+          <text class="meal-kcal" :style="{ color: theme.ink1 }">{{ meal.totalKcal }} kcal</text>
         </view>
-        <view class="meal-card">
+        <view class="meal-card" :style="{ backgroundColor: theme.card }">
           <view v-if="meal.rows.length === 0" class="meal-empty">
-            <text class="meal-empty-txt">{{ t('dd.none') }}</text>
+            <text class="meal-empty-txt" :style="{ color: theme.ink3 }">{{ t('dd.none') }}</text>
           </view>
           <view v-else>
             <view v-for="(rowItem, rowIdx) in meal.rows" :key="rowIdx">
@@ -129,11 +129,11 @@
                 <view class="meal-thumb-hit" hover-class="icon-pressed" :hover-stay-time="120" @click="openEncyclopedia(rowItem.img)">
                   <image class="meal-thumb" :src="rowItem.img" mode="aspectFill"></image>
                 </view>
-                <text class="meal-row-name">{{ rowItem.name }}</text>
-                <text class="meal-row-portion">{{ rowItem.portion }}</text>
-                <text class="meal-row-kcal">{{ rowItem.kcal }} kcal</text>
+                <text class="meal-row-name" :style="{ color: theme.ink1 }">{{ rowItem.name }}</text>
+                <text class="meal-row-portion" :style="{ color: theme.ink3 }">{{ rowItem.portion }}</text>
+                <text class="meal-row-kcal" :style="{ color: theme.accentDeep }">{{ rowItem.kcal }} kcal</text>
               </view>
-              <view class="meal-row-div" v-if="rowIdx < meal.rows.length - 1"></view>
+              <view class="meal-row-div" v-if="rowIdx < meal.rows.length - 1" :style="{ backgroundColor: theme.line }"></view>
             </view>
           </view>
         </view>
@@ -202,9 +202,9 @@ import GoalModal from '../../components/GoalModal.uvue'
 import { useFoodStore } from '../../stores/food'
 import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import { t, tf } from '../../composables/i18n'
+import { useTheme, themeAsset, FIXED_COLORS } from '../../composables/useTheme'
 import { getFoodById, computeEntry } from '../../stores/food'
 import { playSound, triggerHaptic } from '../../stores/settings'
-import { useSettingsStore } from '../../stores/settings'
 import { foodIdFromImg } from '../../stores/encyclopedia'
 import BottleLiquid from '../../components/BottleLiquid.uvue'
 
@@ -214,10 +214,30 @@ import BottleLiquid from '../../components/BottleLiquid.uvue'
  */
 const food = useFoodStore()
 const goal = useGoalStore()
-const settings = useSettingsStore()
 
 const remainCal = computed(() => goal.calorieGoal - food.totalCal)
 const calStatus = computed(() => getCalorieStatus(food.totalCal, goal.calorieGoal))
+
+const { theme, isDark, accentId } = useTheme()
+
+/** 资产按 (accent, mode) 取五档变体；未登记底稿（语义色／无彩稿）自动回落原路径 */
+function asset(path: string): string {
+  return themeAsset(accentId.value, isDark.value, '/static/' + path)
+}
+
+const fabGradient = computed((): string => 'linear-gradient(' + theme.value.accent2 + ', ' + theme.value.accent + ')')
+const heroGradient = computed((): string => 'linear-gradient(' + theme.value.bg + ' 0%, ' + theme.value.heroBg + ' 100%)')
+/** 瓶内胆与宏量横条是中性白玻璃：只随明暗换透明度，不随 accent 换色 */
+const cavityFill = computed((): string => isDark.value ? 'rgba(255, 255, 255, 0.06)' : 'rgba(255, 255, 255, 0.4)')
+const stripFill = computed((): string => isDark.value ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.55)')
+/** 常态（绿档）状态色跟随主题 accent；超标／临界走固定语义色，不随主题 */
+const statusAccentColor = computed((): string => calStatus.value.type == 'green' ? theme.value.accent : calStatus.value.color)
+const statusTextColor = computed((): string => {
+  const ty = calStatus.value.type
+  if (ty == 'coral') return FIXED_COLORS.statusCoral
+  if (ty == 'amber') return FIXED_COLORS.statusAmber
+  return theme.value.ink1
+})
 
 const macroP = computed(() => Math.round(food.totalProtein))
 const macroC = computed(() => Math.round(food.totalCarbs))
@@ -248,12 +268,12 @@ const bottleSrc = computed<string>(() => {
   const t = calStatus.value.type
   if (t === 'coral') return 'coral'
   if (t === 'amber') return 'amber'
-  const a = settings.accent
-  return a === 'ocean' || a === 'lavender' ? a : ''
+  return ''
 })
 function bottleAsset(base: string): string {
-  const s = bottleSrc.value
-  return '/static/home/' + base + (s ? '_' + s : '') + '.svg'
+  const suffix = bottleSrc.value
+  if (suffix.length > 0) return '/static/home/' + base + '_' + suffix + '.svg'
+  return asset('home/' + base + '.svg')
 }
 /** 贴纸文案：三档对应不同鼓励语，绿版为原稿不动 */
 const stickerSrc = computed<string>(() => {
@@ -536,7 +556,6 @@ const meals = computed<Meal[]>(() =>
 
 <style>
 .page {
-  background-color: #F2FAF5;
   padding-bottom: 184rpx;
   /* #ifdef MP-WEIXIN */
   padding-bottom: calc(164rpx + env(safe-area-inset-bottom));
@@ -550,7 +569,6 @@ const meals = computed<Meal[]>(() =>
   left: 0;
   right: 0;
   z-index: 45;
-  background-color: #F2FAF5;
   padding-left: 34rpx;
   padding-right: 28rpx;
 }
@@ -567,11 +585,9 @@ const meals = computed<Meal[]>(() =>
 .title {
   font-size: 48rpx;
   font-weight: bold;
-  color: #0F5B44;
 }
 .subtitle {
   font-size: 26rpx;
-  color: #46706B;
   margin-top: 8rpx;
 }
 .date-row {
@@ -587,21 +603,17 @@ const meals = computed<Meal[]>(() =>
 }
 .date-text {
   font-size: 26rpx;
-  color: #2F7E6E;
 }
 .fab {
   position: absolute;
   width: 80rpx;
   height: 80rpx;
   border-radius: 40rpx;
-  background-color: #2EB889;
-  background-image: linear-gradient( #5CD9A6, #2EB889);
   justify-content: center;
   align-items: center;
 }
 .fab-plus {
   font-size: 40rpx;
-  color: #FFFFFF;
 }
 /* 顶栏文档流占位层 */
 .header-spacer {
@@ -611,8 +623,6 @@ const meals = computed<Meal[]>(() =>
   position: relative;
   height: 552rpx;
   margin-top: 0;
-  background-color: #E6F8EF;
-  background-image: linear-gradient( #F2FAF5 0%, #E6F8EF 100%);
   border-bottom-left-radius: 40rpx;
   border-bottom-right-radius: 40rpx;
 }
@@ -669,7 +679,6 @@ const meals = computed<Meal[]>(() =>
   border-bottom-left-radius: 52rpx;
   border-bottom-right-radius: 52rpx;
   overflow: hidden;
-  background-color: rgba(235, 248, 243, 0.4);
 }
 .bottle-mask {
   position: absolute;
@@ -718,7 +727,6 @@ const meals = computed<Meal[]>(() =>
 .remain-label {
   font-size: 38rpx;
   font-weight: bold;
-  color: #0F5B44;
 }
 .remain-num-row {
   flex-direction: row;
@@ -727,27 +735,16 @@ const meals = computed<Meal[]>(() =>
 .remain-num {
   font-size: 104rpx;
   font-weight: bold;
-  color: #0A5A40;
   line-height: 116rpx;
 }
 .remain-unit {
   font-size: 38rpx;
   font-weight: bold;
-  color: #0A5A40;
   margin-left: 12rpx;
   margin-bottom: 20rpx;
 }
 /* 状态色类由 stores/goal.ts getCalorieStatus().textClass 动态绑定；
    必须定义在 .remain-label/.remain-num 之后，同特异度后者胜出 */
-.status-text-coral {
-  color: #FF9E7D;
-}
-.status-text-amber {
-  color: #E8B54D;
-}
-.status-text-green {
-  color: #0A5A40;
-}
 /* 状态底色类（进度条填充用，实色）与圆环类（描边用，带透明）——
    由 stores/goal.ts getCalorieStatus().bgClass/ringClass 动态绑定；
    DayDetail.dd-fill / Records.lr-bar-green / 首页百分比圆环 均走此族 */
@@ -771,13 +768,11 @@ const meals = computed<Meal[]>(() =>
 }
 .consumed {
   font-size: 26rpx;
-  color: #618585;
   margin-top: 4rpx;
 }
 .goal-pill {
   flex-direction: row;
   align-items: center;
-  background-color: #FFFFFF;
   border-radius: 36rpx;
   padding-left: 28rpx;
   padding-right: 24rpx;
@@ -791,7 +786,6 @@ const meals = computed<Meal[]>(() =>
 }
 .goal-pill-text {
   font-size: 24rpx;
-  color: #0B7954;
   margin-left: 24rpx;
 }
 .pill-edit {
@@ -808,7 +802,6 @@ const meals = computed<Meal[]>(() =>
   height: 96rpx;
   flex-direction: row;
   align-items: center;
-  background-color: rgba(255, 255, 255, 0.55);
   border-radius: 48rpx;
 }
 .hm-macro-cell {
@@ -828,16 +821,13 @@ const meals = computed<Meal[]>(() =>
 .hm-macro-val {
   font-size: 30rpx;
   font-weight: bold;
-  color: #0A5A40;
 }
 .hm-macro-cap {
   font-size: 22rpx;
-  color: #73918B;
 }
 .hm-macro-sep {
   width: 1px;
   height: 48rpx;
-  background-color: #E3F0EA;
 }
 .meal-section-head {
   flex-direction: row;
@@ -850,7 +840,6 @@ const meals = computed<Meal[]>(() =>
 .meal-section-title {
   font-size: 34rpx;
   font-weight: bold;
-  color: #0F5B44;
 }
 .all-records {
   flex-direction: row;
@@ -858,7 +847,6 @@ const meals = computed<Meal[]>(() =>
 }
 .all-records-text {
   font-size: 24rpx;
-  color: #8FAEAF;
 }
 .chev-right {
   width: 16rpx;
@@ -879,7 +867,6 @@ const meals = computed<Meal[]>(() =>
   width: 74rpx;
   height: 74rpx;
   border-radius: 38rpx;
-  background-color: #29B385;
   justify-content: center;
   align-items: center;
 }
@@ -890,7 +877,6 @@ const meals = computed<Meal[]>(() =>
 .rail-line {
   flex: 1;
   width: 2px;
-  background-color: #BFE8D6;
   margin-top: 12rpx;
   margin-bottom: -36rpx;
 }
@@ -907,20 +893,16 @@ const meals = computed<Meal[]>(() =>
 .meal-name {
   font-size: 34rpx;
   font-weight: bold;
-  color: #0F5B44;
 }
 .meal-time {
   font-size: 32rpx;
   font-weight: normal;
-  color: #8FAEAF;
 }
 .meal-kcal {
   font-size: 30rpx;
   font-weight: bold;
-  color: #0A5A40;
 }
 .meal-card {
-  background-color: #FFFFFF;
   border-radius: 32rpx;
   margin-top: 16rpx;
   padding-left: 20rpx;
@@ -936,7 +918,6 @@ const meals = computed<Meal[]>(() =>
 }
 .meal-empty-txt {
   font-size: 26rpx;
-  color: #8FAEAF;
 }
 .meal-row {
   flex-direction: row;
@@ -955,24 +936,20 @@ const meals = computed<Meal[]>(() =>
 }
 .meal-row-name {
   font-size: 26rpx;
-  color: #14584A;
   margin-left: 16rpx;
   margin-right: 20rpx;
 }
 .meal-row-portion {
   flex: 1;
   font-size: 24rpx;
-  color: #8FAEAF;
 }
 .meal-row-kcal {
   width: 158rpx;
   font-size: 26rpx;
-  color: #0B7954;
   text-align: right;
 }
 .meal-row-div {
   height: 1px;
-  background-color: #F0F5F2;
   margin-right: 36rpx;
 }
 </style>

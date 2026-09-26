@@ -1,34 +1,35 @@
 
 <template>
   <view class="fp-overlay" :class="{ 'fp-overlay-active': active, 'fp-hidden': !render }" @click="onOverlayTap">
-    <view class="fp-container" :class="{ 'fp-container-active': active, 'fp-container-detail': step === 'detail' }" @click.stop>
-    <view class="fp-sheet" v-if="step === 'list'">
+    <view class="fp-container" :class="{ 'fp-container-active': active, 'fp-container-detail': step === 'detail' }" :style="{ backgroundColor: theme.card }" @click.stop>
+    <view class="fp-sheet" v-if="step === 'list'" :style="fpSheetStyle">
       <view class="fp-top-row">
-        <view class="fp-search-box">
-          <image class="fp-search-icon" :src="'/static/common/search_icon.svg'" mode="aspectFit"></image>
+        <view class="fp-search-box" :style="searchBoxStyle">
+          <image class="fp-search-icon" :src="asset('common/search_icon.svg')" mode="aspectFit"></image>
           <input
             class="fp-search-input"
+            :style="{ color: theme.ink1 }"
             v-model="keyword"
             :placeholder="t('fp.searchPh')"
-            placeholder-style="color:#9CB8B0;font-size:13.5px;"
+            :placeholder-style="searchPlaceholderStyle"
           ></input>
         </view>
-        <view class="fp-closebtn" hover-class="icon-pressed" :hover-stay-time="120" @click="close">
-          <image class="fp-close-ic" :src="'/static/goal/gm_close.svg'" mode="aspectFit"></image>
+        <view class="fp-closebtn" :style="{ backgroundColor: theme.card }" hover-class="icon-pressed" :hover-stay-time="120" @click="close">
+          <image class="fp-close-ic" :src="asset('goal/gm_close.svg')" mode="aspectFit"></image>
         </view>
       </view>
 
       <scroll-view class="fp-chip-bar" direction="horizontal" :show-scrollbar="false">
         <view
           class="fp-chip ui-pressable"
-          :class="{ 'fp-chip-on': catItem === cat }"
+          :style="chipStyle(catItem === cat)"
           hover-class="ui-pressed"
           :hover-stay-time="120"
           v-for="(catItem, catIdx) in cats"
           :key="catIdx"
           @click="pickCat(catItem)"
         >
-          <text class="fp-chip-text" :class="{ 'fp-chip-text-on': catItem === cat }">{{ catLabel(catItem) }}</text>
+          <text class="fp-chip-text" :style="{ color: chipTextColor(catItem === cat) }">{{ catLabel(catItem) }}</text>
         </view>
       </scroll-view>
 
@@ -42,16 +43,16 @@
           :key="item.id"
           @click="pickFood(item.id)"
         >
-          <view class="fp-row-accent" v-if="item.id === activeFoodId"></view>
-          <image class="fp-row-thumb" :src="'/static/icons/' + item.img" mode="aspectFill"></image>
+          <view class="fp-row-accent" v-if="item.id === activeFoodId" :style="{ backgroundColor: theme.accent }"></view>
+          <image class="fp-row-thumb" :style="{ backgroundColor: theme.thumbStroke }" :src="'/static/icons/' + item.img" mode="aspectFill"></image>
           <view class="fp-row-text">
-            <text class="fp-row-name">{{ item.name }}</text>
-            <text class="fp-row-sub" :class="{ 'fp-row-sub-on': item.id === activeFoodId }">{{ subLine(item) }}</text>
+            <text class="fp-row-name" :style="{ color: theme.ink1 }">{{ item.name }}</text>
+            <text class="fp-row-sub" :class="{ 'fp-row-sub-on': item.id === activeFoodId }" :style="{ color: subTextColor(item.id === activeFoodId) }">{{ subLine(item) }}</text>
           </view>
-          <view class="fp-radio" :class="{ 'fp-radio-on': item.id === activeFoodId }">
-            <text class="fp-radio-check" v-if="item.id === activeFoodId">✓</text>
+          <view class="fp-radio" :style="radioStyle(item.id === activeFoodId)">
+            <text class="fp-radio-check" v-if="item.id === activeFoodId" :style="{ color: theme.onAccent }">✓</text>
           </view>
-          <view class="fp-row-div" v-if="rowIdx < displayedResults.length - 1"></view>
+          <view class="fp-row-div" v-if="rowIdx < displayedResults.length - 1" :style="{ backgroundColor: theme.line }"></view>
         </view>
       </scroll-view>
     </view>
@@ -79,6 +80,7 @@ import { ALL_FOODS, searchFoods, vesselLabelOf, vesselSizesOf, type FoodBase } f
 import { triggerHaptic, playSound } from '../stores/settings'
 import AddFood from './AddFood.uvue'
 import type { AddPayload } from './AddFood.uvue'
+import { useTheme, themeAsset } from '../composables/useTheme'
 export type { AddPayload }
 
 /**
@@ -105,6 +107,53 @@ let timer = 0
 
 const step = ref<'list' | 'detail'>('list')
 const activeFoodId = ref('')
+
+const { theme, isDark, accentId } = useTheme()
+
+// [变更日志] 2026-09-25: App 端弹层底部安全区补齐——类内 calc(env) padding-bottom 仅 MP 生效，原生端底 padding 为 0 致列表末行被小白条遮挡，按 safeAreaInsets 运行时下发（MP 返回空对象不覆盖类规则）
+/** 弹层底距：App 原生端无 env() 通道，＝设计底衬 28rpx 换算 px ＋ 安全区；MP 端交回类内 calc 规则 */
+const fpSheetStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  // #ifdef APP
+  const sysFp = uni.getSystemInfoSync()
+  const insetsFp = sysFp.safeAreaInsets
+  const sbFp = insetsFp != null ? insetsFp.bottom : 0
+  st['padding-bottom'] = (28 * sysFp.windowWidth / 750 + sbFp) + 'px'
+  // #endif
+  return st
+})
+
+/** 资产按 (accent, mode) 取五档变体；未登记底稿自动回落原路径 */
+function asset(path: string): string {
+  return themeAsset(accentId.value, isDark.value, '/static/' + path)
+}
+
+/** 选中态由运行时函数出色——内联 style 优先级高于类名，条件类无法与主题色共存 */
+const searchBoxStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  st['background-color'] = theme.value.chip
+  st['border-color'] = theme.value.line
+  return st
+})
+const searchPlaceholderStyle = computed<string>(() => 'color:' + theme.value.ink3 + ';font-size:13.5px;')
+
+function chipStyle(on: boolean): Record<string, string> {
+  const st = {} as Record<string, string>
+  st['background-color'] = on ? theme.value.accent : theme.value.chip
+  return st
+}
+function chipTextColor(on: boolean): string {
+  return on ? theme.value.onAccent : theme.value.ink3
+}
+function subTextColor(on: boolean): string {
+  return on ? theme.value.ink1 : theme.value.ink3
+}
+function radioStyle(on: boolean): Record<string, string> {
+  const st = {} as Record<string, string>
+  st['background-color'] = on ? theme.value.accent : theme.value.card
+  st['border-color'] = on ? theme.value.accent : theme.value.line
+  return st
+}
 
 /** 分类 chips：全部 + 库内真实分类（按首次出现顺序去重） */
 const cats: string[] = ['全部']  // 数据值＝food_library 原始 cat 字面量
@@ -261,7 +310,6 @@ watch(
   /* #ifdef MP-WEIXIN */
   height: calc(1040rpx + env(safe-area-inset-bottom));
   /* #endif */
-  background-color: #FFFFFF;
   border-top-left-radius: 68rpx;
   border-top-right-radius: 68rpx;
   /* #ifdef MP-WEIXIN */
@@ -314,9 +362,7 @@ watch(
   align-items: center;
   height: 92rpx;
   border-radius: 46rpx;
-  background-color: #F5FAF8;
   border-width: 1px;
-  border-color: #EAF3EF;
   padding-left: 36rpx;
   padding-right: 28rpx;
 }
@@ -324,7 +370,6 @@ watch(
   width: 64rpx;
   height: 64rpx;
   border-radius: 32rpx;
-  background-color: #FFFFFF;
   justify-content: center;
   align-items: center;
   box-shadow: 0 4rpx 16rpx rgba(10, 79, 61, 0.14);
@@ -342,7 +387,6 @@ watch(
 .fp-search-input {
   flex: 1;
   font-size: 27rpx;
-  color: #0A4F3D;
   margin-left: 16rpx;
 }
 .fp-chip-bar {
@@ -356,22 +400,13 @@ watch(
   padding-left: 34rpx;
   padding-right: 34rpx;
   border-radius: 34rpx;
-  background-color: #F8F9FC;
   justify-content: center;
   align-items: center;
   margin-right: 16rpx;
   flex-shrink: 0;
 }
-.fp-chip-on {
-  background-color: #1FBF8F;
-}
 .fp-chip-text {
   font-size: 26rpx;
-  font-weight: bold;
-  color: #8FAEAF;
-}
-.fp-chip-text-on {
-  color: #FFFFFF;
   font-weight: bold;
 }
 .fp-food-list {
@@ -395,13 +430,11 @@ watch(
   width: 6rpx;
   height: 96rpx;
   border-radius: 3rpx;
-  background-color: #1FBF8F;
 }
 .fp-row-thumb {
   width: 96rpx;
   height: 96rpx;
   border-radius: 32rpx;
-  background-color: #EAF9F3;
 }
 .fp-row-text {
   flex: 1;
@@ -410,15 +443,12 @@ watch(
 .fp-row-name {
   font-size: 31rpx;
   font-weight: bold;
-  color: #0A4F3D;
 }
 .fp-row-sub {
   font-size: 24rpx;
-  color: #8FAEAF;
   margin-top: 8rpx;
 }
 .fp-row-sub-on {
-  color: #0F4F3D;
   font-weight: bold;
 }
 .fp-radio {
@@ -426,19 +456,13 @@ watch(
   height: 44rpx;
   border-radius: 22rpx;
   border-width: 1.5px;
-  border-color: #BFE3D6;
   justify-content: center;
   align-items: center;
   margin-left: 20rpx;
   margin-right: 20rpx;
 }
-.fp-radio-on {
-  background-color: #1FBF8F;
-  border-color: #1FBF8F;
-}
 .fp-radio-check {
   font-size: 24rpx;
-  color: #FFFFFF;
 }
 .fp-row-div {
   position: absolute;
@@ -446,6 +470,5 @@ watch(
   right: 0;
   bottom: 0;
   height: 1px;
-  background-color: #EAF3EF;
 }
 </style>

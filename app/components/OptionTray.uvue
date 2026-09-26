@@ -9,7 +9,7 @@
       :key="optIdx"
       @click="select(optItem.key)"
     >
-      <view class="float" :class="{ 'float-on': optItem.key === modelValue, 'float-card': optItem.key === modelValue && optItem.art === '' }">
+      <view class="float" :class="{ 'float-on': optItem.key === modelValue, 'float-card': optItem.key === modelValue && optItem.art === '' }" :style="floatStyle(optItem.key === modelValue, optItem.art === '')">
         <view class="art-wrap" v-if="optItem.art !== ''">
           <view class="art-row">
             <image
@@ -22,9 +22,9 @@
             ></image>
           </view>
         </view>
-        <text class="opt-name" :class="{ 'opt-name-on': optItem.key === modelValue }">{{ optItem.label }}</text>
-        <text class="opt-sub" :class="{ 'opt-sub-on': optItem.key === modelValue }" v-if="optItem.sub !== ''">{{ optItem.sub }}</text>
-        <view class="opt-underline" v-if="optItem.key === modelValue"></view>
+        <text class="opt-name" :class="{ 'opt-name-on': optItem.key === modelValue }" :style="{ color: nameColor(optItem.key === modelValue) }">{{ optItem.label }}</text>
+        <text class="opt-sub" :class="{ 'opt-sub-on': optItem.key === modelValue }" :style="{ color: subColor(optItem.key === modelValue) }" v-if="optItem.sub !== ''">{{ optItem.sub }}</text>
+        <view class="opt-underline" v-if="optItem.key === modelValue" :style="{ backgroundColor: theme.accent }"></view>
       </view>
     </view>
   </view>
@@ -40,6 +40,7 @@
  */
 
 import { playSound, triggerHaptic } from '../stores/settings'
+import { useTheme } from '../composables/useTheme'
 
 export type TrayOption = {
   key: string
@@ -64,6 +65,24 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', v: string): void
 }>()
+
+const { theme, isDark } = useTheme()
+
+/** 选中件＝抬升＋加粗＋下划短线；无器皿图时补一层卡面（暗档改走更亮的 chip 以免比未选态更暗） */
+function floatStyle(on: boolean, noArt: boolean): Record<string, string> {
+  const st = {} as Record<string, string>
+  if (on && noArt) {
+    st['background-color'] = isDark.value ? theme.value.chip : theme.value.card
+  }
+  return st
+}
+
+function nameColor(on: boolean): string {
+  return on ? theme.value.ink1 : theme.value.ink3
+}
+function subColor(on: boolean): string {
+  return on ? theme.value.accentDeep : theme.value.ink3
+}
 
 function select(key: string): void {
   if (key === props.modelValue) {
@@ -115,7 +134,6 @@ function select(key: string): void {
   transform: translateY(-8rpx);
 }
 .float-card {
-  background-color: #FFFFFF;
   box-shadow: 0 10rpx 24rpx rgba(10, 79, 61, 0.25);
 }
 .opt-art {
@@ -126,20 +144,16 @@ function select(key: string): void {
 }
 .opt-name {
   font-size: 26rpx;
-  color: #73918B;
   margin-top: 12rpx;
 }
 .opt-name-on {
-  color: #0A4F3D;
   font-weight: bold;
 }
 .opt-sub {
   font-size: 22rpx;
-  color: #8FAEAF;
   margin-top: 4rpx;
 }
 .opt-sub-on {
-  color: #0A7A5C;
 }
 /* 选中态唯一色彩信号：文字下方居中的薄荷绿短线（替代旧 halo 实心光晕色块，
    白底器皿图叠色块观感差；uvue 无伪元素/radial-gradient，短线是最稳的表达） */
@@ -147,7 +161,6 @@ function select(key: string): void {
   width: 48rpx;
   height: 6rpx;
   border-radius: 3rpx;
-  background-color: #1FBF8F;
   margin-top: 10rpx;
 }
 </style>

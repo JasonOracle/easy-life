@@ -1,110 +1,110 @@
 <template>
-  <view class="page">
+  <view class="page" :style="{ backgroundColor: theme.bg }">
     <!-- [变更日志] 2026-09-25: 「主要食物」卡片接入百科页入口（携 foodId 跳 pages/encyclopedia/Detail） -->
     <scroll-view class="lr-scroll" direction="vertical" :show-scrollbar="false" @scroll="onScroll">
       <!-- Header（纯净自然的高级绿色平滑渐变） -->
-      <view class="lr-header">
+      <view class="lr-header" :style="headerStyle">
         <!-- 状态栏独立占位层，杜绝跨端 calc(rpx+px) 塌陷 -->
         <view :style="{ height: sbH + 'px' }"></view>
         <view class="lr-nav">
           <view class="lr-navtxt">
-            <text class="lr-title">{{ t('rec.title') }}</text>
-            <text class="lr-sub">{{ t('rec.sub') }}</text>
+            <text class="lr-title" :style="{ color: headerTitleColor }">{{ t('rec.title') }}</text>
+            <text class="lr-sub" :style="{ color: headerSubColor }">{{ t('rec.sub') }}</text>
           </view>
         </view>
       </view>
 
       <!-- 月历卡 -->
-      <view class="lr-cal">
+      <view class="lr-cal" :style="{ backgroundColor: theme.card }">
       <view class="lr-mrow">
-        <image class="lr-mnav" :src="'/static/records/lr_prev.svg'" mode="aspectFit" @click="prevMonth"></image>
-        <text class="lr-mlabel">{{ monthLabel }}</text>
-        <image class="lr-mnav" :src="'/static/records/lr_next.svg'" mode="aspectFit" @click="nextMonth"></image>
+        <image class="lr-mnav" :src="asset('records/lr_prev.svg')" mode="aspectFit" @click="prevMonth"></image>
+        <text class="lr-mlabel" :style="{ color: theme.ink1 }">{{ monthLabel }}</text>
+        <image class="lr-mnav" :src="asset('records/lr_next.svg')" mode="aspectFit" @click="nextMonth"></image>
       </view>
       <view class="lr-wrow">
-        <text class="lr-wd" v-for="(wdItem, wdIdx) in weekNames" :key="wdIdx">{{ wdItem }}</text>
+        <text class="lr-wd" :style="{ color: theme.ink3 }" v-for="(wdItem, wdIdx) in weekNames" :key="wdIdx">{{ wdItem }}</text>
       </view>
       <view class="lr-drow" v-for="(rowItem, rowIdx) in calRows" :key="rowIdx">
         <view class="lr-cell" v-for="(cellItem, cellIdx) in rowItem" :key="cellIdx" @click="pickDay(cellItem)">
-          <view class="lr-pill" :class="pillClass(cellItem)"></view>
-          <text class="lr-daynum" :class="numClass(cellItem)">{{ cellItem.num }}</text>
-          <view class="lr-dot" :class="dotClass(cellItem)"></view>
+          <view class="lr-pill" :style="pillStyle(cellItem)"></view>
+          <text class="lr-daynum" :class="numClass(cellItem)" :style="numStyle(cellItem)">{{ cellItem.num }}</text>
+          <view class="lr-dot" :class="dotClass(cellItem)" :style="dotStyle(cellItem)"></view>
         </view>
       </view>
     </view>
 
     <!-- 选中日汇总卡 -->
-    <view class="lr-sum">
+    <view class="lr-sum" :style="{ backgroundColor: theme.card }">
       <view class="lr-sum-left">
-        <text class="lr-sum-date">{{ selDateText }}</text>
-        <text class="lr-sum-wd">{{ selWdText }}</text>
+        <text class="lr-sum-date" :style="{ color: theme.ink1 }">{{ selDateText }}</text>
+        <text class="lr-sum-wd" :style="{ color: theme.ink3 }">{{ selWdText }}</text>
       </view>
-      <view class="lr-sum-div"></view>
+      <view class="lr-sum-div" :style="{ backgroundColor: theme.line }"></view>
       <view class="lr-sum-mid">
         <image class="lr-flame" :src="'/static/profile/flame.svg'" mode="aspectFit"></image>
         <view class="lr-sum-numrow">
-          <text class="lr-sum-num" :class="selStatus.textClass">{{ selTotal }}</text>
-          <text class="lr-sum-unit" :class="selStatus.textClass">kcal</text>
+          <text class="lr-sum-num" :style="{ color: statusTextColor }">{{ selTotal }}</text>
+          <text class="lr-sum-unit" :style="{ color: statusUnitColor }">kcal</text>
         </view>
-        <text class="lr-sum-in">{{ t('rec.in') }}</text>
+        <text class="lr-sum-in" :style="{ color: theme.ink3 }">{{ t('rec.in') }}</text>
       </view>
       <view class="lr-sum-right">
-        <view class="lr-overpill" v-if="selOver > 0">
-          <text class="lr-overtxt">{{ tf('rec.over', [selOver.toString()]) }}</text>
+        <view class="lr-overpill" v-if="selOver > 0" :style="{ backgroundColor: overpillFill }">
+          <text class="lr-overtxt" :style="{ color: overTextColor }">{{ tf('rec.over', [selOver.toString()]) }}</text>
         </view>
-        <text class="lr-goaltxt">{{ tf('rec.goal', [goalVal.toString()]) }}</text>
+        <text class="lr-goaltxt" :style="{ color: theme.ink2 }">{{ tf('rec.goal', [goalVal.toString()]) }}</text>
       </view>
-      <view class="lr-bar-track">
-        <view class="lr-bar-green" :class="selStatus.bgClass" :style="{ width: barGreenW + 'rpx' }"></view>
+      <view class="lr-bar-track" :style="{ backgroundColor: theme.line }">
+        <view class="lr-bar-green" :style="barGreenStyle"></view>
         <view class="lr-bar-over" :style="{ width: barOverW + 'rpx' }" v-if="barOverW > 0"></view>
-        <view class="lr-bar-tick" :style="{ left: barTickX + 'rpx' }"></view>
+        <view class="lr-bar-tick" :style="{ left: barTickX + 'rpx', backgroundColor: theme.bg }"></view>
       </view>
     </view>
 
     <!-- 三餐摄入 -->
     <view class="lr-secrow">
-      <view class="lr-acc"></view>
-      <text class="lr-sec">{{ t('rec.meals') }}</text>
+      <view class="lr-acc" :style="{ backgroundColor: theme.accent }"></view>
+      <text class="lr-sec" :style="{ color: theme.ink1 }">{{ t('rec.meals') }}</text>
       <view class="lr-sec-link" @click="goDetail">
-        <text class="lr-link-txt">{{ t('rec.detail') }}</text>
-        <image class="lr-link-chev" :src="'/static/records/lr_chev.svg'" mode="aspectFit"></image>
+        <text class="lr-link-txt" :style="{ color: theme.ink3 }">{{ t('rec.detail') }}</text>
+        <image class="lr-link-chev" :src="asset('records/lr_chev.svg')" mode="aspectFit"></image>
       </view>
     </view>
     <view class="lr-mcard-row">
-      <view class="lr-mcard" v-for="(mItem, mIdx) in mealCards" :key="mIdx">
-        <view class="lr-mcirc">
+      <view class="lr-mcard" v-for="(mItem, mIdx) in mealCards" :key="mIdx" :style="{ backgroundColor: theme.card }">
+        <view class="lr-mcirc" :style="{ backgroundColor: theme.chip }">
           <image class="lr-mic" :src="mItem.icon" mode="aspectFit"></image>
         </view>
-        <text class="lr-mname">{{ mItem.name }}</text>
+        <text class="lr-mname" :style="{ color: theme.ink1 }">{{ mItem.name }}</text>
         <view class="lr-mkcal-row">
-          <text class="lr-mkcal">{{ mItem.cal }}</text>
-          <text class="lr-mkcal-u">kcal</text>
+          <text class="lr-mkcal" :style="{ color: theme.ink1 }">{{ mItem.cal }}</text>
+          <text class="lr-mkcal-u" :style="{ color: theme.ink2 }">kcal</text>
         </view>
         <view class="lr-mfoot-row">
-          <text class="lr-mtime">{{ mItem.time }}</text>
-          <text class="lr-mcount">{{ tf('rec.itemN', [mItem.count.toString()]) }}</text>
+          <text class="lr-mtime" :style="{ color: theme.ink3 }">{{ mItem.time }}</text>
+          <text class="lr-mcount" :style="{ color: theme.ink3 }">{{ tf('rec.itemN', [mItem.count.toString()]) }}</text>
         </view>
       </view>
     </view>
 
     <!-- 主要食物 -->
     <view class="lr-secrow">
-      <view class="lr-acc"></view>
-      <text class="lr-sec">{{ t('rec.mains') }}</text>
+      <view class="lr-acc" :style="{ backgroundColor: theme.accent }"></view>
+      <text class="lr-sec" :style="{ color: theme.ink1 }">{{ t('rec.mains') }}</text>
       <view class="lr-sec-link" @click="goDetail">
-        <text class="lr-link-txt">{{ t('rec.all') }}</text>
-        <image class="lr-link-chev" :src="'/static/records/lr_chev.svg'" mode="aspectFit"></image>
+        <text class="lr-link-txt" :style="{ color: theme.ink3 }">{{ t('rec.all') }}</text>
+        <image class="lr-link-chev" :src="asset('records/lr_chev.svg')" mode="aspectFit"></image>
       </view>
     </view>
     <view class="lr-fcard-row">
-      <view class="lr-fcard" v-for="(fItem, fIdx) in foodCards" :key="fIdx" @click="openEncyclopedia(fItem.img)">
+      <view class="lr-fcard" v-for="(fItem, fIdx) in foodCards" :key="fIdx" :style="{ backgroundColor: theme.card }" @click="openEncyclopedia(fItem.img)">
         <image class="lr-fphoto" :src="fItem.img" mode="aspectFill"></image>
-        <text class="lr-fname">{{ fItem.name }}</text>
-        <text class="lr-fkcal">{{ fItem.kcal }} kcal</text>
+        <text class="lr-fname" :style="{ color: theme.ink1 }">{{ fItem.name }}</text>
+        <text class="lr-fkcal" :style="{ color: theme.ink2 }">{{ fItem.kcal }} kcal</text>
       </view>
     </view>
     <view v-if="foodCards.length === 0" class="lr-empty">
-      <text class="lr-empty-txt">{{ t('rec.empty') }}</text>
+      <text class="lr-empty-txt" :style="{ color: theme.ink3 }">{{ t('rec.empty') }}</text>
     </view>
 
     <view class="lr-bottom-space"></view>
@@ -113,8 +113,8 @@
     <Tabbar active="records" ></Tabbar>
 
     <!-- 常驻导航栏（#28）：本页已升为一级 Tab 页，跨阈出栏只留标题，无返回钮（Boss 拍板第 4 条） -->
-    <view v-if="scrolled" class="rec-nav" :style="{ height: navBarH + 'px', paddingTop: sbH + 'px' }">
-      <text class="rec-nav-title">{{ t('rec.title') }}</text>
+    <view v-if="scrolled" class="rec-nav" :style="navBarStyle">
+      <text class="rec-nav-title" :style="{ color: navBarTitleColor }">{{ t('rec.title') }}</text>
     </view>
   </view>
 </template>
@@ -127,6 +127,7 @@ import { useFoodStore, dayKeyOf, dayRange, MEAL_KEYS, MEAL_LABELS, FoodEntry } f
 import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import { foodIdFromImg } from '../../stores/encyclopedia'
 import { triggerHaptic } from '../../stores/settings'
+import { useTheme, themeAsset, FIXED_COLORS } from '../../composables/useTheme'
 import Tabbar from '../../components/Tabbar.uvue'
 
 /**
@@ -211,23 +212,16 @@ const calRows = computed<DayCell[][]>(() => {
   return rows
 })
 
-function pillClass(cell: DayCell): string {
-  if (cell.key === selKey.value) return 'lr-pill-sel'
-  if (cell.key === todayKey) return 'lr-pill-today'
-  return ''
-}
 function numClass(cell: DayCell): string {
   if (cell.key === selKey.value) return 'lr-daynum-sel'
   if (cell.key === todayKey) return 'lr-daynum-today'
-  if (!cell.inMonth) return 'lr-daynum-out'
   return ''
 }
+/** 超标圆点用全局危险色（class），常规与选中态跟主题（style） */
 function dotClass(cell: DayCell): string {
-  const t = food.dayTotals[cell.key] ?? 0
-  if (cell.key === selKey.value) return t > 0 ? 'lr-dot-sel' : ''
-  if (t <= 0) return ''
-  if (t > goalVal.value) return 'lr-dot-over'
-  return 'lr-dot-on'
+  if (cell.key === selKey.value) return ''
+  if ((food.dayTotals[cell.key] ?? 0) > goalVal.value) return 'lr-dot-over'
+  return ''
 }
 
 function pickDay(cell: DayCell): void {
@@ -279,6 +273,98 @@ const selOver = computed<number>(() => {
 })
 const selStatus = computed(() => getCalorieStatus(selTotal.value, goalVal.value))
 
+const { theme, isDark, accentId } = useTheme()
+
+/** 资产按 (accent, mode) 取五档变体；未登记底稿（语义色／无彩稿）自动回落原路径 */
+function asset(path: string): string {
+  return themeAsset(accentId.value, isDark.value, '/static/' + path)
+}
+
+/** 品牌渐变头：浅态走该档 accent 三档渐变，暗态改 card 纯色（同 Settings 页既定处理） */
+const headerStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  if (isDark.value) {
+    st['background-color'] = theme.value.card
+  } else {
+    st['background-color'] = theme.value.accent
+    st['background-image'] = 'linear-gradient(' + theme.value.accent2 + ' 0%, ' + theme.value.accent + ' 60%, ' + theme.value.accentDeep + ' 100%)'
+  }
+  return st
+})
+const headerTitleColor = computed((): string => isDark.value ? theme.value.ink1 : theme.value.onAccent)
+const headerSubColor = computed((): string => isDark.value ? theme.value.ink2 : 'rgba(255, 255, 255, 0.85)')
+
+/** 常驻导航栏＝滚动后与头图末色无缝接续的实底栏，几何与配色一并运行时下发 */
+const navBarStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  st['height'] = navBarH.value + 'px'
+  st['padding-top'] = sbH.value + 'px'
+  st['background-color'] = isDark.value ? theme.value.card : theme.value.accent
+  if (!isDark.value) st['box-shadow'] = '0 4rpx 20rpx rgba(10, 79, 61, 0.10)'
+  return st
+})
+const navBarTitleColor = computed((): string => isDark.value ? theme.value.ink1 : theme.value.onAccent)
+
+/** 绿档文字跟主题 ink 轴；接近上限／超标落全局语义色（§8.3 状态色不随主题轮值） */
+const statusTextColor = computed((): string => {
+  if (selStatus.value.type == 'green') return theme.value.ink1
+  return selStatus.value.color
+})
+const statusUnitColor = computed((): string => selStatus.value.type == 'green' ? theme.value.ink2 : statusTextColor.value)
+
+const barGreenStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  st['width'] = barGreenW.value + 'rpx'
+  if (selStatus.value.type == 'green') {
+    st['background-color'] = theme.value.accent
+    st['background-image'] = 'linear-gradient(to right, ' + theme.value.accent2 + ', ' + theme.value.accent + ')'
+  } else {
+    st['background-color'] = selStatus.value.color
+  }
+  return st
+})
+
+/** 超标胶囊＝珊瑚语义色浅底，暗态改同色低透明度以免整块刺眼 */
+const overpillFill = computed((): string => isDark.value ? 'rgba(255, 158, 125, 0.18)' : 'rgba(255, 158, 125, 0.25)')
+const overTextColor = computed((): string => isDark.value ? FIXED_COLORS.statusCoral : '#FA543A')
+
+function pillStyle(cell: DayCell): Record<string, string> {
+  const st = {} as Record<string, string>
+  if (cell.key === selKey.value) {
+    st['background-color'] = theme.value.accentDeep
+    st['background-image'] = 'linear-gradient(' + theme.value.accent2 + ', ' + theme.value.accentDeep + ')'
+  } else if (cell.key === todayKey) {
+    st['background-color'] = theme.value.chip
+  }
+  return st
+}
+
+function numStyle(cell: DayCell): Record<string, string> {
+  const st = {} as Record<string, string>
+  if (cell.key === selKey.value) {
+    st['color'] = theme.value.onAccent
+  } else if (cell.key === todayKey) {
+    st['color'] = theme.value.accent
+  } else if (!cell.inMonth) {
+    st['color'] = theme.value.sysIndicator
+  } else {
+    st['color'] = theme.value.ink1
+  }
+  return st
+}
+
+/** 超标圆点保留全局危险色（由 .lr-dot-over 承担），其余两态跟主题 */
+function dotStyle(cell: DayCell): Record<string, string> {
+  const st = {} as Record<string, string>
+  const total = food.dayTotals[cell.key] ?? 0
+  if (cell.key === selKey.value) {
+    if (total > 0) st['background-color'] = theme.value.onAccent
+  } else if (total > 0 && total <= goalVal.value) {
+    st['background-color'] = theme.value.accent
+  }
+  return st
+}
+
 /** 319px 宽，最大跨度 2x goal */
 const selDateText = computed<string>(() => {
   const parts = selKey.value.split('-')
@@ -315,10 +401,10 @@ interface MealCard {
 }
 
 const MEAL_ICONS: Record<string, string> = {
-  breakfast: '/static/records/lr_meal_breakfast.svg',
-  lunch: '/static/records/lr_meal_lunch.svg',
-  dinner: '/static/records/lr_meal_dinner.svg',
-  snack: '/static/records/lr_meal_snack.svg',
+  breakfast: 'records/lr_meal_breakfast.svg',
+  lunch: 'records/lr_meal_lunch.svg',
+  dinner: 'records/lr_meal_dinner.svg',
+  snack: 'records/lr_meal_snack.svg',
 }
 
 const mealCards = computed<MealCard[]>(() => {
@@ -335,7 +421,7 @@ const mealCards = computed<MealCard[]>(() => {
       time = hh + ':' + mm
     }
     out.push({
-      icon: MEAL_ICONS[mk] ?? '',
+      icon: asset(MEAL_ICONS[mk] ?? ''),
       name: t('meal.' + mk),
       cal,
       time,
@@ -383,7 +469,6 @@ function openEncyclopedia(img: string): void {
 
 <style>
 .page {
-  background-color: #F2FAF5;
   position: absolute;
   left: 0;
   top: 0;
@@ -402,8 +487,6 @@ function openEncyclopedia(img: string): void {
 /* ===== Header（普通自然的高级绿色平滑渐变） ===== */
 .lr-header {
   position: relative;
-  background-color: #29B385;
-  background-image: linear-gradient( #32D0A0 0%, #1FBF8F 60%, #159C72 100%);
   padding-bottom: 56rpx;
 }
 .lr-nav {
@@ -420,13 +503,11 @@ function openEncyclopedia(img: string): void {
 .lr-title {
   font-size: 38rpx;
   font-weight: bold;
-  color: #FFFFFF;
   height: 52rpx;
   line-height: 52rpx;
 }
 .lr-sub {
   font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.85);
   height: 32rpx;
   line-height: 32rpx;
   margin-top: 6rpx;
@@ -435,7 +516,6 @@ function openEncyclopedia(img: string): void {
 /* ===== 月历卡 347×292 r18，自然上叠保留呼吸感 ===== */
 .lr-cal {
   margin: -32rpx 28rpx 0 28rpx;
-  background-color: #FFFFFF;
   border-radius: 36rpx;
   padding: 26rpx 0 38rpx 0;
   flex-shrink: 0;
@@ -456,7 +536,6 @@ function openEncyclopedia(img: string): void {
 .lr-mlabel {
   font-size: 28rpx;
   font-weight: bold;
-  color: #0A4F3D;
 }
 .lr-wrow {
   flex-direction: row;
@@ -467,7 +546,6 @@ function openEncyclopedia(img: string): void {
   text-align: center;
   font-size: 22rpx;
   font-weight: bold;
-  color: rgba(15, 79, 61, 0.34);
 }
 .lr-drow {
   flex-direction: row;
@@ -491,29 +569,16 @@ function openEncyclopedia(img: string): void {
   height: 72rpx;
   border-radius: 22rpx;
 }
-.lr-pill-sel {
-  background-color: #0A7A5C;
-  background-image: linear-gradient( #45C4A2, #0A7A5C);
-}
-.lr-pill-today {
-  background-color: #EAF9F3;
-}
 .lr-daynum {
   font-size: 25rpx;
   font-weight: bold;
-  color: #0F5B44;
   z-index: 1;
 }
 .lr-daynum-sel {
-  color: #FFFFFF;
   font-weight: 700;
 }
 .lr-daynum-today {
-  color: #0A7A5C;
   font-weight: 700;
-}
-.lr-daynum-out {
-  color: #C6D6CE;
 }
 .lr-dot {
   width: 8rpx;
@@ -523,21 +588,14 @@ function openEncyclopedia(img: string): void {
   z-index: 1;
   background-color: transparent;
 }
-.lr-dot-on {
-  background-color: #1FBF8F;
-}
 .lr-dot-over {
   background-color: #FB5D37;
-}
-.lr-dot-sel {
-  background-color: #FFFFFF;
 }
 
 /* ===== 选中日汇总卡 347×92 r16 ===== */
 .lr-sum {
   margin: 20rpx 28rpx 0 28rpx;
   height: 184rpx;
-  background-color: #FFFFFF;
   border-radius: 32rpx;
   flex-shrink: 0;
   position: relative;
@@ -550,11 +608,9 @@ function openEncyclopedia(img: string): void {
 .lr-sum-date {
   font-size: 26rpx;
   font-weight: 700;
-  color: #0F5B44;
 }
 .lr-sum-wd {
   font-size: 21rpx;
-  color: rgba(15, 79, 61, 0.34);
   margin-top: 4rpx;
 }
 .lr-sum-div {
@@ -563,7 +619,6 @@ function openEncyclopedia(img: string): void {
   top: 32rpx;
   width: 1px;
   height: 88rpx;
-  background-color: #EDF4F0;
 }
 .lr-sum-mid {
   position: absolute;
@@ -585,18 +640,15 @@ function openEncyclopedia(img: string): void {
 .lr-sum-num {
   font-size: 42rpx;
   font-weight: 800;
-  color: #0A5A40;
 }
 .lr-sum-unit {
   font-size: 20rpx;
   font-weight: bold;
-  color: rgba(15, 79, 61, 0.6);
   margin-left: 8rpx;
   margin-bottom: 6rpx;
 }
 .lr-sum-in {
   font-size: 19rpx;
-  color: rgba(15, 79, 61, 0.34);
   margin-top: 20rpx;
 }
 .lr-sum-right {
@@ -609,17 +661,14 @@ function openEncyclopedia(img: string): void {
   height: 40rpx;
   padding: 0 20rpx 0 20rpx;
   border-radius: 20rpx;
-  background-color: #FDF0ED;
   justify-content: center;
 }
 .lr-overtxt {
   font-size: 19rpx;
   font-weight: bold;
-  color: #FA543A;
 }
 .lr-goaltxt {
   font-size: 20rpx;
-  color: rgba(15, 79, 61, 0.6);
   margin-top: 14rpx;
 }
 .lr-bar-track {
@@ -629,13 +678,11 @@ function openEncyclopedia(img: string): void {
   width: 630rpx;
   height: 12rpx;
   border-radius: 6rpx;
-  background-color: #EDF4F0;
   flex-direction: row;
 }
 .lr-bar-green {
   height: 12rpx;
   border-radius: 6rpx;
-  background-image: linear-gradient(to right, #45C4A2, #0A7A5C);
 }
 .lr-bar-over {
   height: 12rpx;
@@ -649,7 +696,6 @@ function openEncyclopedia(img: string): void {
   width: 4rpx;
   height: 20rpx;
   border-radius: 2rpx;
-  background-color: #FFFFFF;
 }
 
 /* ===== 分区标题 ===== */
@@ -663,12 +709,10 @@ function openEncyclopedia(img: string): void {
   width: 6rpx;
   height: 26rpx;
   border-radius: 3rpx;
-  background-color: #1FBF8F;
 }
 .lr-sec {
   font-size: 26rpx;
   font-weight: 700;
-  color: #0F5B44;
   margin-left: 10rpx;
   flex: 1;
 }
@@ -678,7 +722,6 @@ function openEncyclopedia(img: string): void {
 }
 .lr-link-txt {
   font-size: 21rpx;
-  color: rgba(15, 79, 61, 0.34);
 }
 .lr-link-chev {
   width: 24rpx;
@@ -695,7 +738,6 @@ function openEncyclopedia(img: string): void {
 .lr-mcard {
   width: 160rpx;
   height: 188rpx;
-  background-color: #FFFFFF;
   border-radius: 28rpx;
   padding: 16rpx 6rpx 14rpx 6rpx;
   align-items: center;
@@ -707,7 +749,6 @@ function openEncyclopedia(img: string): void {
   width: 52rpx;
   height: 52rpx;
   border-radius: 26rpx;
-  background-color: #E7F7EF;
   justify-content: center;
   align-items: center;
 }
@@ -718,7 +759,6 @@ function openEncyclopedia(img: string): void {
 .lr-mname {
   font-size: 22rpx;
   font-weight: bold;
-  color: #0F5B44;
   margin-top: 6rpx;
   height: 30rpx;
   line-height: 30rpx;
@@ -735,12 +775,10 @@ function openEncyclopedia(img: string): void {
 .lr-mkcal {
   font-size: 28rpx;
   font-weight: 800;
-  color: #0A5A40;
 }
 .lr-mkcal-u {
   font-size: 16rpx;
   font-weight: bold;
-  color: rgba(15, 79, 61, 0.6);
   margin-left: 4rpx;
   margin-bottom: 2rpx;
 }
@@ -754,12 +792,10 @@ function openEncyclopedia(img: string): void {
 }
 .lr-mtime {
   font-size: 17rpx;
-  color: rgba(15, 79, 61, 0.38);
   margin-right: 6rpx;
 }
 .lr-mcount {
   font-size: 17rpx;
-  color: rgba(15, 79, 61, 0.38);
 }
 
 /* ===== 食物卡 80×104 r14 ===== */
@@ -771,7 +807,6 @@ function openEncyclopedia(img: string): void {
 .lr-fcard {
   width: 160rpx;
   height: 208rpx;
-  background-color: #FFFFFF;
   border-radius: 28rpx;
   align-items: center;
   flex-shrink: 0;
@@ -785,14 +820,12 @@ function openEncyclopedia(img: string): void {
 .lr-fname {
   font-size: 20rpx;
   font-weight: bold;
-  color: #0F5B44;
   margin-top: 10rpx;
   max-width: 144rpx;
   text-overflow: ellipsis;
 }
 .lr-fkcal {
   font-size: 17rpx;
-  color: rgba(15, 79, 61, 0.6);
   margin-top: 4rpx;
 }
 .lr-empty {
@@ -801,7 +834,6 @@ function openEncyclopedia(img: string): void {
 }
 .lr-empty-txt {
   font-size: 24rpx;
-  color: rgba(15, 79, 61, 0.34);
 }
 .lr-bottom-space {
   height: 184rpx;
@@ -818,13 +850,10 @@ function openEncyclopedia(img: string): void {
   z-index: 45;
   flex-direction: row;
   align-items: center;
-  background-color: #39AD95;
-  box-shadow: 0 4rpx 20rpx rgba(10, 79, 61, 0.10);
 }
 .rec-nav-title {
   font-size: 34rpx;
   font-weight: bold;
-  color: #FFFFFF;
   margin-left: 32rpx;
 }
 </style>

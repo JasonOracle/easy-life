@@ -1,19 +1,19 @@
-<!-- [变更日志] 三 Tab 悬浮玻璃胶囊；2026-09-25 标签文案接入 i18n 字典层 t()，中英随 settings.locale 切换 -->
+<!-- [变更日志] 三 Tab 悬浮玻璃胶囊；2026-09-25 标签色／暗态胶囊底改逐元素 :style 下发（App 端无后代选择器，原 MP 暗态规则在 App 上是死代码）；图标换 /static/tab 矢量资产并按 (accent, mode) 取变体 -->
 <template>
   <view class="tb-bar" :class="barClass" :style="barStyle">
     <!-- 选中气泡：稿面完全内嵌于胶囊（上下各留 6、左右各留 4），几何由 :style 逐帧下发 -->
     <view class="tb-bubble" :class="bubbleClass" :style="bubbleStyle"></view>
     <view class="tb-item" @click="onTap(0)">
       <image class="tb-ic tb-ic-home" :src="iconSrc(0)" mode="aspectFit"></image>
-      <text class="tb-label" :class="labelClass(0)">{{ tabLabels.home }}</text>
+      <text class="tb-label" :style="{ color: labelColor(0) }">{{ tabLabels.home }}</text>
     </view>
     <view class="tb-item" @click="onTap(1)">
       <image class="tb-ic tb-ic-rec" :src="iconSrc(1)" mode="aspectFit"></image>
-      <text class="tb-label" :class="labelClass(1)">{{ tabLabels.records }}</text>
+      <text class="tb-label" :style="{ color: labelColor(1) }">{{ tabLabels.records }}</text>
     </view>
     <view class="tb-item" @click="onTap(2)">
       <image class="tb-ic tb-ic-me" :src="iconSrc(2)" mode="aspectFit"></image>
-      <text class="tb-label" :class="labelClass(2)">{{ tabLabels.me }}</text>
+      <text class="tb-label" :style="{ color: labelColor(2) }">{{ tabLabels.me }}</text>
     </view>
   </view>
 </template>
@@ -22,17 +22,17 @@
 import { computed, ref, onMounted } from 'vue'
 import { useDeviceStore } from '../stores/device'
 import { t } from '../composables/i18n'
+import { useTheme, themeAsset } from '../composables/useTheme'
 
 const props = defineProps<{
   /** 当前激活页：home | records | profile */
   active: string
-  /** 深色底（个人中心／设置暗黑主题时由页面传入；默认 false=稿面浅底） */
-  dark?: boolean
 }>()
 
 // ── 稿面几何（DesignTokens §7.2，按 750rpx 规范自适应，基准宽 750rpx 对应 375dp）────
 const device = useDeviceStore()
 const glass = computed((): boolean => device.backdropBlur)
+const { theme, isDark, accentId } = useTheme()
 
 type TabLabels = { home: string, records: string, me: string }
 const tabLabels = computed((): TabLabels => {
@@ -44,10 +44,11 @@ const KEYS = ['home', 'records', 'profile']
 const PAGES = ['home/Home', 'records/Records', 'profile/Profile']
 /** 气泡飞行起点（上一个 Tab 的下标）跨页载体：redirectTo 会重挂载组件，模块级状态在小程序端不可靠 */
 const ORIGIN_KEY = 'ct_tab_origin'
+// 矢量底稿（toolchain/gen_tab_icons 系），变体由 gen_theme_variants.py 按 (accent, mode) 五档生成
 const ICONS = [
-  ['/static/home/home.png', '/static/home/home-selected.png'],
-  ['/static/home/rili.png', '/static/home/rili-selected.png'],
-  ['/static/home/center.png', '/static/home/center-selected.png']
+  ['/static/tab/tab_home.svg', '/static/tab/tab_home_sel.svg'],
+  ['/static/tab/tab_calendar.svg', '/static/tab/tab_calendar_sel.svg'],
+  ['/static/tab/tab_profile.svg', '/static/tab/tab_profile_sel.svg']
 ]
 
 function readOrigin(): number {
@@ -117,6 +118,8 @@ const barStyle = computed((): Record<string, string> => {
   const st = {} as Record<string, string>
   st['left'] = MARGIN + 'px'
   st['right'] = MARGIN + 'px'
+  // 暗态胶囊底走 token（各主题 card 加 alpha），浅态由 .tb-glass/.tb-flat 类承担
+  if (isDark.value) st['background-color'] = theme.value.tbBarDark
   // 有小白条＝贴在安全区上方 24rpx（稿面「距 Home 指示条 12px」）；无小白条＝44rpx 离底
   st['bottom'] = (safeBottom > 0 ? safeBottom + 24 * scaleRatio : 44 * scaleRatio) + 'px'
   st['height'] = BAR_H + 'px'
@@ -144,7 +147,7 @@ const bubbleStyle = computed((): Record<string, string> => {
   st['width'] = w + 'px'
   st['height'] = h + 'px'
   // 底色在运行时下发（不写成 .a.b 复合类选择器：App 端只认单类），取值＝DesignTokens §7.2
-  const dm = props.dark == true
+  const dm = isDark.value
   st['background-color'] = glass.value
     ? (dm ? 'rgba(255, 255, 255, 0.13)' : 'rgba(255, 255, 255, 0.18)')
     : 'rgba(255, 255, 255, 0.88)'
@@ -160,14 +163,14 @@ const bubbleStyle = computed((): Record<string, string> => {
 const barClass = computed((): string[] => {
   const c = ['tb-bar'] as string[]
   c.push(glass.value ? 'tb-glass' : 'tb-flat')
-  if (props.dark == true) c.push('tb-dark')
+  if (isDark.value) c.push('tb-dark')
   return c
 })
 
 const bubbleClass = computed((): string[] => {
   const c = ['tb-bubble'] as string[]
   c.push(glass.value ? 'tb-bub-glass' : 'tb-bub-flat')
-  if (props.dark == true) {
+  if (isDark.value) {
     c.push('tb-bub-dark')
   } else if (glass.value) {
     c.push('tb-bub-light')
@@ -176,11 +179,14 @@ const bubbleClass = computed((): string[] => {
 })
 
 function iconSrc(idx: number): string {
-  return idx == myIdx.value ? ICONS[idx][1] : ICONS[idx][0]
+  const base = idx == myIdx.value ? ICONS[idx][1] : ICONS[idx][0]
+  return themeAsset(accentId.value, isDark.value, base)
 }
 
-function labelClass(idx: number): string {
-  return idx == myIdx.value ? 'tb-label-on' : ''
+/** 逐元素下发文字色：App 端无后代选择器，浅档未选＝稿面 #8A8A8A，暗档＝该档 ink3 */
+function labelColor(idx: number): string {
+  if (idx == myIdx.value) return theme.value.tbTextOn
+  return isDark.value ? theme.value.ink3 : '#8A8A8A'
 }
 
 /** 入场时间线：起点态已在 setup 内就位（press＋anchorIdx），此处只推进 移动→落位→静止 三段 */
@@ -251,9 +257,8 @@ function onTap(idx: number): void {
   background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 45%);
   box-shadow: 0 -8rpx 48rpx rgba(10, 79, 61, 0.14);
 }
-/* 暗黑档：卡色 token #162924 加 alpha（玻璃面不丢 alpha），描边白 10%，投影改向下黑 */
+/* 暗黑档材质：折光与描边为中性白、投影改向下黑；胶囊底色由 :style 按主题 card 下发 */
 .tb-dark {
-  background-color: rgba(22, 41, 36, 0.72);
   background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 45%);
   border-top-color: rgba(255, 255, 255, 0.1);
   border-right-color: rgba(255, 255, 255, 0.1);
@@ -294,9 +299,6 @@ function onTap(idx: number): void {
   font-weight: bold;
   color: #8A8A8A;
   margin-left: 12rpx;
-}
-.tb-label-on {
-  color: #17916B;
 }
 
 /* ── 选中气泡 ── */
@@ -348,13 +350,4 @@ function onTap(idx: number): void {
   box-shadow: 0 8rpx 28rpx rgba(10, 79, 61, 0.1);
 }
 
-/* #ifdef MP-WEIXIN */
-/* 暗黑文字（后代选择器只在 MP 端生效；App 端须改逐元素 :class，见 AGENTS 深色模式条款） */
-.tb-dark .tb-label {
-  color: #8B9E94;
-}
-.tb-dark .tb-label-on {
-  color: #52D6AC;
-}
-/* #endif */
 </style>

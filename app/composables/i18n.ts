@@ -174,6 +174,10 @@ reg('gm.save', '保存设置', 'Save')
 reg('sb.budget', '今日 {0} / {1} kcal', 'Today {0} / {1} kcal')
 reg('sb.added', '{0} · 已加入', '{0} · added')
 
+// FoodToast 添加成功提示
+reg('ft.added', '已加入{0}', 'Added to {0}')
+reg('ft.done', '已添加', 'Added')
+
 // FoodPicker 选择弹层
 reg('fp.searchPh', '搜索食物 · 支持拼音 / 别名', 'Search food · pinyin / alias')
 reg('fp.all', '全部', 'All')

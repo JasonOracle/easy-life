@@ -1,19 +1,19 @@
 <template>
   <view class="sb-overlay" :class="{ 'sb-overlay-active': active }" v-if="render">
-    <view class="sb-badge" :class="{ 'sb-badge-active': active, 'sb-badge-out': exiting, 'sb-badge-low': lowMode }">
+    <view class="sb-badge" :class="{ 'sb-badge-active': active, 'sb-badge-out': exiting, 'sb-badge-low': lowMode }" :style="{ backgroundColor: theme.card }">
       <!-- 环形进度：底轨为纯 CSS 圆环（双端同构），画布只画进度弧 -->
-      <view class="sb-track"></view>
+      <view class="sb-track" :style="{ borderColor: trackTint }"></view>
       <canvas class="sb-canvas" type="2d" id="sb-ring" @ready="onCanvasReady"></canvas>
       <view class="sb-num-stack">
-        <text class="sb-big-num">{{ shownText }}</text>
-        <text class="sb-unit">kcal</text>
+        <text class="sb-big-num" :style="{ color: theme.ink1 }">{{ shownText }}</text>
+        <text class="sb-unit" :style="{ color: theme.ink2 }">kcal</text>
       </view>
       <view class="sb-budget-row">
-        <text class="sb-budget-text" :style="{ color: calStatus.color }">{{ budgetText }}</text>
+        <text class="sb-budget-text" :style="{ color: budgetTextColor }">{{ budgetText }}</text>
       </view>
       <view class="sb-meal-row">
         <image class="sb-meal-ico" :src="calStatus.type === 'coral' ? '/static/settle/sb_alert_coral.svg' : (calStatus.type === 'amber' ? '/static/settle/sb_alert.svg' : '/static/settle/sb_check.svg')" mode="aspectFit"></image>
-        <text class="sb-meal-text">{{ mealText }}</text>
+        <text class="sb-meal-text" :style="{ color: theme.ink3 }">{{ mealText }}</text>
       </view>
     </view>
   </view>
@@ -26,6 +26,7 @@ import { tf } from '../composables/i18n'
 import { useDeviceStore } from '../stores/device'
 import { useSettingsStore } from '../stores/settings'
 import { getCalorieStatus } from '../stores/goal'
+import { useTheme } from '../composables/useTheme'
 
 /**
  * 弹层③ 结算徽章（Pencil Dz3YV 结构 + MU1O4 动效时间轴）。
@@ -78,12 +79,23 @@ let ringCtx: any | null = null
 let readyFired = false
 
 const calStatus = computed(() => getCalorieStatus(props.after, props.goal))
+const { theme } = useTheme()
 const RING_COLOR: Record<string, string> = {
-  green: 'rgba(31, 191, 143, 1)',
   amber: 'rgba(232, 181, 77, 1)',
   coral: 'rgba(255, 158, 125, 1)'
 }
-const ringColor = computed<string>(() => RING_COLOR[calStatus.value.type])
+/** 绿档环色＝该档 accent（随主题轮值）；琥珀／珊瑚＝§8.3 固定语义色 */
+const ringColor = computed<string>(() => {
+  if (calStatus.value.type === 'green') return theme.value.accent
+  return RING_COLOR[calStatus.value.type]
+})
+/** 底轨＝环色同相 16% 透明（8 位十六进制末位 29≈0.16） */
+const trackTint = computed<string>(() => theme.value.accent + '29')
+/** 预算行是小字（13px），绿档改走深强调色以免亮薄荷压白底对比不足 */
+const budgetTextColor = computed<string>(() => {
+  if (calStatus.value.type === 'green') return theme.value.accentDeep
+  return calStatus.value.color
+})
 const finalRatio = computed<number>(() => {
   if (props.goal <= 0) return 1
   const r = props.after / props.goal
@@ -354,7 +366,6 @@ onUnmounted(() => { clearTimers() })
   width: 528rpx;
   height: 512rpx;
   border-radius: 56rpx;
-  background-color: #F2FAF5;
   position: relative;
   box-shadow: 0 28rpx 72rpx rgba(10, 79, 61, 0.14);
   flex-shrink: 0;
@@ -390,7 +401,6 @@ onUnmounted(() => { clearTimers() })
   height: 292rpx;
   border-width: 36rpx;
   border-style: solid;
-  border-color: rgba(31, 191, 143, 0.16);
   border-radius: 146rpx;
 }
 
@@ -417,13 +427,11 @@ onUnmounted(() => { clearTimers() })
 .sb-big-num {
   font-size: 68rpx;
   font-weight: bold;
-  color: #0A4F3D;
   line-height: 82rpx;
 }
 .sb-unit {
   font-size: 22rpx;
   font-weight: bold;
-  color: rgba(15, 79, 61, 0.6);
   line-height: 32rpx;
 }
 
@@ -440,10 +448,6 @@ onUnmounted(() => { clearTimers() })
 .sb-budget-text {
   font-size: 26rpx;
   font-weight: bold;
-  color: #0A7A5C;
-}
-.sb-budget-text-over {
-  color: #FF9E7D;
 }
 
 /* —— L5 夜宵行与图标 —— */
@@ -464,6 +468,5 @@ onUnmounted(() => { clearTimers() })
 }
 .sb-meal-text {
   font-size: 24rpx;
-  color: #73918B;
 }
 </style>

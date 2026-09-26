@@ -5,24 +5,27 @@
       <view
         class="step-btn ui-pressable"
         :class="{ 'step-btn-disabled': count <= minCount }"
+        :style="{ backgroundColor: theme.card }"
         hover-class="ui-pressed"
         :hover-stay-time="120"
         @click="stepDec"
       >
-        <text class="step-glyph" :class="{ 'step-glyph-disabled': count <= minCount }">−</text>
+        <text class="step-glyph" :style="{ color: glyphColor(count <= minCount) }">−</text>
       </view>
       <view
         class="capsule ui-pressable"
         :class="{ 'capsule-editing': editing, 'capsule-w2': digitCount === 2, 'capsule-w3': digitCount === 3 }"
+        :style="capsuleStyle(editing)"
         hover-class="ui-pressed"
         :hover-stay-time="120"
         @click="beginInput"
       >
-        <text class="capsule-num" :class="{ 'capsule-num-small': digitCount === 3, 'capsule-num-pop': popping }" v-if="!editing">{{ count }}</text>
-        <text class="capsule-unit" v-if="!editing">{{ unitLabel }}</text>
+        <text class="capsule-num" :class="{ 'capsule-num-small': digitCount === 3, 'capsule-num-pop': popping }" :style="{ color: theme.ink1 }" v-if="!editing">{{ count }}</text>
+        <text class="capsule-unit" :style="{ color: theme.ink3 }" v-if="!editing">{{ unitLabel }}</text>
         <input
           v-if="editing"
           class="capsule-input"
+          :style="{ color: theme.ink1 }"
           type="number"
           :value="inputText"
           @input="onInput"
@@ -34,21 +37,22 @@
       <view
         class="step-btn ui-pressable"
         :class="{ 'step-btn-disabled': count >= maxCount }"
+        :style="{ backgroundColor: theme.card }"
         hover-class="ui-pressed"
         :hover-stay-time="120"
         @click="stepInc"
       >
-        <text class="step-glyph" :class="{ 'step-glyph-disabled': count >= maxCount }">＋</text>
+        <text class="step-glyph" :style="{ color: glyphColor(count >= maxCount) }">＋</text>
       </view>
     </view>
     <view class="track" :class="{ 'track-shake': shaking }">
-      <view class="fill" :class="barClass" :style="{ width: fillPct + '%' }"></view>
-      <text class="tick" :style="{ left: '15%' }">1</text>
-      <text class="tick" :style="{ left: '39%' }">5</text>
-      <text class="tick" :style="{ left: '70%' }">25</text>
-      <text class="tick" :style="{ left: '100%' }">100</text>
+      <view class="fill" :class="barClass" :style="fillStyle"></view>
+      <text class="tick" :style="{ left: '15%', color: theme.ink3 }">1</text>
+      <text class="tick" :style="{ left: '39%', color: theme.ink3 }">5</text>
+      <text class="tick" :style="{ left: '70%', color: theme.ink3 }">25</text>
+      <text class="tick" :style="{ left: '100%', color: theme.ink3 }">100</text>
     </view>
-    <text class="meta">{{ tf('cs.meta', [unitLabel, gramsPerUnit.toString(), kcalPerUnit.toString()]) }}</text>
+    <text class="meta" :style="{ color: theme.ink3 }">{{ tf('cs.meta', [unitLabel, gramsPerUnit.toString(), kcalPerUnit.toString()]) }}</text>
   </view>
 </template>
 
@@ -61,6 +65,7 @@ import { watch } from 'vue'
 import { onUnmounted } from 'vue'
 import { MAX_COUNT, portionRatio, portionLevel } from '../stores/food'
 import { triggerHaptic } from '../stores/settings'
+import { useTheme } from '../composables/useTheme'
 
 /**
  * 计数步进器（个/片/串）。
@@ -92,12 +97,36 @@ let dismissTimer = 0
 
 const digitCount = computed(() => count.value.toString().length)
 const fillPct = computed(() => Math.round(portionRatio(count.value) * 1000) / 10)
-const barClass = computed(() => {
+const barClass = computed<string>(() => {
   const lv = portionLevel(count.value)
   if (lv === 1) return 'fill-amber'
   if (lv === 2) return 'fill-coral'
-  return 'fill-mint'
+  return ''
 })
+
+const { theme } = useTheme()
+
+/** 绿档进度条跟该档 accent 渐变；琥珀／珊瑚＝§8.3 固定语义色，仍由类承担 */
+const fillStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  st['width'] = fillPct.value + '%'
+  if (portionLevel(count.value) === 0) {
+    st['background-image'] = 'linear-gradient(to right, ' + theme.value.accent2 + ', ' + theme.value.accent + ')'
+  }
+  return st
+})
+
+/** 步进符号：可用态走该档深强调色，越界置灰走系统指示色 */
+function glyphColor(disabled: boolean): string {
+  return disabled ? theme.value.sysIndicator : theme.value.accentDeep
+}
+
+function capsuleStyle(onEdit: boolean): Record<string, string> {
+  const st = {} as Record<string, string>
+  st['background-color'] = theme.value.card
+  if (onEdit) st['border-color'] = theme.value.accent
+  return st
+}
 
 watch(count, () => {
   popping.value = false
@@ -191,7 +220,6 @@ onUnmounted(() => {
   width: 88rpx;
   height: 88rpx;
   border-radius: 44rpx;
-  background-color: #FFFFFF;
   justify-content: center;
   align-items: center;
   box-shadow: 0 6rpx 16rpx rgba(26, 102, 77, 0.1);
@@ -201,16 +229,11 @@ onUnmounted(() => {
 }
 .step-glyph {
   font-size: 40rpx;
-  color: #0A7A5C;
-}
-.step-glyph-disabled {
-  color: #A9BAB3;
 }
 .capsule {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  background-color: #FFFFFF;
   border-radius: 44rpx;
   min-width: 178rpx;
   height: 104rpx;
@@ -225,24 +248,21 @@ onUnmounted(() => {
 }
 .capsule-editing {
   border-width: 2px;
-  border-color: #1FBF8F;
+  border-style: solid;
 }
 .capsule-num {
   font-size: 68rpx;
   font-weight: bold;
-  color: #0A4F3D;
 }
 .capsule-num-small {
   font-size: 60rpx;
 }
 .capsule-unit {
   font-size: 26rpx;
-  color: #8FAEAF;
   margin-left: 4rpx;
 }
 .capsule-input {
   font-size: 60rpx;
-  color: #0A4F3D;
   width: 140rpx;
   text-align: center;
 }
@@ -250,7 +270,6 @@ onUnmounted(() => {
   position: relative;
   height: 16rpx;
   border-radius: 8rpx;
-  background-color: #DCEDE6;
   margin: 28rpx 48rpx 0 48rpx;
   /* 刻度标签以 absolute 悬在轨道下方，父盒默认裁切会让整组刻度消失 */
   overflow: visible;
@@ -262,9 +281,6 @@ onUnmounted(() => {
   transition-duration: 240ms;
   transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.fill-mint {
-  background-image: linear-gradient(to right, #7DEBC7, #1FBF8F);
-}
 .fill-amber {
   background-color: #E8B54D;
 }
@@ -275,11 +291,9 @@ onUnmounted(() => {
   position: absolute;
   top: 24rpx;
   font-size: 20rpx;
-  color: #8FAEAF;
 }
 .meta {
   font-size: 24rpx;
-  color: #73918B;
   text-align: center;
   margin-top: 36rpx;
 }

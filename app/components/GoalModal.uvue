@@ -1,31 +1,32 @@
 
 <template>
   <view class="gm-overlay" :class="{ 'gm-overlay-active': active }" v-if="render" @click="onOverlayTap">
-    <view class="gm-container" :class="{ 'gm-container-active': active }" @click.stop>
-      <view class="gm-sheet">
+    <!-- [变更日志] 目标弹窗色面（卡面/徽章/滑轨/标题文字）逐元素绑 useTheme token，图标按 themeAsset 取五档变体，App 端三主题×双模式已真机核验 -->
+    <view class="gm-container" :class="{ 'gm-container-active': active }" :style="{ backgroundColor: theme.card }" @click.stop>
+      <view class="gm-sheet" :style="gmSheetStyle">
       <view class="gm-head">
-        <view class="gm-badge">
-          <image class="gm-badge-ic" :src="'/static/goal/gm_target.svg'" mode="aspectFit"></image>
+        <view class="gm-badge" :style="{ backgroundColor: theme.thumbStroke }">
+          <image class="gm-badge-ic" :src="asset('goal/gm_target.svg')" mode="aspectFit"></image>
         </view>
         <view class="gm-headtxt">
-          <text class="gm-title">{{ t('gm.title') }}</text>
-          <text class="gm-sub">{{ t('gm.sub') }}</text>
+          <text class="gm-title" :style="{ color: theme.ink1 }">{{ t('gm.title') }}</text>
+          <text class="gm-sub" :style="{ color: theme.ink2 }">{{ t('gm.sub') }}</text>
         </view>
-        <view class="gm-closebtn" @click="close">
-          <image class="gm-close-ic" :src="'/static/goal/gm_close.svg'" mode="aspectFit"></image>
+        <view class="gm-closebtn" :style="{ backgroundColor: theme.card }" @click="close">
+          <image class="gm-close-ic" :src="asset('goal/gm_close.svg')" mode="aspectFit"></image>
         </view>
       </view>
 
-      <view class="gm-dial" id="gm-dial">
-        <view class="gm-stepbtn ui-pressable" :class="{ 'gm-stepbtn-off': picked <= MIN }" hover-class="ui-pressed" :hover-stay-time="120" @click="step(-1)">
-          <image class="gm-step-ic" :src="'/static/goal/gm_minus.svg'" mode="aspectFit"></image>
+      <view class="gm-dial" id="gm-dial" :style="{ backgroundColor: theme.cardSoft }">
+        <view class="gm-stepbtn ui-pressable" :class="{ 'gm-stepbtn-off': picked <= MIN }" :style="{ backgroundColor: theme.card }" hover-class="ui-pressed" :hover-stay-time="120" @click="step(-1)">
+          <image class="gm-step-ic" :src="asset('goal/gm_minus.svg')" mode="aspectFit"></image>
         </view>
-        <view class="gm-stepbtn gm-stepbtn-r ui-pressable" :class="{ 'gm-stepbtn-off': picked >= MAX }" hover-class="ui-pressed" :hover-stay-time="120" @click="step(1)">
-          <image class="gm-step-ic" :src="'/static/goal/gm_plus.svg'" mode="aspectFit"></image>
+        <view class="gm-stepbtn gm-stepbtn-r ui-pressable" :class="{ 'gm-stepbtn-off': picked >= MAX }" :style="{ backgroundColor: theme.card }" hover-class="ui-pressed" :hover-stay-time="120" @click="step(1)">
+          <image class="gm-step-ic" :src="asset('goal/gm_plus.svg')" mode="aspectFit"></image>
         </view>
         <view class="gm-numrow">
-          <text class="gm-bignum" :class="statusStyle.textClass">{{ picked }}</text>
-          <text class="gm-unit" :class="statusStyle.textClass">kcal</text>
+          <text class="gm-bignum" :style="{ color: statusTextColor }">{{ picked }}</text>
+          <text class="gm-unit" :style="{ color: statusTextColor }">kcal</text>
         </view>
         <view
           class="gm-dragzone"
@@ -34,47 +35,49 @@
           @touchend="onDragEnd"
           @touchcancel="onDragEnd"
         >
-          <view class="gm-track"></view>
-          <view class="gm-fill" :class="statusStyle.bgClass" :style="{ width: (ratio * 478) + 'rpx' }"></view>
-          <view class="gm-thumb" :style="{ left: (96 + ratio * 478 - 26) + 'rpx', borderColor: statusStyle.hex }"></view>
+          <view class="gm-track" :style="{ backgroundColor: theme.line }"></view>
+          <view class="gm-fill" :style="fillStyle"></view>
+          <view class="gm-thumb" :style="thumbStyle"></view>
         </view>
         <view class="gm-ticks">
           <text
             class="gm-tick"
             :class="{ 'gm-tick-on': tickItem === picked }"
+            :style="{ color: tickColor(tickItem === picked) }"
             v-for="(tickItem, tickIdx) in TICKS"
             :key="tickIdx"
           >{{ tickItem }}</text>
         </view>
       </view>
 
-      <text class="gm-qlabel">{{ t('gm.quick') }}</text>
+      <text class="gm-qlabel" :style="{ color: theme.ink1 }">{{ t('gm.quick') }}</text>
       <view class="gm-qtray">
         <view
           class="gm-qslot ui-pressable"
           :class="{ 'gm-qslot-on': quickItem === picked }"
+          :style="qslotStyle(quickItem === picked)"
           hover-class="ui-pressed"
           :hover-stay-time="120"
           v-for="(quickItem, quickIdx) in TICKS"
           :key="quickIdx"
           @click="pick(quickItem)"
         >
-          <text class="gm-qnum" :class="{ 'gm-qnum-on': quickItem === picked }">{{ quickItem }}</text>
-          <text class="gm-qunit" :class="{ 'gm-qunit-on': quickItem === picked }">kcal</text>
+          <text class="gm-qnum" :class="{ 'gm-qnum-on': quickItem === picked }" :style="{ color: qnumColor(quickItem === picked) }">{{ quickItem }}</text>
+          <text class="gm-qunit" :class="{ 'gm-qunit-on': quickItem === picked }" :style="{ color: qunitColor(quickItem === picked) }">kcal</text>
         </view>
       </view>
 
-      <view class="gm-tip">
-        <image class="gm-tip-ic" :src="'/static/goal/gm_bulb.svg'" mode="aspectFit"></image>
+      <view class="gm-tip" :style="{ backgroundColor: theme.chip }">
+        <image class="gm-tip-ic" :src="asset('goal/gm_bulb.svg')" mode="aspectFit"></image>
         <view class="gm-tip-txt">
-          <text class="gm-tip-title">{{ t('gm.tipT') }}</text>
-          <text class="gm-tip-sub">{{ t('gm.tipS') }}</text>
+          <text class="gm-tip-title" :style="{ color: theme.ink1 }">{{ t('gm.tipT') }}</text>
+          <text class="gm-tip-sub" :style="{ color: theme.ink2 }">{{ t('gm.tipS') }}</text>
         </view>
-        <image class="gm-tip-arrow" :src="'/static/goal/gm_chev.svg'" mode="aspectFit"></image>
+        <image class="gm-tip-arrow" :src="asset('goal/gm_chev.svg')" mode="aspectFit"></image>
       </view>
 
-      <view class="gm-save ui-pressable" hover-class="gm-btn-pressed" :hover-stay-time="140" @click="save">
-        <text class="gm-save-txt">{{ t('gm.save') }}</text>
+      <view class="gm-save ui-pressable" :style="saveStyle" hover-class="gm-btn-pressed" :hover-stay-time="140" @click="save">
+        <text class="gm-save-txt" :style="{ color: theme.onAccent }">{{ t('gm.save') }}</text>
       </view>
     </view>
     </view>
@@ -91,6 +94,7 @@ import { nextTick } from 'vue'
 import { getCurrentInstance } from 'vue'
 
 import { playSound, triggerHaptic } from '../stores/settings'
+import { useTheme, themeAsset, FIXED_COLORS } from '../composables/useTheme'
 
 const props = defineProps<{
   show: boolean
@@ -127,15 +131,91 @@ function clamp(v: number): number {
 const ratio = computed<number>(() => (picked.value - MIN) / (MAX - MIN))
 const fillW = computed<number>(() => Math.round(ratio.value * TRACK_W * 10) / 10)
 
-const statusStyle = computed(() => {
-  // 阈值跟随滑块范围（MIN..MAX）的比例，不写死绝对值——范围变更时分档自动同步
-  if (ratio.value <= 0.5) {
-    return { textClass: 'gm-clr-mint', bgClass: 'gm-bg-mint', hex: '#1FBF8F' }
-  } else if (ratio.value <= 0.75) {
-    return { textClass: 'gm-clr-amber', bgClass: 'gm-bg-amber', hex: '#E8B54D' }
+const { theme, isDark, accentId } = useTheme()
+
+// [变更日志] 2026-09-25: App 端弹层底部安全区补齐——类内 calc(env) padding-bottom 仅 MP 生效，原生端保存钮距底仅剩固定 48rpx 可被小白条压住，按 safeAreaInsets 运行时下发（MP 返回空对象不覆盖类规则）
+/** 弹层底距：App 原生端无 env() 通道，＝设计底衬 48rpx 换算 px ＋ 安全区；MP 端交回类内 calc 规则 */
+const gmSheetStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  // #ifdef APP
+  const sysGm = uni.getSystemInfoSync()
+  const insetsGm = sysGm.safeAreaInsets
+  const sbGm = insetsGm != null ? insetsGm.bottom : 0
+  st['padding-bottom'] = (48 * sysGm.windowWidth / 750 + sbGm) + 'px'
+  // #endif
+  return st
+})
+
+/** 资产按 (accent, mode) 取五档变体；未登记底稿自动回落原路径 */
+function asset(path: string): string {
+  return themeAsset(accentId.value, isDark.value, '/static/' + path)
+}
+
+// 阈值跟随滑块范围（MIN..MAX）的比例，不写死绝对值——范围变更时分档自动同步
+const statusMint = computed<boolean>(() => ratio.value <= 0.5)
+const statusWarn = computed<boolean>(() => ratio.value <= 0.75)
+
+/** 绿档＝该档 accent 轴随主题轮值；琥珀／珊瑚＝§8.3 固定语义色，暗态提亮以保住对比度 */
+const statusTextColor = computed<string>(() => {
+  if (statusMint.value) return theme.value.ink1
+  if (statusWarn.value) return isDark.value ? FIXED_COLORS.statusAmber : '#B28322'
+  return isDark.value ? FIXED_COLORS.statusCoral : '#D35C37'
+})
+const statusHex = computed<string>(() => {
+  if (statusMint.value) return theme.value.accent
+  return statusWarn.value ? FIXED_COLORS.statusAmber : FIXED_COLORS.statusCoral
+})
+const fillStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  st['width'] = (ratio.value * 478) + 'rpx'
+  if (statusMint.value) {
+    st['background-color'] = theme.value.accent
+    st['background-image'] = 'linear-gradient(to right, ' + theme.value.accent2 + ', ' + theme.value.accent + ')'
+  } else if (statusWarn.value) {
+    st['background-color'] = FIXED_COLORS.statusAmber
+    st['background-image'] = 'linear-gradient(to right, #FAD961, ' + FIXED_COLORS.statusAmber + ')'
   } else {
-    return { textClass: 'gm-clr-coral', bgClass: 'gm-bg-coral', hex: '#FF9E7D' }
+    st['background-color'] = FIXED_COLORS.statusCoral
+    st['background-image'] = 'linear-gradient(to right, #FFB89E, ' + FIXED_COLORS.statusCoral + ')'
   }
+  return st
+})
+const thumbStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  st['left'] = (96 + ratio.value * 478 - 26) + 'rpx'
+  st['background-color'] = theme.value.card
+  st['border-color'] = statusHex.value
+  return st
+})
+
+function tickColor(on: boolean): string {
+  return on ? theme.value.ink1 : theme.value.ink3
+}
+function qnumColor(on: boolean): string {
+  return on ? theme.value.ink1 : theme.value.ink2
+}
+function qunitColor(on: boolean): string {
+  return on ? theme.value.accent : theme.value.ink3
+}
+/** 快选胶囊：选中件抬起为卡面（暗档无更亮白，改走 chip），未选件＝cardSoft 凹底 */
+function qslotStyle(on: boolean): Record<string, string> {
+  const st = {} as Record<string, string>
+  if (on) {
+    st['background-color'] = isDark.value ? theme.value.chip : theme.value.card
+  } else {
+    st['background-color'] = theme.value.cardSoft
+  }
+  st['border-color'] = theme.value.line
+  return st
+}
+/** 保存钮：浅态 accent→accentDeep 渐变，暗态改纯色（暗档 accentDeep 是亮色，不能当渐变尾色） */
+const saveStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  st['background-color'] = theme.value.accent
+  if (!isDark.value) {
+    st['background-image'] = 'linear-gradient(' + theme.value.accent + ', ' + theme.value.accentDeep + ')'
+  }
+  return st
 })
 
 watch(
@@ -283,7 +363,6 @@ function save(): void {
   bottom: 0;
   height: auto;
   min-height: 1140rpx;
-  background-color: #FFFFFF;
   border-top-left-radius: 68rpx;
   border-top-right-radius: 68rpx;
   transform: translateY(100%);
@@ -316,7 +395,6 @@ function save(): void {
   width: 88rpx;
   height: 88rpx;
   border-radius: 28rpx;
-  background-color: #EAF9F3;
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
@@ -334,12 +412,10 @@ function save(): void {
 .gm-title {
   font-size: 34rpx;
   font-weight: 700;
-  color: #0A4F3D;
 }
 /* 稿面 e2vUw：12 $muted */
 .gm-sub {
   font-size: 24rpx;
-  color: rgba(15, 79, 61, 0.6);
   margin-top: 10rpx;
 }
 /* 稿面 cPaDA：32 白圆 r16 阴影 #0A4F3D24，x 图标 16 */
@@ -347,7 +423,6 @@ function save(): void {
   width: 64rpx;
   height: 64rpx;
   border-radius: 32rpx;
-  background-color: #FFFFFF;
   justify-content: center;
   align-items: center;
   box-shadow: 0 4rpx 16rpx rgba(10, 79, 61, 0.14);
@@ -362,7 +437,6 @@ function save(): void {
   position: relative;
   height: 300rpx;
   margin-top: 36rpx;
-  background-color: #F2FAF5;
   border-radius: 40rpx;
   overflow: visible;
   flex-shrink: 0;
@@ -375,7 +449,6 @@ function save(): void {
   width: 88rpx;
   height: 88rpx;
   border-radius: 44rpx;
-  background-color: #FFFFFF;
   justify-content: center;
   align-items: center;
   box-shadow: 0 4rpx 12rpx rgba(10, 79, 61, 0.1);
@@ -405,13 +478,11 @@ function save(): void {
 .gm-bignum {
   font-size: 92rpx;
   font-weight: 700;
-  color: #0A4F3D;
   line-height: 112rpx;
 }
 .gm-unit {
   font-size: 27rpx;
   font-weight: bold;
-  color: rgba(15, 79, 61, 0.6);
   margin-left: 12rpx;
   margin-bottom: 12rpx;
 }
@@ -431,7 +502,6 @@ function save(): void {
   width: 478rpx;
   height: 24rpx;
   border-radius: 12rpx;
-  background-color: #E2F0EA;
 }
 /* 填充轨道：高度 24rpx，饱满圆角 */
 .gm-fill {
@@ -440,32 +510,9 @@ function save(): void {
   top: 30rpx;
   height: 24rpx;
   border-radius: 12rpx;
-  background-color: #1FBF8F;
-  background-image: linear-gradient(to right, #52D6AC, #1FBF8F);
   /* #ifdef MP-WEIXIN */
   transition: background-color 0.2s, background-image 0.2s;
   /* #endif */
-}
-.gm-bg-mint {
-  background-color: #1FBF8F;
-  background-image: linear-gradient(to right, #52D6AC, #1FBF8F);
-}
-.gm-bg-amber {
-  background-color: #E8B54D;
-  background-image: linear-gradient(to right, #FAD961, #E8B54D);
-}
-.gm-bg-coral {
-  background-color: #FF9E7D;
-  background-image: linear-gradient(to right, #FFB89E, #FF9E7D);
-}
-.gm-clr-mint {
-  color: #0A4F3D;
-}
-.gm-clr-amber {
-  color: #B28322;
-}
-.gm-clr-coral {
-  color: #D35C37;
 }
 /* 增大为 52rpx 直径白底滑钮，带精致立体阴影与 3.5px 强调环 */
 .gm-thumb {
@@ -474,10 +521,8 @@ function save(): void {
   width: 52rpx;
   height: 52rpx;
   border-radius: 26rpx;
-  background-color: #FFFFFF;
   border-width: 3.5px;
   border-style: solid;
-  border-color: #1FBF8F;
   box-shadow: 0 4rpx 16rpx rgba(10, 79, 61, 0.22);
   /* #ifdef MP-WEIXIN */
   transition: border-color 0.2s;
@@ -497,16 +542,13 @@ function save(): void {
   width: 88rpx;
   text-align: center;
   font-size: 24rpx;
-  color: #8FAEAF;
 }
 .gm-tick-on {
   font-weight: 700;
-  color: #0A4F3D;
 }
 .gm-qlabel {
   font-size: 28rpx;
   font-weight: 700;
-  color: #0A4F3D;
   margin-top: 40rpx;
   flex-shrink: 0;
 }
@@ -522,42 +564,33 @@ function save(): void {
   width: 124rpx;
   height: 116rpx;
   border-radius: 28rpx;
-  background-color: #F5FAF8;
   border-width: 1px;
   border-style: solid;
-  border-color: #EAF3EF;
   justify-content: center;
   align-items: center;
 }
 /* 快速选择选中态：纯白底 + 明显柔和投影 + 翠绿细边框 */
 .gm-qslot-on {
-  background-color: #FFFFFF;
-  border-color: #C3EBDD;
   box-shadow: 0 8rpx 20rpx rgba(10, 79, 61, 0.12);
 }
 .gm-qnum {
   font-size: 30rpx;
   font-weight: bold;
-  color: #557870;
 }
 .gm-qnum-on {
   font-weight: 700;
-  color: #0A4F3D;
 }
 .gm-qunit {
   font-size: 22rpx;
-  color: #8FAEAF;
   margin-top: 4rpx;
 }
 .gm-qunit-on {
-  color: #1FBF8F;
   font-weight: bold;
 }
 /* 提示卡片 */
 .gm-tip {
   height: 144rpx;
   margin-top: 36rpx;
-  background-color: #EAF9F3;
   border-radius: 32rpx;
   flex-direction: row;
   align-items: center;
@@ -577,11 +610,9 @@ function save(): void {
 .gm-tip-title {
   font-size: 27rpx;
   font-weight: bold;
-  color: #0A4F3D;
 }
 .gm-tip-sub {
   font-size: 23rpx;
-  color: rgba(15, 79, 61, 0.65);
   margin-top: 8rpx;
 }
 .gm-tip-arrow {
@@ -594,11 +625,6 @@ function save(): void {
   height: 104rpx;
   margin-top: 56rpx;
   border-radius: 52rpx;
-  background-color: #1FBF8F;
-  background-image: linear-gradient(#1FBF8F, #0D9C73);
-  /* #ifdef MP-WEIXIN */
-  background-image: linear-gradient(135deg, #1FBF8F, #0D9C73);
-  /* #endif */
   box-shadow: 0 12rpx 32rpx rgba(13, 156, 115, 0.35);
   justify-content: center;
   align-items: center;
@@ -611,6 +637,5 @@ function save(): void {
 .gm-save-txt {
   font-size: 32rpx;
   font-weight: 700;
-  color: #FFFFFF;
 }
 </style>

@@ -1,147 +1,147 @@
 <template>
-   <view class="page" :class="{ 'page-dark': dk }">
+   <view class="page" :style="{ backgroundColor: theme.bg }">
      <!-- [变更日志] 2026-09-24: Header 简化为与日历页同源的纯净绿色渐变（三页统一） -->
     <!-- 头图（与日历页顶栏同源的纯净绿色渐变） -->
-    <view class="header" :style="{ backgroundColor: dk ? '#162924' : '#29B385', backgroundImage: dk ? 'none' : 'linear-gradient( #32D0A0 0%, #1FBF8F 60%, #159C72 100%)' }">
+    <view class="header" :style="headerStyle">
       <!-- 状态栏独立占位，杜绝混合 calc(rpx+px) 塌陷 -->
       <view :style="{ height: sbH + 'px' }"></view>
       <view class="header-inner">
         <view class="hd-bar">
           <view class="hd-back" hover-class="icon-pressed" :hover-stay-time="120" @click="goBack">
-            <image class="hd-back-icon" :src="'/static/settings/chev_back.svg'" mode="aspectFit"></image>
+            <image class="hd-back-icon" :src="asset('settings/chev_back.svg')" mode="aspectFit"></image>
           </view>
           <view class="hd-info">
-            <text class="hd-title">{{ t('st.title') }}</text>
-            <text class="hd-sub">{{ t('st.sub') }}</text>
+            <text class="hd-title" :style="{ color: headerTitleColor }">{{ t('st.title') }}</text>
+            <text class="hd-sub" :style="{ color: headerSubColor }">{{ t('st.sub') }}</text>
           </view>
         </view>
       </view>
     </view>
 
     <!-- 偏好 -->
-    <text class="sec-title sec-first">{{ t('st.pref') }}</text>
-    <view class="card">
+    <text class="sec-title sec-first" :style="{ color: theme.ink1 }">{{ t('st.pref') }}</text>
+    <view class="card" :style="{ backgroundColor: theme.card }">
       <view class="row">
-        <view class="chip">
-          <image class="chip-icon" :src="'/static/settings/icon_moon.svg'" mode="aspectFit"></image>
+        <view class="chip" :style="{ backgroundColor: theme.chip }">
+          <image class="chip-icon" :src="asset('settings/icon_moon.svg')" mode="aspectFit"></image>
         </view>
         <view class="row-text">
-          <text class="row-title">{{ t('st.dark') }}</text>
+          <text class="row-title" :style="{ color: theme.ink1 }">{{ t('st.dark') }}</text>
         </view>
-        <view class="toggle" :class="{ 'toggle-on': settings.darkMode }" @click="toggleDark">
+        <view class="toggle" :style="{ backgroundColor: toggleFill }" @click="toggleDark">
           <view class="knob" :class="{ 'knob-on': settings.darkMode }"></view>
         </view>
       </view> 
-      <view class="row-div"></view>
+      <view class="row-div" :style="{ backgroundColor: theme.line }"></view>
       <view class="row">
-        <view class="chip">
-          <image class="chip-icon" :src="'/static/settings/icon_bell.svg'" mode="aspectFit"></image>
+        <view class="chip" :style="{ backgroundColor: theme.chip }">
+          <image class="chip-icon" :src="asset('settings/icon_bell.svg')" mode="aspectFit"></image>
         </view>
         <view class="row-text">
-          <text class="row-title">{{ t('st.remind') }}</text>
-          <text class="row-sub">{{ t('st.remindSub') }}</text>
+          <text class="row-title" :style="{ color: theme.ink1 }">{{ t('st.remind') }}</text>
+          <text class="row-sub" :style="{ color: theme.ink3 }">{{ t('st.remindSub') }}</text>
         </view>
-        <view class="soon-pill">
-          <text class="soon-pill-text">{{ t('st.soon') }}</text>
+        <view class="soon-pill" :style="{ backgroundColor: theme.cardSoft }">
+          <text class="soon-pill-text" :style="{ color: theme.ink3 }">{{ t('st.soon') }}</text>
         </view> 
       </view>
-      <view class="row-div"></view>
+      <view class="row-div" :style="{ backgroundColor: theme.line }"></view>
       <view class="row" hover-class="row-pressed" :hover-stay-time="120" @click="openPref('accent')">
-        <view class="chip">
-          <image class="chip-icon" :src="'/static/settings/icon_palette.svg'" mode="aspectFit"></image>
+        <view class="chip" :style="{ backgroundColor: theme.chip }">
+          <image class="chip-icon" :src="asset('settings/icon_palette.svg')" mode="aspectFit"></image>
         </view>
         <view class="row-text">
-          <text class="row-title">{{ t('st.theme') }}</text>
-          <text class="row-sub">{{ accentLabel }}</text>
+          <text class="row-title" :style="{ color: theme.ink1 }">{{ t('st.theme') }}</text>
+          <text class="row-sub" :style="{ color: theme.ink3 }">{{ accentLabel }}</text>
         </view>
         <view class="pf-dot" :style="{ backgroundColor: theme.accent }"></view>
-        <image class="chev" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
+        <image class="chev" :src="asset('home/chev_right.svg')" mode="aspectFit"></image>
       </view>
-      <view class="row-div"></view>
+      <view class="row-div" :style="{ backgroundColor: theme.line }"></view>
       <view class="row" hover-class="row-pressed" :hover-stay-time="120" @click="openPref('locale')">
-        <view class="chip">
-          <image class="chip-icon" :src="'/static/settings/icon_globe.svg'" mode="aspectFit"></image>
+        <view class="chip" :style="{ backgroundColor: theme.chip }">
+          <image class="chip-icon" :src="asset('settings/icon_globe.svg')" mode="aspectFit"></image>
         </view>
         <view class="row-text">
-          <text class="row-title">{{ t('st.lang') }}</text>
-          <text class="row-sub">{{ localeLabel }}</text>
+          <text class="row-title" :style="{ color: theme.ink1 }">{{ t('st.lang') }}</text>
+          <text class="row-sub" :style="{ color: theme.ink3 }">{{ localeLabel }}</text>
         </view>
-        <image class="chev" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
+        <image class="chev" :src="asset('home/chev_right.svg')" mode="aspectFit"></image>
       </view>
     </view>
 
     <!-- 目标管理 -->
-    <text class="sec-title">{{ t('st.goalSec') }}</text>
-    <view class="card">
+    <text class="sec-title" :style="{ color: theme.ink1 }">{{ t('st.goalSec') }}</text>
+    <view class="card" :style="{ backgroundColor: theme.card }">
       <view class="row" @click="openGoal">
-        <view class="chip">
-          <image class="chip-icon" :src="'/static/settings/icon_target.svg'" mode="aspectFit"></image>
+        <view class="chip" :style="{ backgroundColor: theme.chip }">
+          <image class="chip-icon" :src="asset('settings/icon_target.svg')" mode="aspectFit"></image>
         </view>
         <view class="row-text">
-          <text class="row-title">{{ t('st.goalDaily') }}</text>
-          <text class="row-sub">{{ tf('st.goalCur', [goal.calorieGoal.toString()]) }}</text>
+          <text class="row-title" :style="{ color: theme.ink1 }">{{ t('st.goalDaily') }}</text>
+          <text class="row-sub" :style="{ color: theme.ink3 }">{{ tf('st.goalCur', [goal.calorieGoal.toString()]) }}</text>
         </view>
-        <image class="chev" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
+        <image class="chev" :src="asset('home/chev_right.svg')" mode="aspectFit"></image>
       </view>
-      <view class="row-div"></view>
+      <view class="row-div" :style="{ backgroundColor: theme.line }"></view>
       <view class="row">
-        <view class="chip">
-          <image class="chip-icon" :src="'/static/settings/icon_mega.svg'" mode="aspectFit"></image>
+        <view class="chip" :style="{ backgroundColor: theme.chip }">
+          <image class="chip-icon" :src="asset('settings/icon_mega.svg')" mode="aspectFit"></image>
         </view>
         <view class="row-text">
-          <text class="row-title">{{ t('st.mealCustom') }}</text>
-          <text class="row-sub">{{ t('st.mealCustomSub') }}</text>
+          <text class="row-title" :style="{ color: theme.ink1 }">{{ t('st.mealCustom') }}</text>
+          <text class="row-sub" :style="{ color: theme.ink3 }">{{ t('st.mealCustomSub') }}</text>
         </view>
-        <image class="chev" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
+        <image class="chev" :src="asset('home/chev_right.svg')" mode="aspectFit"></image>
       </view>
     </view>
 
     <!-- 数据管理 -->
-    <text class="sec-title">{{ t('st.dataSec') }}</text>
-    <view class="card">
+    <text class="sec-title" :style="{ color: theme.ink1 }">{{ t('st.dataSec') }}</text>
+    <view class="card" :style="{ backgroundColor: theme.card }">
       <view class="row">
-        <view class="chip">
-          <image class="chip-icon" :src="'/static/settings/icon_down.svg'" mode="aspectFit"></image>
+        <view class="chip" :style="{ backgroundColor: theme.chip }">
+          <image class="chip-icon" :src="asset('settings/icon_down.svg')" mode="aspectFit"></image>
         </view>
         <view class="row-text">
-          <text class="row-title">{{ t('st.export') }}</text>
-          <text class="row-sub">{{ t('st.exportSub') }}</text>
+          <text class="row-title" :style="{ color: theme.ink1 }">{{ t('st.export') }}</text>
+          <text class="row-sub" :style="{ color: theme.ink3 }">{{ t('st.exportSub') }}</text>
         </view>
-        <image class="chev" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
+        <image class="chev" :src="asset('home/chev_right.svg')" mode="aspectFit"></image>
       </view>
-      <view class="row-div"></view>
+      <view class="row-div" :style="{ backgroundColor: theme.line }"></view>
       <view class="row">
-        <view class="chip">
-          <image class="chip-icon" :src="'/static/settings/icon_up.svg'" mode="aspectFit"></image>
+        <view class="chip" :style="{ backgroundColor: theme.chip }">
+          <image class="chip-icon" :src="asset('settings/icon_up.svg')" mode="aspectFit"></image>
         </view>
         <view class="row-text">
-          <text class="row-title">{{ t('st.import') }}</text>
-          <text class="row-sub">{{ t('st.importSub') }}</text>
+          <text class="row-title" :style="{ color: theme.ink1 }">{{ t('st.import') }}</text>
+          <text class="row-sub" :style="{ color: theme.ink3 }">{{ t('st.importSub') }}</text>
         </view>
-        <image class="chev" :src="'/static/home/chev_right.svg'" mode="aspectFit"></image>
+        <image class="chev" :src="asset('home/chev_right.svg')" mode="aspectFit"></image>
       </view>
     </view>
 
     <!-- 本机声明 -->
     <view class="shield-row">
-      <image class="shield-icon" :src="'/static/settings/icon_shield.svg'" mode="aspectFit"></image>
-      <text class="shield-note">{{ t('st.shield') }}</text>
+      <image class="shield-icon" :src="asset('settings/icon_shield.svg')" mode="aspectFit"></image>
+      <text class="shield-note" :style="{ color: theme.ink2 }">{{ t('st.shield') }}</text>
     </view>
 
     <!-- 危险区 -->
-    <view class="card-danger">
-      <view class="chip-danger">
-        <image class="chip-icon" :src="'/static/settings/icon_trash.svg'" mode="aspectFit"></image>
+    <view class="card-danger" :style="{ backgroundColor: theme.card }">
+      <view class="chip-danger" :style="{ backgroundColor: dangerChipFill }">
+        <image class="chip-icon" :src="asset('settings/icon_trash.svg')" mode="aspectFit"></image>
       </view>
-      <text class="danger-text">{{ t('st.clear') }}</text>
+      <text class="danger-text" :style="{ color: dangerTextColor }">{{ t('st.clear') }}</text>
     </view>
 
     <!-- 页脚 -->
     <view class="footer">
-      <image class="brand-icon" :src="'/static/settings/icon_leaf.svg'" mode="aspectFit"></image>
-      <text class="brand">{{ t('st.brand') }}</text>
-      <text class="ver">v1.0.0</text>
-      <text class="footnote">{{ t('st.foot') }}</text>
+      <image class="brand-icon" :src="asset('settings/icon_leaf.svg')" mode="aspectFit"></image>
+      <text class="brand" :style="{ color: theme.ink1 }">{{ t('st.brand') }}</text>
+      <text class="ver" :style="{ color: theme.ink3 }">v1.0.0</text>
+      <text class="footnote" :style="{ color: theme.ink3 }">{{ t('st.foot') }}</text>
     </view>
 
     <!-- 每日热量目标弹窗 -->
@@ -149,14 +149,14 @@
 
     <!-- 主题/语言选择半屏 sheet（仿 GoalModal：v-if render + active 两态，即点即换） -->
     <view class="pf-mask" :class="{ 'pf-mask-active': pfActive }" v-if="pfRender" @click="closePref">
-      <view class="pf-sheet" :class="{ 'pf-sheet-active': pfActive }" :style="{ paddingBottom: (40 + safeBottom) + 'px' }" @click.stop="noop">
-        <view class="pf-grip"></view>
-        <text class="pf-title">{{ pfKind == 'accent' ? t('st.theme') : t('st.lang') }}</text>
-        <view class="pf-opt" v-for="(opt, idx) in pfOptions" :key="idx" hover-class="pf-opt-pressed" :hover-stay-time="100" @click="pickPref(opt.id)">
-          <view class="pf-swatch" v-if="opt.swatch.length > 0" :style="{ backgroundColor: opt.swatch }"></view>
+      <view class="pf-sheet" :class="{ 'pf-sheet-active': pfActive }" :style="{ paddingBottom: (40 + safeBottom) + 'px', backgroundColor: theme.card }" @click.stop="noop">
+        <view class="pf-grip" :style="{ backgroundColor: theme.line }"></view>
+        <text class="pf-title" :style="{ color: theme.ink1 }">{{ pfKind == 'accent' ? t('st.theme') : t('st.lang') }}</text>
+        <view class="pf-opt" v-for="(opt, idx) in pfOptions" :key="idx" :style="{ borderBottomColor: theme.line }" hover-class="pf-opt-pressed" :hover-stay-time="100" @click="pickPref(opt.id)">
+          <view class="pf-swatch" v-if="opt.swatch.length > 0" :style="{ backgroundColor: opt.swatch, borderColor: theme.line }"></view>
           <view class="pf-opt-text">
-            <text class="pf-opt-label">{{ opt.label }}</text>
-            <text class="pf-opt-sub" v-if="opt.sub.length > 0">{{ opt.sub }}</text>
+            <text class="pf-opt-label" :style="{ color: theme.ink1 }">{{ opt.label }}</text>
+            <text class="pf-opt-sub" v-if="opt.sub.length > 0" :style="{ color: theme.ink3 }">{{ opt.sub }}</text>
           </view>
           <text class="pf-check" v-if="pfCurrent == opt.id" :style="{ color: theme.accent }">✓</text>
         </view>
@@ -164,11 +164,11 @@
     </view>
 
     <!-- 常驻导航栏（#28：替代 P1 遮罩＋fx-back 两件套）：滚动跨阈后整栏出现＝末色底＋返回箭＋标题，三端生效 -->
-    <view v-if="scrolled" class="set-nav" :style="{ height: navBarH + 'px', paddingTop: sbH + 'px', backgroundColor: dk ? '#162924' : '#39AD95' }">
+    <view v-if="scrolled" class="set-nav" :style="navBarStyle">
       <view class="set-nav-back" @click="goBack">
-        <image class="set-nav-icon" :src="'/static/settings/chev_back.svg'" mode="aspectFit"></image>
+        <image class="set-nav-icon" :src="asset('settings/chev_back.svg')" mode="aspectFit"></image>
       </view>
-      <text class="set-nav-title">{{ t('st.title') }}</text>
+      <text class="set-nav-title" :style="{ color: headerTitleColor }">{{ t('st.title') }}</text>
     </view>
   </view>
 </template>
@@ -182,7 +182,7 @@
 import { useGoalStore } from '../../stores/goal'
 import { useSettingsStore } from '../../stores/settings'
 import { triggerHaptic } from '../../stores/settings'
-import { useTheme, ACCENT_OPTIONS } from '../../composables/useTheme'
+import { useTheme, themeAsset, ACCENT_OPTIONS } from '../../composables/useTheme'
 import { t, tf } from '../../composables/i18n'
 import { ref, computed } from 'vue'
 import { onPageScroll } from '@dcloudio/uni-app'
@@ -193,7 +193,7 @@ type PrefOpt = { id: string; label: string; sub: string; swatch: string }
 
 const goal = useGoalStore()
 const settings = useSettingsStore()
-const { theme } = useTheme()
+const { theme, isDark, accentId } = useTheme()
 const goalShow = ref(false)
 const dk = computed((): boolean => settings.darkMode)
 
@@ -202,7 +202,6 @@ const sbH = ref<number>(uni.getSystemInfoSync().statusBarHeight ?? 0)
 // 常驻导航栏高度计算：58px (116rpx) 内容高 + 状态栏高，避免跨端 calc(rpx+px) 错误
 const navBarH = computed<number>(() => sbH.value + 58)
 
-// 状态栏字色随暗黑反转（Boss P2 指令）：小程序走 setNavigationBarColor；
 // TODO App 原生端改 plus.navigator.setStatusBarStyle 实测后补
 function syncBar(): void {
   uni.setNavigationBarColor({ frontColor: dk.value ? '#ffffff' : '#000000', backgroundColor: '#000000' })
@@ -241,6 +240,39 @@ let pfTimer = 0
 let safeBottom = 0
 const insets = uni.getSystemInfoSync().safeAreaInsets
 if (insets != null) safeBottom = insets.bottom
+
+/** 资产按 (accent, mode) 取五档变体；未登记底稿（危险色／无彩稿）自动回落原路径 */
+function asset(path: string): string {
+  return themeAsset(accentId.value, isDark.value, '/static/' + path)
+}
+
+/** 品牌渐变头：浅态走该档 accent 三档渐变，暗态改 card 纯色（同日历页既定处理） */
+const headerStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  st['background-color'] = isDark.value ? theme.value.card : theme.value.accent
+  if (!isDark.value) {
+    st['background-image'] = 'linear-gradient(' + theme.value.accent2 + ' 0%, ' + theme.value.accent + ' 60%, ' + theme.value.accentDeep + ' 100%)'
+  }
+  return st
+})
+const headerTitleColor = computed((): string => isDark.value ? theme.value.ink1 : theme.value.onAccent)
+const headerSubColor = computed((): string => isDark.value ? theme.value.ink2 : 'rgba(255, 255, 255, 0.82)')
+
+/** 滚动跨阈后的常驻栏与头图末色无缝接续，几何与配色一并运行时下发 */
+const navBarStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  st['height'] = navBarH.value + 'px'
+  st['padding-top'] = sbH.value + 'px'
+  st['background-color'] = isDark.value ? theme.value.card : theme.value.accent
+  if (!isDark.value) st['box-shadow'] = '0 4rpx 20rpx rgba(10, 79, 61, 0.10)'
+  return st
+})
+
+const toggleFill = computed((): string => settings.darkMode ? theme.value.accent : theme.value.line)
+
+/** 危险区：珊瑚系语义色不随主题轮值（§8.3），暗态沿用已定稿的深底亮字 */
+const dangerChipFill = computed((): string => isDark.value ? '#3A221C' : '#FDE9E4')
+const dangerTextColor = computed((): string => isDark.value ? '#FF8266' : '#E0633C')
 
 const accentOpts = computed<PrefOpt[]>((): PrefOpt[] => [
   { id: 'mint', label: t('st.mint'), sub: t('st.mintSub'), swatch: '#20C997' },
@@ -309,13 +341,10 @@ const goBack = () => {
 
 <style>
 .page {
-  background-color: #F2FAF5;
   padding-bottom: 60rpx;
 }
 .header {
   position: relative;
-  background-color: #29B385;
-  background-image: linear-gradient( #32D0A0 0%, #1FBF8F 60%, #159C72 100%);
   overflow: hidden;
   padding-bottom: 56rpx;
 }
@@ -347,12 +376,10 @@ const goBack = () => {
 .hd-title {
   font-size: 38rpx;
   font-weight: bold;
-  color: #FFFFFF;
   line-height: 48rpx;
 }
 .hd-sub {
   font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.82);
   line-height: 32rpx;
   margin-top: 4rpx;
 }
@@ -365,7 +392,6 @@ const goBack = () => {
   z-index: 45;
   flex-direction: row;
   align-items: center;
-  box-shadow: 0 4rpx 20rpx rgba(10, 79, 61, 0.10);
 }
 .set-nav-back {
   width: 88rpx;
@@ -381,12 +407,10 @@ const goBack = () => {
 .set-nav-title {
   font-size: 34rpx;
   font-weight: bold;
-  color: #FFFFFF;
 }
 .sec-title {
   font-size: 30rpx;
   font-weight: bold;
-  color: #245E58;
   margin-left: 50rpx;
   margin-top: 40rpx;
   margin-bottom: 14rpx;
@@ -395,7 +419,6 @@ const goBack = () => {
   margin-top: 20rpx;
 }
 .card {
-  background-color: #FCFFFF;
   border-radius: 36rpx;
   margin-left: 42rpx;
   margin-right: 42rpx;
@@ -412,7 +435,6 @@ const goBack = () => {
   width: 76rpx;
   height: 76rpx;
   border-radius: 38rpx;
-  background-color: #E0F5EC;
   justify-content: center;
   align-items: center;
 }
@@ -426,16 +448,13 @@ const goBack = () => {
 }
 .row-title {
   font-size: 28rpx;
-  color: #0A4F3D;
 }
 .row-sub {
   font-size: 22rpx;
-  color: #8FAEAF;
   margin-top: 6rpx;
 }
 .row-div {
   height: 1px;
-  background-color: #EAF3EF;
 }
 .chev {
   width: 12rpx;
@@ -445,11 +464,7 @@ const goBack = () => {
   width: 94rpx;
   height: 56rpx;
   border-radius: 28rpx;
-  background-color: #D5E5DD;
   justify-content: center;
-}
-.toggle-on {
-  background-color: #1FBF8F;
 }
 .knob {
   width: 46rpx;
@@ -462,7 +477,6 @@ const goBack = () => {
   margin-left: 42rpx;
 }
 .soon-pill {
-  background-color: #EFF4F2;
   border-radius: 22rpx;
   padding-left: 18rpx;
   padding-right: 18rpx;
@@ -471,7 +485,6 @@ const goBack = () => {
 }
 .soon-pill-text {
   font-size: 24rpx;
-  color: #718E89;
 }
 .shield-row {
   flex-direction: row;
@@ -485,13 +498,11 @@ const goBack = () => {
 }
 .shield-note {
   font-size: 24rpx;
-  color: #4A7373;
   margin-left: 12rpx;
 }
 .card-danger {
   flex-direction: row;
   align-items: center;
-  background-color: #FFFFFF;
   border-radius: 36rpx;
   border-width: 1px;
   border-color: #FBA095;
@@ -507,13 +518,11 @@ const goBack = () => {
   width: 68rpx;
   height: 68rpx;
   border-radius: 34rpx;
-  background-color: #FDE9E4;
   justify-content: center;
   align-items: center;
 }
 .danger-text {
   font-size: 28rpx;
-  color: #E0633C;
   margin-left: 20rpx;
 }
 .footer {
@@ -526,17 +535,14 @@ const goBack = () => {
 }
 .brand {
   font-size: 26rpx;
-  color: #0A4F3D;
   margin-top: 12rpx;
 }
 .ver {
   font-size: 22rpx;
-  color: #8FAEAF;
   margin-top: 6rpx;
 }
 .footnote {
   font-size: 20rpx;
-  color: #8FAEAF;
   margin-top: 6rpx;
 }
 /* ===== 主题/语言 sheet（pf- 前缀避跨文件类名冲突） ===== */
@@ -566,7 +572,6 @@ const goBack = () => {
   opacity: 1;
 }
 .pf-sheet {
-  background-color: #FFFFFF;
   border-top-left-radius: 68rpx;
   border-top-right-radius: 68rpx;
   padding-left: 40rpx;
@@ -583,14 +588,12 @@ const goBack = () => {
   width: 72rpx;
   height: 8rpx;
   border-radius: 4rpx;
-  background-color: #D5E5DD;
   margin-left: 295rpx;
   margin-bottom: 24rpx;
 }
 .pf-title {
   font-size: 32rpx;
   font-weight: bold;
-  color: #0A4F3D;
   margin-bottom: 8rpx;
 }
 .pf-opt {
@@ -600,7 +603,6 @@ const goBack = () => {
   padding-bottom: 28rpx;
   border-bottom-width: 1px;
   border-bottom-style: solid;
-  border-bottom-color: #EAF3EF;
 }
 .pf-opt-pressed {
   background-color: #F3FBF7;
@@ -619,85 +621,13 @@ const goBack = () => {
 }
 .pf-opt-label {
   font-size: 30rpx;
-  color: #0A4F3D;
 }
 .pf-opt-sub {
   font-size: 22rpx;
-  color: #8FAEAF;
   margin-top: 4rpx;
 }
 .pf-check {
   font-size: 36rpx;
   font-weight: bold;
 }
-/* ===== 深色模式（Boss P2：与个人中心同薄荷深色板；后代选择器仅 mp 端生效，App 端须改逐元素 :class） ===== */
-/* #ifdef MP-WEIXIN */
-.page-dark {
-  background-color: #0E211C;
-}
-.page-dark .header {
-  background-image: none;
-  background-color: #162924;
-}
-.page-dark .hd-glow {
-  display: none;
-}
-.page-dark .sec-title {
-  color: #8FE8CB;
-}
-.page-dark .card {
-  background-color: #162924;
-}
-.page-dark .chip {
-  background-color: #1E3B33;
-}
-.page-dark .row-title,
-.page-dark .brand {
-  color: #EAF9F3;
-}
-.page-dark .row-sub,
-.page-dark .soon-pill-text,
-.page-dark .shield-note,
-.page-dark .ver,
-.page-dark .footnote {
-  color: rgba(234, 249, 243, 0.5);
-}
-.page-dark .row-div {
-  background-color: #1E352F;
-}
-.page-dark .toggle {
-  background-color: #23443B;
-}
-.page-dark .soon-pill {
-  background-color: #1E3B33;
-}
-.page-dark .card-danger {
-  background-color: #162924;
-}
-.page-dark .chip-danger {
-  background-color: #3A221C;
-}
-.page-dark .danger-text {
-  color: #FF8266;
-}
-.page-dark .pf-sheet {
-  background-color: #162924;
-}
-.page-dark .pf-title,
-.page-dark .pf-opt-label {
-  color: #EAF9F3;
-}
-.page-dark .pf-opt-sub {
-  color: rgba(234, 249, 243, 0.5);
-}
-.page-dark .pf-opt {
-  border-bottom-color: #1E352F;
-}
-.page-dark .pf-opt-pressed {
-  background-color: #1E3B33;
-}
-.page-dark .pf-grip {
-  background-color: #2A4238;
-}
-/* #endif */
 </style>
