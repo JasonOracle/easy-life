@@ -8,13 +8,13 @@
       <view :style="{ height: sbH + 'px' }"></view>
       <view class="ec-nav">
         <view class="ec-nav-btn" hover-class="ec-press" :hover-stay-time="100" @click="goBack">
-          <image v-if="isDark" class="ec-nav-icon" src="/static/encyclopedia/back_light.svg" mode="aspectFit"></image>
-          <image v-else class="ec-nav-icon" src="/static/encyclopedia/back_dark.svg" mode="aspectFit"></image>
+          <image v-if="isDark" class="ec-nav-back" src="/static/encyclopedia/back_light.svg" mode="aspectFit"></image>
+          <image v-else class="ec-nav-back" src="/static/encyclopedia/back_dark.svg" mode="aspectFit"></image>
         </view>
         <text class="ec-nav-title" :style="{ color: theme.ink1 }">{{ t('ec.title') }}</text>
         <view class="ec-nav-btn" hover-class="ec-press" :hover-stay-time="100" @click="openSearch">
-          <image v-if="isDark" class="ec-nav-icon" src="/static/encyclopedia/search_light.svg" mode="aspectFit"></image>
-          <image v-else class="ec-nav-icon" src="/static/encyclopedia/search_dark.svg" mode="aspectFit"></image>
+          <image v-if="isDark" class="ec-nav-search" src="/static/encyclopedia/search_light.svg" mode="aspectFit"></image>
+          <image v-else class="ec-nav-search" src="/static/encyclopedia/search_dark.svg" mode="aspectFit"></image>
         </view>
       </view>
     </view>
@@ -66,15 +66,20 @@
       <!-- 营养点评 + 三列指引 -->
       <view class="ec-card" :style="{ backgroundColor: theme.card }">
         <view class="ec-review-head">
-          <view class="ec-review-dot" :style="{ backgroundColor: theme.chip }">
-            <text class="ec-review-dot-emoji"></text>
+          <view class="ec-review-dot" :style="{ backgroundColor: theme.accent }">
+            <image class="ec-review-dot-ic" src="/static/encyclopedia/ic_eco_w.svg" mode="aspectFit"></image>
           </view>
           <text class="ec-card-title" :style="{ color: theme.ink1 }">{{ t('ec.review') }}</text>
         </view>
         <text class="ec-review-text" :style="{ color: theme.ink2 }">{{ reviewBody }}</text>
         <view class="ec-guide" :style="{ borderTopColor: theme.line }">
           <view class="ec-guide-col" v-for="(g, gIdx) in guideRows" :key="gIdx">
-            <text class="ec-guide-title" :style="{ color: theme.accentDeep }">{{ g.emoji }} {{ g.title }}</text>
+            <view class="ec-guide-head">
+              <view class="ec-guide-dot" :style="{ backgroundColor: theme.accent }">
+                <image class="ec-guide-ic" :src="g.icon" mode="aspectFit"></image>
+              </view>
+              <text class="ec-guide-title" :style="{ color: theme.accentDeep }">{{ g.title }}</text>
+            </view>
             <text class="ec-guide-text" :style="{ color: theme.ink3 }">{{ g.text }}</text>
           </view>
         </view>
@@ -83,7 +88,9 @@
       <!-- 相关食物 -->
       <view class="ec-related-block">
         <view class="ec-related-head">
-          <text class="ec-related-emoji">🍽</text>
+          <view class="ec-related-cir" :style="{ backgroundColor: theme.accent }">
+            <image class="ec-related-ic" src="/static/encyclopedia/ic_category_w.svg" mode="aspectFit"></image>
+          </view>
           <text class="ec-section-title" :style="{ color: theme.ink1 }">{{ t('ec.related') }}</text>
         </view>
         <scroll-view class="ec-related-scroll" direction="horizontal" :show-scrollbar="false">
@@ -102,7 +109,7 @@
     <!-- 底部 CTA：添加到当前餐次 -->
     <view v-if="food != null" class="ec-cta-wrap" :style="{ backgroundColor: theme.bg, paddingBottom: (20 + safeBottom) + 'px' }">
       <view class="ec-cta" :style="{ backgroundImage: ctaGradient }" hover-class="ec-cta-press" :hover-stay-time="120" @click="addToMeal">
-        <text class="ec-cta-plus">＋</text>
+        <image class="ec-cta-plus" src="/static/encyclopedia/ic_add_w.svg" mode="aspectFit"></image>
         <text class="ec-cta-text" :style="{ color: theme.onAccent }">{{ ctaText }}</text>
       </view>
     </view>
@@ -112,8 +119,8 @@
       <view :style="{ height: sbH + 'px' }"></view>
       <view class="ec-search-bar">
         <view class="ec-nav-btn" hover-class="ec-press" :hover-stay-time="100" @click="closeSearch">
-          <image v-if="isDark" class="ec-nav-icon" src="/static/encyclopedia/back_light.svg" mode="aspectFit"></image>
-          <image v-else class="ec-nav-icon" src="/static/encyclopedia/back_dark.svg" mode="aspectFit"></image>
+          <image v-if="isDark" class="ec-nav-back" src="/static/encyclopedia/back_light.svg" mode="aspectFit"></image>
+          <image v-else class="ec-nav-back" src="/static/encyclopedia/back_dark.svg" mode="aspectFit"></image>
         </view>
         <view class="ec-input-box" :style="{ backgroundColor: theme.card }">
           <text class="ec-input-glyph">⌕</text>
@@ -152,6 +159,9 @@
 // [变更日志] 页首摘要：百科详情页＋全屏搜索态单文件双态（viewMode），全 token 驱动三主题/暗色/双语。
 // [变更日志] 食物百科详情页：hero/营养四列/点评+三列指引/相关食物/添加到餐次 CTA + 全屏搜索态；
 //       数据 = food_library（营养与图）⊕ food_encyclopedia 伴生表（英文名/档位/模板），颜色全走 useTheme token。
+// [变更日志] 2026-09-27: 图标按 Pencil 稿 Nnctn 换真 —— 顶栏 lucide chevron-left(18pt)/MSR search(20pt) 替自绘粗线稿，
+//       点评圆改绿底 eco、三列改 group/error/restaurant、相关食物标题改 category 绿圆、CTA 加号改 MSR add；
+//       上述位置原为 emoji（App 端字形缺失：🍽 渲染成豆腐块、点评圆是空串），并顺带对齐稿面尺寸。
 import { ref, computed } from 'vue'
 import { onLoad, onShow } from '@dcloudio/uni-app'
 import { useTheme, FIXED_COLORS, syncStatusBarStyle } from '../../composables/useTheme'
@@ -301,7 +311,7 @@ const reviewBody = computed((): string => {
   return reviewText(e.cls, lang.value, Math.round(f.kcal), f.protein ?? 0, f.carb ?? 0, f.fat ?? 0)
 })
 
-type GuideRow = { emoji: string; title: string; text: string }
+type GuideRow = { icon: string; title: string; text: string }
 
 const guideRows = computed((): GuideRow[] => {
   const out: GuideRow[] = []
@@ -309,9 +319,9 @@ const guideRows = computed((): GuideRow[] => {
   if (e == null) return out
   const g = guidanceOf(e.cls)
   const en = lang.value == 'en'
-  out.push({ emoji: '👥', title: t('ec.audience'), text: en ? g.audience.en : g.audience.zh })
-  out.push({ emoji: '⚠️', title: t('ec.cautions'), text: en ? g.cautions.en : g.cautions.zh })
-  out.push({ emoji: '🍳', title: t('ec.serving'), text: en ? g.serving.en : g.serving.zh })
+  out.push({ icon: '/static/encyclopedia/ic_group_w.svg', title: t('ec.audience'), text: en ? g.audience.en : g.audience.zh })
+  out.push({ icon: '/static/encyclopedia/ic_error_w.svg', title: t('ec.cautions'), text: en ? g.cautions.en : g.cautions.zh })
+  out.push({ icon: '/static/encyclopedia/ic_restaurant_w.svg', title: t('ec.serving'), text: en ? g.serving.en : g.serving.zh })
   return out
 })
 
@@ -498,9 +508,15 @@ onLoad((options: OnLoadOptions) => {
   align-items: center;
   justify-content: center;
 }
-.ec-nav-icon {
-  width: 44rpx;
-  height: 44rpx;
+/* 尺寸按 Pencil 稿：BackIcon 18pt / SearchIcon 20pt，1pt@375稿 = 2rpx。
+   形状同稿：返回 = lucide chevron-left(stroke 2)，搜索 = Material Symbols Rounded search。 */
+.ec-nav-back {
+  width: 36rpx;
+  height: 36rpx;
+}
+.ec-nav-search {
+  width: 40rpx;
+  height: 40rpx;
 }
 .ec-nav-title {
   font-size: 34rpx;
@@ -653,15 +669,16 @@ onLoad((options: OnLoadOptions) => {
   align-items: center;
 }
 .ec-review-dot {
-  width: 56rpx;
-  height: 56rpx;
-  border-radius: 28rpx;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 20rpx;
   align-items: center;
   justify-content: center;
-  margin-right: 16rpx;
+  margin-right: 14rpx;
 }
-.ec-review-dot-emoji {
-  font-size: 28rpx;
+.ec-review-dot-ic {
+  width: 24rpx;
+  height: 24rpx;
 }
 .ec-review-text {
   font-size: 27rpx;
@@ -678,6 +695,22 @@ onLoad((options: OnLoadOptions) => {
 .ec-guide-col {
   flex: 1;
   padding-right: 18rpx;
+}
+.ec-guide-head {
+  flex-direction: row;
+  align-items: center;
+}
+.ec-guide-dot {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 16rpx;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10rpx;
+}
+.ec-guide-ic {
+  width: 22rpx;
+  height: 22rpx;
 }
 .ec-guide-title {
   font-size: 24rpx;
@@ -697,9 +730,17 @@ onLoad((options: OnLoadOptions) => {
   padding-left: 40rpx;
   margin-bottom: 18rpx;
 }
-.ec-related-emoji {
-  font-size: 28rpx;
+.ec-related-cir {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 18rpx;
+  align-items: center;
+  justify-content: center;
   margin-right: 12rpx;
+}
+.ec-related-ic {
+  width: 20rpx;
+  height: 20rpx;
 }
 .ec-section-title {
   font-size: 31rpx;
@@ -755,8 +796,8 @@ onLoad((options: OnLoadOptions) => {
   justify-content: center;
 }
 .ec-cta-plus {
-  font-size: 36rpx;
-  color: #FFFFFF;
+  width: 28rpx;
+  height: 28rpx;
   margin-right: 12rpx;
 }
 .ec-cta-text {

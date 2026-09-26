@@ -785,3 +785,74 @@ App 端是裸 48rpx。新增 `afSheetStyle` computed（App 端 `48 * windowWidth
 不要给写死高度——写死值必然与「内容最长的那一项」博弈，短内容空一片、长内容裁底部；
 同类正确范例是 `GoalModal`（`height:auto` + `min-height`）。底部内边距必须放在**不滚动**的层上
 （列表步 `.fp-sheet` 就是对的，详情步原来是反的）。
+
+
+---
+
+## 2026-09-27 食物百科详情页：按 Pencil 稿换真图标 + 清理外来插画图
+
+**老板报的 4 件事**：①顶栏 svg 图标不对；②点评/三列图标不对；③底部没有选中的绿色框；④「燕麦片」等食物图不是真实食物库里的，要删。
+
+**取证口径**：Pencil 板 `Nnctn`（食物百科·详情页 375×800）逐节点 dump `library/icon/fill/w/h` + 真机 `screencap` 像素比对。
+**结论：设计稿用的是一套图标库，代码里是 emoji —— 这是①②的共同根因。**
+
+| 位置 | 设计稿（Pencil 节点） | 改前代码 | 实际差异 |
+|---|---|---|---|
+| 顶栏返回 | `BackIcon` = lucide `chevron-left` 18×18 | 自绘 `M15 19L8 12L15 5` stroke **2.4** @44rpx | 笔画粗、尺寸大 22% |
+| 顶栏搜索 | `SearchIcon` = MSR `search` 20×20 | 自绘 circle r6.5 stroke **2.2** @44rpx | 笔画粗 |
+| 点评圆 | `RevIc` = MSR `eco` 白 12×12，`RevHeadCir` 20×20 | `theme.chip` 圆 56rpx + **空字符串** `<text>` | 灰圆内**什么都没有** |
+| 三列 | `Ic适宜人群/注意事项/推荐吃法` = MSR `group`/`error`/`restaurant` 白 11×11 + 16×16 底圈 | emoji 👥 / ⚠️ / 🍳 | 系统彩色 emoji，🍳 渲染成怪形 |
+| 相关食物标题 | `RelIc` = MSR `category` 白 10×10，`RelHeadCir` 18×18 | emoji 🍽 | App 端无字形，**渲染成豆腐块** |
+| CTA 加号 | `BtnIc` = MSR `add` 白 14×14 | 全角 `＋` 36rpx | 形状与大小均不符 |
+
+**改动 1 —— 新增 10 个图标资源（`app/static/encyclopedia/`）**：
+- `back_dark/light.svg` → lucide chevron-left（stroke 2，`M15 18L9 12L15 6`）
+- `search_dark/light.svg` → MSR `search`
+- `ic_eco_w / ic_group_w / ic_error_w / ic_restaurant_w / ic_category_w / ic_add_w` → MSR filled，纯白（铺在绿圆上，**不随主题变**，一个文件即可）
+
+MSR 原始 SVG 是 `viewBox="0 -960 960 960"`，已统一转成项目惯用的 `viewBox="0 0 24 24"`：
+`<g transform="scale(0.025) translate(0,960)">`（原点平移，非翻转 —— Material Symbols 的 y 负值范围只需 +960）。
+
+**改动 2 —— `Detail.uvue` 模板/脚本/CSS**：10 处替换全部带命中数校验（`count()` 对不上即中止），
+新增类 `.ec-nav-back(36rpx)` / `.ec-nav-search(40rpx)` / `.ec-review-dot-ic(24rpx)` /
+`.ec-guide-head` / `.ec-guide-dot(32rpx)` / `.ec-guide-ic(22rpx)` / `.ec-related-cir(36rpx)` / `.ec-related-ic(20rpx)`；
+`.ec-cta-plus` 由 text 改 image(28rpx)；`GuideRow.emoji` → `GuideRow.icon`。
+尺寸全部按「稿面 1pt@375 = 2rpx」取：返回 18→36rpx、搜索 20→40rpx、点评圆 20→40rpx、三列底圈 16→32rpx、相关食物圆 18→36rpx、加号 14→28rpx。
+
+**真机验收**（emulator-5554；全量产物 `02:14` 晚于源码 `02:13`，排除差量假绿；
+产物 `GenPagesEncyclopediaDetailSharedData.*.bytes` 中新类名逐个 grep 命中、旧类名 `ec-review-dot-emoji`/`ec-related-emoji` 归零）：
+
+- 顶栏：箭头 2.4 粗线 → 细线 chevron，放大镜同步变细；三联合成图与设计稿一致。
+- 点评圆：空灰圆 → 绿底白 `eco`；三列 → 绿底白 `group`/`error`/`restaurant`；相关食物标题 → 绿底白 `category`。
+- 证据：`debug/evidence_20260927/cmp_topbar_3way.png`（设计稿/改前/改后）、`cmp_icons_3way.png`（同上，点评+三列）、
+  `enc_init.png`（改后整页）、`enc_new.png`（改后滚动页）。
+
+**改动 3 —— 删 6 张外来插画图**：
+全库 353 张食物图里，`p348~p353` 这 6 张是 **92×92px / 500~800 B** 的扁平插画（其余 347 张统一 512×512 / 11~15 KB），
+风格与全库写实摄影完全不同 —— 即老板说的「不是真实食物库里面的」。
+已备份至 `debug/removed_assets_20260927/` 后删除 6 个文件：
+`staple/p348`(燕麦片)、`protein/p349`(水煮蛋)、`drink/p350`(全脂牛奶)、`dish/p351`(鸡胸肉沙拉)、
+`staple/p352`(糙米饭)、`vegetable/p353`(清炒西兰花)。删除后全库复查：**正常 347 / 异常 0**。
+**未做（待拍板）**：这 6 条食物的 JSON 条目与 `img` 字段仍留在 `food_library.json` / `food_encyclopedia.json`，
+App 端引用不到图会静默空白（不报错、不破版）。是否连条目一起删需老板定。
+
+**第 ③ 点（「底部没有选中的绿色框」）—— 实测结果与老板描述不符，但查出了真实差异**：
+
+1. 绿框**存在**且工作正常：真机像素可见 `theme.accent` 圆角描边；点第二张卡后绿框**跟随移动**
+   （`goFood()` → `relatedList` 重排，当前项恒排第一）。
+2. **真实差异是「相关食物卡片被 CTA 裁掉」**：未滚动时卡片只露出约 100rpx（卡片实高 ~255rpx），
+   名称与热量完全看不见；设计稿里 4 张卡连绿框**完整可见**（稿面整页 1600rpx 一屏放得下）。
+3. 实测各区块高度（px→rpx，`1rpx=1.70667px`）：
+
+| 区块 | 设计稿 | 真机实测 | 差 |
+|---|---|---|---|
+| Hero | 300 | 321.7 | +21.7 |
+| 主要营养成分 | 236 | **352.1** | **+116.1** |
+| 营养点评+三列 | 316 | 387.9~451.8 | +72 ~ +136 |
+| 相关食物卡片 | 236 | ~255 | +19 |
+
+   合计超出约 **217rpx**，正好是卡片被裁的量。
+4. **修法（待老板点头再动）**：按稿压缩 20 处尺寸/间距（营养圆底 76→52rpx、删四列进度条 −20rpx、
+   各卡 padding 32→28、点评卡内距微调、相关食物滚动区 320→244rpx、`.ec-bottom-space` 60→24），
+   **不碰任何字号**（避免动 Typography v2 登记），预计省 216rpx，刚好让卡片连绿框完整露出。
+   注意：删四列进度条是稿面口径（Pencil `NutritionCard` 只有 Cir/Lb/Vl/Pc 五节点 ×4 列 = 20 + 标题 2 = 22，**无 bar 节点**）。
