@@ -1,4 +1,7 @@
 <template>
+  <!-- [变更日志] 2026-09-26: Settings 中段按设计稿还原几何 —— 卡片左右边距 28→46rpx；
+       行高 128→140rpx（.row padding 26→32）；危险卡补齐缺失的 border-style 并把描边 1px→1.5rpx；
+       盾行→危险卡过渡 82→106rpx；页脚叶片由「独立一行」改为「内联在脚注左侧」。字号与色值一律不动。 -->
    <view class="page" :style="{ backgroundColor: theme.bg }">
      <!-- [变更日志] 2026-09-24: Header 简化为与日历页同源的纯净绿色渐变（三页统一） -->
     <!-- 头图（与日历页顶栏同源的纯净绿色渐变） -->
@@ -20,7 +23,7 @@
 
     <!-- 偏好 -->
     <text class="sec-title sec-first" :style="{ color: theme.ink1 }">{{ t('st.pref') }}</text>
-    <view class="card" :style="{ backgroundColor: theme.card }">
+    <view class="st-card" :style="{ backgroundColor: theme.card }">
       <view class="row">
         <view class="chip" :style="{ backgroundColor: theme.chip }">
           <image class="chip-icon" :src="asset('settings/icon_moon.svg')" mode="aspectFit"></image>
@@ -72,7 +75,7 @@
 
     <!-- 目标管理 -->
     <text class="sec-title" :style="{ color: theme.ink1 }">{{ t('st.goalSec') }}</text>
-    <view class="card" :style="{ backgroundColor: theme.card }">
+    <view class="st-card" :style="{ backgroundColor: theme.card }">
       <view class="row" @click="openGoal">
         <view class="chip" :style="{ backgroundColor: theme.chip }">
           <image class="chip-icon" :src="asset('settings/icon_target.svg')" mode="aspectFit"></image>
@@ -98,7 +101,7 @@
 
     <!-- 数据管理 -->
     <text class="sec-title" :style="{ color: theme.ink1 }">{{ t('st.dataSec') }}</text>
-    <view class="card" :style="{ backgroundColor: theme.card }">
+    <view class="st-card" :style="{ backgroundColor: theme.card }">
       <view class="row">
         <view class="chip" :style="{ backgroundColor: theme.chip }">
           <image class="chip-icon" :src="asset('settings/icon_down.svg')" mode="aspectFit"></image>
@@ -138,10 +141,12 @@
 
     <!-- 页脚 -->
     <view class="footer">
-      <image class="brand-icon" :src="asset('settings/icon_leaf.svg')" mode="aspectFit"></image>
       <text class="brand" :style="{ color: theme.ink1 }">{{ t('st.brand') }}</text>
       <text class="ver" :style="{ color: theme.ink3 }">v1.0.0</text>
-      <text class="footnote" :style="{ color: theme.ink3 }">{{ t('st.foot') }}</text>
+      <view class="foot-row">
+        <image class="foot-icon" :src="asset('settings/icon_leaf.svg')" mode="aspectFit"></image>
+        <text class="footnote" :style="{ color: theme.ink3 }">{{ t('st.foot') }}</text>
+      </view>
     </view>
 
     <!-- 每日热量目标弹窗 -->
@@ -411,25 +416,25 @@ const goBack = () => {
 .sec-title {
   font-size: 30rpx;
   font-weight: bold;
-  margin-left: 50rpx;
+  margin-left: 52rpx;
   margin-top: 40rpx;
   margin-bottom: 14rpx;
 }
 .sec-first {
   margin-top: 20rpx;
 }
-.card {
+.st-card {
   border-radius: 36rpx;
-  margin-left: 28rpx;
-  margin-right: 28rpx;
+  margin-left: 46rpx;
+  margin-right: 46rpx;
   padding-left: 28rpx;
   padding-right: 28rpx;
 }
 .row {
   flex-direction: row;
   align-items: center;
-  padding-top: 26rpx;
-  padding-bottom: 26rpx;
+  padding-top: 32rpx;
+  padding-bottom: 32rpx;
 }
 .chip {
   width: 76rpx;
@@ -489,8 +494,8 @@ const goBack = () => {
 .shield-row {
   flex-direction: row;
   align-items: center;
-  margin-left: 58rpx;
-  margin-top: 28rpx;
+  margin-left: 61rpx;
+  margin-top: 37rpx;
 }
 .shield-icon {
   width: 30rpx;
@@ -504,13 +509,16 @@ const goBack = () => {
   flex-direction: row;
   align-items: center;
   border-radius: 36rpx;
-  border-width: 1px;
+  /* 原为 border-width:1px 且缺 border-style → 描边完全不渲染；
+     稿面实测描边 1px@572 稿 = 1.31rpx，取 1.5rpx（全项目首个小数值，1rpx 偏细、2rpx 偏粗） */
+  border-style: solid;
+  border-width: 1.5rpx;
   border-color: #FBA095;
-  margin-left: 28rpx;
-  margin-right: 28rpx;
-  margin-top: 24rpx;
-  padding-top: 18rpx;
-  padding-bottom: 18rpx;
+  margin-left: 46rpx;
+  margin-right: 46rpx;
+  margin-top: 33rpx;
+  padding-top: 16rpx;
+  padding-bottom: 16rpx;
   padding-left: 28rpx;
   padding-right: 28rpx;
 }
@@ -527,23 +535,28 @@ const goBack = () => {
 }
 .footer {
   align-items: center;
-  margin-top: 52rpx;
-}
-.brand-icon {
-  width: 40rpx;
-  height: 40rpx;
+  margin-top: 83rpx;
 }
 .brand {
   font-size: 26rpx;
-  margin-top: 12rpx;
 }
 .ver {
   font-size: 22rpx;
-  margin-top: 6rpx;
+  margin-top: 4rpx;
+}
+.foot-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10rpx;
+}
+.foot-icon {
+  width: 20rpx;
+  height: 20rpx;
+  margin-right: 10rpx;
 }
 .footnote {
   font-size: 20rpx;
-  margin-top: 6rpx;
 }
 /* ===== 主题/语言 sheet（pf- 前缀避跨文件类名冲突） ===== */
 .row-pressed {
