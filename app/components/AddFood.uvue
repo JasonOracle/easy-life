@@ -4,7 +4,8 @@
     <!-- [变更日志] 2026-09-27: 确认钮渐变深端 accentDeep→accentMid（消除右下角发黑） -->
     <!-- [变更日志] 2026-09-27: 关闭钮底色 theme.chip→theme.card(白) + 补 box-shadow，对齐 GoalModal/FoodPicker 关闭钮三件套 -->
     <!-- [变更日志] 2026-09-24: 确认钮渐变带角度(135deg)在 App 原生端报 Invalid value → 角度版包入 #ifdef MP-WEIXIN，App 端用无色标渐变 -->
-    <view class="af-sheet" :style="{ backgroundColor: theme.card }">
+    <!-- [变更日志] 2026-09-27: .af-sheet 改绑 afSheetStyle（底色 ＋ App 端运行时安全区底距） -->
+    <view class="af-sheet" :style="afSheetStyle">
     <view class="food-row">
         <image class="food-thumb" :style="{ backgroundColor: theme.thumbStroke }" :src="'/static/icons/' + food.img" mode="aspectFill"></image>
         <view class="food-text">
@@ -234,6 +235,21 @@ const meal = ref(defaultMeal())
 const mealCards = computed<MealCard[]>((): MealCard[] => MEAL_CARDS.value)
 
 const { theme, isDark, accentId } = useTheme()
+
+// [变更日志] 2026-09-27: 详情弹层底部安全区补齐——类内 calc(env) padding-bottom 仅 MP 生效，App 端裸 48rpx，
+//   真实带手势条机型会被系统条压住（本机 safeAreaInsets.bottom=0 掩盖了该问题），按 safeAreaInsets 运行时下发
+/** 详情底距：App 端 = 设计底衬 48rpx 换算 px ＋ 安全区；MP 端交回类内 calc 规则（getSystemInfoSync 在 MP 无 insets，不覆盖） */
+const afSheetStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  st['background-color'] = theme.value.card
+  // #ifdef APP
+  const sysAf = uni.getSystemInfoSync()
+  const insetsAf = sysAf.safeAreaInsets
+  const sbAf = insetsAf != null ? insetsAf.bottom : 0
+  st['padding-bottom'] = (48 * sysAf.windowWidth / 750 + sbAf) + 'px'
+  // #endif
+  return st
+})
 
 /** 资产按 (accent, mode) 取五档变体；未登记底稿自动回落原路径 */
 function asset(path: string): string {

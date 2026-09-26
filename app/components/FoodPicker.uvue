@@ -72,6 +72,7 @@
 // [变更日志] 2026-09-24: 食物列表选中态重构 → 废弃整行绿底 .fp-row-on（白底图标叠绿底色块难看），改为左侧薄荷绿竖条 .fp-row-accent ＋ 既有文字加深加粗；日志落位 script 内（ADR-003 #7 禁 .uvue 根层 HTML 注释）
 // [变更日志] 2026-09-25: 新增 startStep 属性——百科「添加到本餐」经 ct_pending_add 交接后，Home 以 startStep='detail'+selectedId 直接打开该项详情步
 // [变更日志] 2026-09-27: 删除食物列表选中态的左侧绿竖条 .fp-row-accent（老板定稿：以「右侧选择圈✓＋文字加深加粗」为选中态，竖条冗余）
+// [变更日志] 2026-09-27: 详情弹层容器 .fp-container-detail 由写死 1080rpx 改为 height:auto + max-height:90%（贴合内容，长内容交内部 scroll-view）；.fp-detail-wrap 补 min-height:0
 import { ref, computed, watch } from 'vue'
 import { t, tf } from '../composables/i18n'
 import { resolveLang } from '../composables/useLocale'
@@ -332,12 +333,15 @@ watch(
   transform: translateY(0);
 }
 /* #endif */
+/* [变更日志] 2026-09-27: 原 height:1080rpx 是写死的猜测值——真机实测米饭内容已 1108.5rpx
+   （默认即溢出 28.5rpx，选大碗 1124.4rpx），奶茶类 1365.4rpx 更把确认钮整个顶出屏外；
+   内容顶对齐 → 溢出全落底部 → padding-bottom 与确认钮一起被裁（实测底距 18.7/2.9rpx，CSS 声明 48rpx）。
+   改为贴合内容高度：短内容不留白、长内容由 max-height 兜底交内部 scroll-view 滚动。 */
 .fp-container-detail {
-  /* 贴合分量弹层实内容高，超出部分交给内部 scroll-view，避免确认键下方留大片空白 */
-  height: 1080rpx;
-  /* #ifdef MP-WEIXIN */
-  height: calc(1080rpx + env(safe-area-inset-bottom));
-  /* #endif */
+  height: auto;
+  max-height: 90%;
+  display: flex;
+  flex-direction: column;
 }
 .fp-sheet {
   flex: 1;
@@ -353,6 +357,8 @@ watch(
 }
 .fp-detail-wrap {
   flex: 1;
+  /* min-height:0 允许容器被 max-height 限住时收缩，把溢出交给内部 .af-scroll 滚动 */
+  min-height: 0;
   height: 100%;
   overflow: hidden;
 }

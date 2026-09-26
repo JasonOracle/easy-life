@@ -743,3 +743,45 @@ mint `#17916B`/`#52D6AC`、ocean `#1B7BB3`/`#5BC8FF`、lavender `#5A44DE`/`#A99B
 **静默吞掉了原有的 `2026-09-24 Header` 那条变更日志**。`count=1` 校验只保证「锚点唯一命中」，
 **不保证「原有内容还在」**。已补回并 grep 四条日志齐全。
 教训：脚本做插入类改动，写完必须 **grep 复核被当锚点的那条原有内容是否仍在**。
+
+### 2026-09-27 01:56:00 ｜ AddFood 详情弹层容器由写死高度改为贴合内容（底距恢复 48rpx）＋ App 端底距补运行时安全区
+
+**背景**：老板报「选大碗时底部按钮贴着屏幕底部」。诊断（01:55 条）确认根因是
+`.fp-container-detail { height: 1080rpx }` **写死**：内容顶对齐、溢出全落底部，
+`padding-bottom: 48rpx` 与确认钮一起被推出屏外。米饭默认（小碗）实内容已 1108.5rpx（自带溢出 28.5rpx），
+大碗 1124.4rpx，奶茶类更长 → 按钮完全不可见。老板批准方案 A+C 后实施。
+
+**改动 1（方案 A，`app/components/FoodPicker.uvue`）**：`.fp-container-detail`
+`height: 1080rpx`（＋MP 分支 `calc(1080rpx + env(...))`）→ `height: auto; max-height: 90%; display:flex; flex-direction:column`；
+`.fp-detail-wrap` 补 `min-height: 0`（允许容器被 max-height 限住时收缩，把溢出交给内部 `.af-scroll` 滚动）。
+原 MP 分支的 height 覆盖一并删除（贴合语义对两端一致，尾部安全区由 `.af-sheet` 的 MP calc 规则承担）。
+
+**改动 2（方案 C，`app/components/AddFood.uvue`）**：`.af-sheet` 的底距原先仅 `#ifdef MP-WEIXIN` 生效，
+App 端是裸 48rpx。新增 `afSheetStyle` computed（App 端 `48 * windowWidth/750 + safeAreaInsets.bottom`），
+模板 `:style` 由内联对象改绑该 computed（底色 ＋ 底距一并下发）。本机 `safeAreaInsets.bottom=0` 掩盖了该问题，
+真实带手势条机型靠它兜底。
+
+**真机验收**（emulator-5554；全量产物 `01:49:22` 晚于源码 `01:48:29`，排除差量假绿）：
+
+| 状态 | 容器顶边 y | 内容实高 | 确认钮底距屏底（CSS 声明 48rpx） |
+|---|---|---|---|
+| 米饭 · 小碗 | 879（原固定顶边 929） | 1108.5rpx | **48.0rpx**（改前 18.7） |
+| 米饭 · 大碗 | 852 | 1124.4rpx | **48.0rpx**（改前 2.9） |
+| 珍珠奶茶 | 692 | 1218.1rpx | **48.0rpx**（改前按钮完全出屏） |
+
+- 三态底距**差值均为 +0.0rpx**（不多不少正好 48rpx）；容器顶边随内容变化 → 贴合生效。
+- 内容实高与改动前「滚到底」独立测得的 1108.5 / 1124.4rpx **逐位吻合**（交叉验证通过）。
+- **列表步回归零影响**：容器顶边 y=998 vs 理论 997（偏差 1px）、列表可滚动（采样差异 100 点）。
+- 附带验证：奶茶「大杯 700ml」选中态（托盘因 `opt-underline` 长高的最差场景）按钮同样完整可见。
+
+**未触发分支（如实登记）**：`max-height: 90%`（=1462rpx）在当前全部食物下均未被触发
+（最长奶茶 1218.1rpx）——它属于「未来出现更长选项组」的保险，不是当前生效路径。
+
+**证据**：`debug/evidence_20260927/cmp_fit_large.png`（大碗改前/改后）、`cmp_fit_tea.png`（奶茶改前/改后）、
+`fit_small.png`/`fit_large.png`/`fit_tea.png`（真机整页）、`fit_list_regress.png`（列表步回归）；
+验证脚本 `debug/verify_detail_fit.py`。
+
+**架构口径（可复用）**：弹层容器优先 **贴合内容**（`height:auto` ＋ 上限兜底），
+不要给写死高度——写死值必然与「内容最长的那一项」博弈，短内容空一片、长内容裁底部；
+同类正确范例是 `GoalModal`（`height:auto` + `min-height`）。底部内边距必须放在**不滚动**的层上
+（列表步 `.fp-sheet` 就是对的，详情步原来是反的）。
