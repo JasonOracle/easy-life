@@ -141,13 +141,13 @@
 <script setup lang="uts">
 import { ref, computed } from 'vue'
 import { t, tf } from '../../composables/i18n'
-import { onPageScroll } from '@dcloudio/uni-app'
+import { onPageScroll, onShow } from '@dcloudio/uni-app'
 import { useFoodStore, dayKeyOf, dayRange, amountText, getFoodById, computeEntry, MEAL_KEYS } from '../../stores/food'
 import type { FoodEntry } from '../../stores/food'
 import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import { foodIdFromImg } from '../../stores/encyclopedia'
 import { triggerHaptic } from '../../stores/settings'
-import { useTheme, themeAsset, FIXED_COLORS } from '../../composables/useTheme'
+import { useTheme, themeAsset, FIXED_COLORS, syncStatusBarStyle } from '../../composables/useTheme'
 import FoodPicker from '../../components/FoodPicker.uvue'
 import type { AddPayload } from '../../components/FoodPicker.uvue'
 import SettleBadge from '../../components/SettleBadge.uvue'
@@ -208,6 +208,11 @@ const ringPct = computed<number>(() => {
 const calStatus = computed(() => getCalorieStatus(dayTotal.value, goalVal.value))
 
 const { theme, isDark, accentId } = useTheme()
+
+// 状态栏字色按当前主题同步：原生端 pages.json 的静态项只覆盖亮态，切页/切主题都要重下
+onShow(() => {
+  syncStatusBarStyle(isDark.value)
+})
 
 /** 资产按 (accent, mode) 取五档变体；未登记底稿（语义色／无彩稿）自动回落原路径 */
 function asset(path: string): string {

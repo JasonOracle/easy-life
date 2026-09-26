@@ -202,7 +202,7 @@ import GoalModal from '../../components/GoalModal.uvue'
 import { useFoodStore } from '../../stores/food'
 import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import { t, tf } from '../../composables/i18n'
-import { useTheme, themeAsset, FIXED_COLORS } from '../../composables/useTheme'
+import { useTheme, themeAsset, FIXED_COLORS, syncStatusBarStyle } from '../../composables/useTheme'
 import { getFoodById, computeEntry } from '../../stores/food'
 import { playSound, triggerHaptic } from '../../stores/settings'
 import { foodIdFromImg } from '../../stores/encyclopedia'
@@ -497,6 +497,8 @@ function openEncyclopedia(img: string): void {
 
 /** 百科「添加到本餐」一次性交接：读到即清，避免二次 onShow 重复弹层 */
 onShow(() => {
+  // 状态栏字色按当前主题同步（原生端静态配置只覆盖亮态，切页/切主题都要重下）
+  syncStatusBarStyle(isDark.value)
   const raw = uni.getStorageSync('ct_pending_add')
   if (raw == null || raw == '') return
   uni.removeStorageSync('ct_pending_add')

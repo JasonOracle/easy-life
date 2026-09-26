@@ -202,7 +202,7 @@ import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import { useUserStore } from '../../stores/user'
 import { useSettingsStore } from '../../stores/settings'
 import { t, tf } from '../../composables/i18n'
-import { useTheme, themeAsset } from '../../composables/useTheme'
+import { useTheme, themeAsset, syncStatusBarStyle } from '../../composables/useTheme'
 
 /**
  * 接 store 读数（种子精确还原：历史 1950超+150/1720达/1580达；趋势 1580…1950/1368；
@@ -220,6 +220,11 @@ const settings = useSettingsStore()
 const dk = computed((): boolean => settings.darkMode)
 
 const { theme, isDark, accentId } = useTheme()
+
+// 状态栏字色按当前主题同步（下方 ifdef 内的 syncBar 只在小程序端注册）
+onShow(() => {
+  syncStatusBarStyle(isDark.value)
+})
 
 /** 资产按 (accent, mode) 取五档变体；未登记底稿（语义色／无彩稿／png）自动回落原路径 */
 function asset(path: string): string {

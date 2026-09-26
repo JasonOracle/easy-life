@@ -122,12 +122,12 @@
 <script setup lang="uts">
 import { ref, computed } from 'vue'
 import { t, tf } from '../../composables/i18n'
-import { onPageScroll } from '@dcloudio/uni-app'
+import { onPageScroll, onShow } from '@dcloudio/uni-app'
 import { useFoodStore, dayKeyOf, dayRange, MEAL_KEYS, MEAL_LABELS, FoodEntry } from '../../stores/food'
 import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import { foodIdFromImg } from '../../stores/encyclopedia'
 import { triggerHaptic } from '../../stores/settings'
-import { useTheme, themeAsset, FIXED_COLORS } from '../../composables/useTheme'
+import { useTheme, themeAsset, FIXED_COLORS, syncStatusBarStyle } from '../../composables/useTheme'
 import Tabbar from '../../components/Tabbar.uvue'
 
 /**
@@ -274,6 +274,11 @@ const selOver = computed<number>(() => {
 const selStatus = computed(() => getCalorieStatus(selTotal.value, goalVal.value))
 
 const { theme, isDark, accentId } = useTheme()
+
+// 状态栏字色按当前主题同步：原生端 pages.json 的静态项只覆盖亮态，切页/切主题都要重下
+onShow(() => {
+  syncStatusBarStyle(isDark.value)
+})
 
 /** 资产按 (accent, mode) 取五档变体；未登记底稿（语义色／无彩稿）自动回落原路径 */
 function asset(path: string): string {
@@ -806,7 +811,7 @@ function openEncyclopedia(img: string): void {
 }
 .lr-fcard {
   width: 160rpx;
-  height: 208rpx;
+  height: 224rpx;
   border-radius: 28rpx;
   align-items: center;
   flex-shrink: 0;
@@ -818,14 +823,14 @@ function openEncyclopedia(img: string): void {
   margin-top: 16rpx;
 }
 .lr-fname {
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: bold;
   margin-top: 10rpx;
   max-width: 144rpx;
   text-overflow: ellipsis;
 }
 .lr-fkcal {
-  font-size: 17rpx;
+  font-size: 20rpx;
   margin-top: 4rpx;
 }
 .lr-empty {

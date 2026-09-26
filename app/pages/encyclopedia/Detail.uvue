@@ -17,7 +17,7 @@
       </view>
     </view>
 
-    <scroll-view v-if="food != null" class="ec-body" direction="vertical" :show-scrollbar="false" :style="{ height: bodyH + 'px' }">
+    <scroll-view v-if="food != null" class="ec-body" direction="vertical" :show-scrollbar="false">
       <!-- Hero：图 + 名 + 徽章 + 热量 + 宏量标签 -->
       <view class="ec-hero" :style="{ backgroundColor: theme.card }">
         <view class="ec-hero-art" :style="{ backgroundColor: theme.cardSoft }">
@@ -151,8 +151,8 @@
 // [变更日志] 食物百科详情页：hero/营养四列/点评+三列指引/相关食物/添加到餐次 CTA + 全屏搜索态；
 //       数据 = food_library（营养与图）⊕ food_encyclopedia 伴生表（英文名/档位/模板），颜色全走 useTheme token。
 import { ref, computed } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
-import { useTheme, FIXED_COLORS } from '../../composables/useTheme'
+import { onLoad, onShow } from '@dcloudio/uni-app'
+import { useTheme, FIXED_COLORS, syncStatusBarStyle } from '../../composables/useTheme'
 import { resolveLang } from '../../composables/useLocale'
 import { t, tf } from '../../composables/i18n'
 import { currentMealKey } from '../../composables/mealWindow'
@@ -166,14 +166,18 @@ import type { EncEntry } from '../../stores/encyclopedia'
 
 const { theme, isDark } = useTheme()
 
+// 状态栏字色按当前主题同步：原生端 pages.json 的静态项只覆盖亮态，切页/切主题都要重下
+onShow(() => {
+  syncStatusBarStyle(isDark.value)
+})
+
 const sbH = ref<number>(uni.getSystemInfoSync().statusBarHeight ?? 0)
 const insets = uni.getSystemInfoSync().safeAreaInsets
 const safeBottom = insets != null ? insets.bottom : 0
-// 滚动区高度 = 视口 − 顶栏 − CTA（rpx 按 750 稿宽折算 px，原生端 :style 禁跨单位 calc）
 const winH = uni.getSystemInfoSync().windowHeight
-const winW = uni.getSystemInfoSync().windowWidth
-const rpx = (v: number): number => v / 750 * winW
-const bodyH = ref<number>(winH - (sbH.value + rpx(280) + safeBottom))
+// 滚动区高度不再反算：根容器铺满窗口（见 .ec-page），滚动区 flex 吃剩余高度。
+// 旧式「视口 − 顶栏 − CTA(估 280rpx) − 安全区」的减法对不齐 rpx 与 px 的取整误差，
+// 差出的那几十 px 会露出 pages.json 的窗口底色（暗态下是整条浅色横条）。
 
 // 空串起步：库内首条兜底会让「参数没接上」伪装成「显示了米饭」，零报错难查
 const currentId = ref('')
@@ -464,6 +468,14 @@ onLoad((options: OnLoadOptions) => {
 
 <style>
 .ec-page {
+  /* 铺满窗口：根容器若只按内容高，底部剩余条会露出窗口底色（暗态＝浅色横条） */
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
   flex-direction: column;
 }
 .ec-header {
@@ -497,7 +509,9 @@ onLoad((options: OnLoadOptions) => {
   transform: scale(0.97);
 }
 .ec-body {
-  flex-shrink: 0;
+  flex: 1;
+  width: 100%;
+  height: 100%;
 }
 .ec-hero {
   flex-direction: row;

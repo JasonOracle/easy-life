@@ -182,7 +182,7 @@
 import { useGoalStore } from '../../stores/goal'
 import { useSettingsStore } from '../../stores/settings'
 import { triggerHaptic } from '../../stores/settings'
-import { useTheme, themeAsset, ACCENT_OPTIONS } from '../../composables/useTheme'
+import { useTheme, themeAsset, ACCENT_OPTIONS, syncStatusBarStyle } from '../../composables/useTheme'
 import { t, tf } from '../../composables/i18n'
 import { ref, computed } from 'vue'
 import { onPageScroll } from '@dcloudio/uni-app'
@@ -202,9 +202,9 @@ const sbH = ref<number>(uni.getSystemInfoSync().statusBarHeight ?? 0)
 // 常驻导航栏高度计算：58px (116rpx) 内容高 + 状态栏高，避免跨端 calc(rpx+px) 错误
 const navBarH = computed<number>(() => sbH.value + 58)
 
-// TODO App 原生端改 plus.navigator.setStatusBarStyle 实测后补
+// 状态栏字色随暗黑反转：小程序走 setNavigationBarColor，App 原生端走 plus.navigator
 function syncBar(): void {
-  uni.setNavigationBarColor({ frontColor: dk.value ? '#ffffff' : '#000000', backgroundColor: '#000000' })
+  syncStatusBarStyle(dk.value)
 }
 onShow(() => {
   syncBar()
