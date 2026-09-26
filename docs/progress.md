@@ -878,3 +878,69 @@ hook 的 `food-data-integrity` 提示「图标 347 ≠ 食物 353」，顺线索
    各卡 padding 32→28、点评卡内距微调、相关食物滚动区 320→244rpx、`.ec-bottom-space` 60→24），
    **不碰任何字号**（避免动 Typography v2 登记），预计省 216rpx，刚好让卡片连绿框完整露出。
    注意：删四列进度条是稿面口径（Pencil `NutritionCard` 只有 Cir/Lb/Vl/Pc 五节点 ×4 列 = 20 + 标题 2 = 22，**无 bar 节点**）。
+
+---
+
+### 2026-09-27 03:45 ｜ 改动 4 收口：营养四列换真图标＋统一圆底＋去相关食物绿框＋六条假食物彻底移除（真机 PASS）
+
+**老板本轮 3 件事**：①营养四列「不仅图标不对，背景色也不对」；②相关食物「怎么还是有绿色边框」；③「那 6 条食物在设计图上是假的，真是食物数据里面有啥用啥」。
+
+**取证口径**：Pencil 板 `Nnctn` → 子节点 `EkFtL`(NutritionCard, 345×118, cr10) 直接 `Export` 成 PNG 当**稿面铁证**（比截图更权威）＋节点 dump 取 `fill/icon/w/h`；真机 `screencap` 逐像素量色值与尺寸。
+
+**改动 4-A —— 营养四列：emoji＋每列主题色实底 → MSR 描边图标＋统一 `theme.chip` 圆底**
+
+| 项 | 稿面（EkFtL 节点） | 改前代码 | 改后代码 | 真机实测 |
+|---|---|---|---|---|
+| 圆底 | `Cir 26×26 cr13 fill=$fd-chip` ×4 **同色** | 每列各自主题色实底 `76rpx` | `52rpx` ＋ `backgroundColor: theme.chip` | **88px = 26pt** ✓，四列同为 `#E6F9F6` ✓ |
+| 蛋白质 | `Ic 14×14 icon=fitness_center $fd-primary` | emoji 🍗 | `/static/encyclopedia/ic_protein.svg` | ink `#20C997` ✓ 描边 |
+| 脂肪 | `water_drop` | emoji 💧 | `ic_fat.svg` | ink `#20C997` ✓ 描边 |
+| 碳水 | `grain` `#FCA212` | emoji 🌽 | `ic_carb.svg` | ink `#FCA212` ✓ |
+| 热量 | `local_fire_department` `#FC7130` | emoji 🔥 | `ic_kcal.svg` | ink `#FC7130` ✓ |
+
+- 图标源＝**MSR 描边（default）版** `https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/<icon>/default/24px.svg`；
+  `fill0`／`wght400`／`regular` 三条路径全 **404**，仅 `default` 与 `wght300` 可用（`wght300` 偏细，未采用）。
+- `viewBox="0 -960 960 960"` → `viewBox="0 0 24 24"` 统一用 `<g transform="scale(0.025) translate(0,960)">`（**只平移不翻转**）。
+- 蛋白/脂肪用 `#20C997`（＝`theme.accent`）→ 走 5 档变体（实测 `_ocean #3173DE`／`_lavender #A679EA`／`_dark #46E2B4`／`_ocean_dark #72A3E8`／`_lavender_dark #C5A9F1`）；
+  碳水/热量是**语义色**，`gen_theme_variants.py` 判「含家族外彩色」→ 整文件跳过，**无变体**（行为正确）。
+- ASCII 剖面复核：水滴＝水滴外框、火焰＝火焰外框、点阵＝实心圆点 —— **与稿面渲染一致**（稿面 `grain` 也是实心点，非空心）。
+- 证据：`debug/evidence_20260927/cmp_icons_3way_nutrition.png`（改前／设计稿／改后 同尺度）、`cmp_nutrition_3way.png`（整卡）。
+
+**改动 4-B —— 相关食物去掉绿框**
+- 删 `.ec-rel-card` 的 `border-width/border-style` 声明与 `border-color: theme.accent` 三元，并删 `.ec-rel-current` 规则。
+- 真机像素扫卡区带（y2360..2490）：主色只有 `#FFFFFF`(卡)／`#F6FBF8`(页底)／近白抗锯齿，**主题绿像素 0**；卡左缘与顶缘过渡 `#F6FBF8 → #FFFFFF` **无中间描边色** ✓。
+- 稿面口径：`Nnctn` 全树只有 **2 个** stroke 节点（`Status Icons > BattBody`、`ReviewCard`），四张 `Rel_*` 卡均 `fill=$fd-card` **无 stroke**。
+- 证据：`cmp_related_2way.png`。
+
+**改动 4-C —— p348~p353「v2 稿行菜」彻底移除（353 → 347）**
+真因链已坐实：`.workbuddy/tmp/add_foods.py` 头部自述「一次性脚本：向三源追加 p348-p353（v2 行菜），跑完即废」→ `icons_v1_visual.yaml` 日志「补齐 p348–p353 六条生图槽位…清单从 347 条对齐到 353 条」→ 6 张 92×92 假插画于 09-21 01:02 **绕过** `compress_icons.py` 直接落进 `icons-final`。**即这 6 条是给设计稿凑演示的非真实条目。**
+
+- 5 份源各摘 6 条（`icons_v1`／`icons_v1_usage`／`icons_v1_visual`／`encyclopedia_meta`(并改「353 条」→「347 条」)／`nutrition_v1`），原文件备份在 `debug/removed_assets_20260927/`。
+- `validate.py` ✅ 347 条／四源 id 完全对齐；`build.py` → 347 条 178.6KB（「本次复制 0 个／源共 347 个」）；`build_encyclopedia.py` → 347 条 47.3KB；四份产物 `6id命中=0`。
+- 编译产物 `app-service.js` 复查：`糙米饭／燕麦片／清炒西兰花／全脂牛奶／鸡胸肉沙拉／水煮蛋` **各 0 次**。
+- 真机拼音搜索反证：`caomi`（糙米）→ **列表空**；`xilanhua` → **蒜蓉西兰花 ＋ 西兰花**（真实库条目）。证据 `acc_r5_caomi.png`／`acc_r6_xilanhua.png`。
+
+**改动 4-D —— `food.ts` SEED_PLAN「今天」换真实库食材（热量守恒）**
+```
+早 300g 小米粥 126 ＋ 100g 鸡蛋 144 ＋ 231ml 牛奶 150 = 420    （原 420）
+午 212g 宫保鸡丁 307 ＋ 162g 米饭 188 ＋ 100g 蒜蓉西兰花 65 = 560 （原 560）
+晚 p230/p286/p270 = 387                                        （未动）
+全天 1367 kcal 不变
+```
+真机清数据重启实测：早餐 07:30 = 420／午餐 12:10 = 560／已摄入 1367 ✓（`acc_r8_seed.png`）。
+
+**真机验收**（emulator-5554）
+`pm clear` 后由 HBuilderX CLI `launch app-android` 重推资源＋全量重编 **`ready in 14725ms`**。
+- ① 营养四列：四圆底同为 `#E6F9F6`、圆径 88px＝26pt、四图标 ink 色 `#20C997 / #20C997 / #FCA212 / #FC7130` ✓
+- ② 相关食物：卡区带主题绿 **0 像素** ✓
+- ③ 演示数据：真实库食材 ✓；六条假食物在**数据层／编译产物层／交互层**三处均 0 命中 ✓
+
+**新踩坑（写入 memory）**：`adb shell pm clear` 会连 HBuilderX 调试基座的**应用资源**一起清掉，
+重启后弹「未检测到应用资源，请使用HBuilderX重新真机运行」→ **必须重新 `cli.exe launch app-android` 全量重编重推**（本次 `ready in 14725ms`）。
+另：`nohup cli.exe launch ... &` 会被沙箱在 tool 返回时连带杀掉（日志停在「正在编译中」、`dist/` 被清空），**要用工具自身的后台模式**而非 nohup。
+
+**遗留（未改，待老板拍板）**：
+1. **四列进度条**：稿面 `EkFtL` 只有 `Cir/Lb/Vl/Pc` ×4 列 ＋ `NutriTitle/NutriSub` ＝ **22 节点，无 bar 节点**；代码仍保留进度条。
+2. **热量百分比**：稿面 `Pc热量 = "—"`，代码是 `(100%)`。
+3. **卡高**：稿面 118pt ＝ 236rpx；改前 353rpx → 改后 **328rpx**（圆底 76→52rpx 省 25rpx），仍 **+92rpx**（预计主因＝进度条行 ＋ 各层 padding）。
+4. **图标 ink 略大**：稿面 16px(＝8pt)，真机 31px(＝9.1pt)，约 **+14%**（Pencil 按字体渲染 MSR 自带边距，非代码错；要贴合需把 28rpx 降到约 24rpx）。
+5. 浅色档语义色（碳水/热量）对比度不足（lavender-light 碳水 **1.73:1**），与稿面原样一致，未擅改，登记为风险。

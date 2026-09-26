@@ -3,6 +3,8 @@
 export const THEMEABLE_ASSETS: string[] = [
   "common/change_icon",
   "common/search_icon",
+  "encyclopedia/ic_fat",
+  "encyclopedia/ic_protein",
   "goal/gm_bulb",
   "goal/gm_chev",
   "goal/gm_close",

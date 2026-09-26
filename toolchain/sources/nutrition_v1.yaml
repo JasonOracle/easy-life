@@ -1,3 +1,11 @@
+# [变更日志]
+# 修改时间：2026-09-27
+# AI模型：Claude (WorkBuddy)
+# 修改内容：[移除 p348–p353 六条食物（燕麦片/水煮蛋/全脂牛奶/鸡胸肉沙拉/糙米饭/清炒西兰花）。
+#           这六条是 09-21~09-25 为「让 App 演示数据对齐设计稿的当日三餐」而补的，非真实食物库内容：
+#           生图链从未为它们出过图（assets/icons-gen 无源图、生成报告 09-19 只覆盖 347 条），
+#           09-21 用 92×92 外部插画占位塞进 icons-final，09-25 才补的 yaml 条目。
+#           现按「食物库只放真实数据」摘除，清单 353 → 347，与图标数一致。]
 # 营养数据初稿（每 100g 或 100ml 可食部）—— gen_nutrition.py 生成 + 人工修正
 #
 # 分层方法：
@@ -4613,80 +4621,3 @@ p347:
   basis: recipe_estimate
   confidence: 2
   basis_detail: "木糖醇50g + 砂糖20g +  Gum base 15g + 香精少量，总约100g，常见单粒约2g"
-p348:
-  name: 燕麦片
-  cat: 主食
-  cal: 375
-  protein: 13
-  carb: 66
-  fat: 7
-  unit: g
-  piece_weight: null
-  basis: composition_table
-  confidence: 3
-  basis_detail: "干燕麦片常见营养成分，冲泡吸水增重，热量按干重计"
-
-p349:
-  name: 水煮蛋
-  cat: 肉类蛋类
-  cal: 144
-  protein: 13
-  carb: 1.3
-  fat: 9
-  unit: g
-  piece_weight: 60
-  basis: composition_table
-  confidence: 3
-  basis_detail: "与鸡蛋同值，去壳单只约60g"
-
-p350:
-  name: 全脂牛奶
-  cat: 饮品
-  cal: 65
-  protein: 3
-  carb: 4.7
-  fat: 3.2
-  unit: ml
-  piece_weight: null
-  basis: composition_table
-  confidence: 3
-  basis_detail: "市售全脂牛奶常见值"
-
-p351:
-  name: 鸡胸肉沙拉
-  cat: 菜品
-  cal: 91.5
-  protein: 8.3
-  carb: 3
-  fat: 2.5
-  unit: g
-  piece_weight: null
-  basis: recipe_estimate
-  confidence: 2
-  basis_detail: "鸡胸肉100g + 生菜番茄黄瓜共250g，总约350g成品"
-
-p352:
-  name: 糙米饭
-  cat: 主食
-  cal: 112
-  protein: 2.6
-  carb: 23
-  fat: 1
-  unit: g
-  piece_weight: null
-  basis: composition_table
-  confidence: 3
-  basis_detail: "煮熟糙米饭常见值"
-
-p353:
-  name: 清炒西兰花
-  cat: 蔬菜
-  cal: 60
-  protein: 3.5
-  carb: 5
-  fat: 3.5
-  unit: g
-  piece_weight: null
-  basis: recipe_estimate
-  confidence: 2
-  basis_detail: "西兰花150g + 油8g，总约100g成品"

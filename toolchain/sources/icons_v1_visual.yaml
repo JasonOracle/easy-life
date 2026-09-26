@@ -1,4 +1,12 @@
 # [变更日志]
+# 修改时间：2026-09-27
+# AI模型：Claude (WorkBuddy)
+# 修改内容：[移除 p348–p353 六条食物（燕麦片/水煮蛋/全脂牛奶/鸡胸肉沙拉/糙米饭/清炒西兰花）。
+#           这六条是 09-21~09-25 为「让 App 演示数据对齐设计稿的当日三餐」而补的，非真实食物库内容：
+#           生图链从未为它们出过图（assets/icons-gen 无源图、生成报告 09-19 只覆盖 347 条），
+#           09-21 用 92×92 外部插画占位塞进 icons-final，09-25 才补的 yaml 条目。
+#           现按「食物库只放真实数据」摘除，清单 353 → 347，与图标数一致。]
+# [变更日志]
 # 修改时间：2026-09-22
 # AI模型：Qoder (Claude)
 # 修改内容：[补齐 p348–p353 六条生图槽位（燕麦片/水煮蛋/全脂牛奶/鸡胸肉沙拉/糙米饭/清炒西兰花），
@@ -359,9 +367,3 @@ p344: { name: 麻花, cat: 零食, container: "", content: "twisted rope-shaped 
 p345: { name: 山楂片, cat: 零食, container: "", content: "thin flat circular discs, deep reddish-pink color with a smooth matte surface", toppings: [], state: "", view: "three-quarter side view" }
 p346: { name: 蜜饯, cat: 零食, container: "", content: "candied orange peel strips in bright orange, dark red preserved plums, and translucent yellow pineapple chunks dusted with white sugar crystals", toppings: ["candied orange peel strips", "preserved red plums", "sugar-crusted pineapple chunks"], state: "sugar crystals glistening on surface", view: "three-quarter side view" }
 p347: { name: 口香糖, cat: 零食, container: "", content: "small individually wrapped rectangular gum pieces in silver and pink foil wrappers, with some unwrapped pale pink gum exposed", toppings: [], state: "", view: "three-quarter side view" }
-p348: { name: 燕麦片, cat: 主食, container: "a white ceramic bowl", content: "pale beige cooked oatmeal with visible rolled oat flakes, studded with small golden oat clusters", toppings: ["rolled oat flakes"], state: "soft and thick", view: "three-quarter side view" }
-p349: { name: 水煮蛋, cat: 肉类蛋类, container: "", content: "a peeled hard-boiled egg cut in half, smooth white exterior with a firm pale orange yolk facing the viewer", toppings: [], state: "", view: "front view" }
-p350: { name: 全脂牛奶, cat: 饮品, container: "a clear glass bottle with a small neck", content: "white opaque milk filling the bottle, with a pale blue cap", toppings: [], state: "", view: "three-quarter side view" }
-p351: { name: 鸡胸肉沙拉, cat: 菜品, container: "a white ceramic bowl", content: "green leaf lettuce base with sliced grilled chicken breast, halved red cherry tomatoes and cucumber rounds", toppings: ["grilled chicken breast slices", "green leaf lettuce", "cherry tomato halves", "cucumber slices"], state: "", view: "from directly above" }
-p352: { name: 糙米饭, cat: 主食, container: "a brown ceramic bowl", content: "cooked brown rice with visible individual long grains, light beige-brown color, slightly glossy", toppings: [], state: "", view: "three-quarter side view" }
-p353: { name: 清炒西兰花, cat: 蔬菜, container: "", content: "bright green broccoli florets with short pale green stems, alongside small orange carrot slices", toppings: ["carrot slices", "garlic slices"], state: "glistening from light oil", view: "three-quarter side view" }

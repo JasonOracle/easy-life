@@ -330,6 +330,8 @@ export function computeEntry(food: FoodBase, amount: number, unit: string, meal:
   }
 }
 
+// [变更日志] 2026-09-27: 「今天」三餐由 p348~p353（v2 稿行菜，非真实食物库条目）换成真实库食材，
+//       菜品/克重按库内 base.cal 反算，保持早 420 / 午 560 / 晚 387、全天 1367 不变。
 // ===== 演示数据（Boss 授权灌入）=====
 // 热量/营养全部经 computeEntry 按库内 base 值实时计算，不手写任何 kcal；
 // 食材/克重选择为演示场景值。7 天 = 今天 + 前 6 天，供首页今日餐次与「我的」页周概览。
@@ -383,14 +385,16 @@ const SEED_PLAN: SeedDay[] = [
     { id: 'p130', amount: 200, meal: 'dinner', hour: 18.5 },
     { id: 'p130', amount: 330, meal: 'dinner', hour: 18.5 },
   ],
-  /* 今天（v2 稿行菜：早 420 / 午 560 / 晚 390，合计 1368；行热量走库值精确还原） */
+  /* 今天（真实库食材：小米粥+鸡蛋+牛奶 420 / 宫保鸡丁+米饭+蒜蓉西兰花 560 / 苹果+豆浆+奶茶 387，
+     合计 1367，与替换前一致；热量一律走 computeEntry 按库值还原，不手写 kcal。
+     2026-09-27 之前用的是 p348~p353「v2 稿行菜」——为对齐设计稿而补的非真实条目，已从食物库摘除） */
   [
-    { id: 'p348', amount: 40, meal: 'breakfast', hour: 7.5 },
-    { id: 'p349', amount: 83, meal: 'breakfast', hour: 7.5 },
-    { id: 'p350', amount: 231, meal: 'breakfast', hour: 7.5 },
-    { id: 'p351', amount: 350, meal: 'lunch', hour: 12.17 },
-    { id: 'p352', amount: 161, meal: 'lunch', hour: 12.17 },
-    { id: 'p353', amount: 100, meal: 'lunch', hour: 12.17 },
+    { id: 'p013', amount: 300, meal: 'breakfast', hour: 7.5 },
+    { id: 'p143', amount: 100, meal: 'breakfast', hour: 7.5 },
+    { id: 'p284', amount: 231, meal: 'breakfast', hour: 7.5 },
+    { id: 'p065', amount: 212, meal: 'lunch', hour: 12.17 },
+    { id: 'p001', amount: 162, meal: 'lunch', hour: 12.17 },
+    { id: 'p089', amount: 100, meal: 'lunch', hour: 12.17 },
     { id: 'p230', amount: 400, meal: 'dinner', hour: 18.33 },
     { id: 'p286', amount: 360, meal: 'dinner', hour: 18.33 },
     { id: 'p270', amount: 140, meal: 'dinner', hour: 18.33 },

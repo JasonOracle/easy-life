@@ -3,7 +3,7 @@
 #       1) categories：7 类目的双语显示名与类目介绍（通用叙述，不含具体热量数字）；
 #       2) reviews：6 档点评模板（light/balanced/protein_rich/carb_heavy/fat_heavy/dense），
 #          占位符 {cal} {p} {c} {f} 由 build_encyclopedia.py 按每 100g 营养值运行时填充；
-#       3) en_names：353 条食物英文名，AI 起草（text_review: draft），待 Boss 核对；
+#       3) en_names：347 条食物英文名，AI 起草（text_review: draft），待 Boss 核对；
 #       4) badges / guidance：详情页 cls 徽章与三列指引（适宜人群/注意事项/推荐吃法），按 6 档 cls 模板化。
 # 分类规则（以每 100g 计，pcal=p*4, ccal=c*4, fcal=f*9, tot=三者之和）：
 #   dense: cal>=300 → protein_rich: pcal/tot>=0.40 → fat_heavy: fcal/tot>=0.45
@@ -451,9 +451,3 @@ en_names:
   p345: Hawthorn Slice
   p346: Candied Fruit
   p347: Chewing Gum
-  p348: Oatmeal
-  p349: Boiled Egg
-  p350: Whole Milk
-  p351: Chicken Breast Salad
-  p352: Brown Rice
-  p353: Stir-fried Broccoli

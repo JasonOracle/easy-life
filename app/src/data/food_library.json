@@ -1,6 +1,6 @@
 {
   "v": "1.0.0",
-  "generated": "2026-09-22T07:22:07.502985+00:00",
+  "generated": "2026-09-26T18:57:08.969850+00:00",
   "fingerprint": {
     "version": "1.0.0",
     "sources": [
@@ -11,8 +11,8 @@
       "vessel_tpl.yaml",
       "opts_tpl.yaml"
     ],
-    "count": 353,
-    "generatedAt": "2026-09-22T07:22:07.502985+00:00"
+    "count": 347,
+    "generatedAt": "2026-09-26T18:57:08.969850+00:00"
   },
   "vesselTpl": {
     "cup": {
@@ -8795,150 +8795,6 @@
       "py": {
         "f": "kouxiangtang",
         "i": "kxt"
-      }
-    },
-    {
-      "id": "p348",
-      "name": "燕麦片",
-      "cat": "主食",
-      "base": {
-        "cal": 375,
-        "per": 100,
-        "unit": "g",
-        "protein": 13,
-        "carb": 66,
-        "fat": 7
-      },
-      "pieceWeight": null,
-      "vessel": "bowl_rice",
-      "opts": [],
-      "img": "staple/p348.webp",
-      "conf": 3,
-      "editable": true,
-      "source": "composition_table",
-      "py": {
-        "f": "yanmaipian",
-        "i": "ymp"
-      }
-    },
-    {
-      "id": "p349",
-      "name": "水煮蛋",
-      "cat": "肉类蛋类",
-      "base": {
-        "cal": 144,
-        "per": 100,
-        "unit": "g",
-        "protein": 13,
-        "carb": 1.3,
-        "fat": 9
-      },
-      "pieceWeight": 60,
-      "vessel": "piece",
-      "opts": [],
-      "img": "protein/p349.webp",
-      "conf": 3,
-      "editable": true,
-      "source": "composition_table",
-      "py": {
-        "f": "shuizhudan",
-        "i": "szd"
-      }
-    },
-    {
-      "id": "p350",
-      "name": "全脂牛奶",
-      "cat": "饮品",
-      "base": {
-        "cal": 65,
-        "per": 100,
-        "unit": "ml",
-        "protein": 3,
-        "carb": 4.7,
-        "fat": 3.2
-      },
-      "pieceWeight": null,
-      "vessel": "mug",
-      "opts": [],
-      "img": "drink/p350.webp",
-      "conf": 3,
-      "editable": true,
-      "source": "composition_table",
-      "py": {
-        "f": "quanzhiniunai",
-        "i": "qznn"
-      }
-    },
-    {
-      "id": "p351",
-      "name": "鸡胸肉沙拉",
-      "cat": "菜品",
-      "base": {
-        "cal": 91.5,
-        "per": 100,
-        "unit": "g",
-        "protein": 8.3,
-        "carb": 3,
-        "fat": 2.5
-      },
-      "pieceWeight": null,
-      "vessel": "plate",
-      "opts": [],
-      "img": "dish/p351.webp",
-      "conf": 2,
-      "editable": true,
-      "source": "recipe_estimate",
-      "py": {
-        "f": "jixiongroushala",
-        "i": "jxrsl"
-      }
-    },
-    {
-      "id": "p352",
-      "name": "糙米饭",
-      "cat": "主食",
-      "base": {
-        "cal": 112,
-        "per": 100,
-        "unit": "g",
-        "protein": 2.6,
-        "carb": 23,
-        "fat": 1
-      },
-      "pieceWeight": null,
-      "vessel": "bowl_rice",
-      "opts": [],
-      "img": "staple/p352.webp",
-      "conf": 3,
-      "editable": true,
-      "source": "composition_table",
-      "py": {
-        "f": "caomifan",
-        "i": "cmf"
-      }
-    },
-    {
-      "id": "p353",
-      "name": "清炒西兰花",
-      "cat": "蔬菜",
-      "base": {
-        "cal": 60,
-        "per": 100,
-        "unit": "g",
-        "protein": 3.5,
-        "carb": 5,
-        "fat": 3.5
-      },
-      "pieceWeight": null,
-      "vessel": "plate",
-      "opts": [],
-      "img": "vegetable/p353.webp",
-      "conf": 2,
-      "editable": true,
-      "source": "recipe_estimate",
-      "py": {
-        "f": "qingchaoxilanhua",
-        "i": "qcxlh"
       }
     }
   ]

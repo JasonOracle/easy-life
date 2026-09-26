@@ -1,3 +1,11 @@
+# [变更日志]
+# 修改时间：2026-09-27
+# AI模型：Claude (WorkBuddy)
+# 修改内容：[移除 p348–p353 六条食物（燕麦片/水煮蛋/全脂牛奶/鸡胸肉沙拉/糙米饭/清炒西兰花）。
+#           这六条是 09-21~09-25 为「让 App 演示数据对齐设计稿的当日三餐」而补的，非真实食物库内容：
+#           生图链从未为它们出过图（assets/icons-gen 无源图、生成报告 09-19 只覆盖 347 条），
+#           09-21 用 92×92 外部插画占位塞进 icons-final，09-25 才补的 yaml 条目。
+#           现按「食物库只放真实数据」摘除，清单 353 → 347，与图标数一致。]
 # 份量与选项引用（LLM 生成初稿，待人工审核）
 # 生成脚本：toolchain/gen_usage_spec.py
 # vessel_tpl 引用 vessel_tpl.yaml 的模板 key；opts_tpl 引用 opts_tpl.yaml 的 key
@@ -349,9 +357,3 @@ p344: { name: 麻花, cat: 零食, vessel_tpl: piece, opts_tpl: [] }
 p345: { name: 山楂片, cat: 零食, vessel_tpl: bag, opts_tpl: [] }
 p346: { name: 蜜饯, cat: 零食, vessel_tpl: bag, opts_tpl: [] }
 p347: { name: 口香糖, cat: 零食, vessel_tpl: piece, opts_tpl: [] }
-p348: { name: 燕麦片, cat: 主食, vessel_tpl: bowl_rice, opts_tpl: [] }
-p349: { name: 水煮蛋, cat: 肉类蛋类, vessel_tpl: piece, opts_tpl: [] }
-p350: { name: 全脂牛奶, cat: 饮品, vessel_tpl: mug, opts_tpl: [] }
-p351: { name: 鸡胸肉沙拉, cat: 菜品, vessel_tpl: plate, opts_tpl: [] }
-p352: { name: 糙米饭, cat: 主食, vessel_tpl: bowl_rice, opts_tpl: [] }
-p353: { name: 清炒西兰花, cat: 蔬菜, vessel_tpl: plate, opts_tpl: [] }

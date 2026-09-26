@@ -50,8 +50,8 @@
         <text class="ec-card-title" :style="{ color: theme.ink1 }">{{ t('ec.nutrition') }}<text class="ec-card-sub" :style="{ color: theme.ink3 }">{{ t('ec.per100') }}</text></text>
         <view class="ec-nut-row">
           <view class="ec-nut-col" v-for="(col, colIdx) in nutCols" :key="colIdx">
-            <view class="ec-nut-icon" :style="{ backgroundColor: col.tint }">
-              <text class="ec-nut-emoji">{{ col.emoji }}</text>
+            <view class="ec-nut-icon" :style="{ backgroundColor: theme.chip }">
+              <image class="ec-nut-ic" :src="nutIconSrc(col.icon)" mode="aspectFit"></image>
             </view>
             <text class="ec-nut-label" :style="{ color: theme.ink2 }">{{ col.label }}</text>
             <text class="ec-nut-value" :style="{ color: theme.ink1 }">{{ col.value }}</text>
@@ -95,7 +95,7 @@
         </view>
         <scroll-view class="ec-related-scroll" direction="horizontal" :show-scrollbar="false">
           <view class="ec-related-row">
-            <view class="ec-rel-card" :class="{ 'ec-rel-current': rel.id == currentId }" v-for="(rel, relIdx) in relatedList" :key="relIdx" :style="{ backgroundColor: theme.card, borderColor: rel.id == currentId ? theme.accent : theme.card }" hover-class="ec-press" :hover-stay-time="100" @click="goFood(rel.id)">
+            <view class="ec-rel-card" v-for="(rel, relIdx) in relatedList" :key="relIdx" :style="{ backgroundColor: theme.card }" hover-class="ec-press" :hover-stay-time="100" @click="goFood(rel.id)">
               <image class="ec-rel-img" :src="rel.img" mode="aspectFit"></image>
               <text class="ec-rel-name" :style="{ color: theme.ink1 }">{{ rel.name }}</text>
               <text class="ec-rel-cal" :style="{ color: theme.ink3 }">{{ rel.calText }}</text>
@@ -162,9 +162,14 @@
 // [变更日志] 2026-09-27: 图标按 Pencil 稿 Nnctn 换真 —— 顶栏 lucide chevron-left(18pt)/MSR search(20pt) 替自绘粗线稿，
 //       点评圆改绿底 eco、三列改 group/error/restaurant、相关食物标题改 category 绿圆、CTA 加号改 MSR add；
 //       上述位置原为 emoji（App 端字形缺失：🍽 渲染成豆腐块、点评圆是空串），并顺带对齐稿面尺寸。
+// [变更日志] 2026-09-27(2): 营养四列图标按稿换真并纠正底色 —— 原 emoji + theme.accent 实底，
+//       改为 MSR default(描边) fitness_center/water_drop/grain/local_fire_department，
+//       圆底统一 theme.chip（稿面四个 Cir 全为 $fd-chip）、尺寸 76->52rpx、图标 28rpx；
+//       蛋白质/脂肪图标随主题换档（ic_protein/ic_fat 走 themeAsset），碳水 #FCA212 / 热量 #FC7130 为语义色。
+//       相关食物卡去掉「当前食物」绿框：稿面 Rel_* 四节点无 stroke。
 import { ref, computed } from 'vue'
 import { onLoad, onShow } from '@dcloudio/uni-app'
-import { useTheme, FIXED_COLORS, syncStatusBarStyle } from '../../composables/useTheme'
+import { useTheme, FIXED_COLORS, syncStatusBarStyle, themeAsset } from '../../composables/useTheme'
 import { resolveLang } from '../../composables/useLocale'
 import { t, tf } from '../../composables/i18n'
 import { currentMealKey } from '../../composables/mealWindow'
@@ -176,7 +181,13 @@ import {
 } from '../../stores/encyclopedia'
 import type { EncEntry } from '../../stores/encyclopedia'
 
-const { theme, isDark } = useTheme()
+const { theme, isDark, accentId } = useTheme()
+
+// 营养四列图标：蛋白质/脂肪用 theme.accent 系（随主题换档，ic_protein/ic_fat 已有五档变体），
+// 碳水琥珀 #FCA212 / 热量橙 #FC7130 是语义色（不变，无变体）。themeAsset 未命中即原样回落。
+function nutIconSrc(src: string): string {
+  return themeAsset(accentId.value, isDark.value, src)
+}
 
 // 状态栏字色按当前主题同步：原生端 pages.json 的静态项只覆盖亮态，切页/切主题都要重下
 onShow(() => {
@@ -276,7 +287,7 @@ const chipList = computed((): string[] => {
 })
 
 // ===== 营养四列 =====
-type NutCol = { emoji: string; label: string; value: string; pctWidth: string; pctText: string; tint: string }
+type NutCol = { icon: string; label: string; value: string; pctWidth: string; pctText: string; tint: string }
 
 const nutCols = computed((): NutCol[] => {
   const out: NutCol[] = []
@@ -290,16 +301,16 @@ const nutCols = computed((): NutCol[] => {
   const fE = fat * 9
   const tot = pE + cE + fE
   const pct = (e: number): number => tot > 0 ? Math.round(e * 100 / tot) : 0
-  const mk = (emoji: string, labelKey: string, value: string, share: number, tint: string): NutCol => ({
-    emoji: emoji, label: t(labelKey), value: value,
+  const mk = (icon: string, labelKey: string, value: string, share: number, tint: string): NutCol => ({
+    icon: icon, label: t(labelKey), value: value,
     pctWidth: (share < 3 ? 3 : share) + '%',
     pctText: tot > 0 ? '(' + share + '%)' : '—',
     tint: tint,
   })
-  out.push(mk('💪', 'dd.protein', p + 'g', pct(pE), theme.value.accent))
-  out.push(mk('💧', 'dd.fat', fat + 'g', pct(fE), FIXED_COLORS.infoCarb))
-  out.push(mk('🌾', 'dd.carb', c + 'g', pct(cE), theme.value.accentMid))
-  out.push(mk('🔥', 'ec.calorie', Math.round(f.kcal) + ' kcal', 100, FIXED_COLORS.infoCalorie))
+  out.push(mk('/static/encyclopedia/ic_protein.svg', 'dd.protein', p + 'g', pct(pE), theme.value.accent))
+  out.push(mk('/static/encyclopedia/ic_fat.svg', 'dd.fat', fat + 'g', pct(fE), FIXED_COLORS.infoCarb))
+  out.push(mk('/static/encyclopedia/ic_carb.svg', 'dd.carb', c + 'g', pct(cE), theme.value.accentMid))
+  out.push(mk('/static/encyclopedia/ic_kcal.svg', 'ec.calorie', Math.round(f.kcal) + ' kcal', 100, FIXED_COLORS.infoCalorie))
   return out
 })
 
@@ -630,15 +641,18 @@ onLoad((options: OnLoadOptions) => {
   flex: 1;
   align-items: center;
 }
+/* 尺寸按 Pencil NutritionCard：Cir 26pt 圆底 + Ic 14pt 图标（1pt@375稿 = 2rpx）。
+   圆底是统一的 theme.chip（稿面四个 Cir 全为 $fd-chip），不是主题色实底。 */
 .ec-nut-icon {
-  width: 76rpx;
-  height: 76rpx;
-  border-radius: 38rpx;
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 26rpx;
   align-items: center;
   justify-content: center;
 }
-.ec-nut-emoji {
-  font-size: 34rpx;
+.ec-nut-ic {
+  width: 28rpx;
+  height: 28rpx;
 }
 .ec-nut-label {
   font-size: 24rpx;
@@ -755,18 +769,14 @@ onLoad((options: OnLoadOptions) => {
   padding-left: 32rpx;
   padding-right: 32rpx;
 }
+/* 稿面无描边：Rel_* 四张卡节点只有 fill=$fd-card，无 stroke（整个 Nnctn 板只有 ReviewCard 带描边）。 */
 .ec-rel-card {
   width: 220rpx;
   border-radius: 32rpx;
   padding: 22rpx;
   margin-right: 20rpx;
-  border-width: 3rpx;
-  border-style: solid;
   align-items: center;
   flex-shrink: 0;
-}
-.ec-rel-current {
-  opacity: 1;
 }
 .ec-rel-img {
   width: 128rpx;
