@@ -836,6 +836,28 @@ MSR 原始 SVG 是 `viewBox="0 -960 960 960"`，已统一转成项目惯用的 `
 **未做（待拍板）**：这 6 条食物的 JSON 条目与 `img` 字段仍留在 `food_library.json` / `food_encyclopedia.json`，
 App 端引用不到图会静默空白（不报错、不破版）。是否连条目一起删需老板定。
 
+**补记（删完后才查清的完整真相 —— 这件事不该止步于「删图」）**：
+
+hook 的 `food-data-integrity` 提示「图标 347 ≠ 食物 353」，顺线索查到三份独立证据：
+
+1. **这 6 条食物是正规数据，不是野数据**：`p348~p353` 在 `toolchain/sources/` 的
+   `nutrition_v1.yaml` / `icons_v1.yaml` / `icons_v1_usage.yaml` / `icons_v1_visual.yaml` / `encyclopedia_meta.yaml`
+   **5~6 个源文件里全部登记**，与其余 347 条同规格。→ **不该删条目**。
+2. **生成链从未给它们做过图**：`assets/icons-gen/_report.json` 记 `total_selected=347` / `success=326`（2026-09-19 16:54），
+   `assets/icons-gen/` 里**没有**这 6 个的源 PNG，正常成品 webp 的 mtime 是 **09-19 16:55**，
+   而这 6 张假图是 **09-21 01:02** —— 晚两天，绕过 `compress_icons.py` 直接落进 `assets/icons-final/`，
+   再在 `be7e521`（09-21 12:37「GoalModal 编译修复＋进度存档」）里顺手提交。
+   → 即「加食物时忘跑图标生成，用外部插画占位」，不是外部脏数据。
+3. **`assets/icons-final/` 已进 `.gitignore:18`**（只留 App 副本入库），而 `toolchain/build.py` 会
+   `shutil.copy2(icons-final/<cat>/<id>.webp → app/static/icons/…)` —— **只删 App 侧会被下次 build 复活**。
+   已同步删除源目录那 6 个（备份在 `debug/removed_assets_20260927/icons-final/`）。
+   两处复查均 **347 张**，与图标总数一致。
+
+**结论与待选**：缺的是 6 张图，不是 6 条数据。三条路请老板定：
+① **保持现状**（6 条暂时无图，App 端静默空白）；
+② **跑生成链补图**（`icons-gen` 补 6 个 prompt → 生图模型 `agnes-image-2.5-flash` → `compress_icons.py` → `build.py` 同步；要模型额度）；
+③ **从库里移除这 6 条**（改 5 个 yaml 源 → 重跑 `build.py` + 重算 fingerprint；353→347）。
+
 **第 ③ 点（「底部没有选中的绿色框」）—— 实测结果与老板描述不符，但查出了真实差异**：
 
 1. 绿框**存在**且工作正常：真机像素可见 `theme.accent` 圆角描边；点第二张卡后绿框**跟随移动**
