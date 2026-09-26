@@ -6,6 +6,9 @@
        危险卡补齐缺失的 border-style 并把描边 1px→1.5rpx；
        盾行→危险卡过渡 82→106rpx；页脚叶片由「独立一行」改为「内联在脚注左侧」。字号与色值一律不动。 -->
    <view class="page" :style="{ backgroundColor: theme.bg }">
+     <!-- [变更日志] 2026-09-27: 行尾 chevron .chev 12x22rpx→24x24rpx（实测箭头 2.6x4.5dp→5.3x8.9dp，
+          对齐 Records .lr-link-chev；原 22rpx 高度因方形 SVG 受宽度先约束而浪费 10rpx）。
+          类名 .chev 仅用于本页 6 处，改动无外溢。 -->
      <!-- [变更日志] 2026-09-24: Header 简化为与日历页同源的纯净绿色渐变（三页统一） -->
     <!-- 头图（与日历页顶栏同源的纯净绿色渐变） -->
     <view class="header" :style="headerStyle">
@@ -456,9 +459,12 @@ const goBack = () => {
   font-size: 22rpx;
   margin-top: 6rpx;
 }
+/* 行尾 chevron：SVG 为 24x24 方形 viewBox、箭头本体仅占 6x12 单位，
+   aspectFit 先被宽度约束 → 容器宽必须给到 24rpx 箭头才够大（12rpx 时实测仅 2.6x4.5dp，
+   仅 iOS disclosure 8x13dp 的 35%）。24x24rpx 时实测箭头 5.3x8.9dp，与 Records .lr-link-chev 一致。 */
 .chev {
-  width: 12rpx;
-  height: 22rpx;
+  width: 24rpx;
+  height: 24rpx;
 }
 .toggle {
   width: 94rpx;
