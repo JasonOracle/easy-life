@@ -43,7 +43,6 @@
           :key="item.id"
           @click="pickFood(item.id)"
         >
-          <view class="fp-row-accent" v-if="item.id === activeFoodId" :style="{ backgroundColor: theme.accent }"></view>
           <image class="fp-row-thumb" :style="{ backgroundColor: theme.thumbStroke }" :src="'/static/icons/' + item.img" mode="aspectFill"></image>
           <view class="fp-row-text">
             <text class="fp-row-name" :style="{ color: theme.ink1 }">{{ item.name }}</text>
@@ -72,6 +71,7 @@
 // [变更日志] 2026-09-24: FAB 顽疾修复——弹层根由 v-if 挂载改为常驻＋display:none 隐藏（消除每次约 1s 冷启动重挂载）；离场淡出窗口内蒙层点击改为 emit show=true 立即重开（不再吞击）
 // [变更日志] 2026-09-24: 食物列表选中态重构 → 废弃整行绿底 .fp-row-on（白底图标叠绿底色块难看），改为左侧薄荷绿竖条 .fp-row-accent ＋ 既有文字加深加粗；日志落位 script 内（ADR-003 #7 禁 .uvue 根层 HTML 注释）
 // [变更日志] 2026-09-25: 新增 startStep 属性——百科「添加到本餐」经 ct_pending_add 交接后，Home 以 startStep='detail'+selectedId 直接打开该项详情步
+// [变更日志] 2026-09-27: 删除食物列表选中态的左侧绿竖条 .fp-row-accent（老板定稿：以「右侧选择圈✓＋文字加深加粗」为选中态，竖条冗余）
 import { ref, computed, watch } from 'vue'
 import { t, tf } from '../composables/i18n'
 import { resolveLang } from '../composables/useLocale'
@@ -426,15 +426,6 @@ watch(
   align-items: center;
   height: 152rpx;
   border-radius: 32rpx;
-}
-/* 选中态＝左侧薄荷绿竖条（与缩略图等高、垂直居中），不再用整行绿底压白底图标 */
-.fp-row-accent {
-  position: absolute;
-  left: 0;
-  top: 28rpx;
-  width: 6rpx;
-  height: 96rpx;
-  border-radius: 3rpx;
 }
 .fp-row-thumb {
   width: 96rpx;
