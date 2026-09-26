@@ -1,6 +1,9 @@
 <template>
+  <!-- [变更日志] 2026-09-27: 保存按钮三色渐变第三档 accentDeep→accentMid（消除右下角发黑）。 -->
   <!-- [变更日志] 2026-09-26: Settings 中段按设计稿还原几何 —— 卡片左右边距 28→46rpx；
-       行高 128→140rpx（.row padding 26→32）；危险卡补齐缺失的 border-style 并把描边 1px→1.5rpx；
+       行高 128→140rpx（.row padding 26→32）；删掉 5 处 .row-div 行分隔线（稿面实测仅 #F6FAF8，
+       与卡底差 6 级肉眼不可见，而 theme.line=#D8EFE5 差 39 级 → 观感上是「多出一条线」）；
+       危险卡补齐缺失的 border-style 并把描边 1px→1.5rpx；
        盾行→危险卡过渡 82→106rpx；页脚叶片由「独立一行」改为「内联在脚注左侧」。字号与色值一律不动。 -->
    <view class="page" :style="{ backgroundColor: theme.bg }">
      <!-- [变更日志] 2026-09-24: Header 简化为与日历页同源的纯净绿色渐变（三页统一） -->
@@ -35,7 +38,6 @@
           <view class="knob" :class="{ 'knob-on': settings.darkMode }"></view>
         </view>
       </view> 
-      <view class="row-div" :style="{ backgroundColor: theme.line }"></view>
       <view class="row">
         <view class="chip" :style="{ backgroundColor: theme.chip }">
           <image class="chip-icon" :src="asset('settings/icon_bell.svg')" mode="aspectFit"></image>
@@ -48,7 +50,6 @@
           <text class="soon-pill-text" :style="{ color: theme.ink3 }">{{ t('st.soon') }}</text>
         </view> 
       </view>
-      <view class="row-div" :style="{ backgroundColor: theme.line }"></view>
       <view class="row" hover-class="row-pressed" :hover-stay-time="120" @click="openPref('accent')">
         <view class="chip" :style="{ backgroundColor: theme.chip }">
           <image class="chip-icon" :src="asset('settings/icon_palette.svg')" mode="aspectFit"></image>
@@ -60,7 +61,6 @@
         <view class="pf-dot" :style="{ backgroundColor: theme.accent }"></view>
         <image class="chev" :src="asset('home/chev_right.svg')" mode="aspectFit"></image>
       </view>
-      <view class="row-div" :style="{ backgroundColor: theme.line }"></view>
       <view class="row" hover-class="row-pressed" :hover-stay-time="120" @click="openPref('locale')">
         <view class="chip" :style="{ backgroundColor: theme.chip }">
           <image class="chip-icon" :src="asset('settings/icon_globe.svg')" mode="aspectFit"></image>
@@ -86,7 +86,6 @@
         </view>
         <image class="chev" :src="asset('home/chev_right.svg')" mode="aspectFit"></image>
       </view>
-      <view class="row-div" :style="{ backgroundColor: theme.line }"></view>
       <view class="row">
         <view class="chip" :style="{ backgroundColor: theme.chip }">
           <image class="chip-icon" :src="asset('settings/icon_mega.svg')" mode="aspectFit"></image>
@@ -112,7 +111,6 @@
         </view>
         <image class="chev" :src="asset('home/chev_right.svg')" mode="aspectFit"></image>
       </view>
-      <view class="row-div" :style="{ backgroundColor: theme.line }"></view>
       <view class="row">
         <view class="chip" :style="{ backgroundColor: theme.chip }">
           <image class="chip-icon" :src="asset('settings/icon_up.svg')" mode="aspectFit"></image>
@@ -256,7 +254,7 @@ const headerStyle = computed((): Record<string, string> => {
   const st = {} as Record<string, string>
   st['background-color'] = isDark.value ? theme.value.card : theme.value.accent
   if (!isDark.value) {
-    st['background-image'] = 'linear-gradient(' + theme.value.accent2 + ' 0%, ' + theme.value.accent + ' 60%, ' + theme.value.accentDeep + ' 100%)'
+    st['background-image'] = 'linear-gradient(' + theme.value.accent2 + ' 0%, ' + theme.value.accent + ' 60%, ' + theme.value.accentMid + ' 100%)'
   }
   return st
 })
@@ -457,9 +455,6 @@ const goBack = () => {
 .row-sub {
   font-size: 22rpx;
   margin-top: 6rpx;
-}
-.row-div {
-  height: 1px;
 }
 .chev {
   width: 12rpx;

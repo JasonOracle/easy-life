@@ -1,6 +1,7 @@
 
 <template>
   <view class="page" :style="{ backgroundColor: theme.bg }">
+    <!-- [变更日志] 2026-09-27: 品牌渐变头第三档 accentDeep→accentMid（消除底部发黑） -->
     <!-- [变更日志] 2026-09-24: 头图简化为与日历页顶栏同源的纯净绿色渐变，移除 liquid_wave 矢量水波层 -->
     <!-- 头图（与日历页顶栏同源的纯净绿色渐变） -->
     <view class="header" :style="headerStyle">
@@ -239,7 +240,7 @@ const headerStyle = computed((): Record<string, string> => {
     st['background-color'] = theme.value.card
   } else {
     st['background-color'] = theme.value.accent
-    st['background-image'] = 'linear-gradient(' + theme.value.accent2 + ' 0%, ' + theme.value.accent + ' 60%, ' + theme.value.accentDeep + ' 100%)'
+    st['background-image'] = 'linear-gradient(' + theme.value.accent2 + ' 0%, ' + theme.value.accent + ' 60%, ' + theme.value.accentMid + ' 100%)'
   }
   return st
 })

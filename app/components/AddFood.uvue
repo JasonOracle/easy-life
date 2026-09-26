@@ -1,6 +1,7 @@
 
 <template>
   <scroll-view class="af-scroll" direction="vertical" :show-scrollbar="false" v-if="food != null">
+    <!-- [变更日志] 2026-09-27: 确认钮渐变深端 accentDeep→accentMid（消除右下角发黑） -->
     <!-- [变更日志] 2026-09-24: 确认钮渐变带角度(135deg)在 App 原生端报 Invalid value → 角度版包入 #ifdef MP-WEIXIN，App 端用无色标渐变 -->
     <view class="af-sheet" :style="{ backgroundColor: theme.card }">
     <view class="food-row">
@@ -264,7 +265,7 @@ const confirmStyle = computed((): Record<string, string> => {
   const st = {} as Record<string, string>
   st['background-color'] = theme.value.accent
   if (!isDark.value) {
-    st['background-image'] = 'linear-gradient(' + theme.value.accent + ', ' + theme.value.accentDeep + ')'
+    st['background-image'] = 'linear-gradient(' + theme.value.accent + ', ' + theme.value.accentMid + ')'
   }
   return st
 })

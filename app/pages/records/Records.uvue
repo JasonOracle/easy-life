@@ -1,6 +1,8 @@
 <template>
   <view class="page" :style="{ backgroundColor: theme.bg }">
     <!-- [变更日志] 2026-09-25: 「主要食物」卡片接入百科页入口（携 foodId 跳 pages/encyclopedia/Detail） -->
+    <!-- [变更日志] 2026-09-27: 渐变第三档 accentDeep→accentMid（消除发黑）；
+         .lr-fcard-row 由 space-between 改 flex-start + 固定 18rpx 间距（2 张卡时不再两端顶死） -->
     <scroll-view class="lr-scroll" direction="vertical" :show-scrollbar="false" @scroll="onScroll">
       <!-- Header（纯净自然的高级绿色平滑渐变） -->
       <view class="lr-header" :style="headerStyle">
@@ -296,7 +298,7 @@ const headerStyle = computed((): Record<string, string> => {
     st['background-color'] = theme.value.card
   } else {
     st['background-color'] = theme.value.accent
-    st['background-image'] = 'linear-gradient(' + theme.value.accent2 + ' 0%, ' + theme.value.accent + ' 60%, ' + theme.value.accentDeep + ' 100%)'
+    st['background-image'] = 'linear-gradient(' + theme.value.accent2 + ' 0%, ' + theme.value.accent + ' 60%, ' + theme.value.accentMid + ' 100%)'
   }
   return st
 })
@@ -341,7 +343,7 @@ function pillStyle(cell: DayCell): Record<string, string> {
   const st = {} as Record<string, string>
   if (cell.key === selKey.value) {
     st['background-color'] = theme.value.accentDeep
-    st['background-image'] = 'linear-gradient(' + theme.value.accent2 + ', ' + theme.value.accentDeep + ')'
+    st['background-image'] = 'linear-gradient(' + theme.value.accent2 + ', ' + theme.value.accentMid + ')'
   } else if (cell.key === todayKey) {
     st['background-color'] = theme.value.chip
   }
@@ -817,8 +819,12 @@ function openEncyclopedia(img: string): void {
 /* ===== 食物卡 80×104 r14 ===== */
 .lr-fcard-row {
   flex-direction: row;
-  justify-content: space-between;
-  margin: 16rpx 28rpx 0 28rpx;
+  /* 原为 space-between：4 张时间隙恰为 18rpx（等于稿面固定间距）所以一直没暴露；
+     2 张时会被拉到两端顶死（间隙 374rpx）。改为靠左 + 固定间距。
+     右边距随之由 28 收到 10rpx —— 因为每张卡自带 18rpx 右外边距，
+     10+18=28rpx 与其余区块右边距对齐，且 4 张时总占 4×(160+18)=712=750-28-10 正好不溢出。 */
+  justify-content: flex-start;
+  margin: 16rpx 10rpx 0 28rpx;
 }
 .lr-fcard {
   width: 160rpx;
@@ -826,6 +832,7 @@ function openEncyclopedia(img: string): void {
   border-radius: 28rpx;
   align-items: center;
   flex-shrink: 0;
+  margin-right: 18rpx;
 }
 .lr-fphoto {
   width: 128rpx;

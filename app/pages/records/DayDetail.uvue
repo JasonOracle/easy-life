@@ -1,6 +1,9 @@
 <template>
   <view class="page" :style="{ backgroundColor: theme.bg, backgroundImage: pageGradient }">
     <!-- [变更日志] 2026-09-24: Header 简化为与日历页同源的纯净绿色渐变，移除 liquid_wave 矢量水波层 -->
+    <!-- [变更日志] 2026-09-27: 渐变头第三档 accentDeep→accentMid（消除底部发黑）；
+         .dd-ring-label / .dd-add-txt / .dd-row-kcal 由 accentDeep 改 accentMid，
+         恢复改造前「标题深墨(#0A7A5C) + 数值中亮绿(#12A87B/#16A880)」的两档层次 -->
     <!-- [变更日志] 2026-09-25: 记录行食物图接入百科页入口（携 foodId 跳 pages/encyclopedia/Detail） -->
     <!-- Header（与日历页顶栏同源的纯净绿色渐变） -->
     <view class="dd-header" :style="headerStyle">
@@ -25,7 +28,7 @@
       <view class="dd-ring" :style="ringStyle">
         <view class="dd-ring-hole" :style="{ backgroundColor: theme.card }"></view>
         <text class="dd-ring-pct" :style="{ color: theme.ink1 }">{{ ringPct }}%</text>
-        <text class="dd-ring-label" :style="{ color: theme.accentDeep }">{{ t('dd.ring') }}</text>
+        <text class="dd-ring-label" :style="{ color: theme.accentMid }">{{ t('dd.ring') }}</text>
       </view>
       <view class="dd-bignum-row">
         <text class="dd-bignum" :style="{ color: statusTextColor }">{{ dayTotal }}</text>
@@ -82,7 +85,7 @@
       <text class="dd-sec" :style="{ color: theme.ink1 }">{{ t('dd.meals') }}</text>
       <view class="dd-add" @click="openPicker">
         <image class="dd-add-ic" :src="asset('records/dd_add.svg')" mode="aspectFit"></image>
-        <text class="dd-add-txt" :style="{ color: theme.accentDeep }">{{ t('dd.add') }}</text>
+        <text class="dd-add-txt" :style="{ color: theme.accentMid }">{{ t('dd.add') }}</text>
       </view>
     </view>
     <view class="dd-meal" v-for="(mealItem, mealIdx) in mealGroups" :key="mealIdx" :style="{ backgroundColor: theme.card }">
@@ -110,7 +113,7 @@
         <image class="dd-row-ph" :src="rowItem.img" mode="aspectFill" @click="openEncyclopedia(rowItem.img)"></image>
         <text class="dd-row-name" :style="{ color: theme.ink1 }">{{ rowItem.name }}</text>
         <text class="dd-row-portion" :style="{ color: theme.ink3 }">{{ rowItem.portion }}</text>
-        <text class="dd-row-kcal" :style="{ color: theme.accentDeep }">{{ rowItem.kcal }} kcal</text>
+        <text class="dd-row-kcal" :style="{ color: theme.accentMid }">{{ rowItem.kcal }} kcal</text>
       </view>
     </view>
 
@@ -231,7 +234,7 @@ const headerStyle = computed((): Record<string, string> => {
     st['background-color'] = theme.value.card
   } else {
     st['background-color'] = theme.value.accent
-    st['background-image'] = 'linear-gradient(' + theme.value.accent2 + ' 0%, ' + theme.value.accent + ' 60%, ' + theme.value.accentDeep + ' 100%)'
+    st['background-image'] = 'linear-gradient(' + theme.value.accent2 + ' 0%, ' + theme.value.accent + ' 60%, ' + theme.value.accentMid + ' 100%)'
   }
   return st
 })

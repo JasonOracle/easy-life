@@ -580,3 +580,72 @@ Settings **45.7rpx**（= 目标 46rpx ✓）。**注意**：`hooks.py` 的 `clas
   `bytes/GenPagesSettingsSettingsSharedData.style.bytes` mtime **00:09:06** 晚于源码 **00:07:55**，排除差量假绿；产物内含 `st-card`/`foot-row`/`foot-icon`。
 - 暗态不回归：危险卡描边 `#FBA095` 在 `#162924` 卡上对比度 **7.67:1**（图形元素 WCAG 要求 3:1）；卡内/页底 `162924`/`0A1612`；取证后已还原薄荷浅色 `#F6FBF8`。
 - 附：`toolchain/hooks.py all` 五闸需在提交前跑（`docs/progress.md` 与本条同批）。
+
+### 2026-09-27 01:05:00 ｜ 色板补「中间暗档」accentMid + 移除 Settings 行分隔线 + 6 图批次整改
+
+**Boss 指令**：「你确定改了吗，设计稿里面根本没有每个 cell 下面的横线，而且每个模块是通过白色带圆角的
+背景包裹着的。其他我说的问题也都没改。」
+
+#### 一、Settings 行分隔线（Boss 点名的两件事）
+
+`.row-div` 是**显式元素**（`height: 1px` + `backgroundColor: theme.line`），共 5 处
+（偏好 3 / 目标 1 / 数据 1）。**稿面像素实测**：线是 `#F6FAF8`、与卡底 `#FCFEFE` 差 **6 级**；
+**实现**是 `theme.line` = `#D8EFE5`、与卡底 `#FFFFFF` 差 **39 级** ——
+**实现比设计稿「重」6 倍多**，所以设计稿上肉眼无线、实现上一眼就看见。
+
+→ 删除 5 处元素 + `.row-div` CSS。真机复验（脚本 `debug/verify_no_divider.py`）：
+卡片内部**零** theme.line 色行；卡片边距 45.7rpx、宽 658.6rpx；亮/暗双态均正常。
+
+> 「每个模块是白色带圆角背景包裹」这点**本来就已满足**（`.st-card` 白色 + `36rpx` 圆角），
+> 横线一去掉，整块感即恢复。
+
+#### 二、根因级修复：新增 `accent-mid`（v2 色板的档位缺口）
+
+**症状三处、根因一个**：`accentDeep` 是**极端档**（mint 亮态 `#064E3B`，L≈0.19 近黑；
+暗态 `#A7F0DA` 近白），但全项目 **30+ 处**把它当「主题色中间的暗档」用：
+
+| 症状 | 位置 | 后果 |
+|---|---|---|
+| 按钮/头图右下角发黑 | 8 处 `linear-gradient(..., accentDeep)` | Boss 图 1 的「保存钮发黑」 |
+| 强调字与标题同色 | DayDetail `.dd-add-txt`/`.dd-ring-label`/`.dd-row-kcal`、百科碳水… | 可点入口没有视觉区分度 |
+| 数据色不属同一色系 | 百科四营养素「碳水」 | Boss 图 6 |
+
+**新增 `accent-mid`**（浅态＝同色相压暗 accent，≈4:1；暗态＝该档 accent 本体）：
+mint `#17916B`/`#52D6AC`、ocean `#1B7BB3`/`#5BC8FF`、lavender `#5A44DE`/`#A99BFF`。
+已登记 `design/DesignTokens.md` §8.1（18 → **19 角色**）并补「accent-deep vs accent-mid 分工」说明。
+
+**改动面（9 文件）**：
+- **渐变深端 → accentMid（8 处）**：`AddFood`(确认钮)、`GoalModal`(保存钮)、`Profile`(品牌头)、
+  `DayDetail`(品牌头)、`Records`×2(头图/CTA)、`Settings`(保存钮)
+- **DayDetail 强调字层次恢复**：改造前是「标题 `#0A7A5C` + 数值 `#12A87B`/`#16A880`」两档，
+  改造后全压成同一个 `#064E3B` → `.dd-ring-label`/`.dd-add-txt`/`.dd-row-kcal` 改 `accentMid`
+- **百科碳水**：`accentDeep` → `accentMid`
+- **FoodPicker 搜索框/未选胶囊**：`theme.chip`（薄荷绿凸面）→ `theme.bg`（`#F6FBF8` 淡凹面），
+  对齐设计稿 `#F5FAF8`/`#F8F9FC` 的中性近白
+- **Records `.lr-fcard-row`**：`space-between` → `flex-start` + 固定 18rpx 间距，
+  右边距 28→10rpx（卡自带 18rpx，10+18=28 与其余区块对齐，4 张时 4×178=712=750-28-10 不溢出）
+
+#### 三、真机验收（`ready in 74772ms`，bytes mtime 00:40:44 > 源码 00:39:05）
+
+| 项 | 实测 | 结论 |
+|---|---|---|
+| Settings 卡片内横线 | 扫描零命中 | ✓ |
+| Settings 卡片边距/宽 | 45.7 / 658.6rpx | ✓ |
+| Records 主要食物 3 卡 | 靠左、间距 18rpx | ✓（原 space-between 间隙 107rpx） |
+| DayDetail `+ 添加食物` | `17916B` | ✓（原 `064E3B` 近黑） |
+| DayDetail 子项 kcal / 环内标签 | `17916B` / `17916B` | ✓ |
+| DayDetail 标题 | `0A4F3D`（ink1） | ✓ 层次拉开 |
+| 百科四营养素 | `20C997` / `FCA212` / **`17916B`** / `FC7130` | ✓ 四色分明 |
+| GoalModal 保存钮右下角亮度 | 0.19 → **0.456** | ✓ 发黑消除 |
+| 暗态 | 页底 `0A1612`、卡片无横线、`+ 添加食物` 亮青绿 | ✓ 不回归 |
+
+#### 四、方法学教训
+
+1. **「改造前是什么色」用 `git show <commit>^:file` 挖，比揣测设计意图可靠得多。**
+   DayDetail 那三处就是靠它证明「改造前是两档、改造后压成一档」的。
+2. **`infoCarb` 变量名写着「碳水」却被用在「脂肪」上** —— 这类命名与用途错位是硬证据；
+   但「脂肪该用什么色」文档里没有答案（§8.3 只写 `info-protein/info-fat 即 accent`），
+   故本轮**只动有据的碳水**，脂肪保持不动。
+3. **纯色行扫描要先确认元素归属**：我一度把 `.dd-card-title`（今日热量）当成 `.dd-ring-label` 采样，
+   得出「改动没生效」的错误结论。**先用模板确认类的实际用途，再定位采样坐标。**
+4. `design/DesignTokens.md` §8.1 已同批登记 `accent-mid`（18 → **19 角色**）并补分工说明。

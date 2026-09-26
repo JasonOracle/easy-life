@@ -1,6 +1,7 @@
 
 <template>
   <view class="gm-overlay" :class="{ 'gm-overlay-active': active }" v-if="render" @click="onOverlayTap">
+    <!-- [变更日志] 2026-09-27: 保存钮渐变深端 accentDeep→accentMid（消除右下角发黑） -->
     <!-- [变更日志] 目标弹窗色面（卡面/徽章/滑轨/标题文字）逐元素绑 useTheme token，图标按 themeAsset 取五档变体，App 端三主题×双模式已真机核验 -->
     <view class="gm-container" :class="{ 'gm-container-active': active }" :style="{ backgroundColor: theme.card }" @click.stop>
       <view class="gm-sheet" :style="gmSheetStyle">
@@ -213,7 +214,7 @@ const saveStyle = computed((): Record<string, string> => {
   const st = {} as Record<string, string>
   st['background-color'] = theme.value.accent
   if (!isDark.value) {
-    st['background-image'] = 'linear-gradient(' + theme.value.accent + ', ' + theme.value.accentDeep + ')'
+    st['background-image'] = 'linear-gradient(' + theme.value.accent + ', ' + theme.value.accentMid + ')'
   }
   return st
 })

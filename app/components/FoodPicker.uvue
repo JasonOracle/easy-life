@@ -131,7 +131,10 @@ function asset(path: string): string {
 /** 选中态由运行时函数出色——内联 style 优先级高于类名，条件类无法与主题色共存 */
 const searchBoxStyle = computed((): Record<string, string> => {
   const st = {} as Record<string, string>
-  st['background-color'] = theme.value.chip
+  // [变更日志] 2026-09-27: 原为 theme.chip（薄荷绿凸面），与设计稿 #F5FAF8 中性近白不符
+  //   ——改造前是裸 hex #F5FAF8，改造时因 v2 色板无「中性浅面」档而拿 chip 顶替。
+  //   改用 theme.bg（mint 亮 #F6FBF8）做「淡凹面」，视觉回到设计稿。
+  st['background-color'] = theme.value.bg
   st['border-color'] = theme.value.line
   return st
 })
@@ -139,7 +142,9 @@ const searchPlaceholderStyle = computed<string>(() => 'color:' + theme.value.ink
 
 function chipStyle(on: boolean): Record<string, string> {
   const st = {} as Record<string, string>
-  st['background-color'] = on ? theme.value.accent : theme.value.chip
+  // [变更日志] 2026-09-27: 未选件原为 theme.chip（薄荷绿），设计稿是 #F8F9FC 冷调近白；
+  //   同 searchBoxStyle，改用 theme.bg 回到中性凹面。
+  st['background-color'] = on ? theme.value.accent : theme.value.bg
   return st
 }
 function chipTextColor(on: boolean): string {

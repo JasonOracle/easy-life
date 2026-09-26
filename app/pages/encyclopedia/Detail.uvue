@@ -1,4 +1,6 @@
 <!-- [变更日志] 百科详情页 SFC：详情+搜索双态、全 token 三主题/暗色、中英双语、餐次 CTA 交接 -->
+<!-- [变更日志] 2026-09-27: 四营养素进度条「碳水」由 accentDeep 改 accentMid ——
+     原值与正文标题同为近黑墨绿，与蛋白质的亮绿不属同一色系。 -->
 <template>
   <view class="ec-page" :style="{ backgroundColor: theme.bg }">
     <!-- 顶栏：返回 / 标题 / 搜索 -->
@@ -286,7 +288,7 @@ const nutCols = computed((): NutCol[] => {
   })
   out.push(mk('💪', 'dd.protein', p + 'g', pct(pE), theme.value.accent))
   out.push(mk('💧', 'dd.fat', fat + 'g', pct(fE), FIXED_COLORS.infoCarb))
-  out.push(mk('🌾', 'dd.carb', c + 'g', pct(cE), theme.value.accentDeep))
+  out.push(mk('🌾', 'dd.carb', c + 'g', pct(cE), theme.value.accentMid))
   out.push(mk('🔥', 'ec.calorie', Math.round(f.kcal) + ' kcal', 100, FIXED_COLORS.infoCalorie))
   return out
 })

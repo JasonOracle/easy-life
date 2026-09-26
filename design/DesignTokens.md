@@ -299,7 +299,7 @@ Tab 页内容底部预留统一采用**方案 A 动态安全区全避让**：
 > **用法**：代码只写角色名，经 `composables/useTheme.ts` 按 `(角色, mode, accent)` 查表取 hex。
 > 严禁在页面里新增裸 hex——新色必须先登记为本表角色或 §8.3 固定色。
 
-### 8.1 角色 × 主题矩阵（18 角色）
+### 8.1 角色 × 主题矩阵（19 角色）
 
 | 角色 | 用途 | mint·亮 | mint·暗 | ocean·亮 | ocean·暗 | lav·亮 | lav·暗 |
 |---|---|---|---|---|---|---|---|
@@ -313,7 +313,8 @@ Tab 页内容底部预留统一采用**方案 A 动态安全区全避让**：
 | `ink-3` | 辅助/占位文字 | `#8BA7A0`* | `#8B9E94` | `#7E96A6` | `#8FA6B2` | `#9A93B8` | `#9E96BC` |
 | `accent` | 品牌主色 | `#20C997` | `#52D6AC` | `#2F9FE0` | `#5BC8FF` | `#8B7BE8` | `#A99BFF` |
 | `accent-2` | 渐变亮端 | `#2BD6A3` | `#6FE3BF` | `#4FB8F0` | `#7AD6FF` | `#A48CF0` | `#BFB2FF` |
-| `accent-deep` | 强调深字/图标 | `#064E3B` | `#A7F0DA` | `#0B5E8F` | `#A8E4FF` | `#4F3FA8` | `#D6CCFF` |
+| `accent-deep` | 强调深字/图标（**极端档**） | `#064E3B` | `#A7F0DA` | `#0B5E8F` | `#A8E4FF` | `#4F3FA8` | `#D6CCFF` |
+| `accent-mid` | 渐变深端 / 次级强调字（2026-09-27 补） | `#17916B` | `#52D6AC` | `#1B7BB3` | `#5BC8FF` | `#5A44DE` | `#A99BFF` |
 | `on-accent` | accent 底上文字 | `#FFFFFF` | `#0A1612` | `#FFFFFF` | `#0A1218` | `#FFFFFF` | `#100D1A` |
 | `glass-bg` | 玻璃面板底 | `#FFFFFFF2` | `#FFFFFF14` | `#FFFFFFF2` | `#FFFFFF14` | `#FFFFFFF2` | `#FFFFFF14` |
 | `glass-scrim` | 玻璃遮罩 | `#F6FBF8A6` | `#0A1612A6` | `#F5FAFDA6` | `#0A1218A6` | `#FAF8FEA6` | `#100D1AA6` |
@@ -330,6 +331,9 @@ slate 墨（稿面新意图）vs 绿墨（现全 App `#0A4F3D`/`#0F4F3D99`/`#0F4
 
 - 暗态 `bg`/`card`/`card-soft`/`chip`/`line` = 对应亮态主题色相、饱和度压至 ~25%、明度按 mint 暗黑梯级（`#0A1612`→`#2A4238` 的 5 档）平移
 - 暗态 `accent` = 亮态 accent 明度 +18%、饱和 −10%（mint 校验：`#20C997`→`#52D6AC` ✓ 与 Pencil Mint Dark 实测一致）
+- **`accent-deep` 与 `accent-mid` 的分工（2026-09-27 补录）**：`accent-deep` 是**极端档**（浅态 mint 亮态 L≈0.19 近黑 / 暗态 L≈0.85 近白），只用于「深底上的高对比强调」；
+  `accent-mid` 是**中间暗档**（浅态＝同色相压暗 accent，≈4:1；暗态＝该档 accent 本体），用于①渐变深端 ②需要色彩层次的强调字/数值。
+  **反面教材**：此前 8 处 `linear-gradient(accent, accent-deep)` 与 30+ 处「强调字 = accent-deep」，导致按钮右下角发黑、强调文字与 `ink-1` 标题同色而失去层次（2026-09-27 统一整改）。
 - 暗态 `accent-deep` 反转提亮（深底上强调字必须浅色）；暗态 `on-accent` 反转为该主题暗底（浅 accent 上白字对比不足）
 
 ### 8.3 固定色（不随主题/模式变，与 accent 严格分轴）
