@@ -17,9 +17,13 @@
       <!-- 月历卡 -->
       <view class="lr-cal" :style="{ backgroundColor: theme.card }">
       <view class="lr-mrow">
-        <image class="lr-mnav" :src="asset('records/lr_prev.svg')" mode="aspectFit" @click="prevMonth"></image>
+        <view class="lr-mnav-hot" @click="prevMonth">
+          <image class="lr-mnav" :src="asset('records/lr_prev.svg')" mode="aspectFit"></image>
+        </view>
         <text class="lr-mlabel" :style="{ color: theme.ink1 }">{{ monthLabel }}</text>
-        <image class="lr-mnav" :src="asset('records/lr_next.svg')" mode="aspectFit" @click="nextMonth"></image>
+        <view class="lr-mnav-hot" @click="nextMonth">
+          <image class="lr-mnav" :src="asset('records/lr_next.svg')" mode="aspectFit"></image>
+        </view>
       </view>
       <view class="lr-wrow">
         <text class="lr-wd" :style="{ color: theme.ink3 }" v-for="(wdItem, wdIdx) in weekNames" :key="wdIdx">{{ wdItem }}</text>
@@ -522,7 +526,7 @@ function openEncyclopedia(img: string): void {
 .lr-cal {
   margin: -32rpx 28rpx 0 28rpx;
   border-radius: 36rpx;
-  padding: 26rpx 0 38rpx 0;
+  padding: 14rpx 0 38rpx 0;
   flex-shrink: 0;
   overflow: visible;
   box-shadow: 0 8rpx 32rpx rgba(10, 79, 61, 0.06);
@@ -531,8 +535,14 @@ function openEncyclopedia(img: string): void {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  height: 40rpx;
-  padding: 0 24rpx 0 24rpx;
+  height: 64rpx;
+  padding: 0 8rpx 0 8rpx;
+}
+.lr-mnav-hot {
+  width: 64rpx;
+  height: 64rpx;
+  justify-content: center;
+  align-items: center;
 }
 .lr-mnav {
   width: 32rpx;
@@ -544,7 +554,7 @@ function openEncyclopedia(img: string): void {
 }
 .lr-wrow {
   flex-direction: row;
-  margin-top: 28rpx;
+  margin-top: 16rpx;
 }
 .lr-wd {
   flex: 1;
@@ -707,8 +717,8 @@ function openEncyclopedia(img: string): void {
 .lr-secrow {
   flex-direction: row;
   align-items: center;
-  margin: 28rpx 28rpx 0 28rpx;
-  height: 38rpx;
+  margin: 2rpx 28rpx 0 28rpx;
+  height: 64rpx;
 }
 .lr-acc {
   width: 6rpx;
@@ -724,6 +734,7 @@ function openEncyclopedia(img: string): void {
 .lr-sec-link {
   flex-direction: row;
   align-items: center;
+  min-height: 64rpx;
 }
 .lr-link-txt {
   font-size: 21rpx;

@@ -366,8 +366,8 @@ const goBack = () => {
   align-items: center;
 }
 .hd-back-icon {
-  width: 20rpx;   
-  height: 36rpx;
+  width: 32rpx;
+  height: 48rpx;
 }
 .hd-info {
   margin-left: 12rpx;
@@ -401,8 +401,8 @@ const goBack = () => {
   align-items: center;
 }
 .set-nav-icon {
-  width: 20rpx;
-  height: 36rpx;
+  width: 32rpx;
+  height: 48rpx;
 }
 .set-nav-title {
   font-size: 34rpx;

@@ -6,7 +6,9 @@
     <view class="dd-header" :style="headerStyle">
       <view :style="{ height: sbH + 'px' }"></view>
       <view class="dd-nav">
-        <image class="dd-back" :src="asset('records/lr_back.svg')" mode="aspectFit" @click="goBack"></image>
+        <view class="dd-back-hot" @click="goBack">
+          <image class="dd-back" :src="asset('records/lr_back.svg')" mode="aspectFit"></image>
+        </view>
         <text class="dd-title" :style="{ color: headerTitleColor }">{{ headerTitle }}</text>
       </view>
     </view>
@@ -402,7 +404,13 @@ function goBack(): void {
   flex-direction: row;
   align-items: center;
   height: 88rpx;
-  padding-left: 28rpx;
+  padding-left: 10rpx;
+}
+.dd-back-hot {
+  width: 72rpx;
+  height: 72rpx;
+  justify-content: center;
+  align-items: center;
 }
 .dd-back {
   width: 36rpx;
@@ -413,7 +421,7 @@ function goBack(): void {
   font-weight: bold;
   height: 52rpx;
   line-height: 52rpx;
-  margin-left: 20rpx;
+  margin-left: 2rpx;
 }
 
 /* ===== 今日热量卡 348×229 r16，统一自然浮岛层叠 ===== */
@@ -645,6 +653,7 @@ function goBack(): void {
 .dd-meal-cal {
   flex-direction: row;
   align-items: flex-end;
+  margin-left: auto;
 }
 .dd-meal-num {
   font-size: 34rpx;

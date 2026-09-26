@@ -158,7 +158,7 @@
     <view class="card rec-card" :style="{ backgroundColor: theme.card }">
       <view class="card-head">
         <text class="card-title" :style="{ color: theme.ink1 }">{{ t('pf.recent') }}</text>
-        <view class="head-right" @click="goRecords">
+        <view class="head-right view-all-hot" @click="goRecords">
           <text class="view-all" :style="{ color: theme.ink3 }">{{ t('pf.viewAll') }}</text>
           <image class="chev-mini" :src="asset('profile/chev_right.svg')" mode="aspectFit"></image>
         </view>
@@ -735,6 +735,9 @@ const records = computed<Rec[]>(() => {
 .head-right {
   flex-direction: row;
   align-items: center;
+}
+.view-all-hot {
+  min-height: 64rpx;
 }
 .week-num {
   font-size: 20rpx;
