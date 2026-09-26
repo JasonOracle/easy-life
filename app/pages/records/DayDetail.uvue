@@ -390,10 +390,6 @@ function goBack(): void {
 </script>
 
 <style>
-.page {
-  flex: 1;
-}
-
 /* ===== Header（与日历页同源的纯净绿色平滑渐变） ===== */
 .dd-header {
   position: relative;
