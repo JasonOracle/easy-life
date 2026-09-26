@@ -449,3 +449,66 @@ Boss 提出「两侧绿色树枝也做一套 SVG」。与瓶身适配合并为�
   6. **foodIdFromImg 配对疑点**：Records/DayDetail 点「五花肉」「番茄炒蛋」缩略图均打开「米饭」百科——疑似按图路径反查 id 的映射错位，非 i18n 问题，需单独排查。
 - **小程序端**：按 Boss 指令整夜未碰微信工具；所有改动（i18n/主题/资产）MP 端表现待下次统一回归。
 - **隐私开关**：`PRIVACY_DEV_BYPASS=true` 仍在（上线前必须还原，见任务 #29 备注）。
+
+### 2026-09-25 09:48:25 ｜ Boss 三缺陷修复轮收口：全 App token 化 + 三主题×双模式真机矩阵验收 PASS
+- **Boss 报的三条**：① 暗黑模式只有设置页顶部变黑 ② 切主题只有水瓶/背景变 ③ 点猪瘦肉缩略图打开的是大米饭。**验收端＝App/安卓**（Boss 明示），故排除后代选择器与 CSS `filter` 两条路线，统一走「token 表 → 逐元素 `:style` 行内下发 ＋ 预生成 SVG 变体」。
+- **①② 根因（非"没接线"这么简单）**：`useTheme()` 只有百科 Detail＋Settings 两页消费；其余 15 个页面/组件的颜色仍写在 `.uvue` 的 class 规则里（字面 hex），`:style` 未下发 → 切主题自然整屏不动。**修复＝逐页逐组件把颜色从 class 迁到 `:style="{ color: theme.xxx }"`**，class 只留非色属性（App 端行内样式优先级高于 class，且无继承、无后代选择器）。
+- **落地面（17 文件）**：`pages/` Home、Records、DayDetail、Profile、Settings、privacy/PrivacyDialog、encyclopedia/Detail；`components/` Tabbar、FoodPicker、AddFood、GoalModal、SettleBadge、FoodToast、OptionTray、CountStepper；`composables/useTheme.ts`（补 `themeAsset()` 资产矩阵查表 + `THEMEABLE_ASSETS` 登记，未登记资产回落原路径）、`composables/themeAssetList.ts`（新建，资产×变体清单单一来源）。
+- **③ 根因与修复**：`pages/encyclopedia/Detail.uvue` 的 `onLoad` 有永假守卫 `id.length == 6`（真实 id 为 `pNNN`＝4 字符）→ 携参被丢弃、`currentId` 回落 `ALL_FOODS[0].id`＝米饭。**修复＝去掉长度守卫，按 id 命中；无 id 才兜底首条**。真机复验＝首页餐次「米饭」缩略图→详情标题「米饭 116 kcal/100g」；百科热门「鸡胸肉」→「鸡胸肉 239 kcal／24g 蛋白」，两条均同物（上一夜待办 #6「foodIdFromImg 配对疑点」同步闭环，`foodIdFromImg('/static/icons/cat/pNNN.webp')→pNNN` 本身无误，病灶在接收端）。
+- **测试经理轮（安卓真机 1280×2772，证据 `debug/shots/theme/`）**：三主题×双模式矩阵逐屏扫色核对，采样值与 `useTheme.ts` PALETTES **逐位吻合**——mint-light bg `#F6FBF8`／mint-dark `#0A1612`+card `#162924`／ocean-light `#F5FAFD`／ocean-dark `#0A1218`+card `#14232E`／lavender-light `#FAF8FE`／lavender-dark `#100D1A`+card `#1D1830`。覆盖屏＝Home／Records／DayDetail／Profile／Settings／FoodPicker 列表步／AddFood 分量步／GoalModal／SettleBadge／百科详情／百科全屏搜索／主题 sheet／语言 sheet（后四者以 ocean-dark 全采，主题/语言 sheet 另采 mint-light）。**结论＝Issue1、Issue2 在 App 端真修复**（暗黑开关跨 `am force-stop`+冷启动持久化正常）。
+- **本轮新发现（4 项，均**未**擅自改，属视觉决策）**：
+  1. **hero 底图/瓶身在暗态是浅色块**：`toolchain/gen_theme_variants.py` 的 `_dark` 档只做色相旋转、**不做明度反转**，`bg_dark.svg` 填充与 `bg.svg` 逐色相同（`#9BD4B6…#F4FCF8`），`pingzi_dark.svg` 仅把 `#58B984→#84CCA5`、瓶体仍浅绿白 → 暗态 `#0A1612` 页上顶着一块近白方卡（`home_*_dark.png`）。
+  2. **餐次图标暗态"深字压深底"**：`static/records/lr_meal_*_dark.svg` 仍是 `#0A7A5C`（ocean_dark 为 `#0A357A`）画在 `theme.chip` 暗底上，肉眼不可读（`recs_ocean_dark.png` 三餐卡）。
+  3. **页底原生窗体色漏白**：`app/pages.json` 全局 `backgroundColorContent: "#F2FAF5"` 为静态字面量，App 端内容不足视口时底部露一条浅色带——百科详情/百科搜索实测 47px（采样 `#F2FAF5`）。`uni.setBackgroundColor` 文档标注仅 MP 可靠，App 端路线未验证，**不擅自写**。
+  4. **百科「营养点评」空圆**：`Detail.uvue:68` `<text class="ec-review-dot-emoji"></text>` 是空占位，渲染成一个无内容的暗色圆点（素材未替换）。
+- **另挂起（上一夜清单仍有效）**：液体 PALETTES 不随 accent（ocean-dark 下绿液，`home_restart_dark.png` 明显）、贴纸 PNG 单主题、食物缩略图白底、`FoodToast` 孤儿组件、`encyclopedia_meta.yaml` 译文复核。DayDetail「查看详情」跳到「10月02日·周五」而选中日为 9/25，疑日期映射错位，未排查。
+- **纪律**：全程未碰微信开发者工具；`PRIVACY_DEV_BYPASS` 仍为 true；提交只进 `dev`。
+
+### 2026-09-25 21:48:42 ｜ 文档校准轮收口：README 全文与代码对账 + AGENTS.md 两处（暗态范围／399 行待办）
+- **Boss 指令**：① 先把新增能力（食物百科、暗黑模式、主题色、首页液体动画改版）同步进 README；② AGENTS.md「深色模式：仅个人中心＋设置两页随动」按实际改掉，**别的不要动**；③「399 行也改了，README 还有其他的有问题的也都改了，符合项目现在的实际情况」。
+- **方法（证据优先，禁脑补）**：README 每一条声明改动前先在 `app/` 里 grep／Read 到反证才落笔——逐文件读 `defineProps`／`defineEmits` 实签名、`stores/*.ts` 常量与 getter 实名、`pages.json` 八条路由、`useDeviceCapability.ts`＋`stores/device.ts`＋`App.uvue` 三者关系。产出物为 753 行 README ＋ 顶部 `[变更日志]` 条目。
+- **README 修正清单（按节）**：
+  1. **§4 组件契约矩阵**（8 行重写）：`Tabbar` 入参只有 `active`（`dark` 是内部 `useTheme()`）、**零 emits**、自带 `uni.redirectTo`；`FoodPicker` 的 `select`／`confirm` 载荷实名 `AddPayload`（**不是** `FoodEntry`，落库由宿主交 `computeEntry()`），首屏 20 项＋触底 +20（检索态截 50），弹层根**常驻 + `display:none`**；`SettleBadge` 分子＝`after`、`RING_DELAY 140 / RING_MS 620 easeOutCubic / EXIT_AT 2160 / CLOSE_AT 2380`、环绿随 `theme.accent` 而琥珀珊瑚固定；`GoalModal` 预设档位实为 `1200/1500/1800/2100/2400`（旧文档写 2000/2200 是错的）；`CountStepper` 上下界取自 `stores/food.ts`（`1…MAX_COUNT=100`）且**无长按连击**；`FoodToast` 标注「契约就绪但无页面挂载」。
+  2. **§7 设备分档**：检测实际发生在 `stores/device.ts` 的 `state` 初始化（`capability: detectDeviceCapability()`），`App.uvue onLaunch` 只是裸调 `useDeviceStore()` 预热——旧文写成「App.uvue 启动时注入」；补真实判定规则（IOS_LOW/MID 名单＋版本兜底 ≤12/≤14；Android ≤25 low／≤28 mid＋芯片关键词）；low 档兜底色是 `theme.glassBg`/`theme.tbBarDark` 而非硬编码 `#F8FCFA`。
+  3. **§7 滚动**（原为**错误指引**）：删掉「所有长列表与超高页面必须强制包裹在 `<scroll-view>`」——与 AGENTS.md 定案直接冲突（根 view 写 `flex:1` 会被钉死视口高、`overflow:hidden` 裁切）。改为「根 view 自然高度撑开走原生页面滚动，仅 Records／百科详情／定高弹层（FoodPicker、AddFood）用 `scroll-view`」。
+  4. **§8.3 结算环**：旧文「800ms + `cubic-bezier(0.16,1,0.3,1)` + rAF」全错，改为实装的 $R=\min(after/goal,1)$、$\theta_{start}=-\pi/2$、`easeOutCubic`、`setInterval(16ms)`、双端分支（MP `stroke+lineCap`；App 扇区多边形 `fill()`＋两端圆点 `fill()`，分段数 `max(2, round(Δθ/0.1047))`）、底轨＝CSS `.sb-track`（`theme.accent+'29'`）。
+  5. **§1 页面表**：状态栏字色列按文件证据重写——Home／Records／DayDetail／百科实为**未主动同步**（靠 `globalStyle` 的 `navigationBarTextStyle: black`），仅 Profile／Settings 有 `syncBar()` 且**包在 `#ifdef MP-WEIXIN` 内**（App 端为 TODO）；PrivacyDialog 行补 `uni.openDialogPage` 拉起与 `PRIVACY_DEV_BYPASS=true` 上线前还原提醒。
+  6. **`page-container` 清除**：「当前状态」＋§2 架构图 mermaid＋目录树注释三处，统一改为「页面内自绘浮层（蒙层＋阶段类补间，已不用 `page-container`）」；§3 挂载行补 FoodPicker「常驻，非 `v-if`」。
+  7. **§6 数据流**：`ct_user_profile_v1`→实名 `ct_user_v1`（且只持久化昵称，`streakDays` 是稿面演示常量）、`totalCarb`→`totalCarbs`、"防抖写入"→每次变更后同步 `saveEntries` 整体序列化、百科 CTA 的「`switchTab` 回首页」→ `navigateBack`＋失败兜底 `reLaunch`（本项目无原生 tabBar）；「6 个 store 模块（5 Pinia + 百科只读索引）」。
+- **AGENTS.md 改动（严格两处，Boss 分别授权）**：① 视觉约束里的「深色模式：仅个人中心＋设置两页随动」→ 全 App 三主题×双模式随 `settings` token 下发；② 第 399 行「暗态染色图标未产出」待办 → 转为 `- [x] 已完成（2026-09-25）`。`git diff AGENTS.md` 逐行核对，无第三处。
+- **闸门**：`python toolchain\hooks.py all` → **全绿，5 项闸门通过**（本轮为纯文档改动，未触碰 `app/` 代码）。
+- **本轮扫到但**未**擅自修的三件事（等 Boss 定性）**：
+  1. **百科 CTA 音效静默失效**：`pages/encyclopedia/Detail.uvue:354` `playSound('confirm')`，而 `stores/settings.ts:153` 的 `SoundType` 与 `AUDIO_FILES` 均无 `'confirm'` → `if (!src) return` 空转，「添加到本餐」按 L2 反馈规范应是**无声**的（触觉 `medium` 仍在）。修法二选一：改调已存在的音（`success`／`click`）或补一条音频资产，属音频决策，未动。
+  2. **`playSound` 门面有死参数**：`stores/settings.ts:193` 导出签名 `playSound(type, maxDurationMs?)`，但内部 store action（`:94`）只收 1 个参数，`maxDurationMs` 透传后丢弃；全工程无 2 参调用方。
+  3. **过期注释与已废止 ADR**：`FoodPicker.uvue:88/:233`、`GoalModal.uvue:317/:365` 四处注释仍写「page-container 容器／离场」，与常驻浮层的实装不符；`docs/decisions/ADR-002-page-container-migration.md` 的结论已被实现推翻——是否补一篇 superseding ADR 待拍板（文档归属问题，AI 不擅自改历史决策记录）。
+- **另挂起（沿用上一轮，无进展）**：4 项暗态视觉缺陷、`pages.json` 暗态页底漏白、百科点评空圆、`FoodToast` 孤儿组件、`gen_tab_icons.py` 去留、p348–p353 92×92 图标、营养数据核对 0/30、DayDetail「查看详情」日期错位 Bug、Profile 真机尺度校准（#65/#66，**等「开始」**）。
+
+### 2026-09-25 23:00:40 ｜ Android 视觉尺度修改轮收口：4 处修改真机验证全 PASS（零计划外改动）
+- **Boss 指令**：尺度审计最终计划获批后，仅执行 4 项（P0-1/P0-2 弹层 App 端安全区＋P1-3/P1-4 两处 92rpx 漂移），P2 全部冻结，「能只改一个属性就不改两个」。
+- **实际修改（4 处，逐处 grep 行号隔离核验）**：
+  1. `components/FoodPicker.uvue`：`.fp-sheet` 加 `:style="fpSheetStyle"`（L5），新增 computed（L115-123）＝`#ifdef APP` 内运行时下发 `padding-bottom = 28rpx 折算 px + safeAreaInsets.bottom`；MP 端返回空对象，类内既有 `calc(env)` 规则原样生效。
+  2. `components/GoalModal.uvue`：`.gm-sheet` 同模式（L6＋L138-146），基准 48rpx。
+  3. `pages/profile/Profile.uvue`：仅 `.bignum` 字号 90rpx→**92rpx**（L586，对齐 type-hero 46px token）。
+  4. `pages/records/DayDetail.uvue`：仅 `.dd-bignum` 字号 91rpx→**92rpx**（L482）。
+- **P2-6 核查（只报告未修）**：`stores/settings.ts:107` `triggerHaptic` 仅查 `hapticsEnabled`＋PC 平台，`useDeviceStore().haptics` getter 全工程零消费者 → **low 档设备仍会震动**，属已确认缺陷，修复待 Boss 立项。
+- **闸门与构建**：`hooks.py all` 5/5 全绿；停 watch 后完整 `cli.exe launch app-android --cleanCache true --deviceId emulator-5554`，`bytes/` 全量再生成 22:37:29 ＞ 最晚源码编辑 22:31:06（排除差量假绿）；logcat 扫描零 FATAL/运行时错误。
+- **真机验证（MuMu 1280×2772，证据 `debug/shots/vp1~vp6*.png`）**：① FoodPicker 末行距屏底 116px≈28rpx(49px)＋安全区垫高，无遮挡 PASS；② GoalModal 保存钮距底 208px≈48rpx(89px)＋安全区(119px) PASS；③ Profile 大数字实测 197px，与 Home 冻结 104rpx 实测 228px 比值 0.864≈92/104 PASS；④ DayDetail 数字与 Profile 同档 PASS。
+- **冻结项回归**：Home `.remain-num` 104rpx、`.meal-thumb` 74rpx、FoodToast 68/60rpx、SettleBadge 68rpx、27rpx 正文阶梯、Tabbar/BottleLiquid/动画/颜色/Store/路由全部原样，**零计划外修改**；工作区其余 254 条变更属历史未提交工作（主题/i18n 轮），未触碰。
+- **遗留 Backlog（本轮记录、不处理）**：
+  - 已确认缺陷：triggerHaptic low 档未拦截（上）；暗态 hero 底图浅块／餐次图标深压深／页底 `backgroundColorContent` 漏白／百科点评空圆（09:48 轮已记录，仍待修）；DayDetail「查看详情」日期错位（**下一轮取证中**）。
+  - 潜在风险（非缺陷）：FoodPicker `nextTick` 使用于 L268 但顶部无 import（现编译产物可解析、真机零报错）；`backdrop-filter`/Worklet App 端未实现（已 `#ifdef` 隔离）；本轮安全区补偿的 insets 增量在 MuMu（无小白条）未真正触发，带导航条真机待复验。
+  - 缺证据：MP 端自 09-24 夜起零回归；iOS 真机零覆盖；营养数据核对 0/30。
+- **纪律**：全程未碰微信开发者工具；`PRIVACY_DEV_BYPASS=true` 仍待上线前还原；提交仅当 Boss 明确要求。
+### 2026-09-25 23:30:25 ｜ DayDetail「查看详情」日期错位取证收口：ROOT CAUSE CONFIRMED＝测试点位误命中 10/02 跨月格，代码零缺陷，本项关闭
+- **Boss 指令**：补拍 Step 1 最后一跳取证（严格只读，不改代码/配置/资源，只做证据采集）。
+- **真机取证结果（MuMu 1280×2772，App 端）**：
+  1. Records 选中 **9/25**（当月格）→ 点「查看详情」→ DayDetail 标题 = **「09月25日 · 周五」** ✅ 正常（证据 `debug/shots/bug_case1.png` / `_c1_title.png`）。
+  2. Records 选中 **9/23**（当月格）→ 标题 = **「09月23日 · 周三」** ✅ 正常（证据 `debug/shots/bug_sel23.png` / `_c2c_title.png`）。
+  3. 点 9 月网格中 25 正下方一行的跨月尾格「2」→ 日历即切至 2026年10月、该格紫色选中、汇总卡显示「10月02日 周五」——**该格实际选中的 key 就是 `2026-10-02`**：`calRows`（Records.uvue:186-213）对跨月尾格走 `new Date(y, m + 1, tail)`，`pickDay`（Records.uvue:227-236）同步翻月，均为既有设计行为，非计算错误。
+- **最后一跳已闭环**：在 10/2 选中态下执行 `adb shell input tap 1128 2040`，一次命中并成功进入 DayDetail。坐标由截图 1280×2772 逐像素定位——「查看详情 ›」文字像素簇实测包围盒 **x 1037–1219 / y 2023–2056**（浅紫 `rgb(154,147,184)`），取其中心。DayDetail 标题明确为 **「10月02日 · 周五」**（证据链 `debug/shots/f1_now.png`（点击前）→ `f2_detail.png`（点击后）→ `f2_title.png`（标题特写））。
+- **数据链路核查（`Records → food.viewDay → DayDetail`）无缺陷**：`goDetail()`（Records.uvue:456-459）跳转**零 query**，仅写 store `food.viewDay`；全工程**单写单读**（唯一写者 Records.uvue:457，唯一读者 DayDetail.uvue:179）。DayDetail `dayKey`（L178-181）字符串直通＋长度守卫回落今日，`headerTitle`（L190-195）直接 `split('-')` 取段渲染，星期用本地 `new Date(y, mo-1, da)` + `(getDay()+6)%7`。`dayKeyOf`（food.ts:407-418）与 `dayRange`（food.ts:421-428）均为本地时间零填充拼接；全链路**无 `toISOString`、无 UTC 构造、无 `setDate` 偏移** → 时区日切类根因已被证据排除。
+- **最终判定**：**ROOT CAUSE CONFIRMED —— 原始问题属于测试点位误命中 10/02 跨月格的测试伪影，代码无需修改**。症状文案「10月02日」的唯一产出路径就是选中了 25 正下方同列的跨月格（`2026-10-02`），且两条当月格复现路径端到端正确。
+- **Backlog 撤项**：原挂「『查看详情』热区偏窄、点击需重试」→ **撤销**。真相是此前取证用 y=2165，换算回显示坐标 y≈844，落点已在「三餐摄入」卡片内部而非「查看详情」行（y≈795）——是坐标取错行，不是热区问题；重定位后一次即中。
+- **本项关闭，不进入任何代码修复流程**（无待修对象）。
+- **本轮改动范围**：仅本条交接记录；**未修改任何代码、配置、资源或其他文档**；仅在 `debug/shots/` 新增 3 张取证截图（`f1_now.png` / `f2_detail.png` / `f2_title.png`）。
+- **纪律**：未启动 Step 2；未触碰其他既有 Backlog（暗态 4 项、`pages.json` 页底漏白、百科点评空圆、`FoodToast` 孤儿组件、`gen_tab_icons.py` 去留、triggerHaptic low 档、营养数据核对 0/30 等均原样保留）。
