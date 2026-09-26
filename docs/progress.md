@@ -677,3 +677,30 @@ mint `#17916B`/`#52D6AC`、ocean `#1B7BB3`/`#5BC8FF`、lavender `#5A44DE`/`#A99B
 （列表行竖条）**是两个不同组件里的不同元素**——老板把两者混为「添加食物的选中态」时，
 须先回到模板确认元素归属再动手，否则会改错地方。定位「更换」按钮时也踩了一次：
 按截图目视估算的 y 偏了 106px（1024 vs 实际 1130），**改用逐行非白像素扫描定位**才点中。
+
+### 2026-09-27 01:38:00 ｜ AddFood 关闭钮对齐 GoalModal/FoodPicker 三件套（白底+阴影）
+
+**背景**：老板指出 AddFood 详情页的关闭钮（`image#1` 红框）应像「设置每日热量目标」弹窗里的那样
+——白底 + 阴影。核查发现三件套**尺寸本就一致**（64×64rpx / 圆角 32rpx / 图标 32rpx），
+差异只在**底色与阴影**：
+
+| 组件 | 底色 | box-shadow |
+|---|---|---|
+| GoalModal `.gm-closebtn` | `theme.card`（白） | `0 4rpx 16rpx rgba(10,79,61,.14)` ✓ |
+| FoodPicker `.fp-closebtn` | `theme.card`（白） | 同上 ✓ |
+| **AddFood `.af-closebtn`（改前）** | **`theme.chip`（浅绿）** | **无** ✗ |
+
+**改动**（`app/components/AddFood.uvue`）：
+- 模板：`backgroundColor: theme.chip` → `theme.card`
+- CSS：`.af-closebtn` 补 `box-shadow: 0 4rpx 16rpx rgba(10, 79, 61, 0.14)`（与另两处逐字相同）
+
+**真机验收**：关闭钮底色采样 4 点全为 `(255,255,255)` 纯白（改前 `(230,249,246)` 浅绿）；
+中心仍为 `#0A4F3D` 的 × 图标。**视觉收益**：改前关闭钮与左侧「更换」按钮同为浅绿、糊成一片，
+改后白底浮起、层级分明。
+
+**证据**：`debug/evidence_20260927/cmp_closebtn.png`（改前/改后并排放大 3×）。
+
+**顺带记录（待老板拍板，本轮未改）**：Settings 行尾 chevron `.chev` 为 12×22rpx，
+而 SVG `chev_right.svg` 是 **24×24 正方形 viewBox 且箭头本体仅占 6×12 单位**，`aspectFit` 受宽度
+限制只能缩到 12×12 → 箭头实测仅 **2.6×4.5dp**（iOS disclosure 为 8×13dp，本项目
+`Records .lr-link-chev` 24×24rpx 为 5.3×8.9dp）。同类元素全项目四档并存（12/14/16/24rpx）。

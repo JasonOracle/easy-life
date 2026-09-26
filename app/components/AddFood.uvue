@@ -2,6 +2,7 @@
 <template>
   <scroll-view class="af-scroll" direction="vertical" :show-scrollbar="false" v-if="food != null">
     <!-- [变更日志] 2026-09-27: 确认钮渐变深端 accentDeep→accentMid（消除右下角发黑） -->
+    <!-- [变更日志] 2026-09-27: 关闭钮底色 theme.chip→theme.card(白) + 补 box-shadow，对齐 GoalModal/FoodPicker 关闭钮三件套 -->
     <!-- [变更日志] 2026-09-24: 确认钮渐变带角度(135deg)在 App 原生端报 Invalid value → 角度版包入 #ifdef MP-WEIXIN，App 端用无色标渐变 -->
     <view class="af-sheet" :style="{ backgroundColor: theme.card }">
     <view class="food-row">
@@ -16,7 +17,7 @@
           <image class="change-icon" :src="asset('common/change_icon.svg')" mode="aspectFit"></image>
           <text class="change-text" :style="{ color: theme.ink1 }">{{ t('af.change') }}</text>
         </view>
-        <view class="af-closebtn" :style="{ backgroundColor: theme.chip }" hover-class="icon-pressed" :hover-stay-time="120" @click="close">
+        <view class="af-closebtn" :style="{ backgroundColor: theme.card }" hover-class="icon-pressed" :hover-stay-time="120" @click="close">
           <image class="af-close-ic" :src="asset('goal/gm_close.svg')" mode="aspectFit"></image>
         </view>
       </view>
@@ -512,6 +513,7 @@ function confirm(): void {
   border-radius: 32rpx;
   justify-content: center;
   align-items: center;
+  box-shadow: 0 4rpx 16rpx rgba(10, 79, 61, 0.14);
   flex-shrink: 0;
   margin-left: 16rpx;
 }
