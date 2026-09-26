@@ -512,3 +512,26 @@ Boss 提出「两侧绿色树枝也做一套 SVG」。与瓶身适配合并为�
 - **本项关闭，不进入任何代码修复流程**（无待修对象）。
 - **本轮改动范围**：仅本条交接记录；**未修改任何代码、配置、资源或其他文档**；仅在 `debug/shots/` 新增 3 张取证截图（`f1_now.png` / `f2_detail.png` / `f2_title.png`）。
 - **纪律**：未启动 Step 2；未触碰其他既有 Backlog（暗态 4 项、`pages.json` 页底漏白、百科点评空圆、`FoodToast` 孤儿组件、`gen_tab_icons.py` 去留、triggerHaptic low 档、营养数据核对 0/30 等均原样保留）。
+
+
+### 2026-09-26 23:35:51 ｜ 首页水瓶「瓶肩两侧透明层」根因关闭：方案 C（Canvas 按瓶身内腔轮廓 clip）落地并真机验收通过
+- **Boss 指令**：「先走 C，C 不行再 B」。→ 直接上 C，**一次通过，B 未启用**。
+- **问题定性（前一轮取证 `debug/evidence_20260926/BOTTLE_CAVITY_FINDING.md`）**：`.bottle-cavity` 是 148×236rpx 半透明白圆角矩形（`rgba(255,255,255,.4)`，暗态 `.06`），四边不随瓶身轮廓走，上沿处**左右各外露 50.5rpx × 89rpx**，形成两条上宽下尖的楔形半透明白带；`pingzi.svg` 里没有它（它不是图片资产，是能装液体 Canvas 的最省事容器）。回归引入点 = `08891f1`（2026-09-23 液体改 Canvas 2D）。
+- **实施（4 文件）**：
+  1. `components/BottleLiquid.uvue`：新增 `CAVITY_PATH`（30 条命令）＋`traceCavityPath()`；`draw()` 改为 `save()→clip()→玻璃底 fillRect→各元素→restore()`；新增 `glassFill` prop；`.bl-canvas` 高 236→242rpx。
+  2. `pages/home/Home.uvue`：`.bottle-cavity` 去掉 4 个 `border-*-radius` 与 `overflow:hidden`、高 236→242rpx；玻璃底改以 `:glass-fill="cavityFill"` 传入；`CAVITY_HEIGHT` 过期注释修正。
+  3. `composables/useLiquid.ts`：`CAVITY_H` 注释校准（**取值未变**）。
+  4. `toolchain/gen_cavity_path.py`：**新增**——从 `pingzi.svg` 的 `#A9DCC2` 环内轮廓生成路径，杜绝手抄误差（原放 `debug/` 但 `debug/` 被 gitignore，故迁入受控目录）。
+- **关键机理**：`1 设计单位 = 1rpx`。canvas 高与 `cvH` 同步 236→242rpx 后 `cvH/242 == cvH_old/236 ==「每 rpx 的物理像素数」`，故引擎水位（0..236 空间）屏幕位置**逐像素不变**，多出的 6rpx 只让玻璃底/液体够到瓶底。**实测已证（见下 ④）。**
+- **真机验收（MuMu 1280×2772，`1rpx=1.70667px`；两次全量 `cli.exe launch app-android`，`ready in 70494 / 39794ms`，`bytes/` mtime 均晚于源码，排除差量假绿）**：
+  ① **楔形侧漏归零**——差分逐行为上宽下尖楔形：y=660 起于 x179（恰为矩形 24rpx 顶角圆角处）→ 逐行左扩至 x153 → **y≈810 收敛为零**，与预测 809px 吻合；
+  ② **材质反算逐点成立**——`0.4×255+0.6×AFTER == BEFORE`（`#DCF2E5→#EAF7EF`、`#DBF1E5→#E9F7EF`、`#CBEADA→#A9DCC2`），证明变化**只是撤掉那层 40% 白**，无副作用；
+  ③ 内胆内部采样 `Δ=(0,0,0)`，矩形内 3300 点平均 Δ=0.14；
+  ④ **平均水位 176.0→175.0rpx**（4 帧复测 174.6~175.4，落在波浪相位噪声内）→ 印证机理；
+  ⑤ **瓶底贴合**：液体由 wrap 316 延伸到 322rpx，y_cav=241.2 处 `x240..320` ↔ 理论内腔 `238.9..320.8`；y_cav=239.4 处 `220..340` ↔ `216.4..343.4`（差额正是 2.5rpx 轮廓环）；
+  ⑥ **轮廓环 `#A9DCC2` 恢复完整可见**（此前在瓶颈/肩部被 40% 白盖住，采样为「无」），与 SVG 原稿一致；
+  ⑦ **`clip()` 在本项目 App 端确认可用**（未抛异常、未走降级分支）；液体动画两帧差 5758~7536 像素，**画面未冻结**；
+  ⑧ **暗态不回归**：楔形区 `#123623`（无 6% 白叠加 → 裁剪在暗态同样生效）、液体动画 4772 像素仍在动；**取证后已还原薄荷浅色**（页底 `#F6FBF8`）。
+- **本次未做（登记备查）**：① **瓶颈 6rpx 玻璃接缝**——canvas 顶在 wrap 80rpx 而瓶内腔顶在 53.6rpx，该段无玻璃底，实测 x=280 跨上沿 `#F0FBF4→#F5FDF8`（Δ=5，很淡）；**改动前后完全一致 = 既有问题，非本次引入**，要修须把 canvas 上移 26.4rpx 并重定引擎坐标原点（会让水位映射跟着变）；② 瓶内液体色板仍写死 v1 薄荷（`BottleLiquid.uvue:28`），仅蓝/紫主题显形，Boss 已表态「不算问题」；③ `Home.uvue` `CAVITY_HEIGHT` 为零引用死常量（本次只修注释不删）。
+- **纪律**：`hooks.py all` 五闸全绿后提交；`pages/settings/Settings.uvue` 的待回滚改动（描边 `#FBA095→#F5D5C8`，经 Pencil 实时稿面证实为误改）**不在本次提交内**。
+- **⚠️ 文档补记（需 Boss 知悉）**：本 `progress.md` 此前**没有任何 2026-09-26 条目**——当日已完成的「视觉尺度 5 项修复 / DayDetail 滚动 / Settings 边距 / Home hero A3 遮罩 / 配色跨主题审计（`COLOR_PLAN_V2.md`）」等轮次**均未落板**，本条为本日首条。收口协议要求的「每轮同批更新」在当日未执行，建议后续按轮次补齐或明确豁免。

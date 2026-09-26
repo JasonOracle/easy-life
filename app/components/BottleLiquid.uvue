@@ -4,6 +4,7 @@
 
 <script setup lang="ts">
 // [变更日志] 2026-09-24: 新增水瓶液体 Canvas 2D 渲染组件——非响应式引擎（useLiquid）逐帧 step+draw，@ready 主通道 + onMounted setTimeout 兜底（App 端 @ready 首挂可能不触发）
+// [变更日志] 2026-09-26: 新增 CAVITY_PATH/traceCavityPath 与 glassFill prop——draw() 改为 save()→clip() 到瓶内腔真实轮廓→玻璃底 fillRect→…→restore()；.bl-canvas 高 236→242rpx、scaleY 分母 236→242（1 设计单位仍=1rpx，水位映射不变）。消除 .bottle-cavity 矩形在瓶肩两侧各 50.5rpx 的楔形侧漏（方案 C）
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { LiquidEngine, ColorMode } from '../composables/useLiquid'
 
@@ -12,6 +13,7 @@ const props = defineProps<{
   colorMode: ColorMode
   cmdRev: number
   cmdKind: string
+  glassFill: string
 }>()
 
 let engine: LiquidEngine | null = null
@@ -28,6 +30,57 @@ const PALETTES: Record<string, string[]> = {
   green: ['#7DEBC7', '#3EDDB0', '#1FBF8F', '#0D9C73', '#0A7A5C'],
   amber: ['#F0E6D0', '#E8D080', '#E8B54D', '#D4A23E', '#A06820'],
   coral: ['#FFE8D0', '#FFC4A0', '#FF9E7D', '#E66040', '#C04020']
+}
+
+// ── 瓶内腔轮廓（内胆局部 rpx，即 0..148 × 0..236 的绘制坐标系）──────────────────
+// 数据源：app/static/home/pingzi.svg 中 #A9DCC2 轮廓环的内轮廓（fill-rule=evenodd 的第二子路径）。
+// 换算链：pingzi.svg 420×680 以 aspectFit 装进 .bottle-wrap 208×336rpx
+//         → 1 SVG 单位 = 0.4941176rpx；再减去 .bottle-cavity 的 left30/top80rpx 原点。
+// 生成脚本：toolchain/gen_cavity_path.py（可重复生成，勿手改数字）。
+// 用途：把「玻璃底 + 液体」裁进瓶身内腔，消除 .bottle-cavity 矩形在瓶肩两侧的侧漏。
+const CAVITY_PATH: any[] = [
+  ['M', 51.52, 3.01],
+  ['Q', 51.52, 6.86, 50.17, 10.08],
+  ['Q', 48.92, 13.08, 46.37, 15.83],
+  ['Q', 44.18, 18.20, 40.59, 20.82],
+  ['Q', 38.02, 22.70, 33.17, 25.79],
+  ['Q', 25.83, 30.56, 20.13, 36.87],
+  ['Q', 14.34, 43.28, 10.37, 51.13],
+  ['Q', 2.11, 67.47, 2.11, 88.99],
+  ['L', 2.11, 194.73],
+  ['Q', 2.11, 205.37, 6.02, 214.31],
+  ['Q', 9.77, 222.88, 16.76, 229.14],
+  ['Q', 23.66, 235.31, 32.97, 238.59],
+  ['Q', 42.39, 241.92, 53.25, 241.92],
+  ['L', 94.75, 241.92],
+  ['Q', 105.61, 241.92, 115.03, 238.59],
+  ['Q', 124.34, 235.31, 131.24, 229.14],
+  ['Q', 138.23, 222.88, 141.98, 214.31],
+  ['Q', 145.89, 205.37, 145.89, 194.73],
+  ['L', 145.89, 88.99],
+  ['Q', 145.89, 67.47, 137.63, 51.13],
+  ['Q', 133.66, 43.28, 127.87, 36.87],
+  ['Q', 122.17, 30.56, 114.84, 25.80],
+  ['Q', 109.98, 22.70, 107.41, 20.82],
+  ['Q', 103.82, 18.20, 101.63, 15.83],
+  ['Q', 99.08, 13.08, 97.83, 10.08],
+  ['Q', 96.48, 6.86, 96.48, 3.01],
+  ['L', 96.48, -26.39],
+  ['L', 51.52, -26.39],
+  ['L', 51.52, 3.01],
+  ['Z']
+]
+
+function traceCavityPath(c: any, sx: number, sy: number): void {
+  c.beginPath()
+  for (let i = 0; i < CAVITY_PATH.length; i++) {
+    const seg = CAVITY_PATH[i]
+    const k = seg[0]
+    if (k === 'M') c.moveTo(seg[1] * sx, seg[2] * sy)
+    else if (k === 'L') c.lineTo(seg[1] * sx, seg[2] * sy)
+    else if (k === 'Q') c.quadraticCurveTo(seg[1] * sx, seg[2] * sy, seg[3] * sx, seg[4] * sy)
+    else c.closePath()
+  }
 }
 
 let readyFired = false
@@ -190,8 +243,10 @@ function drawStream(c: any, scaleX: number, scaleY: number, palette: string[], e
 function draw(): void {
   const c = ctx
   if (c == null || engine == null || cvW <= 0) return
+  // 1 设计单位 = 1rpx：X 按 148rpx 宽换、Y 按 242rpx 高换（与 .bl-canvas 的 CSS 尺寸一致）。
+  // 引擎水位坐标 0..236 仍按同一 rpx 比例映射，所以水位屏幕位置不变。
   const scaleX = cvW / 148
-  const scaleY = cvH / 236
+  const scaleY = cvH / 242
 
   try { c.clearRect(0, 0, cvW, cvH) } catch (e) {}
 
@@ -199,6 +254,27 @@ function draw(): void {
   if (pts.length < 4) return
 
   const palette = PALETTES[props.colorMode] ?? PALETTES['green']
+
+  // ── 裁剪到瓶内腔 ────────────────────────────────────────────────────────────
+  // 用真实瓶身轮廓代替矩形 .bottle-cavity 作边界，玻璃底与液体都只落在瓶内，
+  // 消除矩形内胆在瓶肩两侧约 51rpx 的楔形侧漏（方案 C）。
+  // App 端若不支持 clip() 则降级为不裁剪，此时玻璃底仍由本 canvas 铺满矩形，观感与改动前一致。
+  let clipped = false
+  try {
+    c.save()
+    traceCavityPath(c, scaleX, scaleY)
+    c.clip()
+    clipped = true
+  } catch (e) {
+    try { c.restore() } catch (e2) {}
+  }
+
+  // 玻璃底：原由 .bottle-cavity 的 backgroundColor 提供，现移到裁剪区内绘制（值不变，观感不变）
+  const glassFill = props.glassFill
+  if (glassFill != null && glassFill.length > 0) {
+    c.fillStyle = glassFill
+    c.fillRect(0, 0, cvW, cvH)
+  }
 
   // C: Pour stream FIRST (before liquid body, so it's visible above surface)
   drawStream(c, scaleX, scaleY, palette, engine)
@@ -372,6 +448,11 @@ function draw(): void {
     c.arc(cx, cy, 20 * scaleX, 0, Math.PI * 2)
     c.fill()
   }
+
+  // 解除瓶内腔裁剪（与上方 c.save() 配对）
+  if (clipped) {
+    try { c.restore() } catch (e) {}
+  }
 }
 
 // Watch for commands from parent
@@ -398,11 +479,14 @@ const CAVITY_W = 148
 </script>
 
 <style>
+/* 绘制坐标系 = 内胆局部 rpx（0..148 × 0..DESIGN_H）。
+   DESIGN_H 242 = 内胆高度 236 + 6rpx 余量，用于覆盖到瓶身内腔底部（见 CAVITY_PATH 底部 241.92）。
+   引擎的水位坐标仍是 0..236（MAX_FILL_RATIO 基准不变），故水位屏幕位置与本改动无关。 */
 .bl-canvas {
   position: absolute;
   left: 0;
   top: 0;
   width: 148rpx;
-  height: 236rpx;
+  height: 242rpx;
 }
 </style>

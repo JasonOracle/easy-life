@@ -1,9 +1,10 @@
 // [变更日志] 2026-09-24: 新增液体物理引擎——双模强迫阻尼振荡器（M1/M2）+ 气泡/粒子池，四态（idle/tap/longpress/pour），非响应式设计由调用方逐帧驱动
+// [变更日志] 2026-09-26: CAVITY_H 注释校准（取值未变）——canvas 实高已改 242rpx 以覆盖瓶底，引擎坐标系仍为 236
 // Liquid physics engine: dual-mode forced damped oscillator + bubble/particle pool
 // Non-reactive by design (per nonreactive-engine pattern); caller drives step() per frame.
 
 const CAVITY_W = 148 // rpx, matches .bottle-cavity width
-const CAVITY_H = 236 // rpx, matches .bottle-cavity height
+const CAVITY_H = 236 // rpx, 引擎纵向坐标空间（= 玻璃内胆可视高）。canvas 实高 242rpx，多出的 6rpx 仅用于覆盖瓶底余量
 const MAX_FILL = 0.68 // visual shoulder-line cap (was 0.80; 0.68 keeps liquid below bottleneck)
 const AMP_CAP = 18 // rpx hard cap to prevent overflow at 68% fill
 

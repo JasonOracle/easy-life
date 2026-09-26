@@ -2,6 +2,7 @@
 <template>
   <view class="page" :style="{ backgroundColor: theme.bg }">
     <!-- [变更日志] 2026-09-24: Hero 水瓶液体由 CSS 水波图重构为 BottleLiquid Canvas 2D 物理引擎渲染；瓶身/刻度/叶片独立分层，废弃 liquid_wave 水体渐变头图。同日重排第一批：补定义 status-text-coral/amber/green 死类（超标报警色此前静默失效）、顶部带压缩（spacer 220→190 / hero 470→440）、贴纸由右上悬空改入右列流内（并清除整画布 alpha≈10 白雾层）、删悬空小 leaf 改状态色竖条、宏量/餐次字号降档拉开层级阶梯。第二批 S4：.hero-text right 20→28rpx，贴纸/pill 右缘与全页卡片 margin-right 28 统一对齐轴。S7：独立宏量卡并入 hero 底缘玻璃横条（hm-macro-strip，左右 28 同轴），hero 440→552、hero-text bottom 24→136，页面白卡 3→2。第三批：FAB 与左列垂直居中（top 35rpx）、hero 渐变翻转为上白下绿（重心下沉）、贴纸矢量感高清重绘（246px→840px 白椭圆+薄荷描边+行楷双行）并从右列流内迁挂瓶卡左上空白带、左组收拢（bg 卡 352→324 / 瓶左移 12 / 右叶左移 24）使叶-字间隙 2rpx→26rpx 且 goal-pill 退出卡片边线。2026-09-25：餐次行食物图接入百科页入口（openEncyclopedia 携 foodId 跳 pages/encyclopedia/Detail）；食物图 hover 反馈由 <image> 迁到包裹 view（hover-stay-time 不支持 image，编译期 warn）；onShow 消费 ct_pending_add 一次性交接，百科「添加到本餐」回首页直接打开 FoodPicker 详情步预填该食物 -->
+    <!-- [变更日志] 2026-09-26: 内胆层改由 BottleLiquid 按瓶身内腔轮廓 clip() 绘制——玻璃底从 .bottle-cavity 的 backgroundColor 移入裁剪区（新增 glass-fill 传参），容器去掉 4 个 border-radius 与 overflow:hidden、高 236→242rpx，消除瓶肩两侧楔形侧漏（方案 C） -->
     <!-- 标题与操作栏（顶栏常驻+日期整合，对齐设计图规范，保证日期完全外露） -->
     <view class="hm-nav" :style="{ paddingTop: sbH + 'px', backgroundColor: theme.bg }">
       <view class="hm-nav-inner">
@@ -51,8 +52,9 @@
       <view class="bottle-wrap" :style="bottleAnimStyle" @click="onBottleTap" @longpress="onBottleLongPress" @touchstart="onBottleTouchStart" @touchend="onBottleTouchEnd">
         <!-- 玻璃层（最底）：App 端 SVG 渲染不识别 evenodd 镂空，瓶体在原生端是实心色块，故液体必须叠在它之上 -->
         <image class="bottle-mask" :src="bottleAsset('pingzi')" mode="aspectFit"></image>
-        <view class="bottle-cavity" :style="{ backgroundColor: cavityFill }">
-          <BottleLiquid :ratio="liquidRatio" :color-mode="liquidColorMode" :cmd-rev="liquidCmdRev" :cmd-kind="liquidCmdKind"></BottleLiquid>
+        <!-- 内胆层：容器背景改透明，玻璃底与液体统一由 BottleLiquid 裁进瓶内腔绘制（消除瓶肩侧漏） -->
+        <view class="bottle-cavity">
+          <BottleLiquid :ratio="liquidRatio" :color-mode="liquidColorMode" :cmd-rev="liquidCmdRev" :cmd-kind="liquidCmdKind" :glass-fill="cavityFill"></BottleLiquid>
         </view>
         <!-- 刻度层（最上）：水位上涨后刻度仍需可读，与玻璃层同源同几何 -->
         <image class="bottle-ticks" :src="bottleAsset('pingzi_tick')" mode="aspectFit"></image>
@@ -257,7 +259,7 @@ const macroC = computed(() => Math.round(food.totalCarbs))
 const macroF = computed(() => Math.round(food.totalFat))
 
 // 瓶身内胆几何参数与最高水位硬约束（Boss 规则：最高不超过肩线，视觉上液体不进入瓶颈收窄区）
-const CAVITY_HEIGHT = 236 // 与 CSS .bottle-cavity (236rpx) 一致
+const CAVITY_HEIGHT = 236 // 引擎水位坐标空间高度（rpx，同 useLiquid.CAVITY_H）。注意：容器 .bottle-cavity 已是 242rpx（多出 6rpx 仅用于覆盖瓶底）。本常量当前无引用
 const MAX_FILL_RATIO = 0.68 // 对应瓶身肩线位置（原 0.80 会溢出到瓶颈视觉区）
 
 // 瓶身流体动效状态
@@ -694,17 +696,15 @@ const meals = computed<Meal[]>(() =>
   width: 208rpx;
   height: 336rpx;
 }
+/* 内胆层：不再用矩形+圆角裁剪（会切到瓶肩外侧、并比瓶身多切瓶底 26rpx），
+   改由 BottleLiquid 的 canvas 按瓶内腔真实轮廓 clip()，容器本身只负责定位。
+   高度 236→242rpx：让 canvas 一直覆盖到瓶身内腔底部（wrap 321.9rpx）。 */
 .bottle-cavity {
   position: absolute;
   left: 30rpx;
   top: 80rpx;
   width: 148rpx;
-  height: 236rpx;
-  border-top-left-radius: 24rpx;
-  border-top-right-radius: 24rpx;
-  border-bottom-left-radius: 52rpx;
-  border-bottom-right-radius: 52rpx;
-  overflow: hidden;
+  height: 242rpx;
 }
 .bottle-mask {
   position: absolute;
