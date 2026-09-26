@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 # [变更日志]
+# 修改时间：2026-09-27
+# AI模型：Claude (WorkBuddy)
+# 修改内容：[产物 json 以 newline="\n" 写出。Windows 文本模式默认把 \n 译成 CRLF，
+#           导致 food_library.json 在工作区变成 8801 行 CRLF（HEAD 为 LF），
+#           git diff 每次刷「CRLF will be replaced by LF」警告。]
+# [变更日志]
 # 修改时间：2026-09-22
 # AI模型：Qoder (Claude)
 # 修改内容：[1. 源文件数由五份变六份（validate.SOURCES 纳入 icons_v1_visual.yaml 生图槽位），
@@ -169,7 +175,7 @@ def main():
     output = build(src)
 
     DIST_OUT.parent.mkdir(parents=True, exist_ok=True)
-    with open(DIST_OUT, "w", encoding="utf-8") as f:
+    with open(DIST_OUT, "w", encoding="utf-8", newline="\n") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
         f.write("\n")
 

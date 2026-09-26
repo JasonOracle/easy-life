@@ -17,6 +17,11 @@
     绝不做「只转一半」的破坏性改写；
   - 无 mint 也无命中 NEUTRAL_REMAP 的文件跳过（转了还是同一张图，白增资产）。
 
+[变更日志]
+2026-09-27 Claude (WorkBuddy)：四处写出统一加 newline='\n'（清单 ts / 变体 svg / manifest json）。
+  原因：Windows 下 Path.write_text 走文本模式会把 \n 译成 CRLF，themeAssetList.ts 被刷成 59 行 CRLF（HEAD 为 LF），
+  每次重跑生成线都污染工作区并触发 git 的 CRLF 警告。生成物换行符应与仓库一致。
+
 [变更日志] 2026-09-25 扩展为全库批处理（原仅 app/static/home 五张）：
 新增中性/语义色判定、暗态中性平移、manifest 产出 debug/theme_asset_manifest.json
 供页面接线核对。
@@ -227,7 +232,7 @@ def write_runtime_index(included):
         lines.append('  ' + json.dumps(k, ensure_ascii=False) + ',')
     lines.append(']')
     LIST_OUT.parent.mkdir(parents=True, exist_ok=True)
-    LIST_OUT.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+    LIST_OUT.write_text('\n'.join(lines) + '\n', encoding='utf-8', newline='\n')
     return len(keys)
 
 
@@ -290,7 +295,7 @@ def main():
             # 五个档位一律落盘（哪怕内容与底稿相同）：页面按 `<基名>_<档>.svg`
             # 拼路径，缺文件在 App 端是静默空白图标，宁可留一份同色副本
             dst = path.with_name(stem + suffix + path.suffix)
-            dst.write_text(out, encoding='utf-8')
+            dst.write_text(out, encoding='utf-8', newline='\n')
             variants[suffix.lstrip('_')] = str(dst.relative_to(STATIC)).replace('\\', '/')
 
         included.append({'src': rel, 'variants': variants})
@@ -310,7 +315,7 @@ def main():
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(manifest, ensure_ascii=False, indent=2),
-                   encoding='utf-8')
+                   encoding='utf-8', newline='\n')
     listed = write_runtime_index(included)
 
     print('染色资产 %d 张（清理上轮残留 %d 个），变体清单见 manifest'
