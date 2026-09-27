@@ -944,3 +944,39 @@ hook 的 `food-data-integrity` 提示「图标 347 ≠ 食物 353」，顺线索
 3. **卡高**：稿面 118pt ＝ 236rpx；改前 353rpx → 改后 **328rpx**（圆底 76→52rpx 省 25rpx），仍 **+92rpx**（预计主因＝进度条行 ＋ 各层 padding）。
 4. **图标 ink 略大**：稿面 16px(＝8pt)，真机 31px(＝9.1pt)，约 **+14%**（Pencil 按字体渲染 MSR 自带边距，非代码错；要贴合需把 28rpx 降到约 24rpx）。
 5. 浅色档语义色（碳水/热量）对比度不足（lavender-light 碳水 **1.73:1**），与稿面原样一致，未擅改，登记为风险。
+
+
+---
+
+## 2026-09-27（下）· 设计稿反哺收官 ＋ 老板四项真机反馈修复
+
+### A. 设计稿反哺（5 路并行，全部真机基准图 → Pencil 回写）
+
+| 板 | id | 回写内容 | 验收 |
+|---|---|---|---|
+| Home | `Yvg8R` | 宏量卡并入 hero 底缘玻璃条、6 缩略图换真图、真实食物数据 | 导出像素扫描 ✓ |
+| Records | `bTPUq` | 标题「最近记录」、日历整盘重排（2026-09）、删超标标/红条段、三餐 chips | ✓ |
+| DayDetail | `VEWYt` | 删圆环、删超标胶囊、大数字 1615/90%、进度条 286pt、早午餐换真食物 | ✓ |
+| Profile | `Vtp9C` | 删圆环＋水波层、185/90%/1615、本周 6/7、趋势 9/21–9/27 | ✓ |
+| Settings | `T0IUr` | 补「主题切换/薄荷 Mint」「语言切换/跟随系统」两行，下游 36 节点下移 120.8pt | ✓ |
+| 新建主题色板 | `tpTAn` | 6 档 × 19 角色 = 114 色块（以 `useTheme.ts` 为准；与 §8.1 仅 ink-1 mint 亮 1 处出入，取代码） | 非白像素 99.1% ✓ |
+| 百科营养卡 | `EkFtL` | 118→152pt、五行 y 重排、数值/百分比换真机值，`Nnctn` 联动下移 Δ34pt | 导出 690×304 精确 ✓ |
+
+**新增 Pencil 铁律（写入 memory）**：① 变更脚本里禁 `throw new Error`（会回滚整个执行块，throw 只用于只读取数）；
+② `frame` 必须显式 `layout:'none'`，且 `layout` 只能写在 `Replace` 顶层（子节点带 layout 报 Invalid properties）；
+③ 复核「删除父容器」时子节点会被孤儿提升继续渲染，删完必须 Get 父节点复查。
+
+### B. 四项真机反馈（截图像素取证 → Pencil 稿面比对 → 根因）
+
+| # | 现象 | 根因（实测） | 改法 |
+|---|---|---|---|
+| 1 | 首页餐次连接线"没有了" | **线存在但隐形**：主题迁移把设计值 `#BFE8D6` 换成 `theme.line`(#D8EFE5)，压在页底 #F6FBF8 上对比 **1.13:1**；真机实测线体 x127..131(5px)、色 #D8EFE5 | 新增 `useTheme.alphaOf()`；rail 取 `accent@0.37` ≈ 设计 #BFE8D5（跨 6 档自洽）；宽 `2px→4rpx`（Pencil Timeline 2pt） |
+| 2 | 首页瓶卡底图跟着卡路里变黄 | `bottleAsset()` 给 bg／双叶／瓶身／刻度**一律**加 `_amber/_coral`；`bg_amber.svg` 整块琥珀（#E8D080×5、#D4A23E×2） | bg 恒走主题档（＝右侧文案区同底）；双叶/瓶身/刻度保持状态色（老板认定其正确） |
+| 3 | 餐卡左下角异常色块 | `.meal-card` 的 `box-shadow(0 8rpx 22rpx rgba(26,102,77,.06))` 在 App 端渲染成卡角灰斑；**Pencil 早餐卡/午餐卡/晚餐卡 三个节点 `sh:null`（设计无阴影）** | 删该 box-shadow（`goal-pill` 的阴影保留） |
+| 4 | 添加食物底部按钮色被改 | commit `9da9016` 把 `accent→accentDeep` 改成 `accent→accentMid`，按钮底压暗到 #17916B；Pencil `ConfirmBtn` = gradient(rotation 180, `#7DEBC7→#1FBF8F`)，导出实测顶 #78E9C4 → 底 #26C293 | 改 `accent2→accent`（＝百科页 CTA 同一对 token） |
+| 5 | Profile「今日不达标」箭头偏大偏粗 | `.banner-chev` 50rpx(25pt)，真机 ink 实测 **19.3×33.4rpx**；Pencil `Vtp9C/BannerChev` = **12.7pt 方框**（内含 4.8×8.5pt 矢量） | 50→**26rpx**（13pt），描边随缩放同比变细 |
+
+提交 `5005740`（4 文件 +43/-8），pre-commit 5 项全绿。
+
+**未做（阻塞项）**：真机复验——HBuilderX GUI 已被关闭；`cli.exe launch app-android` 在无 GUI 时**挂死**（本轮实测 3m56s 零输出后终止，与下午 46 分钟卡死同因）。
+**结论：`cli.exe` 依赖 GUI 常驻，「无 GUI 的 headless 重编」在本机走不通。** 待 GUI 重启后热编即可截图复验上述 5 点。
