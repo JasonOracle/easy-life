@@ -1000,3 +1000,17 @@ hook 的 `food-data-integrity` 提示「图标 347 ≠ 食物 353」，顺线索
 此前记「GUI 未运行时挂死」——**作废**。本轮 GUI（HBuilderX.exe）在运行中，`cli.exe launch app-android` 仍零输出挂死 4m28s 后终止。
 → 重编只能靠 **GUI 内的运行会话**（本轮真实生效路径：14:23:49 改 `GoalModal.uvue` → GUI watch 编译 → 14:25:09 出 `unpackage/dist/dev/app-android/*`，App 热更新）。
 → 判断编译是否吃到改动：比对源文件 mtime 与 `app/unpackage/dist/dev/app-android/app-service.js` 的 mtime。
+
+### E. 主题切换三选项改用意象 SVG 图标（老板第 6 项）
+
+| 项 | 内容 |
+|---|---|
+| 需求 | 「主题切换」弹层里三个纯色圆点 → 图标（老板原话：直接生成意思相近的 svg 图标就行，这里没有设计稿） |
+| 新增 | `static/settings/theme_{mint,ocean,lavender}[_dark].svg` 共 6 枚：薄荷＝对生叶薄荷枝／海洋＝水滴＋高光弧／薰衣草＝花穗＋茎叶；24×24 线稿、stroke 2，沿用全局图标风格 |
+| 关键决策 | 图标取「该主题自己的品牌色」（暗态取该档更亮 accent：`#52D6AC`/`#5BC8FF`/`#A99BFF`），**不随当前主题换色** —— 否则三个选项会长得一模一样。这三枚**不走 `themeAsset`**（它们是「代表各自主题」的资产，不是「跟随当前主题」的资产） |
+| 圆底 | 实心色圆 → 浅色圆底（各档 chip 色：亮 `#E6F9F6`/`#E1F0FA`/`#EFEAFC`，暗 `#2A4238`/`#1E3A4C`/`#2B2350`），保留原视觉重量；顺带删掉 CSS 里写死的 `#E3EFE8` 描边 |
+| 代码 | `PrefOpt` 增 `soft` 字段；新增 `accentIcon(id)` 拼路径；`.pf-swatch` 改 flex 居中 ＋ `.pf-swatch-ic` 34rpx |
+| 真机验证 | 亮态 ✓ 三枚全部正常渲染；暗态（mint-dark，页面底 `#0A1612`）✓ 换亮版色＋深色圆底；验证后已把深色模式关回、恢复原设置 |
+| 提交 | `b557acd` |
+
+**未做**：主列表行 `.pf-dot`（24rpx 色点）未动 —— 老板截图只指弹层，且该尺寸放图标会看不清，待确认是否一并换。
