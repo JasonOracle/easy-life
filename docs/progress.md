@@ -1064,3 +1064,12 @@ D_goalmodal/D_added 补齐后复核两块推导板：rHdQ5→新壳 `X8wtJp`（�
 - **结论：四个进度页早已统一**——同一函数 `getCalorieStatus(已吃,目标)`（stores/goal.ts:48）：≤100% 绿(=该档 accent) / 100~150% 琥珀 #E8B54D / >150% 珊瑚 #FF9E7D。消费方：Home 贴纸、Records 横条、DayDetail 圆环、Profile 圆环+横条、SettleBadge 成功弹窗环，共五处
 - GoalModal 唯一语义例外：比值=目标在滑杆(1200~2400)的位置（≤1800 绿/1800~2100 琥珀/>2100 珊瑚），因设定目标时无「已吃」可除；三色与全局同轴。已向老板解释，维持现状
 - 沉淀规则：新改进度类 UI 必须走 getCalorieStatus，禁止自定阈值（MEMORY.md）
+
+---
+
+## 编译报错修复：变更日志误插注释块外（2026-09-28 00:57）
+
+- 92fedcf 的 python 脚本把「2026-09-27(4)」变更日志行追加在 `*/` **之后**（old 以 ` */` 结尾，new = old + 新行）→ 新行成了注释块外裸文本，GoalModal.uvue:217 编译报 `Unexpected token (217:1)`
+- 同病两处一次修掉（GoalModal / AddFood）：删掉前一行行尾 ` */` 使新行收回块内；GoalModal 注释首行过期的 accent2→accent 描述同步改 accentSoft→accent
+- 教训（收口协议）：**插入类脚本若锚点行以 `*/` 结尾，new 必须把 `*/` 从 old 尾部挪到 new 尾部**，count=1 不代表语义正确
+- app-service.js 已 watch 自动重编（00:57），提交 `e3c53cc`
