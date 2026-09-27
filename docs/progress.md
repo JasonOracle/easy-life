@@ -980,3 +980,23 @@ hook 的 `food-data-integrity` 提示「图标 347 ≠ 食物 353」，顺线索
 
 **未做（阻塞项）**：真机复验——HBuilderX GUI 已被关闭；`cli.exe launch app-android` 在无 GUI 时**挂死**（本轮实测 3m56s 零输出后终止，与下午 46 分钟卡死同因）。
 **结论：`cli.exe` 依赖 GUI 常驻，「无 GUI 的 headless 重编」在本机走不通。** 待 GUI 重启后热编即可截图复验上述 5 点。
+
+### C. GoalModal 保存钮渐变（老板第 5 项反馈）
+
+| 项 | 内容 |
+|---|---|
+| 现象 | 「设置每日热量目标」弹窗底部按钮颜色不对（老板附 Pencil 设计稿截图） |
+| 根因 | `saveStyle` = `linear-gradient(accent, accentMid)`，深端 `accentMid`(#17916B) 是「暗档」色，整条被压暗发浊；稿面 `SaveBtn` = 180° `#7DEBC7→#1FBF8F`（浅端→品牌端）。该写法本仓历史确有（`linear-gradient(90deg, #7DEBC7, #1FBF8F)`），主题化改造时被换掉 |
+| 改法 | `accent2→accent`（与 AddFood 确认钮 / 百科 CTA / 首页 FAB 同一对 token，跨 6 档主题自洽） |
+| 真机实测 | before 顶 `#1BA87D` → 底 `#17916B`（底端精确命中 accentMid）；after 顶 `#24CE9C` → 底 `#20C997`（底端精确命中 accent）；按钮盒 180px = 105.5rpx ↔ 稿面 54pt = 108rpx |
+| 提交 | `157fb08` |
+
+**稿面取证**：Pencil 里 `#7DEBC7→#1FBF8F` 共 **14 个节点**（各弹窗 `ConfirmBtn` + GoalModal `SaveBtn`），是主按钮的统一渐变；`accent2→accent` 是其在 token 层的唯一对应写法。
+
+**遗留（待拍板）**：v1 稿面浅端 `#7DEBC7` vs v2 token `accent2` `#2BD6A3` —— 真机渐变明度跨度 ≈12 级，稿面 ≈100 级，即 token 化后主按钮渐变层次显著变弱。若要完全等于稿面需上调 mint 亮态 `accent2`，影响 9 处调用（FAB / 进度条 / CTA / 确认钮等），未擅自改。
+
+### D. 工具结论更正：`cli.exe launch` 无条件挂死
+
+此前记「GUI 未运行时挂死」——**作废**。本轮 GUI（HBuilderX.exe）在运行中，`cli.exe launch app-android` 仍零输出挂死 4m28s 后终止。
+→ 重编只能靠 **GUI 内的运行会话**（本轮真实生效路径：14:23:49 改 `GoalModal.uvue` → GUI watch 编译 → 14:25:09 出 `unpackage/dist/dev/app-android/*`，App 热更新）。
+→ 判断编译是否吃到改动：比对源文件 mtime 与 `app/unpackage/dist/dev/app-android/app-service.js` 的 mtime。
