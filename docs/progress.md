@@ -1238,7 +1238,7 @@ v2 我把组件根节点包成「零高度 fixed 宿主 + absolute 子节点」�
 - Pencil `gFuXt`：删掉上轮加进去的 **4 条托底条**（`XlFc2/dSepO/EouCr/dIbEH`，98→94 节点），胶囊 `#FFFFFF85`／气泡 `#20C9971F` 保留；Export 验收：原条带位置已有 **54%→~2%** 的 `#F6FBF8` 覆盖降到与页面素材差值 0.22~0.45
 
 ### 7. 遗留（未动）
-- `FoodPicker.uvue:342 max-height: 90%`：uni-app x 只接受 `number|pixel`，该声明静默失效（**既存项**，非本轮引入）。详情弹层的实际高度由 `height:auto` + 内部 scroll-view 兜底，行为现状可接受；要真加 90% 上限需改成运行时 px（并要按弹层三态重新验收），未做
+- `FoodPicker.uvue:342 max-height: 90%`：uni-app x 只接受 `number|pixel`，该声明静默失效（**既存项**，非本轮引入）。详情弹层的实际高度由 `height:auto` + 内部 scroll-view 兜底，行为现状可接受；**已于 2026-09-28 修复**——改成 `fpContainerStyle` 运行时下发 `windowHeight*0.9+'px'`，差异实验取证见文末新章
 - 调试通道收获：`console.log` 在 App 端会进 **logcat**（tag `JSConsole`），`adb logcat -d | grep xxx` 可直接读；热重载是否生效可用「产物 mtime vs 源 mtime」＋探针日志复现判断
 
 ### 8. 附带修掉：「向上柔影」其实从未渲染过（本轮第 3 个真 bug）
@@ -1252,3 +1252,36 @@ v2 我把组件根节点包成「零高度 fixed 宿主 + absolute 子节点」�
   真机实测内部 `254,255,254`（比页面底 247,252,249 更亮、干净），气泡 `227,248,241`。深色态仍保留黑投影
 - **副产品**：近白页面上「白色 + 透明度」无法拉开对比（alpha 0.20→1.00 只差 2~9 级 R），
   所以胶囊的「存在感」只能来自光晕/阴影或内容从背后经过时的模糊——这条对后续所有浅色玻璃件都适用
+
+
+---
+
+## FoodPicker 详情弹层 `max-height`：编译 ERROR → 运行时 px（2026-09-28）
+
+### 1. 问题
+老板贴的 HBuilderX 日志第 3 条：`ERROR: property value '90%' is not supported for 'max-height' at components/FoodPicker.uvue:342`。
+uni-app x 的 uvue-css 对 `max-height` **只接受 `number | pixel`**；写 `%` 不只是报错，而是**整条声明被丢弃**。
+
+### 2. 取证：这条声明在 App 上从未生效
+反编译产物 `bytes/GenComponentsFoodPickerSharedData.style.bytes`（格式＝`[属性][type][len][类名]`；长度按 rpx 原值存、颜色按 B,G,R,alpha 存），
+逐 block 解码确认：`.fp-container-detail` 的 payload 里**根本没有 max-height 字段**（只剩 `height:auto`）。
+→ 2026-09-27 那次「`height:auto` + `max-height:90%` 贴合内容」的修复，在 App 端退化成**完全无上限**。
+
+### 3. 修法
+- 类里删掉 `max-height: 90%`（保留注释并补记原因）
+- 新增 `fpContainerStyle` computed，`:style` 运行时下发：`st['max-height'] = (uni.getSystemInfoSync().windowHeight * 0.9) + 'px'`（仅 `step === 'detail'`）
+- 参照物＝`.fp-overlay`（`position:fixed` 满屏），故取视口高 90%
+
+### 4. 验收：差异实验，而不是目视
+只看「奶茶详情正常」不足以证明修复——奶茶内容高 ≈2330px，本来就没到上限，旧版（无上限）也是同样高度。故做对照：
+
+| 上限 | 容器顶边 y（物理 px） | 占屏高 | 说明 |
+|---|---|---|---|
+| `×0.5`（临时诊断值） | **1385** | **50.0%**（精确） | 上限确实生效 → App 采纳运行时 `max-height` |
+| `×0.9`（定稿） | 443 | 16.0% | ＝内容高 2329px，未触上限，容器贴合内容 |
+
+边界干净：遮罩 `(123,125,124)` → 卡片纯白 `(255,255,255)`。定稿后「珍珠奶茶」详情：标题/更换/关闭钮、分量三档、甜度 10 格电量条五档、餐次四色卡、「添加到早餐 · 325 kcal」确认钮**全部完整可见**。
+
+### 5. 产物核对（两点易误判，记下来）
+- `app-service.js` 在源改动后 **3~5s** 内重编，含 `windowHeight * 0.9 + "px"` ✓
+- `style.bytes` 的 mtime **不变属正常**：无效声明本来就没进产物，删掉后输出字节与旧产物一致 → 编译器不重写文件。**不要用「文件没更新」反推「没编译」**，要与源码 diff 一起看。

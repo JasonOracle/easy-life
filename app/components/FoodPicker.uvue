@@ -1,7 +1,7 @@
 
 <template>
   <view class="fp-overlay" :class="{ 'fp-overlay-active': active, 'fp-hidden': !render }" @click="onOverlayTap">
-    <view class="fp-container" :class="{ 'fp-container-active': active, 'fp-container-detail': step === 'detail' }" :style="{ backgroundColor: theme.card }" @click.stop>
+    <view class="fp-container" :class="{ 'fp-container-active': active, 'fp-container-detail': step === 'detail' }" :style="fpContainerStyle" @click.stop>
     <view class="fp-sheet" v-if="step === 'list'" :style="fpSheetStyle">
       <view class="fp-top-row">
         <view class="fp-search-box" :style="searchBoxStyle">
@@ -73,6 +73,7 @@
 // [变更日志] 2026-09-25: 新增 startStep 属性——百科「添加到本餐」经 ct_pending_add 交接后，Home 以 startStep='detail'+selectedId 直接打开该项详情步
 // [变更日志] 2026-09-27: 删除食物列表选中态的左侧绿竖条 .fp-row-accent（老板定稿：以「右侧选择圈✓＋文字加深加粗」为选中态，竖条冗余）
 // [变更日志] 2026-09-27: 详情弹层容器 .fp-container-detail 由写死 1080rpx 改为 height:auto + max-height:90%（贴合内容，长内容交内部 scroll-view）；.fp-detail-wrap 补 min-height:0
+// [变更日志] 2026-09-28: 修上面一条的 App 端编译 ERROR——uvue-css 的 max-height 只接受 number|pixel，`90%` 静默失效；改由 fpContainerStyle 运行时下发 windowHeight*0.9+'px'，类里不再写 max-height
 import { ref, computed, watch } from 'vue'
 import { t, tf } from '../composables/i18n'
 import { resolveLang } from '../composables/useLocale'
@@ -121,6 +122,20 @@ const fpSheetStyle = computed((): Record<string, string> => {
   const sbFp = insetsFp != null ? insetsFp.bottom : 0
   st['padding-bottom'] = (28 * sysFp.windowWidth / 750 + sbFp) + 'px'
   // #endif
+  return st
+})
+
+// [变更日志] 2026-09-28: 详情容器 max-height 改运行时下发——App 端 uvue-css 对 max-height 只接受
+//   number|pixel，类里写 `90%` 会报 ERROR 且**整条静默失效**（2026-09-27 那次「贴合内容」的修复
+//   在真机上从未生效：长内容照样溢出、确认钮照样被顶出屏外）。参照物＝.fp-overlay（fixed 满屏），
+//   故取视口高的 90%。
+const fpContainerStyle = computed((): Record<string, string> => {
+  const st = {} as Record<string, string>
+  st['background-color'] = theme.value.card
+  if (step.value === 'detail') {
+    const sysC = uni.getSystemInfoSync()
+    st['max-height'] = (sysC.windowHeight * 0.9) + 'px'
+  }
   return st
 })
 
@@ -336,10 +351,11 @@ watch(
 /* [变更日志] 2026-09-27: 原 height:1080rpx 是写死的猜测值——真机实测米饭内容已 1108.5rpx
    （默认即溢出 28.5rpx，选大碗 1124.4rpx），奶茶类 1365.4rpx 更把确认钮整个顶出屏外；
    内容顶对齐 → 溢出全落底部 → padding-bottom 与确认钮一起被裁（实测底距 18.7/2.9rpx，CSS 声明 48rpx）。
-   改为贴合内容高度：短内容不留白、长内容由 max-height 兜底交内部 scroll-view 滚动。 */
+   改为贴合内容高度：短内容不留白、长内容由 max-height 兜底交内部 scroll-view 滚动。
+   [变更日志] 2026-09-28: 上面那条的 `max-height:90%` 在 App 端是编译 ERROR 且静默失效
+   （uvue-css 只接受 number|pixel），已移到 :style 运行时下发，见 script 的 fpContainerStyle。 */
 .fp-container-detail {
   height: auto;
-  max-height: 90%;
   display: flex;
   flex-direction: column;
 }
