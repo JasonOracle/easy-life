@@ -1,4 +1,6 @@
 <template>
+  <!-- [变更日志] 2026-09-27(4):「主题切换」三套主题的纯色圆点 → 意象 SVG 图标（薄荷叶／水滴／薰衣草花穗），
+       图标用该主题自己的品牌色 + 浅色圆底；资源 `static/settings/theme_{mint,ocean,lavender}[_dark].svg`。 -->
   <!-- [变更日志] 2026-09-27: 保存按钮三色渐变第三档 accentDeep→accentMid（消除右下角发黑）。 -->
   <!-- [变更日志] 2026-09-26: Settings 中段按设计稿还原几何 —— 卡片左右边距 28→46rpx；
        行高 128→140rpx（.row padding 26→32）；删掉 5 处 .row-div 行分隔线（稿面实测仅 #F6FAF8，
@@ -159,7 +161,9 @@
         <view class="pf-grip" :style="{ backgroundColor: theme.line }"></view>
         <text class="pf-title" :style="{ color: theme.ink1 }">{{ pfKind == 'accent' ? t('st.theme') : t('st.lang') }}</text>
         <view class="pf-opt" v-for="(opt, idx) in pfOptions" :key="idx" :style="{ borderBottomColor: theme.line }" hover-class="pf-opt-pressed" :hover-stay-time="100" @click="pickPref(opt.id)">
-          <view class="pf-swatch" v-if="opt.swatch.length > 0" :style="{ backgroundColor: opt.swatch, borderColor: theme.line }"></view>
+          <view class="pf-swatch" v-if="opt.swatch.length > 0" :style="{ backgroundColor: opt.soft }">
+            <image class="pf-swatch-ic" :src="accentIcon(opt.id)" mode="aspectFit"></image>
+          </view>
           <view class="pf-opt-text">
             <text class="pf-opt-label" :style="{ color: theme.ink1 }">{{ opt.label }}</text>
             <text class="pf-opt-sub" v-if="opt.sub.length > 0" :style="{ color: theme.ink3 }">{{ opt.sub }}</text>
@@ -195,7 +199,8 @@ import { onPageScroll } from '@dcloudio/uni-app'
 import { onShow } from '@dcloudio/uni-app'
 import GoalModal from '../../components/GoalModal.uvue'
 
-type PrefOpt = { id: string; label: string; sub: string; swatch: string }
+/** swatch = 该主题品牌色（图标用色，暗态取该档更亮的一档）；soft = 图标浅色圆底（各档 chip 色） */
+type PrefOpt = { id: string; label: string; sub: string; swatch: string; soft: string }
 
 const goal = useGoalStore()
 const settings = useSettingsStore()
@@ -252,6 +257,13 @@ function asset(path: string): string {
   return themeAsset(accentId.value, isDark.value, '/static/' + path)
 }
 
+/** 主题意象图标：薄荷叶／水滴／薰衣草花穗 → `/static/settings/theme_<key>[_dark].svg`。
+ *  这三枚是「代表各自主题」的固定色图标，**不走 themeAsset**（那不是跟随当前主题的资产）。 */
+function accentIcon(id: string): string {
+  const key = id == 'ocean' ? 'ocean' : (id == 'lavender' ? 'lavender' : 'mint')
+  return '/static/settings/theme_' + key + (isDark.value ? '_dark' : '') + '.svg'
+}
+
 /** 品牌渐变头：浅态走该档 accent 三档渐变，暗态改 card 纯色（同日历页既定处理） */
 const headerStyle = computed((): Record<string, string> => {
   const st = {} as Record<string, string>
@@ -280,15 +292,18 @@ const toggleFill = computed((): string => settings.darkMode ? theme.value.accent
 const dangerChipFill = computed((): string => isDark.value ? '#3A221C' : '#FDE9E4')
 const dangerTextColor = computed((): string => isDark.value ? '#FF8266' : '#E0633C')
 
-const accentOpts = computed<PrefOpt[]>((): PrefOpt[] => [
-  { id: 'mint', label: t('st.mint'), sub: t('st.mintSub'), swatch: '#20C997' },
-  { id: 'ocean', label: t('st.ocean'), sub: t('st.oceanSub'), swatch: '#2F9FE0' },
-  { id: 'lavender', label: t('st.lav'), sub: t('st.lavSub'), swatch: '#8B7BE8' },
-])
+const accentOpts = computed<PrefOpt[]>((): PrefOpt[] => {
+  const dk = isDark.value
+  return [
+    { id: 'mint', label: t('st.mint'), sub: t('st.mintSub'), swatch: dk ? '#52D6AC' : '#20C997', soft: dk ? '#2A4238' : '#E6F9F6' },
+    { id: 'ocean', label: t('st.ocean'), sub: t('st.oceanSub'), swatch: dk ? '#5BC8FF' : '#2F9FE0', soft: dk ? '#1E3A4C' : '#E1F0FA' },
+    { id: 'lavender', label: t('st.lav'), sub: t('st.lavSub'), swatch: dk ? '#A99BFF' : '#8B7BE8', soft: dk ? '#2B2350' : '#EFEAFC' },
+  ]
+})
 const localeOpts = computed<PrefOpt[]>((): PrefOpt[] => [
-  { id: '', label: t('st.sys'), sub: t('st.sysSub'), swatch: '' },
-  { id: 'zh', label: t('st.zh'), sub: t('st.zhSub'), swatch: '' },
-  { id: 'en', label: t('st.en'), sub: t('st.enSub'), swatch: '' },
+  { id: '', label: t('st.sys'), sub: t('st.sysSub'), swatch: '', soft: '' },
+  { id: 'zh', label: t('st.zh'), sub: t('st.zhSub'), swatch: '', soft: '' },
+  { id: 'en', label: t('st.en'), sub: t('st.enSub'), swatch: '', soft: '' },
 ])
 
 const pfOptions = computed((): PrefOpt[] => pfKind.value == 'accent' ? accentOpts.value : localeOpts.value)
@@ -621,14 +636,18 @@ const goBack = () => {
 .pf-opt-pressed {
   background-color: #F3FBF7;
 }
+/* [变更日志] 2026-09-27(4): 实心色圆 → 浅色圆底 + 主题意象图标（顺带去掉写死的 #E3EFE8 描边） */
 .pf-swatch {
   width: 56rpx;
   height: 56rpx;
   border-radius: 28rpx;
-  border-width: 1px;
-  border-style: solid;
-  border-color: #E3EFE8;
   margin-right: 24rpx;
+  justify-content: center;
+  align-items: center;
+}
+.pf-swatch-ic {
+  width: 34rpx;
+  height: 34rpx;
 }
 .pf-opt-text {
   flex: 1;
