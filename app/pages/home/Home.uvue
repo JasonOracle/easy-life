@@ -239,7 +239,8 @@ function asset(path: string): string {
   return themeAsset(accentId.value, isDark.value, '/static/' + path)
 }
 
-const fabGradient = computed((): string => 'linear-gradient(' + theme.value.accent2 + ', ' + theme.value.accent + ')')
+/** FAB＝按钮类渐变 accentSoft→accent（2026-09-27 老板拍板：按钮统一「很浅的绿→品牌绿」，进度条类仍走 accent2） */
+const fabGradient = computed((): string => 'linear-gradient(' + theme.value.accentSoft + ', ' + theme.value.accent + ')')
 const heroGradient = computed((): string => 'linear-gradient(' + theme.value.bg + ' 0%, ' + theme.value.heroBg + ' 100%)')
 // A3 遮罩渐变：nav 底色 → 同色 0 透明（8 位 hex，同 Profile #00000000 先例）
 const navFadeGradient = computed((): string => 'linear-gradient(' + theme.value.bg + ' 0%, ' + theme.value.bg + '00 100%)')

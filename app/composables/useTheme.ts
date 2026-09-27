@@ -20,6 +20,12 @@ export type ThemeTokens = {
   ink3: string
   accent: string
   accent2: string
+  /**
+   * 按钮专用浅端：主按钮/CTA 渐变＝accentSoft→accent（浅端→品牌端，一浅一深）。
+   * [2026-09-27 老板拍板] 所有按钮类统一恢复 v1 稿面「很浅的绿→品牌绿」；
+   * 进度条/滑轨/页头等非按钮渐变仍用 accent2，两枚 token 从此分工。
+   */
+  accentSoft: string
   accentDeep: string
   /**
    * 主题色「中间暗档」：浅态＝同色相压暗 accent（保证约 4:1 文字对比），暗态＝accent 本体。
@@ -45,7 +51,7 @@ const PALETTES: Record<string, ThemeTokens> = {
   'mint-light': {
     bg: '#F6FBF8', card: '#FFFFFF', cardSoft: '#EEFAF6', chip: '#E6F9F6', line: '#D8EFE5',
     ink1: '#0A4F3D', ink2: '#475569', ink3: '#8BA7A0',
-    accent: '#20C997', accent2: '#2BD6A3', accentDeep: '#064E3B', accentMid: '#17916B', onAccent: '#FFFFFF',
+    accent: '#20C997', accent2: '#2BD6A3', accentSoft: '#7DEBC7', accentDeep: '#064E3B', accentMid: '#17916B', onAccent: '#FFFFFF',
     glassBg: '#FFFFFFF2', glassScrim: '#F6FBF8A6', thumbStroke: '#EAF9F3', dashLine: '#0A4F3D1F',
     heroBg: '#E4F2E9', sysIndicator: '#B9C9C3',
     tbTextOn: '#17916B',
@@ -54,7 +60,7 @@ const PALETTES: Record<string, ThemeTokens> = {
   'mint-dark': {
     bg: '#0A1612', card: '#162924', cardSoft: '#1A3B2F', chip: '#2A4238', line: '#24443A',
     ink1: '#FFFFFF', ink2: '#FFFFFFB8', ink3: '#8B9E94',
-    accent: '#52D6AC', accent2: '#6FE3BF', accentDeep: '#A7F0DA', accentMid: '#52D6AC', onAccent: '#0A1612',
+    accent: '#52D6AC', accent2: '#6FE3BF', accentSoft: '#6FE3BF', accentDeep: '#A7F0DA', accentMid: '#52D6AC', onAccent: '#0A1612',
     glassBg: '#FFFFFF14', glassScrim: '#0A1612A6', thumbStroke: '#2A4238', dashLine: '#FFFFFF1F',
     heroBg: '#0E211C', sysIndicator: '#3A4F47',
     tbTextOn: '#52D6AC',
@@ -63,7 +69,7 @@ const PALETTES: Record<string, ThemeTokens> = {
   'ocean-light': {
     bg: '#F5FAFD', card: '#FFFFFF', cardSoft: '#EAF4FB', chip: '#E1F0FA', line: '#D2E7F3',
     ink1: '#0F2A3D', ink2: '#3D5A6E', ink3: '#7E96A6',
-    accent: '#2F9FE0', accent2: '#4FB8F0', accentDeep: '#0B5E8F', accentMid: '#1B7BB3', onAccent: '#FFFFFF',
+    accent: '#2F9FE0', accent2: '#4FB8F0', accentSoft: '#82C5EC', accentDeep: '#0B5E8F', accentMid: '#1B7BB3', onAccent: '#FFFFFF',
     glassBg: '#FFFFFFF2', glassScrim: '#F5FAFDA6', thumbStroke: '#E3F0F9', dashLine: '#0F2A3D1F',
     heroBg: '#E2F0F9', sysIndicator: '#B4C6D1',
     tbTextOn: '#1B7BB3',
@@ -72,7 +78,7 @@ const PALETTES: Record<string, ThemeTokens> = {
   'ocean-dark': {
     bg: '#0A1218', card: '#14232E', cardSoft: '#1A2E3B', chip: '#1E3A4C', line: '#24424F',
     ink1: '#FFFFFF', ink2: '#FFFFFFB8', ink3: '#8FA6B2',
-    accent: '#5BC8FF', accent2: '#7AD6FF', accentDeep: '#A8E4FF', accentMid: '#5BC8FF', onAccent: '#0A1218',
+    accent: '#5BC8FF', accent2: '#7AD6FF', accentSoft: '#7AD6FF', accentDeep: '#A8E4FF', accentMid: '#5BC8FF', onAccent: '#0A1218',
     glassBg: '#FFFFFF14', glassScrim: '#0A1218A6', thumbStroke: '#1E3A4C', dashLine: '#FFFFFF1F',
     heroBg: '#0E1E26', sysIndicator: '#33464F',
     tbTextOn: '#5BC8FF',
@@ -81,7 +87,7 @@ const PALETTES: Record<string, ThemeTokens> = {
   'lavender-light': {
     bg: '#FAF8FE', card: '#FFFFFF', cardSoft: '#F3EFFC', chip: '#EFEAFC', line: '#E3DCF5',
     ink1: '#241D47', ink2: '#4E4675', ink3: '#9A93B8',
-    accent: '#8B7BE8', accent2: '#A48CF0', accentDeep: '#4F3FA8', accentMid: '#5A44DE', onAccent: '#FFFFFF',
+    accent: '#8B7BE8', accent2: '#A48CF0', accentSoft: '#B9B0F1', accentDeep: '#4F3FA8', accentMid: '#5A44DE', onAccent: '#FFFFFF',
     glassBg: '#FFFFFFF2', glassScrim: '#FAF8FEA6', thumbStroke: '#EEEAF9', dashLine: '#241D471F',
     heroBg: '#EDE7F7', sysIndicator: '#C3BCD6',
     tbTextOn: '#5A44DE',
@@ -90,7 +96,7 @@ const PALETTES: Record<string, ThemeTokens> = {
   'lavender-dark': {
     bg: '#100D1A', card: '#1D1830', cardSoft: '#241E3C', chip: '#2B2350', line: '#372D5E',
     ink1: '#FFFFFF', ink2: '#FFFFFFB8', ink3: '#9E96BC',
-    accent: '#A99BFF', accent2: '#BFB2FF', accentDeep: '#D6CCFF', accentMid: '#A99BFF', onAccent: '#100D1A',
+    accent: '#A99BFF', accent2: '#BFB2FF', accentSoft: '#BFB2FF', accentDeep: '#D6CCFF', accentMid: '#A99BFF', onAccent: '#100D1A',
     glassBg: '#FFFFFF14', glassScrim: '#100D1AA6', thumbStroke: '#2B2350', dashLine: '#FFFFFF1F',
     heroBg: '#171126', sysIndicator: '#413A55',
     tbTextOn: '#A99BFF',

@@ -279,12 +279,13 @@ function sweetNameColor(on: boolean): string {
 
 /** 确认钮：浅态走该档 accent2→accent 渐变（与百科页 CTA 同一对 token），暗态改 accent 纯色。
  *  [变更日志] 2026-09-27: 原 accent→accentMid 把按钮底压暗，与 Pencil ConfirmBtn 的
- *  浅端→品牌端（rotation 180，#7DEBC7→#1FBF8F，token 等价 accent2→accent）不一致，Boss 指出「按钮颜色又被篡改」。 */
+ *  浅端→品牌端（rotation 180，#7DEBC7→#1FBF8F）不一致，Boss 指出「按钮颜色又被篡改」。 */
+ *  [变更日志] 2026-09-27(4): 老板拍板「按钮统一恢复很浅的绿→品牌绿」——accent2 同时服务进度条不能动，新增 accentSoft（浅端专用），按钮全部改 accentSoft→accent。 */
 const confirmStyle = computed((): Record<string, string> => {
   const st = {} as Record<string, string>
   st['background-color'] = theme.value.accent
   if (!isDark.value) {
-    st['background-image'] = 'linear-gradient(' + theme.value.accent2 + ', ' + theme.value.accent + ')'
+    st['background-image'] = 'linear-gradient(' + theme.value.accentSoft + ', ' + theme.value.accent + ')'
   }
   return st
 })

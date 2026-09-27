@@ -1047,3 +1047,20 @@ D_goalmodal/D_added 补齐后复核两块推导板：rHdQ5→新壳 `X8wtJp`（�
 - Pencil 文档落盘 ✓（mtime 21:41）；各分片 Export 验收图在 backfill2/verify2、export3、exp1~5、verify_ref/r3
 - 板账：40 块未反哺 → **全部反哺完成**（规格/素材板 18 块本就不需还原；ocean/lavender 无页面板）
 - 遗留：老板待拍板两项不变（accent2 明度代差、GoalModal 三档色解释）；MRV3b SumNum 1950 vs 基准 2125 属数据同步范畴未动
+
+---
+
+## 按钮渐变恢复浅端 + 三档色全局盘点（2026-09-28 00:31 老板两条指令）
+
+### 1. 按钮类统一「很浅的绿→品牌绿」（老板拍板，推翻前夜「维持现状」）
+- 根因：accent2 同时是按钮浅端(4 处)和进度条浅端(8 处)，不能全局改浅——**新增 token `accentSoft`（按钮专用浅端）**：
+  - mint-light `#7DEBC7`（v1 稿面原值）｜mint-dark `#6FE3BF`（=现 accent2，暗态视觉零变化）
+  - ocean-light `#82C5EC` / lavender-light `#B9B0F1`（各自 accent 同比例提亮自拟）；两暗档沿用现 accent2
+- 4 处按钮改 `accentSoft→accent`：Home FAB（Home.uvue:243）、百科 CTA（Detail.uvue:374）、AddFood 确认钮（:288）、GoalModal 保存钮（:222）；进度条/滑轨/页头 8 处保持 accent2 系不动
+- Pencil 同步回写：7 块亮板按钮（6×ConfirmBtn + qnNST SaveBtn）浅端 #2BD6A3→#7DEBC7，Export PIL 验收顶 #74E7C2/底 #28CC9B ✓；滑轨/拨盘/暗板未动
+- **未重编**：app-service.js mtime 仍 20:32，GUI watch 未编（运行会话已断）——改动需老板在 HBuilderX 重跑一次「运行到 Android」才会进模拟器
+
+### 2. 三档色全局规则盘点（老板问「是否全局统一」）
+- **结论：四个进度页早已统一**——同一函数 `getCalorieStatus(已吃,目标)`（stores/goal.ts:48）：≤100% 绿(=该档 accent) / 100~150% 琥珀 #E8B54D / >150% 珊瑚 #FF9E7D。消费方：Home 贴纸、Records 横条、DayDetail 圆环、Profile 圆环+横条、SettleBadge 成功弹窗环，共五处
+- GoalModal 唯一语义例外：比值=目标在滑杆(1200~2400)的位置（≤1800 绿/1800~2100 琥珀/>2100 珊瑚），因设定目标时无「已吃」可除；三色与全局同轴。已向老板解释，维持现状
+- 沉淀规则：新改进度类 UI 必须走 getCalorieStatus，禁止自定阈值（MEMORY.md）

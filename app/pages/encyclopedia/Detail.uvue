@@ -370,7 +370,8 @@ const ctaText = computed((): string => {
   return tf('af.confirm', [mealName.value, heroCalText.value])
 })
 
-const ctaGradient = computed((): string => 'linear-gradient(' + theme.value.accent2 + ', ' + theme.value.accent + ')')
+/** CTA＝按钮类渐变 accentSoft→accent（2026-09-27 老板拍板，同 FAB/AddFood/GoalModal） */
+const ctaGradient = computed((): string => 'linear-gradient(' + theme.value.accentSoft + ', ' + theme.value.accent + ')')
 
 function addToMeal(): void {
   triggerHaptic('medium')
