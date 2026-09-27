@@ -1,4 +1,4 @@
-<!-- [变更日志] 三 Tab 悬浮玻璃胶囊；2026-09-25 标签色／暗态胶囊底改逐元素 :style 下发（App 端无后代选择器，原 MP 暗态规则在 App 上是死代码）；图标换 /static/tab 矢量资产并按 (accent, mode) 取变体 -->
+<!-- [变更日志] 三 Tab 悬浮玻璃胶囊；2026-09-25 标签色／暗态胶囊底改逐元素 :style 下发（App 端无后代选择器，原 MP 暗态规则在 App 上是死代码）；图标换 /static/tab 矢量资产并按 (accent, mode) 取变体；2026-09-28 外层胶囊提白到 80%＋App 端放开真磨砂（backdrop-filter 原被 #ifdef MP-WEIXIN 挡在 App 外，蒸汽模式 5.25+ 本就支持）；选中气泡改主题色淡染（外层提白后 18% 白只差 1.8% 亮度，靠色相区分）；未选中标签/图标 #8A8A8A→#5F6B66 保对比度 -->
 <template>
   <view class="tb-bar" :class="barClass" :style="barStyle">
     <!-- 选中气泡：稿面完全内嵌于胶囊（上下各留 6、左右各留 4），几何由 :style 逐帧下发 -->
@@ -148,8 +148,12 @@ const bubbleStyle = computed((): Record<string, string> => {
   st['height'] = h + 'px'
   // 底色在运行时下发（不写成 .a.b 复合类选择器：App 端只认单类），取值＝DesignTokens §7.2
   const dm = isDark.value
+  // 浅态玻璃档＝主题色淡染（2026-09-28）：外层已提到 80% 白，气泡若仍用 18% 白，
+  // 两者合成亮度只差 4.6/255（≈1.8%），选中态等于消失；故改走「色相」区分——
+  // 淡主题色玻璃块压在实底上，仍是半透明玻璃质感，且随主题换色。
+  // 暗态外层是深绿 72%，气泡 13% 白已足够区分，不动。
   st['background-color'] = glass.value
-    ? (dm ? 'rgba(255, 255, 255, 0.13)' : 'rgba(255, 255, 255, 0.18)')
+    ? (dm ? 'rgba(255, 255, 255, 0.13)' : accentTint(0.18))
     : 'rgba(255, 255, 255, 0.88)'
   // #ifdef MP-WEIXIN
   st['transition-property'] = 'left, width, height'
@@ -183,10 +187,21 @@ function iconSrc(idx: number): string {
   return themeAsset(accentId.value, isDark.value, base)
 }
 
-/** 逐元素下发文字色：App 端无后代选择器，浅档未选＝稿面 #8A8A8A，暗档＝该档 ink3 */
+/** 主题色淡染（选中气泡底，浅态玻璃档专用）：accent hex → rgba(r, g, b, alpha) */
+function accentTint(alpha: number): string {
+  const hex = theme.value.accent.replace('#', '')
+  const r = parseInt(hex.substring(0, 2), 16)
+  const g = parseInt(hex.substring(2, 4), 16)
+  const b = parseInt(hex.substring(4, 6), 16)
+  return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')'
+}
+
+/** 逐元素下发文字色：App 端无后代选择器，浅档未选＝#5F6B66，暗档＝该档 ink3
+ *  2026-09-28：#8A8A8A 压在外层 80% 白上只有 2.6:1（WCAG 要 4.5:1），
+ *  加深到 #5F6B66 后底纹浅时 ≈5.4:1、中灰时 4.4:1；同色的 tab_*.svg 底稿一并改 */
 function labelColor(idx: number): string {
   if (idx == myIdx.value) return theme.value.tbTextOn
-  return isDark.value ? theme.value.ink3 : '#8A8A8A'
+  return isDark.value ? theme.value.ink3 : '#5F6B66'
 }
 
 /** 入场时间线：起点态已在 setup 内就位（press＋anchorIdx），此处只推进 移动→落位→静止 三段 */
@@ -230,9 +245,10 @@ function onTap(idx: number): void {
   border-radius: 56rpx;
   overflow: hidden;
 }
-/* 玻璃档（backdropBlur=true）：底 #FFFFFF 60% ＋ 顶部折光 ＋ 白 80% 描边 ＋ 向上柔影 */
+/* 玻璃档（backdropBlur=true）：底 #FFFFFF 80% ＋ 顶部折光 ＋ 白描边 ＋ 向上柔影。
+   2026-09-28 老板定：外层提到 80% 白保未选中项可读，磨砂靠下面的 backdrop-filter 承担 */
 .tb-glass {
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.8);
   background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 45%);
   border-top-width: 1px;
   border-right-width: 1px;
@@ -245,12 +261,12 @@ function onTap(idx: number): void {
   border-style: solid;
   box-shadow: 0 -8rpx 48rpx rgba(10, 79, 61, 0.14);
 }
-/* #ifdef MP-WEIXIN */
+/* 真磨砂：Web 4.0+ / App 蒸汽模式(Vapor) 5.25+ / 微信小程序 支持（VDOM 端静默无效）。
+   2026-09-28 前这组被 #ifdef MP-WEIXIN 挡在 App 外，真机上只有半透白、没有磨砂 */
 .tb-glass {
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   backdrop-filter: blur(24px) saturate(180%);
 }
-/* #endif */
 /* 降级档（low 机／无模糊能力）：稿面「胶囊改不透明 #F8FCFA」，折光与投影保留 */
 .tb-flat {
   background-color: #F8FCFA;
@@ -297,7 +313,7 @@ function onTap(idx: number): void {
 .tb-label {
   font-size: 24rpx;
   font-weight: bold;
-  color: #8A8A8A;
+  color: #5F6B66;
   margin-left: 12rpx;
 }
 
@@ -307,11 +323,11 @@ function onTap(idx: number): void {
   z-index: 1;
   border-radius: 44rpx;
 }
-/* #ifdef MP-WEIXIN */
 .tb-bub-glass {
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
 }
+/* #ifdef MP-WEIXIN */
 /* 图标／文字高亮比气泡晚 40ms */
 .tb-label {
   transition-property: color;
@@ -328,10 +344,10 @@ function onTap(idx: number): void {
   border-bottom-width: 1px;
   border-left-width: 1px;
   border-style: solid;
-  border-top-color: rgba(255, 255, 255, 0.6);
-  border-right-color: rgba(255, 255, 255, 0.6);
-  border-bottom-color: rgba(255, 255, 255, 0.6);
-  border-left-color: rgba(255, 255, 255, 0.6);
+  border-top-color: rgba(255, 255, 255, 0.85);
+  border-right-color: rgba(255, 255, 255, 0.85);
+  border-bottom-color: rgba(255, 255, 255, 0.85);
+  border-left-color: rgba(255, 255, 255, 0.85);
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08), 0 12rpx 36rpx rgba(10, 79, 61, 0.14);
 }
 /* #ifdef MP-WEIXIN */

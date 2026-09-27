@@ -7,8 +7,13 @@
 
 - 色相旋转：锚点取主绿 #58B984 的 hue，旋到各 accent 主色 hue，全库共用同一个 delta，
   保证不同图之间的相对明度/饱和关系不被打散。
-- 中性色平移：灰底稿（如未选中 Tab 图标 #8A8A8A）不参与色相旋转（S=0 转了没变化），
+- 中性色平移：灰底稿（如未选中 Tab 图标 #5F6B66）不参与色相旋转（S=0 转了没变化），
   但暗态需要把它抬到暗色板的 ink3，否则在 #162924 上对比不足，故走 NEUTRAL_REMAP。
+
+## 手工资产（白名单排除）
+
+设置页主题选择器的三枚图标是**手画**的（各自代表一个主题，不随当前主题变色），
+文件名带 _mint/_ocean/_lavender 会撞上变体后缀规则，故走 MANUAL_ASSETS 白名单跳过。
 
 ## 逐文件的入选判定
 
@@ -63,8 +68,10 @@ ACCENT_DEEP_ANCHOR = {
 }
 
 # 暗态下中性灰稿的落点（取 useTheme mint-dark / ocean-dark / lavender-dark 的 ink3）
+# 亮态灰值 2026-09-28 由 #8A8A8A 加深到 #5F6B66：TabBar 外层提到 80% 白后，
+# 原灰压在上面只有 2.6:1（WCAG 要 4.5:1），深一档到 #5F6B66 后 ≈5.4:1。
 NEUTRAL_REMAP = {
-    '#8A8A8A': {
+    '#5F6B66': {
         'dark': '#8B9E94',
         'ocean_dark': '#8FA6B2',
         'lavender_dark': '#9E96BC',
@@ -196,6 +203,21 @@ def swap_neutral(text, gray, target):
                   if m.group(0).isupper() else target, text, flags=re.IGNORECASE)
 
 
+# 手工资产：设置页主题选择器那三枚图标（各自代表一个主题、不随当前主题变色）及其暗态。
+# 文件名天然带 _mint/_ocean/_lavender，会撞上变体后缀规则。
+# [2026-09-28 实测踩坑] 无此闸门时：clean_managed 会把 theme_lavender_dark.svg /
+# theme_ocean_dark.svg 判成「亮态底稿的暗档变体」删掉，主循环又会把 theme_mint.svg
+# 当底稿生成五档垃圾并覆盖手画的 theme_mint_dark.svg。
+MANUAL_ASSETS = (
+    'settings/theme_mint.svg', 'settings/theme_ocean.svg', 'settings/theme_lavender.svg',
+    'settings/theme_mint_dark.svg', 'settings/theme_ocean_dark.svg', 'settings/theme_lavender_dark.svg',
+)
+
+
+def is_manual_asset(rel):
+    return rel in MANUAL_ASSETS
+
+
 def clean_managed():
     """删掉上一轮产出的变体再重生成：本轮判定为「无变化」的档位若不清，
     旧档位留下的错色文件会继续留在盘上被页面引用。
@@ -203,6 +225,8 @@ def clean_managed():
     （_dark 是语义名而非变体档）底稿不存在，天然不会被误删。"""
     removed = 0
     for path in sorted(STATIC.rglob('*.svg')):
+        if is_manual_asset(str(path.relative_to(STATIC)).replace('\\', '/')):
+            continue
         stem = path.stem
         hit = next((s for s in MANAGED_SUFFIXES if stem.endswith(s)), None)
         if hit is None:
@@ -262,11 +286,14 @@ def main():
     dark_surface_l = {t: (hls_of(SURFACE_ANCHOR[t]['lo'])[1],
                           hls_of(SURFACE_ANCHOR[t]['hi'])[1]) for t in ACCENT_ANCHOR}
 
-    included, skipped_foreign, skipped_idle = [], [], []
+    included, skipped_foreign, skipped_idle, skipped_manual = [], [], [], []
 
     for path in sorted(STATIC.rglob('*.svg')):
         stem = path.stem
         if any(stem.endswith(s) for s in VARIANT_SUFFIXES):
+            continue
+        if is_manual_asset(str(path.relative_to(STATIC)).replace('\\', '/')):
+            skipped_manual.append(str(path.relative_to(STATIC)).replace('\\', '/'))
             continue
         text = path.read_text(encoding='utf-8')
         mint, foreign = audit(text)
@@ -328,6 +355,9 @@ def main():
     for f in skipped_foreign:
         print('   ', f)
     print('无彩可旋跳过 %d 张' % len(skipped_idle))
+    print('手工资产跳过（不生成变体）%d 张:' % len(skipped_manual))
+    for f in skipped_manual:
+        print('   ', f)
     print('manifest →', OUT)
 
 
