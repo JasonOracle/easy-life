@@ -1,6 +1,6 @@
 <!-- [变更日志] 百科详情页 SFC：详情+搜索双态、全 token 三主题/暗色、中英双语、餐次 CTA 交接 -->
-<!-- [变更日志] 2026-09-27: 四营养素进度条「碳水」由 accentDeep 改 accentMid ——
-     原值与正文标题同为近黑墨绿，与蛋白质的亮绿不属同一色系。 -->
+<!-- [变更日志] 2026-09-27(2): 四营养素进度条整行删除、热量列百分比固定为「—」——
+     老板拍板按稿面口径（Pencil EkFtL 无 bar 节点、Pc热量="—"）。 -->
 <template>
   <view class="ec-page" :style="{ backgroundColor: theme.bg }">
     <!-- 顶栏：返回 / 标题 / 搜索 -->
@@ -55,9 +55,6 @@
             </view>
             <text class="ec-nut-label" :style="{ color: theme.ink2 }">{{ col.label }}</text>
             <text class="ec-nut-value" :style="{ color: theme.ink1 }">{{ col.value }}</text>
-            <view class="ec-nut-track" :style="{ backgroundColor: theme.line }">
-              <view class="ec-nut-fill" :style="{ width: col.pctWidth, backgroundColor: col.tint }"></view>
-            </view>
             <text class="ec-nut-pct" :style="{ color: theme.ink3 }">{{ col.pctText }}</text>
           </view>
         </view>
@@ -169,7 +166,7 @@
 //       相关食物卡去掉「当前食物」绿框：稿面 Rel_* 四节点无 stroke。
 import { ref, computed } from 'vue'
 import { onLoad, onShow } from '@dcloudio/uni-app'
-import { useTheme, FIXED_COLORS, syncStatusBarStyle, themeAsset } from '../../composables/useTheme'
+import { useTheme, syncStatusBarStyle, themeAsset } from '../../composables/useTheme'
 import { resolveLang } from '../../composables/useLocale'
 import { t, tf } from '../../composables/i18n'
 import { currentMealKey } from '../../composables/mealWindow'
@@ -287,7 +284,7 @@ const chipList = computed((): string[] => {
 })
 
 // ===== 营养四列 =====
-type NutCol = { icon: string; label: string; value: string; pctWidth: string; pctText: string; tint: string }
+type NutCol = { icon: string; label: string; value: string; pctText: string }
 
 const nutCols = computed((): NutCol[] => {
   const out: NutCol[] = []
@@ -301,16 +298,15 @@ const nutCols = computed((): NutCol[] => {
   const fE = fat * 9
   const tot = pE + cE + fE
   const pct = (e: number): number => tot > 0 ? Math.round(e * 100 / tot) : 0
-  const mk = (icon: string, labelKey: string, value: string, share: number, tint: string): NutCol => ({
+  // 稿面口径（Pencil EkFtL）：无进度条；热量列无占比概念，百分比固定写「—」。
+  const mk = (icon: string, labelKey: string, value: string, share: number, isCal = false): NutCol => ({
     icon: icon, label: t(labelKey), value: value,
-    pctWidth: (share < 3 ? 3 : share) + '%',
-    pctText: tot > 0 ? '(' + share + '%)' : '—',
-    tint: tint,
+    pctText: (!isCal && tot > 0) ? '(' + share + '%)' : '—',
   })
-  out.push(mk('/static/encyclopedia/ic_protein.svg', 'dd.protein', p + 'g', pct(pE), theme.value.accent))
-  out.push(mk('/static/encyclopedia/ic_fat.svg', 'dd.fat', fat + 'g', pct(fE), FIXED_COLORS.infoCarb))
-  out.push(mk('/static/encyclopedia/ic_carb.svg', 'dd.carb', c + 'g', pct(cE), theme.value.accentMid))
-  out.push(mk('/static/encyclopedia/ic_kcal.svg', 'ec.calorie', Math.round(f.kcal) + ' kcal', 100, FIXED_COLORS.infoCalorie))
+  out.push(mk('/static/encyclopedia/ic_protein.svg', 'dd.protein', p + 'g', pct(pE)))
+  out.push(mk('/static/encyclopedia/ic_fat.svg', 'dd.fat', fat + 'g', pct(fE)))
+  out.push(mk('/static/encyclopedia/ic_carb.svg', 'dd.carb', c + 'g', pct(cE)))
+  out.push(mk('/static/encyclopedia/ic_kcal.svg', 'ec.calorie', Math.round(f.kcal) + ' kcal', 100, true))
   return out
 })
 
@@ -662,17 +658,6 @@ onLoad((options: OnLoadOptions) => {
   font-size: 28rpx;
   font-weight: bold;
   margin-top: 6rpx;
-}
-.ec-nut-track {
-  width: 104rpx;
-  height: 8rpx;
-  border-radius: 4rpx;
-  margin-top: 12rpx;
-  overflow: hidden;
-}
-.ec-nut-fill {
-  height: 8rpx;
-  border-radius: 4rpx;
 }
 .ec-nut-pct {
   font-size: 21rpx;
