@@ -159,6 +159,32 @@ export function syncStatusBarStyle(dark: boolean): void {
   })
 }
 
+/**
+ * 主题色按 alpha 叠到底色上，返回 rgba() 字符串。
+ * 用于「要品牌调、但要比 line 更实」的细线（如首页餐次时间轴 rail）：
+ * 设计稿 rail 是 #BFE8D5（mint 亮态），≈ accent #20C997 以 0.37 alpha 叠白底；
+ * uvue 的 :style 拿不到 token 通道 alpha，故在这里做 hex→rgba。
+ */
+export function alphaOf(hex: string, a: number): string {
+  let h = hex
+  if (h.length == 4) h = '#' + h.charAt(1) + h.charAt(1) + h.charAt(2) + h.charAt(2) + h.charAt(3) + h.charAt(3)
+  if (h.length < 7) return hex
+  // 手写两位十六进制解析：不依赖 parseInt 的 radix 参数（UTS 该签名未在本仓验证过）
+  const r = hex2(h, 1)
+  const g = hex2(h, 3)
+  const b = hex2(h, 5)
+  return 'rgba(' + r.toString() + ', ' + g.toString() + ', ' + b.toString() + ', ' + a.toString() + ')'
+}
+
+const HEX_DIGITS = '0123456789abcdef'
+
+/** 取 hex 串第 i、i+1 位组成的字节值 */
+function hex2(h: string, i: number): number {
+  const hi = HEX_DIGITS.indexOf(h.charAt(i).toLowerCase())
+  const lo = HEX_DIGITS.indexOf(h.charAt(i + 1).toLowerCase())
+  return (hi < 0 ? 0 : hi) * 16 + (lo < 0 ? 0 : lo)
+}
+
 export function useTheme() {
   const settings = useSettingsStore()
   const isDark = computed<boolean>(() => settings.darkMode)

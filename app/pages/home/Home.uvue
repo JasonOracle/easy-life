@@ -3,6 +3,7 @@
   <view class="page" :style="{ backgroundColor: theme.bg }">
     <!-- [变更日志] 2026-09-24: Hero 水瓶液体由 CSS 水波图重构为 BottleLiquid Canvas 2D 物理引擎渲染；瓶身/刻度/叶片独立分层，废弃 liquid_wave 水体渐变头图。同日重排第一批：补定义 status-text-coral/amber/green 死类（超标报警色此前静默失效）、顶部带压缩（spacer 220→190 / hero 470→440）、贴纸由右上悬空改入右列流内（并清除整画布 alpha≈10 白雾层）、删悬空小 leaf 改状态色竖条、宏量/餐次字号降档拉开层级阶梯。第二批 S4：.hero-text right 20→28rpx，贴纸/pill 右缘与全页卡片 margin-right 28 统一对齐轴。S7：独立宏量卡并入 hero 底缘玻璃横条（hm-macro-strip，左右 28 同轴），hero 440→552、hero-text bottom 24→136，页面白卡 3→2。第三批：FAB 与左列垂直居中（top 35rpx）、hero 渐变翻转为上白下绿（重心下沉）、贴纸矢量感高清重绘（246px→840px 白椭圆+薄荷描边+行楷双行）并从右列流内迁挂瓶卡左上空白带、左组收拢（bg 卡 352→324 / 瓶左移 12 / 右叶左移 24）使叶-字间隙 2rpx→26rpx 且 goal-pill 退出卡片边线。2026-09-25：餐次行食物图接入百科页入口（openEncyclopedia 携 foodId 跳 pages/encyclopedia/Detail）；食物图 hover 反馈由 <image> 迁到包裹 view（hover-stay-time 不支持 image，编译期 warn）；onShow 消费 ct_pending_add 一次性交接，百科「添加到本餐」回首页直接打开 FoodPicker 详情步预填该食物 -->
     <!-- [变更日志] 2026-09-26: 内胆层改由 BottleLiquid 按瓶身内腔轮廓 clip() 绘制——玻璃底从 .bottle-cavity 的 backgroundColor 移入裁剪区（新增 glass-fill 传参），容器去掉 4 个 border-radius 与 overflow:hidden、高 236→242rpx，消除瓶肩两侧楔形侧漏（方案 C） -->
+    <!-- [变更日志] 2026-09-27(2)：① 瓶卡底图 bg 不再随卡路里状态换色（原超标时整块底图跟着变黄，Boss 要求底图恒随主题＝与右侧文案区同底）；② 餐次时间轴 rail 恢复可见（theme.line 压页底对比 1.13:1 ≈ 隐形）、宽度对齐设计 2pt；③ 餐卡删 box-shadow（Pencil 三张餐卡均无阴影，App 端渲染成卡左下灰斑） -->
     <!-- 标题与操作栏（顶栏常驻+日期整合，对齐设计图规范，保证日期完全外露） -->
     <view class="hm-nav" :style="{ paddingTop: sbH + 'px', backgroundColor: theme.bg }">
       <view class="hm-nav-inner">
@@ -119,7 +120,7 @@
         <view class="meal-circle" :style="{ backgroundColor: theme.accent }">
           <image class="meal-circle-icon" :src="meal.icon" mode="aspectFit"></image>
         </view>
-        <view class="rail-line" v-if="mealIdx < meals.length - 1" :style="{ backgroundColor: theme.line }"></view>
+        <view class="rail-line" v-if="mealIdx < meals.length - 1" :style="{ backgroundColor: railFill }"></view>
       </view>
       <view class="meal-main">
         <view class="meal-head">
@@ -215,7 +216,7 @@ import GoalModal from '../../components/GoalModal.uvue'
 import { useFoodStore } from '../../stores/food'
 import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import { t, tf } from '../../composables/i18n'
-import { useTheme, themeAsset, FIXED_COLORS, syncStatusBarStyle } from '../../composables/useTheme'
+import { useTheme, themeAsset, FIXED_COLORS, syncStatusBarStyle, alphaOf } from '../../composables/useTheme'
 import { getFoodById, computeEntry } from '../../stores/food'
 import { playSound, triggerHaptic } from '../../stores/settings'
 import { foodIdFromImg } from '../../stores/encyclopedia'
@@ -285,7 +286,11 @@ const bottleSrc = computed<string>(() => {
   if (t === 'amber') return 'amber'
   return ''
 })
+/** 时间轴 rail 色：设计值 #BFE8D5 ≈ accent 0.37 alpha，随主题走（theme.line 太淡，真机上等于看不见） */
+const railFill = computed<string>((): string => alphaOf(theme.value.accent, 0.37))
 function bottleAsset(base: string): string {
+  // 底图恒随主题：它是右侧文案区的底，不该被卡路里状态染色（bg.svg 之外的三件套＝瓶身/双叶/刻度才跟状态）
+  if (base == 'bg') return asset('home/bg.svg')
   const suffix = bottleSrc.value
   if (suffix.length > 0) return '/static/home/' + base + '_' + suffix + '.svg'
   return asset('home/' + base + '.svg')
@@ -902,7 +907,8 @@ const meals = computed<Meal[]>(() =>
 }
 .rail-line {
   flex: 1;
-  width: 2px;
+  /* [变更日志] 2026-09-27: 2px→4rpx（对齐 Pencil Timeline 2pt 宽） */
+  width: 4rpx;
   margin-top: 12rpx;
   margin-bottom: -36rpx;
 }
@@ -935,7 +941,7 @@ const meals = computed<Meal[]>(() =>
   padding-right: 24rpx;
   padding-top: 4rpx;
   padding-bottom: 4rpx;
-  box-shadow: 0 8rpx 22rpx rgba(26, 102, 77, 0.06);
+  /* [变更日志] 2026-09-27: 删 box-shadow——Pencil 早餐卡/午餐卡/晚餐卡 均无阴影，App 端该阴影渲染成卡片左下角一块灰斑（Boss 截图取证） */
 }
 .meal-empty {
   height: 84rpx;

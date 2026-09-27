@@ -715,8 +715,9 @@ const records = computed<Rec[]>(() => {
   margin-top: 4rpx;
 }
 .banner-chev {
-  width: 50rpx;
-  height: 50rpx;
+  /* [变更日志] 2026-09-27: 50→26rpx，对齐 Pencil Vtp9C 的 BannerChev 13pt 方框（原实现偏大且描边显粗） */
+  width: 26rpx;
+  height: 26rpx;
 }
 .card {
   border-radius: 32rpx;
