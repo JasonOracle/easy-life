@@ -1,12 +1,12 @@
-<!-- [变更日志] 三 Tab 悬浮玻璃胶囊；2026-09-25 标签色／暗态胶囊底改逐元素 :style 下发（App 端无后代选择器，原 MP 暗态规则在 App 上是死代码）；图标换 /static/tab 矢量资产并按 (accent, mode) 取变体；2026-09-28 外层胶囊提白到 80%＋App 端放开真磨砂（backdrop-filter 原被 #ifdef MP-WEIXIN 挡在 App 外，蒸汽模式 5.25+ 本就支持）；选中气泡改主题色淡染（外层提白后 18% 白只差 1.8% 亮度，靠色相区分）；未选中标签/图标 #8A8A8A→#5F6B66 保对比度；2026-09-28 v2 老板拍板改「参考实现的两层结构」——胶囊 80%→52% 白(真透)＋新增全宽托底渐隐条承担可读性，选中气泡删描边/投影/自身blur只留 accent 12% 淡染，胶囊加 inset 内高光、模糊降为单层 blur20/150% -->
+<!-- [变更日志] 三 Tab 悬浮玻璃胶囊；2026-09-25 标签色／暗态胶囊底改逐元素 :style 下发（App 端无后代选择器，原 MP 暗态规则在 App 上是死代码）；图标换 /static/tab 矢量资产并按 (accent, mode) 取变体；2026-09-28 外层胶囊提白到 80%＋App 端放开真磨砂（backdrop-filter 原被 #ifdef MP-WEIXIN 挡在 App 外，蒸汽模式 5.25+ 本就支持）；选中气泡改主题色淡染（外层提白后 18% 白只差 1.8% 亮度，靠色相区分）；未选中标签/图标 #8A8A8A→#5F6B66 保对比度；2026-09-28 v2 老板拍板改「参考实现的两层结构」——胶囊 80%→52% 白(真透)＋新增全宽托底渐隐条承担可读性，选中气泡删描边/投影/自身blur只留 accent 12% 淡染，胶囊加 inset 内高光、模糊降为单层；2026-09-28(3) 修编译报错——App 端 backdrop-filter 只接受 `none`|`blur()`，原 blur20/saturate150% 触发 ERROR 且整条失效，App 侧改裸 blur(20px)、饱和增强版隔离进 MP-WEIXIN，-webkit- 前缀同移出 App；2026-09-28(4) 撤掉「全宽托底渐隐条」——实测它有真实高度时会吃掉屏幕底部整条的页面点击（带内 0 命中 / 带外对照 2 命中），而 App 端 pointer-events:none 连子级一起屏蔽、无法只让背景穿透，故组件根节点回归胶囊本体 -->
 <template>
-  <view class="tb-host">
-    <!-- 托底条（2026-09-28 新增，参考实现的两层结构）：全宽贴底、纯 alpha 渐变＝当前主题页面底色，
-         让滚到底部的内容渐隐，为未选中项提供稳定可读底色；触摸穿透（pointer-events:none）。
-         刻意不加 backdrop-filter：页面底本就近白，加它就是第三条 GPU 模糊通道，观感几乎无差。 -->
-    <view class="tb-scrim" :style="scrimStyle"></view>
-    <view class="tb-bar" :class="barClass" :style="barStyle">
-      <!-- 选中气泡：稿面完全内嵌于胶囊（上下各留 6、左右各留 4），几何由 :style 逐帧下发 -->
+  <!-- 根节点＝胶囊本体（几何由 :style 逐帧下发）。
+       ⚠️ 不要在外面再包一层容器：①零高度（height:0）的 fixed 父级会把后代整棵裁掉
+       （Android ViewGroup 默认 clipChildren，实测 fixed 子节点也一起消失）；
+       ②有真实高度的全宽父级会挡住屏幕底部整条的页面点击（实测：带内点击 0 命中、带外对照 2 命中），
+       而 App 端 pointer-events:none 会连子级一起屏蔽、无法只让背景穿透。 -->
+  <view class="tb-bar" :class="barClass" :style="barStyle">
+    <!-- 选中气泡：稿面完全内嵌于胶囊（上下各留 6、左右各留 4），几何由 :style 逐帧下发 -->
       <view class="tb-bubble" :class="bubbleClass" :style="bubbleStyle"></view>
       <view class="tb-item" @click="onTap(0)">
         <image class="tb-ic tb-ic-home" :src="iconSrc(0)" mode="aspectFit"></image>
@@ -20,7 +20,6 @@
         <image class="tb-ic tb-ic-me" :src="iconSrc(2)" mode="aspectFit"></image>
         <text class="tb-label" :style="{ color: labelColor(2) }">{{ tabLabels.me }}</text>
       </view>
-    </view>
   </view>
 </template>
 
@@ -134,21 +133,6 @@ const barStyle = computed((): Record<string, string> => {
   return st
 })
 
-/** 托底条（2026-09-28 老板拍板）：高度＝胶囊底边距＋胶囊高＋余量，顶部全透 → 底部近实。
- *  底色取当前主题页面底 bg，两端同色叠加后视觉无痕，只把「滚到底的内容」渐隐掉，
- *  从而让 52% 白的胶囊仍能保持真透，同时未选中的标签/图标始终有稳定可读底色。 */
-const scrimStyle = computed((): Record<string, string> => {
-  const st = {} as Record<string, string>
-  st['height'] = (barBottomPx + BAR_H + 40 * scaleRatio) + 'px'
-  const hex = theme.value.bg.replace('#', '')
-  const r = parseInt(hex.substring(0, 2), 16)
-  const g = parseInt(hex.substring(2, 4), 16)
-  const b = parseInt(hex.substring(4, 6), 16)
-  const base = r + ', ' + g + ', ' + b
-  st['background-image'] = 'linear-gradient(to bottom, rgba(' + base + ', 0) 0%, rgba(' + base + ', 0.55) 45%, rgba(' + base + ', 0.88) 100%)'
-  return st
-})
-
 const bubbleStyle = computed((): Record<string, string> => {
   const st = {} as Record<string, string>
   let w = baseW
@@ -256,34 +240,17 @@ function onTap(idx: number): void {
 </script>
 
 <style>
-/* ── 宿主：零高度定位锚（自身不产生命中区），承托 托底条 ＋ 胶囊 ── */
-.tb-host {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 0px;
-  z-index: 30;
-}
-/* 托底条：全宽贴底，底色＝当前主题页面底，底部近实、往上渐透明。
-   pointer-events 只设在这个叶子节点上——App 端父级设 none 会连子级一起屏蔽，故不能设在 .tb-host */
-.tb-scrim {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-}
-/* ── 胶囊：悬浮、四周留空气，靠朝上柔影与背景模糊撑起体积 ── */
+/* ── 胶囊：悬浮、四周留空气，靠朝上柔影与背景模糊撑起体积。
+   自 2026-09-28 起它同时是组件根节点（不再套外层容器，原因见模板注释） ── */
 .tb-bar {
-  position: absolute;
-  z-index: 10;
+  position: fixed;
+  z-index: 30;
   flex-direction: row;
   border-radius: 56rpx;
   overflow: hidden;
 }
 /* 玻璃档（backdropBlur=true）：底 #FFFFFF 52%（真透）＋ 顶部折光 ＋ 白描边 ＋ 左上 inset 内高光 ＋ 向上柔影。
-   2026-09-28 v2 老板拍板：80% 白会让整条像实白板，降回 52%；可读性交给 .tb-scrim 托底渐隐条 */
+   2026-09-28 v2 老板拍板：80% 白会让整条像实白板，降回 52%；可读性交给 .tb-host 托底渐隐条 */
 .tb-glass {
   background-color: rgba(255, 255, 255, 0.52);
   background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 45%);
@@ -300,12 +267,20 @@ function onTap(idx: number): void {
   box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.9), 0 -8rpx 48rpx rgba(10, 79, 61, 0.14);
 }
 /* 真磨砂：Web 4.0+ / App 蒸汽模式(Vapor) 5.25+ / 微信小程序 支持（VDOM 端静默无效）。
-   2026-09-28 前这组被 #ifdef MP-WEIXIN 挡在 App 外，真机上只有半透白、没有磨砂；
-   v2 收敛为单层一条通道：半径 24→20、饱和 180%→150% */
+   2026-09-28 前这组被 #ifdef MP-WEIXIN 挡在 App 外，真机上只有半透白、没有磨砂。
+   ⚠️ App 端 uvue-css 编译器对 backdrop-filter 只接受 `none` | `blur()`：
+      写 saturate() → ERROR「not supported for backdrop-filter」且整条声明失效；
+      写 -webkit- 前缀 → WARNING「not a standard property name」。
+   故 App 侧只留裸 blur(20px)；带饱和增强的版本隔离到 MP-WEIXIN（真 WebView，两条都认）。 */
+.tb-glass {
+  backdrop-filter: blur(20px);
+}
+/* #ifdef MP-WEIXIN */
 .tb-glass {
   -webkit-backdrop-filter: blur(20px) saturate(150%);
   backdrop-filter: blur(20px) saturate(150%);
 }
+/* #endif */
 /* 降级档（low 机／无模糊能力）：稿面「胶囊改不透明 #F8FCFA」，折光与投影保留 */
 .tb-flat {
   background-color: #F8FCFA;
