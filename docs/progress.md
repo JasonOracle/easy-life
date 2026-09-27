@@ -1014,3 +1014,36 @@ hook 的 `food-data-integrity` 提示「图标 347 ≠ 食物 353」，顺线索
 | 提交 | `b557acd` |
 
 **未做**：主列表行 `.pf-dot`（24rpx 色点）未动 —— 老板截图只指弹层，且该尺寸放图标会看不清，待确认是否一并换。
+
+---
+
+## 反哺二期：47 板全量按真机还原设计稿（2026-09-27 晚，团队模式）
+
+**任务**：老板指令「全部按照真机的现状还原到设计稿里面，不要替我做决定」。git 已确认干净（`ae2ffe3`，v1.0 真机测完近封版）。
+
+### 基准采集（backfill2/，20 张全齐 + baseline.md）
+- 亮态 11 张（6 弹层+食物列表+添加成功+目标弹窗+百科详情/搜索）15:12-15:24 采集
+- 暗态 9 张：D_home/records/daydetail/profile/settings/foodpick/pop_milktea 当日已采；本轮补 **D_goalmodal**（点首页目标行）、**D_added**（FAB→米饭→添加到夜宵，弹窗自动消失，两轮才抓到：先 1.5s 太慢，第二轮点击后立即 screencap 成功）
+- 采集中间踩坑见下「FAB 假死」
+
+### 五路并行反哺（板 id 互斥分片）
+| 分片 | 板 | 要点 |
+|---|---|---|
+| 暗主页面×4 | DElIX/c3KNy/MRV3b/PLo0t | DElIX 高 989→1110 补主题/语言两行；c3KNy 删水波；MRV3b 删 TodayPill+改 2026年9月；PLo0t 删超标胶囊 |
+| Home暗×3 | OE9tz/ZwE7m/eFD0c | OE9tz 整板亮→暗（底 #0A1612，图标换 dk_* 暗版）；三板共同追平 Macro Card 344×99→347×48、Hero Wave 234→297、日期 9月27日·周日、食物数据对齐 SEED_PLAN；TabBar 各留原风格 |
+| 亮弹层×9 | NUEJF/nURQn/B51pW/v9Ruwg/u1vpbN/AtxDr/n3dgv/Dz3YV/qnNST | n3dgv 0 图→5 行真图（food_p001~p005 拷入文档 images/）；qnNST 保存钮 v1 渐变回写 accent2→accent（#2BD6A3→#20C997）；Dz3YV 圆环琥珀 #E8B54D；各弹层数值/份量/餐次选中态对齐真机 |
+| 暗弹层×5 | k9NPCw/T6QD4F/F2SECy/MPI5w/rHdQ5 | MPI5w/rHdQ5 原是 ref→Insert 空壳+Replace 灌独立版面；F2SECy Ph_* 占位换 16 处真图；确认钮暗档渐变 #6FE3BF→#52D6AC |
+| 百科×2 | Nnctn/POU8h | Nnctn HeroCard/ReviewCard/相关卡按 PIL 基线重排（EkFtL 全程未碰）；POU8h 旧玻璃拟态→真搜索态（52 叶子清理+重建搜索行/结果行/🔥chips） |
+
+### 暗弹层二轮复核（真基准到位后）
+D_goalmodal/D_added 补齐后复核两块推导板：rHdQ5→新壳 `X8wtJp`（关闭钮无底托薄荷 ✕、拇指薄荷环、chips 描边等 9 项修正）、MPI5w→新壳 `p09pr0`（环心 429、预算行琥珀 #D69E84、弧 #E8B54D 等 5 项）。**Replace 换壳后旧 id 失效，复核必须重新 Get**。
+
+### 采集踩坑（环境，非代码 bug）
+1. **FAB/TabBar 触控假死**：App 长时间运行后 FAB 点不动（tap/swipe 均无效、uiautomator 无节点属正常）；`am force-stop` 重启后 FAB 恢复。**TabBar 在本轮三次重启后始终无法触达**（弹层类正常、目标行正常），「恢复深色关+回首页」未完成，留待人工。此前「swipe 110ms 可点 TabBar」经验本轮失效，待复证。
+2. 添加成功弹窗停留 <1.5s，抓拍必须在点击同一命令内立即 screencap。
+3. 采集污染演示数据：夜宵被加两条米饭（今日 2914/1800），无法在 App 内删除，未处理。
+
+### 状态
+- Pencil 文档落盘 ✓（mtime 21:41）；各分片 Export 验收图在 backfill2/verify2、export3、exp1~5、verify_ref/r3
+- 板账：40 块未反哺 → **全部反哺完成**（规格/素材板 18 块本就不需还原；ocean/lavender 无页面板）
+- 遗留：老板待拍板两项不变（accent2 明度代差、GoalModal 三档色解释）；MRV3b SumNum 1950 vs 基准 2125 属数据同步范畴未动
