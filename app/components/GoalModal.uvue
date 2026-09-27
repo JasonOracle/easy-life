@@ -2,6 +2,7 @@
 <template>
   <view class="gm-overlay" :class="{ 'gm-overlay-active': active }" v-if="render" @click="onOverlayTap">
     <!-- [变更日志] 2026-09-27: 保存钮渐变深端 accentDeep→accentMid（消除右下角发黑） -->
+    <!-- [变更日志] 2026-09-27(3): 保存钮渐变 accent→accentMid 改为 accent2→accent——对齐 Pencil SaveBtn（180° #7DEBC7→#1FBF8F，导出像素顶 #7EEBC7 底 #25C293），与 AddFood ConfirmBtn 同一对 token；原组合把按钮整体压暗，与设计稿「浅端→品牌端」不符 -->
     <!-- [变更日志] 目标弹窗色面（卡面/徽章/滑轨/标题文字）逐元素绑 useTheme token，图标按 themeAsset 取五档变体，App 端三主题×双模式已真机核验 -->
     <view class="gm-container" :class="{ 'gm-container-active': active }" :style="{ backgroundColor: theme.card }" @click.stop>
       <view class="gm-sheet" :style="gmSheetStyle">
@@ -209,12 +210,15 @@ function qslotStyle(on: boolean): Record<string, string> {
   st['border-color'] = theme.value.line
   return st
 }
-/** 保存钮：浅态 accent→accentDeep 渐变，暗态改纯色（暗档 accentDeep 是亮色，不能当渐变尾色） */
+/** 保存钮：浅态走该档 accent2→accent 渐变（稿面 SaveBtn = 180° 浅端→品牌端，
+ *  与百科 CTA / AddFood 确认钮同一对 token），暗态改纯色（暗档 accentDeep 是亮色，不能当渐变尾色）。
+ *  [变更日志] 2026-09-27(3): 原 accent→accentMid 的浅端用 accent（品牌绿）、深端用 accentMid（更暗），
+ *  整体偏暗发浊；稿面是「浅青绿→品牌绿」，故改用 accent2 当浅端。 */
 const saveStyle = computed((): Record<string, string> => {
   const st = {} as Record<string, string>
   st['background-color'] = theme.value.accent
   if (!isDark.value) {
-    st['background-image'] = 'linear-gradient(' + theme.value.accent + ', ' + theme.value.accentMid + ')'
+    st['background-image'] = 'linear-gradient(' + theme.value.accent2 + ', ' + theme.value.accent + ')'
   }
   return st
 })
