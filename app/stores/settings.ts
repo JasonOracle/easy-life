@@ -172,10 +172,14 @@ export type SoundType = 'click' | 'switch' | 'success' | 'shake' | 'slide' | 'ca
 //   card 改用 switch.mp3（原 selected-card.mp3 已删）
 //   新增 confirm（百科详情页「添加到某餐」CTA；此前该类型缺失 → 静默无声）
 //   移除 change（无任何调用，且 change.mp3 已删，留着会指向不存在的文件）
+// [变更日志] 2026-09-28: card 改用 tap.mp3（131ms，由 click2 裁剪 + 淡出生成）——
+//   实测连点 4 张餐次卡完整播完率：switch(575ms)=1/4、tap(131ms)=4/4（见
+//   docs/analysis-2026-09-28-audio-playback.md 第 9 章）。130ms 互斥是照短素材调的，
+//   长素材（≥500ms）等于没保护，「点四次第 5 次才响」的根因就是素材太长。
 const AUDIO_FILES: Record<string, string> = {
   click: '/static/audio/click2.mp3',
   switch: '/static/audio/switch.mp3',
-  card: '/static/audio/switch.mp3',
+  card: '/static/audio/tap.mp3',
   success: '/static/audio/success.mp3',
   shake: '/static/audio/shake.mp3',
   slide: '/static/audio/slide.mp3',
