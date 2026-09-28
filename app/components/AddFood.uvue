@@ -103,7 +103,7 @@ import { t, tf } from '../composables/i18n'
 import { computed } from 'vue'
 import { watch } from 'vue'
 import OptionTray from './OptionTray.uvue'
-import type { TrayOption } from './OptionTray.uvue'
+import type { TrayOption, AddPayload } from '../composables/pickerTypes'
 import CountStepper from './CountStepper.uvue'
 import { useTheme, themeAsset } from '../composables/useTheme'
 import { playSound, triggerHaptic } from '../stores/settings'
@@ -136,16 +136,6 @@ const emit = defineEmits<{
   (e: 'change'): void
   (e: 'close'): void
 }>()
-
-export type AddPayload = {
-  foodId: string
-  amount: number
-  unit: string
-  meal: string
-  sweets: Record<string, string>
-  extraKcal: number
-  kcal: number
-}
 
 /**
  * 器皿素材元数据（pencil 对照A/B/C/D 定案）：

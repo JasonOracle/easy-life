@@ -250,8 +250,11 @@ function getAudioContext(type: string): any {
 /**
  * 启动预热：逐个类型静默（volume=0）起播一次，把「冷态首载 131ms」的成本提前付掉，
  * 用户第一次点击就有声音。在 onLaunch 空闲时段延迟调用，不与首屏动画抢资源。
+ * Web 端整体跳过：浏览器 autoplay 政策拒绝无手势起播（8 类型 × NotAllowedError），
+ * 且预热本为消原生播放器冷载，HTML audio 无此成本。
  */
 export function warmupAudio(): void {
+  // #ifdef APP || MP-WEIXIN
   const types: SoundType[] = ['click', 'switch', 'card', 'success', 'shake', 'slide', 'delete', 'confirm']
   for (let i = 0; i < types.length; i++) {
     setTimeout(() => {
@@ -275,6 +278,7 @@ export function warmupAudio(): void {
       }
     }, i * 160)
   }
+  // #endif
 }
 
 export function playSound(type: SoundType): void {

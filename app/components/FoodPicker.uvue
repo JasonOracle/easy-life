@@ -81,9 +81,8 @@ import { categoryName } from '../stores/encyclopedia'
 import { ALL_FOODS, searchFoods, vesselLabelOf, vesselSizesOf, type FoodBase } from '../stores/food'
 import { triggerHaptic, playSound } from '../stores/settings'
 import AddFood from './AddFood.uvue'
-import type { AddPayload } from './AddFood.uvue'
+import type { AddPayload } from '../composables/pickerTypes'
 import { useTheme, themeAsset } from '../composables/useTheme'
-export type { AddPayload }
 
 /**
  * 弹层⓪ 食物选择与添加单流程整合容器（pencil 画板 n3dgv + 弹窗①）。

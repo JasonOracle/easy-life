@@ -210,7 +210,7 @@ try {
 import Tabbar from '../../components/Tabbar.uvue'
 import { computed } from 'vue'
 import FoodPicker from '../../components/FoodPicker.uvue'
-import type { AddPayload } from '../../components/FoodPicker.uvue'
+import type { AddPayload } from '../../composables/pickerTypes'
 import SettleBadge from '../../components/SettleBadge.uvue'
 import GoalModal from '../../components/GoalModal.uvue'
 import { useFoodStore } from '../../stores/food'

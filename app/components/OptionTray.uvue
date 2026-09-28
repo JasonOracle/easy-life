@@ -41,21 +41,7 @@
 
 import { playSound, triggerHaptic } from '../stores/settings'
 import { useTheme } from '../composables/useTheme'
-
-export type TrayOption = {
-  key: string
-  label: string
-  sub: string
-  art: string
-  artW: number
-  artH: number
-  /** 并排颗数（砝码类 1/2/3 颗；常规为 1） */
-  count: number
-  /** 接触宽系数（设计实测：瓶0.93/罐0.93/碗0.64/盘0.49/杯0.64/串0.13） */
-  contact: number
-  /** 实心不透明素材（未选中压暗 0.85 而非 0.62） */
-  solid: boolean
-}
+import type { TrayOption } from '../composables/pickerTypes'
 
 const props = defineProps<{
   options: TrayOption[]

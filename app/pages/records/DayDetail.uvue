@@ -152,9 +152,10 @@ import type { FoodEntry } from '../../stores/food'
 import { useGoalStore, getCalorieStatus } from '../../stores/goal'
 import { foodIdFromImg } from '../../stores/encyclopedia'
 import { triggerHaptic } from '../../stores/settings'
+import { MEAL_WINDOWS } from '../../composables/mealWindow'
 import { useTheme, themeAsset, FIXED_COLORS, syncStatusBarStyle } from '../../composables/useTheme'
 import FoodPicker from '../../components/FoodPicker.uvue'
-import type { AddPayload } from '../../components/FoodPicker.uvue'
+import type { AddPayload } from '../../composables/pickerTypes'
 import SettleBadge from '../../components/SettleBadge.uvue'
 
 /**
@@ -379,7 +380,21 @@ function openPicker(): void {
 function onAddConfirm(payload: AddPayload): void {
   const f = getFoodById(payload.foodId)
   if (f != null) {
-    food.addEntry(computeEntry(f, payload.amount, payload.unit, payload.meal, payload.extraKcal))
+    const entry = computeEntry(f, payload.amount, payload.unit, payload.meal, payload.extraKcal)
+    // 补记：查看非当日时 computeEntry 的 ts=Date.now() 会落到今天，页面看起来「添加无效」。
+    // 锚定到所选日期该餐次最后一条记录之后；餐次为空则取该日餐窗起点。
+    const range = dayRange(dayKey.value)
+    if (Date.now() < range[0] || Date.now() >= range[1]) {
+      const sameMeal = dayEntries.value.filter((e: FoodEntry): boolean => e.meal === payload.meal)
+      if (sameMeal.length > 0) {
+        entry.ts = sameMeal[sameMeal.length - 1].ts + 1000
+      } else {
+        const win = MEAL_WINDOWS.find((w): boolean => w.key === payload.meal)
+        const hour = win != null ? win.startHour : 12
+        entry.ts = range[0] + hour * 3600 * 1000
+      }
+    }
+    food.addEntry(entry)
   }
   settleKcal.value = payload.kcal
   settleAfter.value = food.totalCal

@@ -1694,3 +1694,36 @@ pull 本地路径要写 Windows 形式（`D:\...`）并配 `MSYS_NO_PATHCONV=1`�
 ### 文档反哺
 `AGENTS.md` 音效条（新增「严禁 stop/seek 重启」红线）；`stores/settings.md` 设计决策；分析文档第 10 章；
 上条 v2 记录中「真机连点验收未做」警告作废——v2 验收实际不通过，由本条 v3 收口。
+
+---
+
+## Web（H5）端全页面/弹窗逐测与三处修复（2026-09-28 20:36:02）
+
+### 背景
+Boss 指令「把每个页面弹窗都测试一遍」。经 `cli.exe launch web`（Vite dev，http://localhost:5173/，hash 路由）
+＋ browser-use 结构快照/脚本注入逐页取证，发现并修复三类缺陷，另抓到一条**三端共有的业务真 Bug**。
+
+### 修复清单
+1. **H5 起不来**：项目根缺 `index.html` → 从 HBuilderX 官方模板 `plugins/templates/project/uniapp_vue/default-x.zip` 原样落一份（commit 4575f27）。
+2. **首页/单日详情白屏（「连接服务器超时」）**：Web 编译器对**跨 .uvue 的 `import type`** 不擦除（转成真值 import），而 .uvue 的 `export type` 再导出**会被擦除** → 运行时 `SyntaxError: does not provide an export named 'AddPayload'` → 异步组件加载失败。正解＝共享类型一律下沉 `.ts`：新建 `composables/pickerTypes.ts`（AddPayload/TrayOption），AddFood/OptionTray/FoodPicker/Home/DayDetail 五处改 import。**App/微信端不受影响**（UTS 编译期消化类型）。
+3. **控制台 8× NotAllowedError**：`warmupAudio()` 在 Web 端触发自动播放策略拒绝。预热只为消原生端 131ms 冷载，HTML audio 无需 → 函数体包 `#ifdef APP || MP-WEIXIN`。
+
+### 真 Bug（三端共有）：历史日补记静默落到今天
+`DayDetail.onAddConfirm` 用 `computeEntry()`（`ts=Date.now()`），查看 6 天前的日子添加食物时条目落进**今天**，
+页面看起来「添加无效」。修复＝查看日非今日时把 `entry.ts` 锚定到该日该餐次最后一条 +1s（餐次为空取该日餐窗起点，复用 `MEAL_WINDOWS`）；查看今日维持实时。
+Web 端回归：22 日 1448→1680、新行落晚餐末尾、Hero 百分比同步 ✓。
+
+### 逐页/逐弹窗测试结果（Web 端）
+- 页面：Home／Records／Profile／Settings／DayDetail（含传参 date）／Encyclopedia Detail(p067)／PrivacyDialog —— 全渲染 ✓
+- 弹窗：FoodPicker 列表→AddFood detail→确认添加（SettleBadge「232kcal 晚餐·已加入」出现 ✓）、GoalModal（快速选择 2100→保存→行文案随动→复位 1800 ✓）、主题选择（薄荷↔海洋切换 ✓）、语言选择（即时中英互换、全页词条跟随 ✓）、深色模式（页底 #F2FAF5↔#0A1612 ✓）、长按记录→ActionSheet→删除这条记录（条目移除 ✓，需真 Touch 事件序列才触发 longpress，普通合成 click 无效）
+- Tabbar 三槽点击换页 ✓；日历选日（22 日→1448）✓；Records「查看详情」→DayDetail ✓
+- 残留告警（判定良性）：Hydration node mismatch（uni-app x H5 SSR 占位注释 `<!--app-html-->` 固有）；Boss 控制台里的 `webextension.js` TypeError＝浏览器插件噪声，非本 App 代码。
+- Web 截图取证仍受阻：browser-use 截图要求内嵌 Browser 面板可见（`visibilityState=hidden` 即拒），结构快照不受影响——README 配图仍以安卓端截图为准。
+
+### 验证
+- `hooks.py all` 5 项全绿；Vite 控制台除 Hydration 警告外零 error。
+- 演示数据已复位为纯种子态（7 天阶梯 1447/1458/1739/1972/1889/2533/今日 1626；测试期误添加的条目已全部清掉，存储清空后 store 回落 seedEntries 重新播种）。
+
+### 待办
+- DayDetail 补记修复仅 Web 端回归过，**App 端需跑一次完整 `cli.exe launch app-android` 验收**（模板改动差量编译不可信）。
+- Web 修复（pickerTypes.ts＋5 个 .uvue＋settings.ts＋DayDetail.uvue）未提交，等 Boss 拍板。
