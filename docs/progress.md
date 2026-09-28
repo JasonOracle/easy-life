@@ -1603,3 +1603,94 @@ App 端 `innerAudioContext` **每次 `play()` 都重建底层播放器**（`CCod
 - docs/history/、code-comment-audit-report 等历史类文档中的旧音效引用（selected-card.mp3 等）＝历史记录，不改。
 
 **过程坑（已回写）**：Pencil `Insert` 后用 `Get(visit)` 读 `bounds.y` 会偏 +50（解析基准坑），**以 raw `n.y` 为准**；`takeScreenshot` 偶发滞后一轮。SelectTarget 未决项清理：「FoodPicker 绿竖条去留」实际 9-27 已拍板（删竖条留圈），记忆已更正。
+
+---
+
+## 音源三次重整：card→click2、slide→switch、slide.mp3 删除（2026-09-28 老板指令）
+
+### 改动（仅 `app/stores/settings.ts` 映射表，13 处调用点零改动）
+| 音效类型 | 原音源 | 新音源 | 语义 / 调用点 |
+|---|---|---|---|
+| `card` | tap.mp3 (131ms) | **click2.mp3 (504ms)** | 选项切换/甜度/餐次/分类：AddFood ×2、GoalModal ×1、OptionTray ×1 |
+| `slide` | slide.mp3 (78ms) | **switch.mp3 (575ms)** | 滑块拖动：GoalModal `playSlide()` |
+
+- **删除 `app/static/audio/slide.mp3`**（老板明示不用了）；click3/click4 老板已自行删除（本就零接线）。
+- 目录由 7 → **6 个**：`click2 / switch / confirm / shake / success / tap`。
+- 同批更新 `settings.ts` 头部注释：130ms 互斥的依据由「slide 78ms + 余量」改为「首载重建 131ms 同量级硬下限」（slide 已删，且在用最短素材为 confirm 313ms）。
+
+### 时长实测（ffprobe，补齐此前欠账）
+`click2 504ms ／ confirm 313ms ／ shake 862ms ／ success 1829ms ／ switch 575ms ／ tap 131ms（已无引用）`。
+
+### 闸门
+`hooks.py all` 5 项全绿；grep 复核 `slide.mp3`/`tap.mp3` 在源码中仅存于变更日志注释，**零运行时引用**。
+
+### 待老板拍板
+- **`tap.mp3` 成孤儿**（card 换源后零引用，5KB）：删还是留作备用素材？
+- `switch` SoundType 本体仍零调用（仅 slide 映射复用了 switch.mp3 文件），类型保留无害。
+- 换源后 card 类 504ms 比 tap 131ms 长，连点场景「第 5 次才响」的截断风险回升（第 9 章 A/B 结论），真机连点体验待观察。
+
+### 三次重整追记（2026-09-28 17:2x，同日后续两步，老板指定）
+1. **`tap.mp3` 已删**（老板自行删除，源码零引用）；**`click2.mp3` 已被老板替换为 96ms 短版**（4845B / 404kbps，原 504ms）——连点截断风险随素材变短自然消除。
+2. **`switch.mp3` 换源并删除**：`slide`（滑块拖动）与 `switch` 两键的音源 `switch.mp3 (575ms)` → **`click2.mp3 (96ms)`**，`switch.mp3` 文件已删。
+3. 现存音频目录收敛为 **4 个**：`click2 96ms ／ confirm 313ms ／ shake 862ms ／ success 1829ms`（ffprobe 实测）。
+4. `settings.ts` 同步：AUDIO_FILES 全部指向存在的文件（grep `switch.mp3` 运行时零引用，仅存变更日志注释）；130ms 互斥注释的素材依据更正为「最短 click2 96ms（起播 75+96≈171ms，连点尾部可能截）」。
+5. 闸门 `hooks.py all` 全绿。
+
+---
+
+## 音效丢音修复 v2：方案A 音频池落地 + 设置页音效开关（2026-09-28 18:14:08，Boss 拍板「优先方案A」）
+
+### 背景
+Boss 报告三处丢音：①首页 FAB 开 FoodPicker 无声；②FoodPicker 分类 chips 切换/选中无声（**核实＝pickCat 从未绑音效，非互斥问题**）；③AddFood 餐次/分量连点多次才响一次。根因分析见本文件此前记录与 `docs/analysis-2026-09-28-audio-playback.md`：单实例 + 全局 130ms 互斥下，长素材（shake 862ms / success）起播即锁死全 App 音效窗口。同批 Boss 把 `success.mp3` 换成 1s 档（ffprobe 实测 **1320ms**）。
+
+### 改动清单
+1. **`stores/settings.ts` 音频层重构（方案A）**：
+   - 单实例 `audioPool` → **每类型一个常驻 `contexts[type]`**（8 类型＝4 素材文件，click2 被 5 个类型共用但各走各实例）；类型间彻底并行，长素材不再阻塞短音效。
+   - 全局 130ms 互斥 → **按类型最小间隔**：click/switch/card/slide/delete 130ms（96ms 素材 + 热态重建 25~39ms 的实测下限）；confirm 350 / shake 320 / success 320（≈1/4 素材长，连点语义＝重头再听，只挡误触连击）。
+   - **预热 `warmupAudio()`**：`App.uvue` onLaunch 后 1.5s 起，逐类型间隔 160ms 以 `volume=0` 静默起播一次后 stop，把冷态首载 131ms 提前付掉——修「冷启动前几次点击没声」。
+   - **可观测性**：去掉静默 `catch {}`，改 `console.error`；每个实例挂 `onError` 记录 errCode/errMsg（上轮排查最大阻力即零日志）。
+   - 修签名不一致：导出层 `playSound(type, maxDurationMs?)` 双参转发单参 store 方法 → 统一单参（全工程 grep 确认无调用点传第二参）。
+2. **设置页音效开关**（Boss 点名）：偏好卡「深色模式」下新增「音效」toggle 行，接 `setSoundEnabled`（store 字段与 `playSound` 首行守卫早已存在，此前**无 UI 入口**）；i18n 键 `st.sound`（音效 / Sound effects）；图标 `settings/icon_sound.svg` 走生图线产出五档变体，`themeAssetList.ts` 新增登记 1 行。
+3. **FoodPicker 分类 chips 绑音效**：`pickCat` 补 `playSound('click')`（对应 Boss 报的「点 tabs 没声音」，原为绑定缺失）。
+
+### 过程坑（已回写工具）
+重跑 `gen_theme_variants.py` 时发现：`records/lr_next_off`/`lr_prev_off` 两枚**手画暗态**（#54655E）被脚本判成可染色底稿，暗态被中性平移重写成近黑 #181F1C 并衍生出 8 张无人引用的 ocean/lavender 变体（页面代码只按亮/暗两态直拼文件名，不走 themeAsset）。已把 4 个路径加入脚本 `MANUAL_ASSETS` 白名单、还原被改写文件、删除垃圾变体；复跑后清单仅剩本轮预期的 `settings/icon_sound` 一行增量。
+
+### 验证
+- `hooks.py all` 5 项全绿（含 class-prefix-collision 18 个 .uvue 比对）。
+- `cli.exe launch app-android --compile true` 两轮均「项目 app 编译成功」（18:14:48 / 18:15:50，34~53s，第二轮含 FoodPicker pickCat 补绑）。
+- ⚠️ **真机连点验收未做**：需完整 `cli.exe launch`（非 --compile）重装基座后跑连点取证（餐次卡 4 连点、shake 后立点 card、冷启动首点），下轮执行。
+
+---
+
+## 音效丢音修复 v3：根因定案＝App 端 `stop/seek/play` 重启序列静默失败（2026-09-28 18:51:31）
+
+### 背景（v2 被真机证伪）
+Boss 实测方案A 上线后**仍丢音**（「点了四五次才有声音／偶尔几次有声」）。本轮在设备产物注入
+`[AUD]` 四探针（fire / skip-gate / onPlay / onEnded）抓真实手势事件链，根因定案：
+
+- **v2 的分实例/间隔层没有问题**：用户连点 dt=596~1194ms，全部通过 130ms 门并 `fire`，零 skip。
+- **丢音发生在播放器层**：原重启序列 `ctx.src=… → stop() → seek(0) → play()` 实测「起播即结束」——
+  **onPlay 零触发、onEnded ~167-184ms 即到**。机制＝stop 拆掉底层玩家后，对相同 src 值再赋值是空操作
+  （setter 同值不重装载），play 面对空壳静默失败。warmup 之所以有声＝它走的是首次赋新值路径。
+- 取证与证伪清单全文：`docs/analysis-2026-09-28-audio-playback.md` 第 10 章。
+
+### 修复（settings.ts playSound 一处）
+`stop/seek/play` → **`ctx.src=''` → setTimeout 20ms → `ctx.src=src; ctx.play()`**（让 src 值真变化触发重装载）。
+方案A 分实例与按类型间隔保留（解决的是长素材锁死窗口的另一半问题）；warmup 未动。
+
+### 验证（探针版 A/B，热补丁）
+- 策略B 探针版：FAB→click、分类 chips→click、餐次卡→card 三场景连点，**每次 fireB 后 onPlay(+~80ms)/onEnded(+~140ms) 成对出现，5/5 无一丢失**；
+  同素材同实例下原序列 4 次 fire 全部无 onPlay。
+- 干净 v3 产物（`cli.exe launch app-android --compile true` 绿灯 18:48:36，44s，零探针）推送冷启动后，
+  UI 链路回归正常（4 连点餐次卡逐次换选中）。**听感终验＝Boss 真机过一遍**。
+- `hooks.py all` 全绿。
+
+### 取证过程新坑（已回写文档）
+① Read 工具显示的截图是 0.5 缩放预览，**input swipe 坐标必须按原图 1280×2772 量**（按预览坐标点全部打空且零日志，极易误判成「注入失效」）；
+② MuMu main logcat 环缓冲只留约 90s，边点边拉；③ adb 1.0.31 无 exec-out screencap，须 `shell screencap -p /data/local/tmp/x.png` + pull，
+pull 本地路径要写 Windows 形式（`D:\...`）并配 `MSYS_NO_PATHCONV=1`。
+
+### 文档反哺
+`AGENTS.md` 音效条（新增「严禁 stop/seek 重启」红线）；`stores/settings.md` 设计决策；分析文档第 10 章；
+上条 v2 记录中「真机连点验收未做」警告作废——v2 验收实际不通过，由本条 v3 收口。

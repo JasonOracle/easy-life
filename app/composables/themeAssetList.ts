@@ -47,6 +47,7 @@ export const THEMEABLE_ASSETS: string[] = [
   "settings/icon_moon",
   "settings/icon_palette",
   "settings/icon_shield",
+  "settings/icon_sound",
   "settings/icon_target",
   "settings/icon_up",
   "settle/sb_check",

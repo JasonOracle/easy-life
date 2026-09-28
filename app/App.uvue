@@ -4,6 +4,7 @@
 
 import { onLaunch } from '@dcloudio/uni-app'
 import { useDeviceStore } from './stores/device'
+import { warmupAudio } from './stores/settings'
 
 // App 端 agree() 仅 closeDialogPage，授权态不持久化，每次冷启动都会重弹并挡死截图/点击验收；上线前须置回 false
 const PRIVACY_DEV_BYPASS = true
@@ -11,6 +12,11 @@ const PRIVACY_DEV_BYPASS = true
 onLaunch(() => {
   // 触发 device store 初始化（state 内自调 detectDeviceCapability，无单独 detect 方法）
   useDeviceStore()
+
+  // 音效预热：首屏动画落定后静默起播各类型一次，把冷态首载 131ms 提前付掉
+  setTimeout(() => {
+    warmupAudio()
+  }, 1500)
 
   // 检查并处理隐私授权状态
   if (!PRIVACY_DEV_BYPASS) {

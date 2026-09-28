@@ -211,6 +211,10 @@ def swap_neutral(text, gray, target):
 MANUAL_ASSETS = (
     'settings/theme_mint.svg', 'settings/theme_ocean.svg', 'settings/theme_lavender.svg',
     'settings/theme_mint_dark.svg', 'settings/theme_ocean_dark.svg', 'settings/theme_lavender_dark.svg',
+    # 日历翻页「禁用态」两枚：_dark 是手画的终态（#54655E），页面按亮/暗两态直拼文件名、
+    # 不走 themeAsset 换档。若不白名单化，中性平移会把暗态重写成近黑 #181F1C（肉眼可见回归）。
+    'records/lr_next_off.svg', 'records/lr_next_off_dark.svg',
+    'records/lr_prev_off.svg', 'records/lr_prev_off_dark.svg',
 )
 
 

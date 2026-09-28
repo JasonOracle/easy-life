@@ -1,19 +1,30 @@
 // [变更日志] 设置持久化 store：新增 accent（主题色 mint/ocean/lavender）与 locale（'' = 跟随系统）两字段，随 ct_settings_v1 一并落盘
-// [变更日志] 2026-09-28: 音效丢音修复 —— 全局单实例 + 130ms 互斥（真机 A/B 实测完整播出率 8% → 100%）
+// [变更日志] 2026-09-28: 音效默认改为关闭（Boss 指令）——soundEnabled 出厂默认 false，设置页可手动开启；已落盘的用户偏好不受影响
+// [变更日志] 2026-09-28: 音效丢音修复 v3（根因定案）—— 真机 [AUD] 探针取证：方案A 分实例后仍丢音，
+//   因 App 端 InnerAudioContext 的 src→stop→seek→play 重启序列「起播即结束」（onPlay 零触发、
+//   onEnded ~170ms 即到，玩家被 stop 打成 0 音量空壳）。正解＝置空 src → 20ms 后重设 src+play。
+//   方案A（每类型独立实例 + 按类型最小间隔）保留，取证见 docs/analysis-2026-09-28-audio-playback.md
+// [变更日志] 2026-09-28: 音效丢音修复 v2（方案A·音频池）—— 每类型独立 InnerAudioContext + 按类型最小间隔，
+//   替代「单实例 + 全局 130ms 互斥」。单实例下长素材（shake 862ms / success 1.32s）起播即锁死全 App 音效窗口；
+//   分实例后类型间互不干扰，同类型重启代价只剩热态重建 25~39ms。
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 const STORAGE_KEY = 'ct_settings_v1'
 
 /**
- * 音效最小播放间隔（互斥）。
- * 背景：App 端 innerAudioContext 每次 play() 都会重建底层播放器（热态 25~39ms、首载 131ms），
- * 而滑动相邻音效只隔 30~40ms → 互相顶掉，表现为「没声音 / 声音滞后 / 滑动快就出问题」。
- * 130ms = 最短板素材 slide.mp3（78ms）+ 重建余量。
- * 取证与 7 组真机 A/B：docs/analysis-2026-09-28-audio-playback.md
+ * 音效最小触发间隔（按类型，毫秒）。
+ * 间隔只约束「同一类型连点」：click 类素材 96ms + 热态重建 25~39ms ≈ 130ms 为能播完的下限
+ * （同口径 A/B 实测值，见 docs/analysis-2026-09-28-audio-playback.md 第 8 章）；
+ * 长素材（confirm/shake/success）取 1/4 素材长作连点保护——连点语义＝「重头再听」，
+ * 允许中途重启，只挡人手速极限以下的误触发连击。不同类型各走各的实例，互不占用窗口。
  */
-const MIN_PLAY_INTERVAL_MS = 130
-let lastPlayTs = 0
+const MIN_PLAY_INTERVAL_MS: Record<string, number> = {
+  click: 130, switch: 130, card: 130, slide: 130, delete: 130,
+  confirm: 350, shake: 320, success: 320,
+}
+const DEFAULT_PLAY_INTERVAL_MS = 130
+const lastPlayTsByType: Record<string, number> = {}
 
 /** v1.0 功能开关：自建食物不做 */
 export const USER_FOOD_ENABLED = false
@@ -31,7 +42,7 @@ function loadSettings(): SettingsState {
   const def: SettingsState = {
     darkMode: false,
     mealReminders: false,
-    soundEnabled: true,
+    soundEnabled: false,
     hapticsEnabled: true,
     accent: 'mint',
     locale: '',
@@ -106,17 +117,24 @@ export const useSettingsStore = defineStore('settings', () => {
     if (!soundEnabled.value) return
     const src = AUDIO_FILES[type]
     if (!src) return
-    // 互斥：间隔不足直接跳过，避免相邻音效互相顶掉（真机实测这是丢音的主因）
+    // 同类型连点保护：间隔不足直接跳过（不同类型各有实例，互不影响）
     const now = Date.now()
-    if (now - lastPlayTs < MIN_PLAY_INTERVAL_MS) return
-    lastPlayTs = now
+    const gate = MIN_PLAY_INTERVAL_MS[type] ?? DEFAULT_PLAY_INTERVAL_MS
+    if (now - (lastPlayTsByType[type] ?? 0) < gate) return
+    lastPlayTsByType[type] = now
+    const ctx = getAudioContext(type)
+    if (ctx == null) return
     try {
-      const ctx = getAudioContext()
-      ctx.src = src
-      ctx.stop()
-      ctx.seek(0)
-      ctx.play()
-    } catch (e) {}
+      // App 端重启正解：置空 src 再重设（真机探针取证——原 src→stop→seek→play 序列
+      // 会「起播即结束」：onPlay 零触发、onEnded ~170ms 即到，玩家被 stop 打死，只剩 0 音量空壳）
+      ctx.src = ''
+      setTimeout(() => {
+        ctx.src = src
+        ctx.play()
+      }, 20)
+    } catch (e) {
+      console.error('[audio] play failed:', type, e)
+    }
   }
 
   function triggerHaptic(type: 'light' | 'medium' | 'heavy'): void {
@@ -167,6 +185,15 @@ export const useSettingsStore = defineStore('settings', () => {
 
 export type SoundType = 'click' | 'switch' | 'success' | 'shake' | 'slide' | 'card' | 'delete' | 'confirm'
 
+// [变更日志] 2026-09-28: 音源三次重整（老板指定）——
+//   slide（滑块拖动）与 switch 的音源 switch.mp3 → click2.mp3，switch.mp3 已删
+//   click2.mp3 已由老板替换为 96ms 短版（原 504ms）；tap.mp3 已删
+//   现存素材时长（ffprobe 复核）：click2 96ms / confirm 313ms / shake 862ms / success 1320ms（老板换 1s 档）
+// [变更日志] 2026-09-28: 音源二次重整（老板指定）——
+//   card（选项切换/甜度/餐次/分类）tap.mp3 → click2.mp3
+//   slide（滑块拖动）slide.mp3 → switch.mp3，slide.mp3 已删
+//   click3.mp3 / click4.mp3 已删（本就零引用）
+//   时长实测（ffprobe）：click2 504ms / switch 575ms / confirm 313ms / shake 862ms / success 1829ms
 // [变更日志] 2026-09-28: 音源重整（老板指定）——
 //   click / delete 改用 click2.mp3（原 click.mp3、delete.mp3 已删）
 //   card 改用 switch.mp3（原 selected-card.mp3 已删）
@@ -178,45 +205,85 @@ export type SoundType = 'click' | 'switch' | 'success' | 'shake' | 'slide' | 'ca
 //   长素材（≥500ms）等于没保护，「点四次第 5 次才响」的根因就是素材太长。
 const AUDIO_FILES: Record<string, string> = {
   click: '/static/audio/click2.mp3',
-  switch: '/static/audio/switch.mp3',
-  card: '/static/audio/tap.mp3',
+  switch: '/static/audio/click2.mp3',
+  card: '/static/audio/click2.mp3',
   success: '/static/audio/success.mp3',
   shake: '/static/audio/shake.mp3',
-  slide: '/static/audio/slide.mp3',
+  slide: '/static/audio/click2.mp3',
   delete: '/static/audio/click2.mp3',
   confirm: '/static/audio/confirm.mp3',
 }
 
-// 全局单实例（真机 A/B：双实例轮询会让「同一文件的前两次播放」各付一次首载成本，
-// 也正是老板看到的「前两次点击没声音」）。单实例 + 上面的 130ms 互斥 = 完整播出率 100%。
-const audioPool: any[] = []
+// 每类型一个常驻实例：长素材（shake/success）起播不再占用其他类型的窗口，
+// 类型间彻底并行；同类型连点由上面的按类型间隔兜底。
+const contexts: Record<string, any> = {}
 
-function getAudioContext(): any {
-  if (audioPool.length < 1) {
-    try {
-      const a1 = uni.createInnerAudioContext()
-      // #ifdef MP-WEIXIN
-      if ((uni as any).setInnerAudioOption != null) {
-        (uni as any).setInnerAudioOption({
-          obeyMuteSwitch: false,
-          mixWithOther: true,
-        })
-      }
-      // #endif
-      audioPool.push(a1)
-    } catch (e) {}
+function applyMuteOption(): void {
+  // #ifdef MP-WEIXIN
+  if ((uni as any).setInnerAudioOption != null) {
+    (uni as any).setInnerAudioOption({
+      obeyMuteSwitch: false,
+      mixWithOther: true,
+    })
   }
-  if (audioPool.length === 0) {
-    return uni.createInnerAudioContext()
-  }
-  return audioPool[0]
+  // #endif
 }
 
-export function playSound(type: SoundType, maxDurationMs?: number): void {
+function getAudioContext(type: string): any {
+  let ctx = contexts[type]
+  if (ctx == null) {
+    try {
+      ctx = uni.createInnerAudioContext()
+      applyMuteOption()
+      ctx.onError((res: any) => {
+        console.error('[audio] onError', type, res.errCode, res.errMsg)
+      })
+      contexts[type] = ctx
+    } catch (e) {
+      console.error('[audio] create failed:', type, e)
+      return null
+    }
+  }
+  return ctx
+}
+
+/**
+ * 启动预热：逐个类型静默（volume=0）起播一次，把「冷态首载 131ms」的成本提前付掉，
+ * 用户第一次点击就有声音。在 onLaunch 空闲时段延迟调用，不与首屏动画抢资源。
+ */
+export function warmupAudio(): void {
+  const types: SoundType[] = ['click', 'switch', 'card', 'success', 'shake', 'slide', 'delete', 'confirm']
+  for (let i = 0; i < types.length; i++) {
+    setTimeout(() => {
+      const type = types[i]
+      const src = AUDIO_FILES[type]
+      if (!src) return
+      const ctx = getAudioContext(type)
+      if (ctx == null) return
+      try {
+        ctx.volume = 0
+        ctx.src = src
+        ctx.play()
+        setTimeout(() => {
+          try {
+            ctx.stop()
+            ctx.volume = 1
+          } catch (e) {}
+        }, 260)
+      } catch (e) {
+        console.error('[audio] warmup failed:', type, e)
+      }
+    }, i * 160)
+  }
+}
+
+export function playSound(type: SoundType): void {
   try {
     const s = useSettingsStore()
-    s.playSound(type, maxDurationMs)
-  } catch (e) {}
+    s.playSound(type)
+  } catch (e) {
+    console.error('[audio] playSound dispatch failed:', type, e)
+  }
 }
 
 export function triggerHaptic(type: 'light' | 'medium' | 'heavy'): void {

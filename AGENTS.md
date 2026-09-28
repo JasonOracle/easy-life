@@ -52,7 +52,7 @@
 
 - **动画反馈**：按压 `scale(0.945)` 回弹、波纹从触点扩散、Tab 图标弹跳、Sheet stagger 入场、数字 odometer 滚动、Toast 弹入、删除右滑淡出、新增高亮扫入
 - **触觉反馈**：`uni.vibrateShort()` / `uni.vibrateLong()`，通过 `useDeviceStore().haptics` 按机型分档降级
-- **音效**：Web Audio API（`assets/sound/`），4 种——确认/取消/删除/成就，音量可调，设置页可关
+- **音效**：`uni.createInnerAudioContext`（素材 `app/static/audio/`，现存 4 个：click2 96ms／confirm 313ms／shake 862ms／success 1320ms），调度集中在 `stores/settings.ts playSound()`——**每类型独立常驻实例 + 按类型最小间隔**（click 类 130ms／confirm 350ms／shake·success 320ms），严禁退回单实例全局互斥（长素材起播会锁死全 App 音效窗口）；**App 端重启播放唯一正解＝`ctx.src=''`→20ms 后重设 src+play()，严禁 `src→stop→seek→play` 序列**（真机探针取证：stop 拆掉玩家后同值赋 src 是空操作，play 静默失败＝「起播即结束」，即「点四五次才响」的根因）；App 启动后 1.5s 走 `warmupAudio()` 静默预热消冷启动首载延迟；设置页「音效」开关（`soundEnabled`）可关总音效
 - **液体晃动**：Canvas 2D 实时渲染，双模强迫阻尼振荡器（M1 cos(πu) T=460ms ζ=0.14 + M2 sin(4πu+φ) 0.955 decay dt-normalized），34 段表面路径，气泡池 8 + 粒子池 12；引擎在 `composables/useLiquid.ts`，渲染在 `components/BottleLiquid.uvue`
 - **首次进入不晃动**（安静开场）
 

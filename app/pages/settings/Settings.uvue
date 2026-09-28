@@ -1,4 +1,6 @@
 <template>
+  <!-- [变更日志] 2026-09-28: 偏好卡「深色模式」下新增「音效」开关行（Boss 拍板：可关闭总音效），
+       接 settings.setSoundEnabled（store 字段早已存在并落盘，此前无 UI 入口）；图标 settings/icon_sound.svg（生图线五档变体）。 -->
   <!-- [变更日志] 2026-09-27(4):「主题切换」三套主题的纯色圆点 → 意象 SVG 图标（薄荷叶／水滴／薰衣草花穗），
        图标用该主题自己的品牌色 + 浅色圆底；资源 `static/settings/theme_{mint,ocean,lavender}[_dark].svg`。 -->
   <!-- [变更日志] 2026-09-27: 保存按钮三色渐变第三档 accentDeep→accentMid（消除右下角发黑）。 -->
@@ -41,6 +43,17 @@
         </view>
         <view class="toggle" :style="{ backgroundColor: toggleFill }" @click="toggleDark">
           <view class="knob" :class="{ 'knob-on': settings.darkMode }"></view>
+        </view>
+      </view> 
+      <view class="row">
+        <view class="chip" :style="{ backgroundColor: theme.chip }">
+          <image class="chip-icon" :src="asset('settings/icon_sound.svg')" mode="aspectFit"></image>
+        </view>
+        <view class="row-text">
+          <text class="row-title" :style="{ color: theme.ink1 }">{{ t('st.sound') }}</text>
+        </view>
+        <view class="toggle" :style="{ backgroundColor: soundToggleFill }" @click="toggleSound">
+          <view class="knob" :class="{ 'knob-on': settings.soundEnabled }"></view>
         </view>
       </view> 
       <view class="row">
@@ -139,13 +152,14 @@
       <text class="shield-note" :style="{ color: theme.ink2 }">{{ t('st.shield') }}</text>
     </view>
 
-    <!-- 危险区 -->
+    <!-- 危险区（Boss 2026-09-28 指令：暂时下线，保留代码待恢复）
     <view class="card-danger" :style="{ backgroundColor: theme.card }">
       <view class="chip-danger" :style="{ backgroundColor: dangerChipFill }">
         <image class="chip-icon" :src="asset('settings/icon_trash.svg')" mode="aspectFit"></image>
       </view>
       <text class="danger-text" :style="{ color: dangerTextColor }">{{ t('st.clear') }}</text>
     </view>
+    -->
 
     <!-- 页脚 -->
     <view class="footer">
@@ -247,6 +261,10 @@ function toggleDark(): void {
   syncBar()
 }
 
+function toggleSound(): void {
+  settings.setSoundEnabled(!settings.soundEnabled)
+}
+
 /* ===== 主题 / 语言 半屏选择 sheet（即点即换 + 持久化在 store 层） ===== */
 const pfRender = ref(false)
 const pfActive = ref(false)
@@ -292,6 +310,7 @@ const navBarStyle = computed((): Record<string, string> => {
 })
 
 const toggleFill = computed((): string => settings.darkMode ? theme.value.accent : theme.value.line)
+const soundToggleFill = computed((): string => settings.soundEnabled ? theme.value.accent : theme.value.line)
 
 /** 危险区：珊瑚系语义色不随主题轮值（§8.3），暗态沿用已定稿的深底亮字 */
 const dangerChipFill = computed((): string => isDark.value ? '#3A221C' : '#FDE9E4')

@@ -487,3 +487,73 @@ for f in app/static/audio/*.mp3; do ffprobe -v error -show_entries format=durati
 python debug/analyze_meal.py debug/audio_probe/logs_20260928/lg_card*.txt
 python debug/audio_latency.py debug/audio_probe/logs_20260928/lg_cardSLIDE_B.txt
 ```
+
+## 10. 追加：方案A 上线后仍丢音 —— `stop/seek/play` 重启序列被证伪（根因定案）
+
+**触发**：方案A（每类型独立实例 + 按类型间隔）落地并全量编译后，老板真机实测仍报
+「点了四五次才有声音 / 偶尔几次有声」。本轮不再猜，直接在设备上的产物里注入 `[AUD]` 四探针
+（fire / skip-gate / onPlay / onEnded），抓真实用户手势的完整事件链。
+
+### 10.1 取证方法
+
+- 热补丁：直接改 `app/unpackage/dist/dev/app-android/app-service.js` 注入 `uni.__log__("log","at probe",...)`，
+  `adb push` 到 `/data/data/io.dcloud.uniappx/apps/__UNI__F70225F/www/app-service.js`（root 后），
+  `am force-stop` + `am start` 冷启动（app-service 只在启动时加载一次）。
+- 注入点击：`input tap` 在 launch 后失效（已知坑），用 `input swipe x y x y 40~60` 当点击；
+  **坐标必须按原图 1280×2772 量**（Read 工具显示的截图是 0.5 缩放预览，按预览坐标点会全部打空——本轮踩过）。
+- 抓日志：`logcat -d | grep AUD | grep JSConsole`（main 环缓冲只留约 90s，边点边拉）。
+
+### 10.2 关键证据链（方案A 原序列：`src=… → stop() → seek(0) → play()`）
+
+用户真实连点（进程 6575，18:39:01–04，四条 click）：
+
+```
+fire dt=…  →  (无 onPlay)  →  onEnded @ +167~184ms
+fire dt=1194 → (无 onPlay)  →  onEnded @ +167ms
+fire dt=696  → (无 onPlay)  →  onEnded @ +180ms
+fire dt=596  → (无 onPlay)  →  onEnded @ +169ms
+```
+
+**四次全部 `fire` 后直接 `onEnded`、`onPlay` 零触发** —— playSound 层没有任何 skip（间隔 596~1194ms
+远超 130ms 门），丢音完全发生在播放器层：`play()` 静默失败，只回一个「立即结束」。
+
+对照：同素材同实例，把重启序列换成 `ctx.src='' → 20ms 后 ctx.src=src; ctx.play()`（策略B）后，
+连点餐次卡 5 次（dt=333~667ms）：
+
+```
+fireB → onPlay @ +84ms → onEnded @ +218ms   ×5，无一丢失
+```
+
+FAB→click、分类 chips→click、餐次卡→card 三个 Boss 投诉场景全部逐次 `onPlay/onEnded` 成对出现。
+
+### 10.3 机制判读
+
+`stop()` 会把 InnerAudioContext 的底层玩家整个拆掉；此后对**同一个 src 值**再赋 `ctx.src = src`
+是空操作（uni-app x 的 src setter 对相同值不触发重新装载），于是 `play()` 面对的是一个已 stop、
+无素材的空壳 → 不发 onPlay、直接 onEnded。§9.5 证伪的是「源没变不重赋值能省重建」，
+本轮补上它的镜像结论：**想重启播放必须让 src 值真的发生变化**（置空再赋回），
+`stop/seek` 不但省不了重建，反而把玩家打死。
+
+### 10.4 已证伪清单（累计三条，勿再尝试）
+
+| 假设 | 实测 | 证据 |
+|---|---|---|
+| 「同 src 不重赋值可省重建」（§9.5） | ❌ play() 本身触发重建 | app-service.reuse.js |
+| 「方案A 分实例即可解决丢音」 | ❌ 分实例后 stop 序列仍静默失败 | 本轮 18:39 四连 fire 无 onPlay |
+| 「fire 后无声是 130ms 互斥太严」 | ❌ 用户手势 dt=596~1194ms，门根本没拦 | fire dt 日志 |
+
+### 10.5 落地（v3）
+
+`app/stores/settings.ts playSound()`：`stop/seek/play` → `ctx.src='' ; setTimeout(20ms){ ctx.src=src; ctx.play() }`。
+方案A 的分实例与按类型间隔保留（它们解决的是「长素材锁死全 App」的另一半问题）。
+warmup 未改动（volume=0 起播→stop 的路径与用户点击路径独立，实测预热全类型 onPlay 正常）。
+
+### 10.6 复现命令
+
+```bash
+ADB="/d/soft/HBuilderX/plugins/launcher-tools/tools/adbs/1.0.31/adb.exe"; S=127.0.0.1:7555
+export MSYS_NO_PATHCONV=1
+"$ADB" -s $S shell "input swipe 1125 217 1125 217 60"   # FAB（原图坐标！）
+"$ADB" -s $S logcat -d | grep AUD | grep JSConsole       # 90s 内拉取
+```
+

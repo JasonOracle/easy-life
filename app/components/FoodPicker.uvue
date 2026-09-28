@@ -236,6 +236,7 @@ function pickCat(name: string): void {
   if (name === cat.value) {
     return
   }
+  playSound('click')
   cat.value = name
 }
 
