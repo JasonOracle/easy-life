@@ -8,6 +8,9 @@
 *.webp  binary
 *.gif   binary
 *.ico   binary
+*.mp3   binary
+*.wav   binary
+*.m4a   binary
 *.zip   binary
 *.xlsx  binary
 

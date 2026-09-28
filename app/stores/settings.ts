@@ -150,17 +150,22 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 })
 
-export type SoundType = 'click' | 'switch' | 'change' | 'success' | 'shake' | 'slide' | 'card' | 'delete'
+export type SoundType = 'click' | 'switch' | 'success' | 'shake' | 'slide' | 'card' | 'delete' | 'confirm'
 
+// [变更日志] 2026-09-28: 音源重整（老板指定）——
+//   click / delete 改用 click2.mp3（原 click.mp3、delete.mp3 已删）
+//   card 改用 switch.mp3（原 selected-card.mp3 已删）
+//   新增 confirm（百科详情页「添加到某餐」CTA；此前该类型缺失 → 静默无声）
+//   移除 change（无任何调用，且 change.mp3 已删，留着会指向不存在的文件）
 const AUDIO_FILES: Record<string, string> = {
-  click: '/static/audio/click.mp3',
+  click: '/static/audio/click2.mp3',
   switch: '/static/audio/switch.mp3',
-  change: '/static/audio/change.mp3',
+  card: '/static/audio/switch.mp3',
   success: '/static/audio/success.mp3',
   shake: '/static/audio/shake.mp3',
   slide: '/static/audio/slide.mp3',
-  card: '/static/audio/selected-card.mp3',
-  delete: '/static/audio/delete.mp3',
+  delete: '/static/audio/click2.mp3',
+  confirm: '/static/audio/confirm.mp3',
 }
 
 const audioPool: any[] = []

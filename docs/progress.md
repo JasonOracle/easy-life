@@ -1331,3 +1331,68 @@ uni-app x 的 uvue-css 对 `max-height` **只接受 `number | pixel`**；写 `%`
 - 本文件（progress.md）
 - `.workbuddy/memory/MEMORY.md`：选中气泡条目改写
 - **未做**：Pencil 稿面板 `gFuXt` 的气泡色仍是 `#20C9971F`（accent 12%），需按反哺口径回写为中性；稿面 4 个气泡尺寸不一致的遗留问题也仍在
+
+
+---
+
+## 音源重整：删除废弃音频 + 换源（2026-09-28 14:30）
+
+### 1. 老板指定的换源
+| 音效类型 | 原音源 | 新音源 | 调用点 |
+|---|---|---|---|
+| `click` | click.mp3 | **click2.mp3** | Home ×3、FoodPicker ×1 |
+| `delete` | delete.mp3 | **click2.mp3** | Home ×1 |
+| `card` | selected-card.mp3 | **switch.mp3** | AddFood ×2、GoalModal ×1、OptionTray ×1 |
+| `confirm` | **缺失**（静默无声） | **confirm.mp3** | 百科详情页 CTA ×1 |
+
+同时**删除 4 个不再使用的音频**：`change.mp3`、`click.mp3`、`delete.mp3`、`selected-card.mp3`；
+`change` 类型一并从 `SoundType` / `AUDIO_FILES` 移除（它零调用，且文件已删，留着会指向不存在的路径）。
+目录由 8 个收敛为 **6 个**：`click2 / switch / confirm / shake / slide / success`。
+
+改动集中在 `app/stores/settings.ts`（映射表 + 类型），**13 处调用点无需改动**——`playSound('card')` 这类语义名保持不变，只换音源。
+
+### 2. 校验（脚本化，非目视）
+- 映射表 → 文件存在性：**0 悬挂引用**（8 个 key 全部命中实体文件）
+- 14 处 `playSound('x')` 调用：类型全在 `SoundType`、且全部有音源
+- 编译产物 `app-service.js`：`click2.mp3`×2、`switch.mp3`×2、`confirm/shake/slide/success` 各 ×1，**旧路径 0 残留**
+- `dist/.../static/audio/`：恰好 6 个文件，已删的 4 个不在其中
+
+### 3. 真机实测（不是"看着对"）
+`adb logcat` 抓到真实解码播放链路：
+```
+CCodec: allocate(c2.android.mp3.decoder) → Created component
+C2SoftMp3Dec: Reconfiguring decoder: 0->48000 Hz, 0->1 channels
+AudioTrack: stop(56): called with 23616 frames delivered      ← click→click2.mp3（≈0.49s，与 4.5KB 文件相符）
+14:32:22 第二次 mp3 解码                                       ← card→switch.mp3
+```
+另加 `.gitattributes` 显式声明 `*.mp3 /*.wav /*.m4a` 为 `binary`，避免 `* text=auto eol=lf` 对音频做任何换行处理。
+
+### 4. ⚠️ 运维坑：HBuilderX 增量同步把设备资源推成半截 → App 白屏
+**现象**：改完音频后重启 App，整屏纯白 `(250,250,250)`，日志：
+```
+V8Inspector: attached root=/data/data/io.dcloud.uniappx/apps/__UNI__F70225F/www/
+AndroidJSBridge: LoadFileByPath failed: .../www/app-service.js (errno=2, No such file or directory)
+UNIAPPX_LOG: LoadAppScripts: failed to load script: app-service.js
+```
+**根因**：HBuilderX 的增量同步是「先删远端旧文件 → 再拷新文件」。本次触发同步的两个东西**恰好都在被写入中**
+（`app-service.js` 641KB 正在重写、`static/audio` 正在删旧增新），拷贝阶段失败后**不会重试**，
+且 HBuilderX 认为设备已是最新 → 卡死在这个状态。设备 `www/` 只剩 490 个文件（本地 809），
+`static/` 下只有 `encyclopedia/icons/settings` 三个目录，`app-service.js` 与 `static/audio` 全丢。
+> 注意：**本地编译是正常的**（`touch` 源文件后 1 秒内 `app-service.js` 就重编了），坏的只是"编译产物 → 设备"这一段。
+> 所以不能靠"本地产物更新了"推断"设备已生效"。
+
+**修复办法**（不改代码，手工补齐设备资源）——设备私有目录需 `run-as`，中转文件走 `/data/local/tmp`（其 0771 允许 app uid 穿透读）：
+```bash
+adb push app/unpackage/dist/dev/app-android /data/local/tmp/www_push
+adb shell run-as io.dcloud.uniappx cp -r \
+  /data/local/tmp/www_push/static /data/local/tmp/www_push/bytes /data/local/tmp/www_push/app-service.js \
+  /data/local/tmp/www_push/app-config.js /data/local/tmp/www_push/manifest.json \
+  /data/local/tmp/www_push/androidPrivacy.json apps/__UNI__F70225F/www/
+adb shell rm -r /data/local/tmp/www_push
+```
+（`androidPrivacy.json` 按实际文件名传；`cp -r` 会与已有目录合并，不破坏原有文件。）
+**验收判据**：设备 `find www -type f` 的条数 == 本地 dist 条数（809 == 809，缺失 0），
+且重启后 `LoadAppScripts` 报错消失、首页正常渲染。
+设备侧文件清单留存于 `debug/evidence_20260928/device_www_files_BROKEN_1424.txt`（490 行，坏态）
+与 `device_www_files_REPAIRED.txt`（809 行，修好态）。
+> 若以后遇到同样白屏，也可以直接在 HBuilderX 里**重新点一次"运行到 Android"**做全量同步（会覆盖手工补齐的结果，无害）。
