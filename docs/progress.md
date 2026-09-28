@@ -1740,3 +1740,26 @@ Web 端回归：22 日 1448→1680、新行落晚餐末尾、Hero 百分比同�
 - ~~DayDetail 补记修复仅 Web 端回归过~~ → 已安卓端全量编译回归通过（见上）。
 - ~~Web 修复未提交~~ → 已提交 `7d44c27`。
 - README 配图：安卓端逐页／逐弹窗截图（承 #6）。
+
+---
+
+## 2026-09-28 21:34:10 ｜ README 配图收官（#6 表现层取证）＋ AGENTS.md 补 Web 端两条铁律
+
+### 配图（`docs/screenshots/`，17 张，安卓模拟器 1280×2772 原图 → 640 宽入库，合计 3.2 MB）
+- **页面全覆盖**：`01_home`（达标态）／`05_home_over`（超标态，液体＋贴纸整体转琥珀、文案换第三档）／`06_records`／`07_daydetail`／`08_profile`／`09_settings`／`11_encyclopedia`。
+- **弹窗全覆盖**：`02_picker_list`＋`03_picker_detail`（FoodPicker 原地两步）／`04_settle_badge`（Canvas 2D 结算环）／`10_goal_modal`（目标弹窗五档）／`16_theme_sheet`（三主题抽屉）／长按删除的 ActionSheet 已在补记回归中取证（未单独入图，避免与详情页重复）。
+- **主题矩阵抽样**：暗态四页 `12~15` ＋ 海洋暗态 `17`，验证「换主题不只换主色，图标／贴纸／液体／玻璃胶囊一并随动」。
+- **未入图**：隐私授权弹窗只在首启出现，需清存储复现，README 已注明。
+- 原图留档 `debug/shots/full/`（`debug/` 在 .gitignore 内，不入库）。
+- README 新增「界面预览」一节（视觉方向之后），按 首页与记录流／添加食物／百科·我的·设置／目标弹窗与主题 四组表格排布，每图一句「看到什么＋为什么这样设计」。
+
+### 取证过程中的两条事实（供后续复用）
+- Records 的「主要食物」旁 **「查看全部」是纯装饰**（无 `@click`），百科入口只挂在 `.lr-fcard` 食物卡片上（`openEncyclopedia(img)` → `pages/encyclopedia/Detail?id=`）；百科目前**只有 Detail 一页，没有列表页**。
+- 安卓坐标 tap 的命中带必须**逐张截图用 PIL 现量**（页面滚动一次，上一帧坐标即作废）；本轮「添加按钮点七次无反应」的误判即源于此（详见上一节）。
+
+### AGENTS.md 反向同步（Boss 批准「写进去」）
+「已知风险」新增两条：① **跨 `.uvue` 的 `import type`/`export type` 在 Web(H5) 端不被擦除 → 整页白屏**（含产物级证据、App/微信端不报的原因、`.ts/.uts` 铁律、`curl ?import&vue&type=script` 排查法）；② **Web(H5) 端运行前置**（`app/index.html` 必须从官方 `default-x.zip` 拷入、静默预热类音频调用必须包 `#ifdef APP || MP-WEIXIN`）。
+
+### 待办
+- 音效 v3 仍需 Boss 戴耳机耳验。
+- 提交本轮（AGENTS.md＋README.md＋docs/screenshots/）；是否推 dev 待 Boss 当次授权。

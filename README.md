@@ -16,6 +16,43 @@ uni-app x（Vue3 语法 ＋ UTS/TS 编译为原生）＋ Pinia，本地存储，
 
 薄荷液滴（Mint Drop）—— 记完一顿饭，水位涨一截、晃两下、归于平静。主题色为薄荷／海洋／薰衣草三档，各随亮暗两态，但「液滴」的物理质感与卡片体系不随主题改变。
 
+## 界面预览
+
+> 全部截图取自 **Android 模拟器 / uni-app x 原生渲染**（1280×2772 原图缩至 640 宽），演示数据为内置 7 天种子阶梯（4 天达标／3 天超标）。原图归档于 `debug/shots/full/`（`debug/` 已 gitignore）。
+
+### 首页与记录流
+
+| | |
+|---|---|
+| ![首页](docs/screenshots/01_home.png) | ![首页超标态](docs/screenshots/05_home_over.png) |
+| **首页（达标态）**：还能吃 172 kcal、水瓶液体停在肩线 80% 上限内、三大宏量、今日餐次时间轴、三 Tab 悬浮玻璃胶囊。 | **首页（超标态）**：液体与贴纸整体转琥珀色（非红），文案随档位换成「今天很棒 再坚持一下」，Hero 转「已超标 60 kcal」。 |
+| ![日历](docs/screenshots/06_records.png) | ![单日详情](docs/screenshots/07_daydetail.png) |
+| **日历 Tab**：月历每日带达标色点（绿＝达标／橙＝超标），下方为选中日概览＋三餐摄入＋主要食物（点卡片进百科）。 | **单日详情**：热量环卡＋营养分布＋按餐次分组的记录流水；行长按弹「删除这条记录」。 |
+
+### 添加食物（单弹层两步，无二次冷启动）
+
+| | | |
+|---|---|---|
+| ![食物列表](docs/screenshots/02_picker_list.png) | ![分量与餐次](docs/screenshots/03_picker_detail.png) | ![结算徽章](docs/screenshots/04_settle_badge.png) |
+| **列表步**：搜索支持拼音／别名，分类 chip 横滑，353 条内置食物带缩略图与「每 100g／一碗约」双口径。 | **分量步**：点选后原地切步（不销毁重建），器具三档图示＋餐次四卡（按餐窗自动预选），底部胶囊实时算出 kcal。 | **结算徽章**：Canvas 2D 环形＋本次 kcal 数字滚动＋「今日 x／目标」与餐次落位提示；App 端走 fill-only 路径出圆头环。 |
+
+### 百科 · 我的 · 设置
+
+| | | |
+|---|---|---|
+| ![食物百科](docs/screenshots/11_encyclopedia.png) | ![我的](docs/screenshots/08_profile.png) | ![设置](docs/screenshots/09_settings.png) |
+| **食物百科**：热量＋标签＋主要营养成分占比＋营养点评／适宜人群／注意事项／推荐吃法＋相关食物横滑，底部一键按当前餐次添加。 | **我的**：今日热量三格、达标 banner、本周概览 7 点、热量趋势柱状（超标日用珊瑚色而非红）。 | **设置**：深色模式／音效／用餐提醒（即将上线占位）／主题切换／语言切换 ＋ 目标管理；底部明示「所有数据仅保存在本机」，无联网与账号。 |
+
+### 目标弹窗与主题
+
+| | | |
+|---|---|---|
+| ![每日热量目标](docs/screenshots/10_goal_modal.png) | ![主题切换](docs/screenshots/16_theme_sheet.png) | ![海洋暗态](docs/screenshots/17_settings_ocean_dark.png) |
+| **每日热量目标**：步进圆钮＋滑杆＋五档快速选择（1200／1500／1800／2100／2400），确认后全 App 环与色档随动。 | **主题切换**：薄荷／海洋／薰衣草三档，各随亮暗＝6 档 token 矩阵，图标走生成线产出的染色变体。 | **海洋·暗态**：换主题不只换主色——图标、贴纸、液体渐变、玻璃胶囊一并随动（逐元素 `:style` 绑定，原生端无 CSS 变量通道）。 |
+
+暗态另见 [`13_home_dark.png`](docs/screenshots/13_home_dark.png)／[`14_records_dark.png`](docs/screenshots/14_records_dark.png)／[`15_profile_dark.png`](docs/screenshots/15_profile_dark.png)／[`12_settings_dark.png`](docs/screenshots/12_settings_dark.png)。
+（隐私授权弹窗仅在首次启动出现，需清存储复现，未入图。）
+
 ## 快速上手
 
 ```powershell
