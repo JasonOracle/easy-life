@@ -1,4 +1,4 @@
-<!-- [变更日志] 三 Tab 悬浮玻璃胶囊；2026-09-25 标签色／暗态胶囊底改逐元素 :style 下发（App 端无后代选择器，原 MP 暗态规则在 App 上是死代码）；图标换 /static/tab 矢量资产并按 (accent, mode) 取变体；2026-09-28 外层胶囊提白到 80%＋App 端放开真磨砂（backdrop-filter 原被 #ifdef MP-WEIXIN 挡在 App 外，蒸汽模式 5.25+ 本就支持）；选中气泡改主题色淡染（外层提白后 18% 白只差 1.8% 亮度，靠色相区分）；未选中标签/图标 #8A8A8A→#5F6B66 保对比度；2026-09-28 v2 老板拍板改「参考实现的两层结构」——胶囊 80%→52% 白(真透)＋新增全宽托底渐隐条承担可读性，选中气泡删描边/投影/自身blur只留 accent 12% 淡染，胶囊加 inset 内高光、模糊降为单层；2026-09-28(3) 修编译报错——App 端 backdrop-filter 只接受 `none`|`blur()`，原 blur20/saturate150% 触发 ERROR 且整条失效，App 侧改裸 blur(20px)、饱和增强版隔离进 MP-WEIXIN，-webkit- 前缀同移出 App；2026-09-28(4) 撤掉「全宽托底渐隐条」——实测它有真实高度时会吃掉屏幕底部整条的页面点击（带内 0 命中 / 带外对照 2 命中），而 App 端 pointer-events:none 连子级一起屏蔽、无法只让背景穿透，故组件根节点回归胶囊本体；2026-09-28(5) 修「向上柔影从未渲染」——`box-shadow` 里带 `inset` 会让**整条声明失效**（拍平引擎不支持 inset），去掉 inset 后单值外阴影 0.18 正常，胶囊在近白页面上终于有了可见的悬浮边 -->
+<!-- [变更日志] 三 Tab 悬浮玻璃胶囊；2026-09-25 标签色／暗态胶囊底改逐元素 :style 下发（App 端无后代选择器，原 MP 暗态规则在 App 上是死代码）；图标换 /static/tab 矢量资产并按 (accent, mode) 取变体；2026-09-28 外层胶囊提白到 80%＋App 端放开真磨砂（backdrop-filter 原被 #ifdef MP-WEIXIN 挡在 App 外，蒸汽模式 5.25+ 本就支持）；选中气泡改主题色淡染（外层提白后 18% 白只差 1.8% 亮度，靠色相区分）；未选中标签/图标 #8A8A8A→#5F6B66 保对比度；2026-09-28 v2 老板拍板改「参考实现的两层结构」——胶囊 80%→52% 白(真透)＋新增全宽托底渐隐条承担可读性，选中气泡删描边/投影/自身blur只留 accent 12% 淡染，胶囊加 inset 内高光、模糊降为单层；2026-09-28(3) 修编译报错——App 端 backdrop-filter 只接受 `none`|`blur()`，原 blur20/saturate150% 触发 ERROR 且整条失效，App 侧改裸 blur(20px)、饱和增强版隔离进 MP-WEIXIN，-webkit- 前缀同移出 App；2026-09-28(4) 撤掉「全宽托底渐隐条」——实测它有真实高度时会吃掉屏幕底部整条的页面点击（带内 0 命中 / 带外对照 2 命中），而 App 端 pointer-events:none 连子级一起屏蔽、无法只让背景穿透，故组件根节点回归胶囊本体；2026-09-28(5) 修「向上柔影从未渲染」——`box-shadow` 里带 `inset` 会让**整条声明失效**（拍平引擎不支持 inset），去掉 inset 后单值外阴影 0.18 正常，胶囊在近白页面上终于有了可见的悬浮边；2026-09-28(6) 选中气泡底色由 accent 12% 淡染改为**中性反差**（浅态 rgba(26,26,26,0.08) 加暗／暗态 13% 白加亮）——对齐参考实现 tab-bar.vue 的 `.active` 规则，品牌色只由图标/文字承担，accentTint() 一并删除 -->
 <template>
   <!-- 根节点＝胶囊本体（几何由 :style 逐帧下发）。
        ⚠️ 不要在外面再包一层容器：①零高度（height:0）的 fixed 父级会把后代整棵裁掉
@@ -155,11 +155,12 @@ const bubbleStyle = computed((): Record<string, string> => {
   st['height'] = h + 'px'
   // 底色在运行时下发（不写成 .a.b 复合类选择器：App 端只认单类），取值＝DesignTokens §7.2
   const dm = isDark.value
-  // 浅态玻璃档＝主题色淡染（2026-09-28 v2）：胶囊已降到 52% 白，气泡只留一层 accent 淡染，
-  // 描边／投影／自身 blur 全部删除（实测那三样叠加才是把它撑成「实心绿块」的真凶）。
-  // 暗态外层是深绿 72%，气泡 13% 白已足够区分，不动。
+  // 选中态＝**中性反差**，不带品牌色相（对齐参考实现 tab-bar.vue 的 `.active { background: rgba(26,26,26,0.08) }`）：
+  //   浅态玻璃档 → 8% 黑加暗；暗态玻璃档 → 13% 白加亮。两态都只改明度、不动色相。
+  // 不用 accent 染底：品牌色铺在气泡上会让「选中」读成「一块绿」，且与「真透玻璃」的预期相悖；
+  // 品牌色的表达交给图标与文字（见 labelColor → tbTextOn），与参考实现用蓝字而非蓝底同理。
   st['background-color'] = glass.value
-    ? (dm ? 'rgba(255, 255, 255, 0.13)' : accentTint(0.12))
+    ? (dm ? 'rgba(255, 255, 255, 0.13)' : 'rgba(26, 26, 26, 0.08)')
     : 'rgba(255, 255, 255, 0.88)'
   // #ifdef MP-WEIXIN
   st['transition-property'] = 'left, width, height'
@@ -177,7 +178,7 @@ const barClass = computed((): string[] => {
   return c
 })
 
-/** 玻璃档气泡只靠 :style 下发的 accent 淡染底色区分（描边/投影/自身 blur 已全删）；
+/** 玻璃档气泡只靠 :style 下发的中性反差底色区分（描边/投影/自身 blur 已全删）；
  *  flat 降级档底为不透明 #F8FCFA，气泡必须保留描边＋投影才看得出选中态 */
 const bubbleClass = computed((): string[] => {
   const c = ['tb-bubble'] as string[]
@@ -188,15 +189,6 @@ const bubbleClass = computed((): string[] => {
 function iconSrc(idx: number): string {
   const base = idx == myIdx.value ? ICONS[idx][1] : ICONS[idx][0]
   return themeAsset(accentId.value, isDark.value, base)
-}
-
-/** 主题色淡染（选中气泡底，浅态玻璃档专用）：accent hex → rgba(r, g, b, alpha) */
-function accentTint(alpha: number): string {
-  const hex = theme.value.accent.replace('#', '')
-  const r = parseInt(hex.substring(0, 2), 16)
-  const g = parseInt(hex.substring(2, 4), 16)
-  const b = parseInt(hex.substring(4, 6), 16)
-  return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')'
 }
 
 /** 逐元素下发文字色：App 端无后代选择器，浅档未选＝#5F6B66，暗档＝该档 ink3
@@ -250,12 +242,14 @@ function onTap(idx: number): void {
   /* 不设 overflow:hidden：①背景自带圆角裁切，本元素无需裁子节点；②app-ios 上 box-shadow 与
      overflow:hidden 互斥（官方文档），去掉可避免阴影在 iOS 失效 */
 }
-/* 玻璃档（backdropBlur=true）：底 #FFFFFF 52%（真透）＋ 顶部折光（兼作内高光）＋ 白描边 ＋ 向上柔影。
-   2026-09-28 v3：52% 白保留（老板确认「要真透」）；托底渐隐条已否决（会吃点击），
-   胶囊可见性由下面的外阴影承担 */
+/* 玻璃档（backdropBlur=true）：**未选中区域＝不太透明的白色磨砂**（68% 白 ＋ 顶部折光兼作内高光
+   ＋ 白描边）；选中格的「更高透」由气泡叠一层中性加暗实现（见 bubbleStyle），本元素只提供白底。
+   参数对齐参考实现 tab-bar.vue：容器 rgba(255,255,255,0.5) 渐变 ＋ blur，选中格叠 rgba(26,26,26,0.08)。
+   提白到 68% 的原因：页面底本身就是近白（#F6FBF8），50% 白合成后只高 5 级、读不出「白磨砂」；
+   参考实现是靠 wrapper 上那条不透明底部渐变托底才显得出白，而 App 端做不了全宽托底层（会吃点击）。 */
 .tb-glass {
-  background-color: rgba(255, 255, 255, 0.52);
-  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 45%);
+  background-color: rgba(255, 255, 255, 0.68);
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 45%);
   border-top-width: 1px;
   border-right-width: 1px;
   border-bottom-width: 1px;
@@ -350,8 +344,8 @@ function onTap(idx: number): void {
   z-index: 1;
   border-radius: 44rpx;
 }
-/* 玻璃档气泡（2026-09-28 v2）：不设任何描边／投影／自身模糊——
-   只靠 accent 淡染底色（12%）区分选中。那三样叠加会把它变成实心色块，是上版的病根。
+/* 玻璃档气泡：不设任何描边／投影／自身模糊——只靠 :style 下发的中性反差底色区分选中
+   （浅态 8% 黑加暗、暗态 13% 白加亮，见 bubbleStyle）。那三样叠加会把气泡撑成实心色块。
    文字色高亮过渡仍留在下面（仅小程序需要） */
 /* #ifdef MP-WEIXIN */
 /* 图标／文字高亮比气泡晚 40ms */
