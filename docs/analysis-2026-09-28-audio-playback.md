@@ -64,12 +64,12 @@ function playSound(type: SoundType): void {
 
 音源映射（`AUDIO_FILES`）：`click`/`delete` → `click2.mp3`、`card`/`switch` → `switch.mp3`、`success`/`shake`/`slide`/`confirm` 各自一份。
 
-音频素材实测参数：
+音频素材实测参数（**2026-09-28 晚用 ffprobe 复测校正过，§9.1 为准**）：
 
 | 文件 | 体积 | 码率 | 时长 |
 |---|---|---|---|
 | `slide.mp3` | 2507 B | 256 kbps | **0.08 s** |
-| `click2.mp3` | 4584 B | 128 kbps | 0.29 s |
+| `click2.mp3` | 4584 B | 73 kbps | **0.50 s**（帧头估算曾误记 0.29 s） |
 | `confirm.mp3` | 10031 B | 256 kbps | 0.31 s |
 | `switch.mp3` | 18390 B | 256 kbps | 0.57 s |
 | `shake.mp3` | 27585 B | 256 kbps | 0.86 s |
@@ -298,7 +298,7 @@ grep -c "CCodec  : allocate" slide.log                                # 重建�
 | **C** | 单实例池（其余不变） | 23 | 12 | 3 | 0%（样本 1） |
 | **D** | 双实例 + **90ms 互斥**（丢弃式） | 22 | 9 | 8 | **71%** |
 | **F** | **单实例 + 130ms 互斥**（＝老板方案） | 6 | 6 | 4 | **100%** |
-| **G** | E 但 `slide` 改指向 **click2.mp3**（78ms→290ms） | – | 20 | 4 | **0%** |
+| **G** | E 但 `slide` 改指向 **click2.mp3**（78ms→504ms） | – | 20 | 4 | **0%** |
 | **H** | 掘金方案：每次 `destroy()`+新建+`autoplay=true` | 15 | 15 | **3** | 100%（幸存者） |
 | **I** | H + 130ms 互斥 | 7 | 7 | 5 | **100%** |
 
@@ -316,7 +316,7 @@ grep -c "CCodec  : allocate" slide.log                                # 重建�
 - 两者叠加（F）：100%。**单实例是优化，互斥是必要条件。**
 
 **③ 换 click2.mp3 是负向优化。**（实验 G）
-- `slide.mp3` = **0.08s，是全库最短的**；`click2.mp3` = **0.29s（长 3.6 倍）**。
+- `slide.mp3` = **78ms，是全库最短的**；`click2.mp3` = **504ms（长 6.5 倍，ffprobe 校正值）**。
 - 换长素材后：AudioTrack session 从 14 掉到 **4**（大量调用连播放器都没建起来），完整率 **0%**。
 - 结论：**不要换**。真要动素材，方向是**更短**（30~50ms 的「哒」），而不是更长。
 
@@ -372,3 +372,118 @@ grep -c "CCodec  : allocate" slide.log                                # 重建�
 2. **探针里引用上层作用域变量时注意拼接位置。** 实验 I 第一次生成时 `let lastPlayTs` 被拼进了
    `if` 块内部，导致 `ReferenceError` 被 `catch (e2) {}` 静默吞掉，表现为「一个字都没有」的零日志，
    极易误判成「方案无效」。**零日志先怀疑产物有语法/作用域问题，别直接下结论。**
+
+---
+
+## 9. 追加：餐次（card）连点丢音 —— 素材时长实测与同口径对照
+
+**触发**：老板在模拟器实测「连点 4 个不同餐次，第 5 次才有声音」，且点击仍有延迟感；
+同时在 `app/static/audio/` 新增了 `click3.mp3` / `click4.mp3`，问是否比 `click2.mp3` 短。
+
+### 9.1 素材真实时长（ffprobe 实测，`app/static/audio/`）
+
+> 工具：`D:/soft/ffmpeg/bin/ffprobe -show_entries format=duration,bit_rate -show_entries stream=sample_rate,channels`
+
+| 文件 | 真实时长 | 体积 | 码率 / 声道 |
+|---|---|---|---|
+| `slide.mp3` | **78ms** | 2.5KB | 256k / 单声道 |
+| `confirm.mp3` | 313ms | 10.0KB | 256k / 单声道 |
+| `click2.mp3` | **504ms** | 4.5KB | 73k / 单声道 |
+| `switch.mp3` | 575ms | 18.0KB | 256k / **立体声** |
+| `shake.mp3` | 862ms | 27.6KB | 256k / 单声道 |
+| `click4.mp3`（新增） | **888ms** | 28.4KB | 256k / **立体声** |
+| `click3.mp3`（新增） | **1104ms** | 35.3KB | 256k / **立体声** |
+| `success.mp3` | 1829ms | 58.5KB | 256k / 立体声 |
+
+**结论：`click3` 是 `click2` 的 2.19 倍长、`click4` 是 1.76 倍长 —— 两个都更长，而且重得多
+（256kbps 立体声 vs 73kbps 单声道）。换成它们只会让丢音更严重。**
+
+> ⚠️ **记录更正**：本文件前文（§2.3 / §8.2）把 `click2.mp3` 估成 0.29s，是当时用帧头估算的错值。
+> ffprobe 实测为 **0.504s**，以此处为准。
+
+### 9.2 餐次卡在代码里用的是哪个素材
+
+`app/components/AddFood.uvue:477 pickMeal()` → `playSound('card')`
+→ `app/stores/settings.ts AUDIO_FILES.card = '/static/audio/switch.mp3'`（**575ms / 18KB / 立体声**）。
+同一条映射也被 `OptionTray`（份量/选项切换）与 `GoalModal`（目标档位切换）使用。
+
+### 9.3 同口径 A/B：只换 `card` 的素材，其余全不动
+
+同台模拟器（MuMu 1280×2772）、同一份代码、同一串手势（进入「米饭」添加页 → 连点 4 张餐次卡）。
+探针打在 `playSound` 内（`debug/audio_probe/app-service.mealprobe.js`），四种素材各跑一遍。
+原始日志：`debug/audio_probe/logs_20260928/`。
+
+**A 组：4 连点，间隔 0.5s（慢速）**
+
+| `card` 素材 | 时长 | 真正起播 | **完整播完** |
+|---|---|---|---|
+| `slide.mp3` | 78ms | 4 | **4 / 4** |
+| `click2.mp3` | 504ms | 4 | 1 / 4 |
+| `click4.mp3` | 888ms | 4 | 1 / 4 |
+| `click3.mp3` | 1104ms | 4 | 1 / 4 |
+| `switch.mp3`（现状） | 575ms | 4 | 1 / 4 |
+
+**B 组：4 连点，间隔 ≈0.25s（更接近真人连点）**
+
+| `card` 素材 | 时长 | 真正起播 | **完整播完** |
+|---|---|---|---|
+| `slide.mp3` | 78ms | 4 | **4 / 4** |
+| `switch.mp3`（现状） | 575ms | 4 | 1 / 4 |
+
+**C 组：4 连点，间隔 ≈65ms（adb 极限，比真人更快）**
+
+| `card` 素材 | 点击 | 被 130ms 互斥跳过 | 真正起播 | 完整播完 |
+|---|---|---|---|---|
+| `slide.mp3` | 4 | 3 | 1 | **1 / 1** |
+| `switch.mp3` | 4 | 2 | 2 | 1 |
+| `click2.mp3` | 4 | 2 | 2 | 1 |
+| `click3.mp3` | 4 | 2 | 2 | 1 |
+| `click4.mp3` | 4 | 3 | 1 | 1 |
+
+**读法**：`slide.mp3` 在三种节奏下都做到「凡是真正起播的，全部完整播完」；
+任何 ≥500ms 的素材都只有最后一次点击能完整播出 —— **这正是「点四次、第五次才听见」的物理来源。**
+
+### 9.4 机制（与 §3 根因链的关系）
+
+§3 的根因（每次 `play()` 重建解码器）依旧成立，但要补上**第二个独立条件**：
+
+1. 每一次 `play()` 都会重新装载素材，并**把上一次没播完的直接 `stop()` 掐掉**（`playSound` 里那条 `ctx.stop()`）。
+2. 所以「这一声能不能被听见」= 下一次点击是否晚于「起播开销 + 素材时长」。
+   - `slide`（78ms）：78 + 约 75 = **约 155ms** → 只要间隔 > 0.15s 就播得完。
+   - `switch`（575ms）：575 + 约 75 = **约 650ms** → 间隔 0.2~0.5s 的连点**必然全部被掐断**，
+     只有停下来之后的那一次（第 5 次）能完整响。
+3. 130ms 的互斥阈值是照最短板素材（`slide` 78ms）调的，**对 575ms 的 `card` 素材等于没有保护**。
+   于是「点点就没声」在餐次/选项卡这一路复现，而滑块（`slide`）那一路看起来是好的。
+
+**延迟感的来源**：每次点击都要从零走一遍「新建解码器 → 装载 → 起播」，
+实测新建解码器 +18~36ms、开始解码 +34~56ms，`slide` 端到端在 **+152~171ms** 播完（素材仅 78ms）
+→ **固定开销约 75ms/次**，再叠加模拟器的音频输出延迟，就是「慢半拍」的手感。
+
+### 9.5 已证伪的一条「省事方案」
+
+**假设**：既然是重赋值 `ctx.src` 触发重新装载，那「源没变就不重赋值」应该能省掉重建。
+**实测**：无效。4 次点击 4 次 `allocate(c2.android.mp3.decoder)` —— 重建由 `play()` 本身触发，
+与是否重赋值 `src` 无关。产物：`debug/audio_probe/app-service.reuse.js`。
+
+### 9.6 结论与建议
+
+| 目标 | 手段 | 现状可行性 |
+|---|---|---|
+| 连点「每一下都听得见」 | `card` 换成 **≤120ms** 的短素材 | ✅ 立刻见效（`slide` 已实测 4/4） |
+| 连点「每一下都完整」 | 互斥阈值改成按素材时长自适应 | ⚠️ 只会更稀疏（跳过的点击更多），不推荐 |
+| 消除 75ms 起播延迟 | 原生 `SoundPool`（自写 UTS 插件） | ⏳ 1.1 |
+| 换成 `click3` / `click4` | —— | ❌ 实测更差（更长更重） |
+
+**一句话**：`card` 这一路的病根不是「互斥没调好」，而是**给点击音配了 575ms 的素材**。
+点击音效的业界惯例是 50~150ms；素材短到 120ms 以内，现有代码（单实例 + 130ms 互斥）就已经够用。
+
+### 9.7 复现命令
+
+```bash
+# 素材时长
+for f in app/static/audio/*.mp3; do ffprobe -v error -show_entries format=duration,bit_rate "$f"; done
+
+# 同口径 A/B（换 card 素材后推送热补丁产物 → 连点 → 抓 logcat）
+python debug/analyze_meal.py debug/audio_probe/logs_20260928/lg_card*.txt
+python debug/audio_latency.py debug/audio_probe/logs_20260928/lg_cardSLIDE_B.txt
+```
