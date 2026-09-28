@@ -1,8 +1,19 @@
 // [变更日志] 设置持久化 store：新增 accent（主题色 mint/ocean/lavender）与 locale（'' = 跟随系统）两字段，随 ct_settings_v1 一并落盘
+// [变更日志] 2026-09-28: 音效丢音修复 —— 全局单实例 + 130ms 互斥（真机 A/B 实测完整播出率 8% → 100%）
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 const STORAGE_KEY = 'ct_settings_v1'
+
+/**
+ * 音效最小播放间隔（互斥）。
+ * 背景：App 端 innerAudioContext 每次 play() 都会重建底层播放器（热态 25~39ms、首载 131ms），
+ * 而滑动相邻音效只隔 30~40ms → 互相顶掉，表现为「没声音 / 声音滞后 / 滑动快就出问题」。
+ * 130ms = 最短板素材 slide.mp3（78ms）+ 重建余量。
+ * 取证与 7 组真机 A/B：docs/analysis-2026-09-28-audio-playback.md
+ */
+const MIN_PLAY_INTERVAL_MS = 130
+let lastPlayTs = 0
 
 /** v1.0 功能开关：自建食物不做 */
 export const USER_FOOD_ENABLED = false
@@ -95,6 +106,10 @@ export const useSettingsStore = defineStore('settings', () => {
     if (!soundEnabled.value) return
     const src = AUDIO_FILES[type]
     if (!src) return
+    // 互斥：间隔不足直接跳过，避免相邻音效互相顶掉（真机实测这是丢音的主因）
+    const now = Date.now()
+    if (now - lastPlayTs < MIN_PLAY_INTERVAL_MS) return
+    lastPlayTs = now
     try {
       const ctx = getAudioContext()
       ctx.src = src
@@ -168,14 +183,14 @@ const AUDIO_FILES: Record<string, string> = {
   confirm: '/static/audio/confirm.mp3',
 }
 
+// 全局单实例（真机 A/B：双实例轮询会让「同一文件的前两次播放」各付一次首载成本，
+// 也正是老板看到的「前两次点击没声音」）。单实例 + 上面的 130ms 互斥 = 完整播出率 100%。
 const audioPool: any[] = []
-let poolCursor = 0
 
 function getAudioContext(): any {
-  if (audioPool.length < 2) {
+  if (audioPool.length < 1) {
     try {
       const a1 = uni.createInnerAudioContext()
-      const a2 = uni.createInnerAudioContext()
       // #ifdef MP-WEIXIN
       if ((uni as any).setInnerAudioOption != null) {
         (uni as any).setInnerAudioOption({
@@ -184,15 +199,13 @@ function getAudioContext(): any {
         })
       }
       // #endif
-      audioPool.push(a1, a2)
+      audioPool.push(a1)
     } catch (e) {}
   }
   if (audioPool.length === 0) {
     return uni.createInnerAudioContext()
   }
-  const ctx = audioPool[poolCursor]
-  poolCursor = (poolCursor + 1) % audioPool.length
-  return ctx
+  return audioPool[0]
 }
 
 export function playSound(type: SoundType, maxDurationMs?: number): void {
