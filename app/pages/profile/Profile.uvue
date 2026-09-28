@@ -217,6 +217,11 @@ try {
   sbH = 0
 }
 
+// [变更日志] 2026-09-28: 设置齿轮「大一点 + 往下一点」（老板指截图）——
+//   胶囊 48→56rpx、图标 26→32rpx、top 由 sbH+13 落到 sbH+21（+8px）；MP 端胶囊对齐常数同步 24→28。
+// [变更日志] 2026-09-28: 头像换新（static/profile/avatar.png＝192² 薄荷瓶插画）、
+//   昵称默认值「老刘」→「轻律生活」（见 stores/user.ts）。
+
 const settings = useSettingsStore()
 const dk = computed((): boolean => settings.darkMode)
 
@@ -257,9 +262,9 @@ onPageScroll((e) => {
   if (v !== scrolled.value) scrolled.value = v
 })
 
-// 设置齿轮位置：默认稿面（右 25、状态栏下 13）；小程序端移到胶囊左侧、与胶囊垂直居中对齐
+// 设置齿轮位置：默认稿面（右 25、状态栏下 21）；小程序端移到胶囊左侧、与胶囊垂直居中对齐
 const gearRight = ref('25px')
-const gearTop = ref((sbH + 13) + 'px')
+const gearTop = ref((sbH + 21) + 'px')
 // #ifdef MP-WEIXIN
 const placeGear = () => {
   try {
@@ -274,7 +279,7 @@ const placeGear = () => {
       if (capTop < sbH / 2) {
         capTop = capTop + sbH
       }
-      gearTop.value = (capTop + (capsule.height - 24) / 2) + 'px'
+      gearTop.value = (capTop + (capsule.height - 28) / 2) + 'px'
     }
   } catch (e) {
     // 取不到胶囊信息时保持默认位置
@@ -510,18 +515,19 @@ const records = computed<Rec[]>(() => {
   font-size: 24rpx;
   margin-top: 6rpx;
 }
+/* [变更日志] 2026-09-28: 齿轮热区 48→56rpx（圆角同步 24→28rpx）、图标 26→32rpx，位置见 script 的 gearTop */
 .gear-circle {
   position: absolute;
-  width: 48rpx;
-  height: 48rpx;
-  border-radius: 24rpx;
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 28rpx;
   background-color: rgba(255, 255, 255, 0.25);
   justify-content: center;
   align-items: center;
 }
 .gear {
-  width: 26rpx;
-  height: 26rpx;
+  width: 32rpx;
+  height: 32rpx;
 }
 .cal-card {
   position: relative;

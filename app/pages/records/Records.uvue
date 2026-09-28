@@ -1,5 +1,8 @@
 <template>
   <view class="page" :style="{ backgroundColor: theme.bg }">
+    <!-- [变更日志] 2026-09-28: 月历翻页加上下界（老板拍板）——左不过「最远一次有记录的那天」所在月，
+         右不过今天所在月；到界时箭头换灰色 SVG 且点击无效；本月内的未来日一并置灰不可选。
+         原实现零边界，且点跨月的灰色未来格会连视图一起跳到下个月。 -->
     <!-- [变更日志] 2026-09-25: 「主要食物」卡片接入百科页入口（携 foodId 跳 pages/encyclopedia/Detail） -->
     <!-- [变更日志] 2026-09-27: 渐变第三档 accentDeep→accentMid（消除发黑）；
          .lr-fcard-row 由 space-between 改 flex-start + 固定 18rpx 间距（2 张卡时不再两端顶死） -->
@@ -20,11 +23,11 @@
       <view class="lr-cal" :style="{ backgroundColor: theme.card }">
       <view class="lr-mrow">
         <view class="lr-mnav-hot" @click="prevMonth">
-          <image class="lr-mnav" :src="asset('records/lr_prev.svg')" mode="aspectFit"></image>
+          <image class="lr-mnav" :src="prevIcon" mode="aspectFit"></image>
         </view>
         <text class="lr-mlabel" :style="{ color: theme.ink1 }">{{ monthLabel }}</text>
         <view class="lr-mnav-hot" @click="nextMonth">
-          <image class="lr-mnav" :src="asset('records/lr_next.svg')" mode="aspectFit"></image>
+          <image class="lr-mnav" :src="nextIcon" mode="aspectFit"></image>
         </view>
       </view>
       <view class="lr-wrow">
@@ -231,6 +234,8 @@ function dotClass(cell: DayCell): string {
 }
 
 function pickDay(cell: DayCell): void {
+  // 未来日不可选（含跨月的灰色未来格）：原实现会把视图一起跳到下个月
+  if (cell.key > todayKey) return
   selKey.value = cell.key
   const parts = cell.key.split('-')
   const cy = parseInt(parts[0])
@@ -241,7 +246,9 @@ function pickDay(cell: DayCell): void {
   }
 }
 
+/** 上一页：到界（视图月＝最远有记录月）时不可点 */
 function prevMonth(): void {
+  if (!canPrev.value) return
   if (viewMonth.value === 0) {
     viewMonth.value = 11
     viewYear.value = viewYear.value - 1
@@ -250,7 +257,9 @@ function prevMonth(): void {
   }
 }
 
+/** 下一页：到界（视图月＝今天所在月）时不可点，不支持翻到未来月 */
 function nextMonth(): void {
+  if (!canNext.value) return
   if (viewMonth.value === 11) {
     viewMonth.value = 0
     viewYear.value = viewYear.value + 1
@@ -290,6 +299,51 @@ onShow(() => {
 function asset(path: string): string {
   return themeAsset(accentId.value, isDark.value, '/static/' + path)
 }
+
+/* ===== 翻页上下界（2026-09-28 老板拍板） ===== */
+
+/** 年月序号（y*12+m，m 0-based）：边界只比大小，不做 Date 运算 */
+function ymOf(y: number, m: number): number {
+  return y * 12 + m
+}
+
+/** 今天所在年月＝右边界 */
+const todayYM = ymOf(nowDate.getFullYear(), nowDate.getMonth())
+
+/** 当前视图年月 */
+const viewYM = computed<number>((): number => ymOf(viewYear.value, viewMonth.value))
+
+/**
+ * 左边界＝「最远一次有记录的那天」所在年月。
+ * 取 food.entries 的最小 ts（不按 dayTotals 取键：那要 Object.keys，uvue 的 uts 侧没先例；
+ * 遍历取 min 是纯算术，三端零风险）。全库无记录时回落今天 → 左右同时到界，符合「没历史可翻」。
+ */
+const firstDataYM = computed<number>((): number => {
+  let minTs = 0
+  for (const e of food.entries) {
+    if (minTs === 0 || e.ts < minTs) minTs = e.ts
+  }
+  if (minTs === 0) return todayYM
+  const d = new Date(minTs)
+  return ymOf(d.getFullYear(), d.getMonth())
+})
+
+const canPrev = computed<boolean>((): boolean => viewYM.value > firstDataYM.value)
+const canNext = computed<boolean>((): boolean => viewYM.value < todayYM)
+
+/**
+ * 翻页箭头：可翻＝主题色箭头（走 asset 五档变体）；到界＝固定灰。
+ * 禁用属「状态色」，不随主题轮值（同 .lr-dot-over 的 #FB5D37 口径），
+ * 故**不登记进 THEMEABLE_ASSETS**，直接按亮暗二选一取灰箭头。
+ */
+const prevIcon = computed<string>((): string => {
+  if (canPrev.value) return asset('records/lr_prev.svg')
+  return '/static/records/lr_prev_off' + (isDark.value ? '_dark' : '') + '.svg'
+})
+const nextIcon = computed<string>((): string => {
+  if (canNext.value) return asset('records/lr_next.svg')
+  return '/static/records/lr_next_off' + (isDark.value ? '_dark' : '') + '.svg'
+})
 
 /** 品牌渐变头：浅态走该档 accent 三档渐变，暗态改 card 纯色（同 Settings 页既定处理） */
 const headerStyle = computed((): Record<string, string> => {
@@ -356,6 +410,9 @@ function numStyle(cell: DayCell): Record<string, string> {
     st['color'] = theme.value.onAccent
   } else if (cell.key === todayKey) {
     st['color'] = theme.value.accent
+  } else if (cell.key > todayKey) {
+    // 未来日：与跨月格同一档灰（不可选，见 pickDay）
+    st['color'] = theme.value.sysIndicator
   } else if (!cell.inMonth) {
     st['color'] = theme.value.sysIndicator
   } else {

@@ -10,6 +10,8 @@
 - **资产**：`static/records/lr_{prev,next,chev}.png` + `lr_meal_{breakfast,lunch,dinner,snack}.png`
   （Pencil bTPUq 图标节点 @4x 透明导出）；火焰复用 `static/profile/flame.png`；食物图复用 `static/icons/<catKey>/<id>.webp`
   （`lr_back.png` 随返回钮退役，文件仍在素材目录未删）
+- **翻页灰箭头（2026-09-28）**：`static/records/lr_{prev,next}_off.svg`（亮 `#B9C9C3`）＋ `_dark.svg`（暗 `#54655E`）。
+  禁用属**状态色**、不随主题轮值（同 `.lr-dot-over` 口径），故**不登记 `THEMEABLE_ASSETS`**，按亮暗二选一直接取路径
 - **入口**：底部 TabBar「日历」格（一级 Tab，`redirectTo`）、首页目标 Pill 日历图标（Home `.pill-cal`）、
   个人中心最近记录「查看全部」（Profile `.head-right` 第三个）——后两者 2026-09-22 起也改 `redirectTo`
 - **出口**：「查看详情 / 查看全部」→ `uni.navigateTo('/pages/records/DayDetail')`（跳转前写 `food.viewDay`）
@@ -26,12 +28,20 @@
   父链 `.lr-cell/.lr-drow/.lr-cal` 全部 `overflow:visible`（全局 `view{overflow:hidden}` 会裁掉 -9 上缘）
 - **能量条**：轨道 = `max(当日总量, 目标)` 满轨，绿色段到目标位、珊瑚段为超出、白刻度钉在目标位置（稿面 1950/1800 例：绿 291 + 珊瑚 24 + 刻度 290 复算一致）
 - **Header 高度 = sbH + 108 写在 :style**：uvue/mp `height` 为 border-box，写 CSS 固定值会被 paddingTop 吃掉（本轮实拍踩坑）
-- **类名 `lr-` 前缀**：mp-weixin 组件类名跨文件冲突铁律
+- **翻页上下界（2026-09-28 Boss 拍板）**：`canPrev = 视图年月(A) > 最远有记录日的年月(B)`、`canNext = A < 今天所在月`；
+  A/B 都是 `ymOf(y,m)=y*12+m` 整数比较，不做 Date 运算。到界时 `prevMonth()/nextMonth()` 首行 guard 直接 return，
+  并把箭头换成灰 SVG（`prevIcon`/`nextIcon` computed：可翻走 `asset()` 五档变体，到界走固定灰路径）。
+  **B 取 `food.entries` 的最小 `ts`**而非 `dayTotals` 取键——后者要 `Object.keys`，uvue 的 uts 侧没先例；
+  遍历取 min 是纯算术，三端零风险。全库无记录时 B 回落今天 → 左右同时到界。
+  **未来日整体拒绝**：`pickDay()` 首行 `if (cell.key > todayKey) return`，`numStyle()` 给未来日补 `sysIndicator` 灰
+  （修掉「点跨月灰格会连视图一起跳到下个月」的老 bug）。
+  逻辑验收：判据按源码逐行同构成 node 脚本跑真日期，21 条断言全通过（含跨年连翻 18 个月到 2025-03 再被拦）。
+  ⚠️ 本机种子数据只有 7 天且在 9 月内，**所以当前左箭头就是灰的**——不是 bug，真实跨月数据积累后自然可用。
 
 ## 边界与降级
 - 选中日无记录：汇总卡显 0、三餐卡显 0 kcal 0 项、主要食物区显「这一天还没有记录」
 - 未超标：超标 pill 整体 `v-if` 隐藏（稿面只有超标态）
-- 点出月日期：选中并自动翻到该月
+- 点**过去的**出月日期：选中并自动翻到该月（不变）；点**未来**的出月灰格：拒绝，不再跳月（2026-09-28）
 - Header 光晕/弧线：稿面为 radial 渐变椭圆，App 端 radial-gradient 未真机验证 → 用半透明白 ellipse 近似（降级方案）
 - **常驻导航栏无返回钮（2026-09-22 胶囊化，Boss 拍板第 4 条）**：本页升为一级 Tab 后，跨阈出栏＝末色底＋标题「最近记录」，
   44×44 返回热区与 `goBack` 一并退役（一级 Tab 无返回语义）；头图左上返回箭同删，`.lr-navtxt` 的 `margin-left` 归零。

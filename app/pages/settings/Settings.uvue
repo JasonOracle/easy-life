@@ -103,7 +103,11 @@
       </view>
     </view>
 
-    <!-- 数据管理 -->
+    <!-- [变更日志] 2026-09-28: 【1.0 不做】「数据管理」模块整块注释掉（老板：「先把设置的数据管理模块
+         注释掉，1.0 版本不做这个了」）。该模块此前本来就是没接 @click 的空桩，注释掉不影响任何行为；
+         备份/恢复方案已出计划书 docs/plan-2026-09-28-records-nav-and-backup.md，整体挪到 1.1。
+         i18n 键 st.dataSec / st.export / st.exportSub / st.import / st.importSub 与图标
+         settings/icon_down + icon_up（含五档主题变体）**刻意保留不删**，便于 1.1 直接复用。
     <text class="sec-title" :style="{ color: theme.ink1 }">{{ t('st.dataSec') }}</text>
     <view class="st-card" :style="{ backgroundColor: theme.card }">
       <view class="row">
@@ -127,6 +131,7 @@
         <image class="chev" :src="asset('home/chev_right.svg')" mode="aspectFit"></image>
       </view>
     </view>
+    -->
 
     <!-- 本机声明 -->
     <view class="shield-row">
