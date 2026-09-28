@@ -1531,7 +1531,7 @@ App 端 `innerAudioContext` **每次 `play()` 都重建底层播放器**（`CCod
 > 判据铁律：`frames delivered` 恒 3456 只证明「写进缓冲」，真判据是 **AudioTrack session 从创建到 stop 的存活时长**。
 
 ### 已证伪的两条路
-- **换 `click2.mp3`（0.29s，比 slide 长 3.6 倍）→ 完整率 0%**。「时间长了就听得见」方向相反 —— 真要动素材只能**更短**。
+- **换 `click2.mp3`（504ms，比 slide 长 6.5 倍；0.29s 是旧估算错值）→ 完整率 0%**。「时间长了就听得见」方向相反 —— 真要动素材只能**更短**。
 - **掘金文里的「每次 destroy + 新建 + autoplay」**：PDA 扫码秒级场景，高频下会干掉在播实例（15 次只活 3 个），不可照搬。
 
 ### 已知取舍与未做项
@@ -1565,3 +1565,21 @@ App 端 `innerAudioContext` **每次 `play()` 都重建底层播放器**（`CCod
 
 素材时长 `slide.mp3` = 78ms → 存活 45~62ms 的**全部被截断（听不见）**，这正是老板说的「没声音」。
 对照产物测完已用本地编译产物还原（md5 一致），设备上不留任何实验代码。
+
+
+---
+
+## card 素材更换：switch(575ms) → tap(131ms)（2026-09-28 16:30）
+
+老板实测「连点 4 个餐次、第 5 次才响」→ 归因（ffprobe + 同口径 A/B，见
+`docs/analysis-2026-09-28-audio-playback.md` 第 9 章）：每次 `play()` 会把上一次
+没播完的掐掉，能否听见＝下一次点击是否晚于「起播开销(≈75ms)+素材时长」；
+`switch` 575+75≈650ms，连点必被掐。130ms 互斥是照 78ms 素材调的，对长素材等于没保护。
+
+- **新增 `app/static/audio/tap.mp3`**：131ms / 5KB / 256k 单声道，ffmpeg 从 click2
+  裁前 82ms + 5ms 淡入 + 32ms 淡出。click2/click3/click4/switch 原样保留。
+- **`settings.ts` `AUDIO_FILES.card` → `tap.mp3`**（餐次卡 ×2、GoalModal 档位 ×1、OptionTray ×1）。
+- 预期：4 连点 @0.25s/0.5s 完整播完 4/4（slide 78ms 同口径已验证）。
+- 老板新加的 click3(1104ms)/click4(888ms) 比 click2(504ms) 更长（且 256k 立体声更重），
+  实测换了更差，**未接线**。
+- commit `575bbf1`；需 HBuilderX 重新编译后真机生效。
