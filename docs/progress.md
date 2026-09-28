@@ -1396,3 +1396,44 @@ adb shell rm -r /data/local/tmp/www_push
 设备侧文件清单留存于 `debug/evidence_20260928/device_www_files_BROKEN_1424.txt`（490 行，坏态）
 与 `device_www_files_REPAIRED.txt`（809 行，修好态）。
 > 若以后遇到同样白屏，也可以直接在 HBuilderX 里**重新点一次"运行到 Android"**做全量同步（会覆盖手工补齐的结果，无害）。
+
+
+---
+
+## 甜度底槽去绿改白 + 默认五分糖（2026-09-28 14:45）
+
+### 1. 老板要求（附截图）
+> 「这个甜度能否把整体背景的绿色去掉，用默认的白色就行。然后默认选择一个五分糖就行。」
+> （追问澄清）「改的是整体的背景，不是选中态」
+
+### 2. 改动
+| 项 | 改前 | 改后 | 落点 |
+|---|---|---|---|
+| 甜度整块底槽 | `theme.chip` → mint 亮 `#E6F9F6`（浅绿） | **`theme.card` → `#FFFFFF`** | `app/components/AddFood.uvue:43`（`.sweet-tray` 的 `:style`） |
+| 甜度默认档 | `def: full`（全糖） | **`def: half`（五分）** | `toolchain/sources/opts_tpl.yaml` 的 `opt_templates.sweet` |
+
+**为什么改 yaml 而不是改代码**：`opts_tpl.yaml` 是该模板集的「全局单一事实来源」，`toolchain/build.py` 由它生成
+`food_library.json`（同时写 `toolchain/dist/` 与 `app/src/data/`）。改一处即覆盖所有引用 `sweet` 的食物，
+无需对任何单品硬编码。运行时读的是 `app/src/data/food_library.json`（`stores/food.ts` import）。
+- 构建命令：`C:/Program Files/Python312/python.exe -X utf8 toolchain/build.py`（依赖 `pypinyin`/`PyYAML`，系统 Python 已具备）
+- 产物校验：json 差异**仅 3 行**——`def: "half"` + 2 个 `generated` 时间戳，无其他漂移
+
+### 3. 真机验收（adb 取色，1280×2772）
+| 项 | 实测 |
+|---|---|
+| 底槽底色 | **`(255,255,255)` 纯白**（`x=120` 竖扫：除电量条 `(216,239,229)`、文字 `(10,79,61)` 外全白；`x=20` 亦全白） |
+| 默认选中 | **「五分」5/10**，选中胶囊阴影区间 `x=560-720`、中心 `640`（正中段） |
+| 点击「全糖」 | 胶囊移到 `x=1024-1168`（最右段） |
+| 点击「无糖」 | 胶囊移到 `x=112-256`（最左段） |
+| 三态底槽 | 均保持 `(255,255,255)` |
+| 设备资源 | **809 == 809，缺失 0**（上一章那个「增量同步推成半截」的坑本轮未复现） |
+
+### 4. 已知取舍
+底槽改白后，它与选中胶囊（同为 `theme.card` 白）**同色**，选中态只能靠胶囊的
+`box-shadow: 0 8rpx 20rpx rgba(10,79,61,0.12)` 阴影圈 + 文字加粗变深色（`ink1`）来区分。
+真机截图里仍可辨（"五分"处能看出浮起的白块），但比"白块压绿底"弱。若老板嫌不够，可给胶囊加中性加暗底
+（`rgba(26,26,26,0.06)` 一类，同 TabBar 的口径），一行数。
+
+### 5. 附带发现（未改，供参考）
+`design/ScreenSpecs.md:115/226` 的稿面文案仍写「已按 中杯 500ml · **全糖** 计算」，
+默认档改为五分后这句示例已与行为不符（纯文案，不影响运行）。
