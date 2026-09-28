@@ -1,6 +1,6 @@
 {
   "v": "1.0.0",
-  "generated": "2026-09-26T18:57:08.969850+00:00",
+  "generated": "2026-09-28T06:40:32.329556+00:00",
   "fingerprint": {
     "version": "1.0.0",
     "sources": [
@@ -12,7 +12,7 @@
       "opts_tpl.yaml"
     ],
     "count": 347,
-    "generatedAt": "2026-09-26T18:57:08.969850+00:00"
+    "generatedAt": "2026-09-28T06:40:32.329556+00:00"
   },
   "vesselTpl": {
     "cup": {
@@ -302,7 +302,7 @@
     "sweet": {
       "key": "sweet",
       "label": "甜度",
-      "def": "full",
+      "def": "half",
       "type": "single",
       "scale": "by_capacity",
       "base_amount": 500,

@@ -3,6 +3,7 @@
   <scroll-view class="af-scroll" direction="vertical" :show-scrollbar="false" v-if="food != null">
     <!-- [变更日志] 2026-09-27: 确认钮渐变深端 accentDeep→accentMid（消除右下角发黑） -->
     <!-- [变更日志] 2026-09-27: 关闭钮底色 theme.chip→theme.card(白) + 补 box-shadow，对齐 GoalModal/FoodPicker 关闭钮三件套 -->
+    <!-- [变更日志] 2026-09-28: 甜度底槽 .sweet-tray 底色 theme.chip(浅绿 #E6F9F6)→theme.card(白)，按老板要求去掉整块绿背景 -->
     <!-- [变更日志] 2026-09-24: 确认钮渐变带角度(135deg)在 App 原生端报 Invalid value → 角度版包入 #ifdef MP-WEIXIN，App 端用无色标渐变 -->
     <!-- [变更日志] 2026-09-27: .af-sheet 改绑 afSheetStyle（底色 ＋ App 端运行时安全区底距） -->
     <view class="af-sheet" :style="afSheetStyle">
@@ -40,7 +41,7 @@
 
       <template v-for="(grpItem, grpIdx) in singleGroups" :key="grpIdx">
         <text class="form-label" :style="{ color: theme.ink1 }">{{ grpItem.label }}</text>
-        <view class="sweet-tray" :style="{ backgroundColor: theme.chip }" v-if="grpItem.key === 'sweet'">
+        <view class="sweet-tray" :style="{ backgroundColor: theme.card }" v-if="grpItem.key === 'sweet'">
           <view
             class="sweet-pill"
             :style="sweetPillStyle(grpItem)"

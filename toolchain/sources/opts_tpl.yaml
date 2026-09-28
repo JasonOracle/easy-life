@@ -18,7 +18,7 @@ opt_templates:
   sweet:
     key: sweet
     label: 甜度
-    def: full
+    def: half        # [2026-09-28] 老板指定：默认五分糖（原 full=全糖）
     type: single
     scale: by_capacity          # delta 按实际容量线性缩放（基准 500ml）
     base_amount: 500
