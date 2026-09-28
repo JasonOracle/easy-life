@@ -1583,3 +1583,23 @@ App 端 `innerAudioContext` **每次 `play()` 都重建底层播放器**（`CCod
 - 老板新加的 click3(1104ms)/click4(888ms) 比 click2(504ms) 更长（且 256k 立体声更重），
   实测换了更差，**未接线**。
 - commit `575bbf1`；需 HBuilderX 重新编译后真机生效。
+
+
+---
+
+## 设计资产滞后排查与反哺（2026-09-28 17:00）
+
+逐块排查 Pencil 稿（47 块板）+ 本地资产与代码的一致性，结果：
+
+**已反哺（Pencil 稿 4 处）**
+1. **浅 Home（Yvg8R）选中气泡**：iOS26 五层白渐变 → v4 中性反差 `#1A1A1A14`（对齐 TabBar.uvue `rgba(26,26,26,0.08)`）。
+2. **暗 Home（ZwE7m）选中气泡**：五层结构禁用 4 效果层（可逆 enabled:false），背景层 → `#FFFFFF21`（对齐暗态 `rgba(255,255,255,0.13)`）。
+3. **FoodPicker 选中行补「选择圈✓」**：浅（n3dgv）/暗（F2SECy）首行各补 22×22 全圆 accent 圈＋白✓（暗版原 off 圈就地转 on）。规格对齐 FoodPicker.uvue `.fp-radio`（44rpx、accent 填充描边、白✓）。
+4. **Theme Palette 补「Status 三档色 v4」板**（`AYdYz`）：green `#20C997`（≤100%）/ amber `#E8B54D`（100~150%）/ coral `#FF9E7D`（>150%）——三档色唯一权威仍是 `stores/goal.ts getCalorieStatus()`。
+
+**判定不滞后（免复查）**
+- FoodPicker 板内无绿竖条（与 9-27 定稿一致）；Typography 登记表抽查一致（Hero XL 104 仅 Home:768、Hero 92 ×4 处、TabLabel 24、退役值零出现）；static/audio ↔ AUDIO_FILES 对齐（tap.mp3 已入库接线，switch.mp3 仍被 `switch` 类型使用）；icons-final 在 .gitignore 且 build.py 引用正常；avatar.png 在位。
+- `gFuXt`（TabBar 探索板，气泡仍为已否的 accent 淡染）＝**探索存档，不改**。
+- docs/history/、code-comment-audit-report 等历史类文档中的旧音效引用（selected-card.mp3 等）＝历史记录，不改。
+
+**过程坑（已回写）**：Pencil `Insert` 后用 `Get(visit)` 读 `bounds.y` 会偏 +50（解析基准坑），**以 raw `n.y` 为准**；`takeScreenshot` 偶发滞后一轮。SelectTarget 未决项清理：「FoodPicker 绿竖条去留」实际 9-27 已拍板（删竖条留圈），记忆已更正。
