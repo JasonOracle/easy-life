@@ -31,6 +31,11 @@
 
 - **`Export` 有 2~3 个调用周期的滞后**：刚改完立刻导出拿到的是字节级旧图。
   等约 20s，再用 PIL 数特征色像素验收。Export 输出 **2.0 px/pt**，单节点可单独导出。
+- **`TakeScreenshot` 同样偶发滞后一轮**（2026-09-28 实测：新区块截出来全白，隔一轮再截就正常）。
+- **`Get(id, visit)` 读 `bounds.y` 会恒偏 +50**（ctx 解析基准坑；同一节点 raw `n.y` 是对的）。
+  → **验证插入位置一律读 raw 属性（`Get(id).y`），别信 visit 里的 `bounds`**。
+- **flex 容器（vertical/horizontal）内的 text 子节点，x/y 会被忽略并报 warning** →
+  居中交给父级 `justifyContent:'center'` + `alignItems:'center'`，别手写坐标。
 
 ## fill / 图片
 
