@@ -40,7 +40,8 @@
       "path": "pages/privacy/PrivacyDialog",
       "style": {
         "navigationStyle": "custom",
-        "backgroundColor": "transparent"
+        "__changelog": "[变更日志] 2026-10-14：backgroundColor 由 transparent 改为 #00000000 —— 微信小程序只接受 hex 色值，不认 CSS 颜色关键字；8 位 hex 的全0 即透明（同项目 Home.uvue navFadeGradient 先例）。",
+        "backgroundColor": "#00000000"
       }
     },
     {
