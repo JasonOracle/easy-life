@@ -4,6 +4,10 @@
 
 **uni-app x（Vue3 + UTS/TS）· 一套代码三端运行：Android App / 微信小程序 / Web H5 · 本地存储 · 无服务器**
 
+###🌐 在线体验（Web H5）
+
+**https://easylife-c7x.pages.dev** —由 master 分支自动部署到 Cloudflare Pages，改代码即上线。
+
 [![演示视频](docs/media/demo_small.gif)](docs/media/demo_light.mp4)
 
 > 🎬 **67 秒走完一遍核心链路**：薄荷亮态首页（还能吃 1098 kcal / 已摄入 702）→ 点击水瓶液体晃动 → 我的 → 设置 → 打开深色模式 → 回首页看暗态 → 依次切换**海洋／薰衣草／薄荷** 三套主题，每换一次回首页看整体换肤。
@@ -18,7 +22,7 @@
 | Android App | 微信小程序 | Web H5 |
 |---|---|---|
 | ![App 首页](docs/screenshots/01_home.png) | ![小程序首页](docs/screenshots/mp-01_home.png) | ![H5 首页](docs/screenshots/h5-01_home.png) |
-| **Android 原生渲染**<br>模拟器 1440×2560<br>目标 1800 kcal | **微信小程序**<br>开发者工具 iPhone 框架<br>目标 2400 kcal | **Web H5**<br>浏览器<br>目标 1800 kcal |
+| **Android 原生渲染**<br>模拟器 1440×2560<br>目标 1800 kcal | **微信小程序**<br>开发者工具 iPhone 框架<br>目标 2400 kcal | **Web H5**<br>[**线上可访问**](https://easylife-c7x.pages.dev)<br>Cloudflare Pages<br>目标 1800 kcal |
 | ![App 日历](docs/screenshots/02_records.png) | ![小程序日历](docs/screenshots/mp-02_records.png) | ![H5 日历](docs/screenshots/h5-02_records.png) |
 | **日历 Tab**：达标色点（绿/橙/珊瑚） | **最近记录**：胶囊按钮按小程序规范内移避让 | **最近记录**：同一份代码，Web 端渲染 |
 
@@ -30,6 +34,31 @@
 | 热量构成环形 + 蛋白质/脂肪/碳水占比 + 营养点评 + 适宜人群/注意事项/推荐吃法 + 相关食物横滑，底部一键按当前餐次添加。 |
 
 > **三端数据各自独立**（本地存储，不跨端同步），故截图里的每日目标与当日记录不同——这是设计如此，不是 bug。
+
+<details>
+<summary><b>Web 端部署方式（Cloudflare Pages）</b></summary>
+
+Web 端走**「本地发行 + 仓库托管产物」**：uni-app x 的编译器集成在 HBuilderX 内部，项目无 `package.json` / `vite.config`，Cloudflare 环境里编不出来，所以产物需本地编译后入库。
+
+```powershell
+# 1. HBuilderX GUI：右键 app 根节点 → 发行 → 网站-PC Web 或手机 H5
+#    ⚠️ 必须选中项目根节点，不是 index.html 文件，否则菜单里没有 Web 项
+# 2. 产物拷入 web/
+rm -rf web && mkdir -p web
+cp -r app/unpackage/dist/build/web/. web/
+# 3. 自检（实测引用形态 / 路由模式 / 产物规模 / 探活）
+python toolchain/verify_web_deploy.py
+# 4. 推送即触发 Cloudflare 自动部署
+git add web/ && git commit -m "chore(web): 更新 Web 发行产物" && git push origin master
+```
+
+**Cloudflare Pages 配置**：框架预设「无」/ 构建命令留空 / 构建输出目录 `/web` / 生产分支 `master`。
+
+因为产物实测为**根绝对路径引用 + hash 路由**，所以**不需要任何 SPA rewrite 规则**。产物 795 文件 / 9.7MB（其中 6.4MB 是 347 张食物图标的 WebP），已压缩、无 sourcemap。
+
+详见 [`web/_cloudflare.md`](web/_cloudflare.md)。
+
+</details>
 
 ---
 
@@ -91,7 +120,7 @@
 | 层 | 技术 |
 |---|---|
 | 框架 | uni-app x（Vue3 语法，UTS/TS 编译为原生代码） |
-| 目标端 | **Android（Vapor 原生渲染）／ 微信小程序 ／ Web H5** |
+| 目标端 | **Android（Vapor 原生渲染）／ 微信小程序 ／ Web H5**（线上：[easylife-c7x.pages.dev](https://easylife-c7x.pages.dev)） |
 | 状态 | Pinia（6 个 store：food / settings / goal / user / device / encyclopedia） |
 | 存储 | `uni.setStorageSync` 本地存储，**无服务器** |
 | 渲染 | 原生渲染 + Canvas 2D（水瓶液体、结算环） |
@@ -208,6 +237,7 @@ python toolchain\hooks.py install         # 新机器必跑
 | `docs/总结uniappx项目的坑与经验.md` | uni-app x 踩坑实录，按「症状→根因→解法→落点」组织 |
 | `docs/screenshots/` | README 用的界面截图（`01_`~`18_` Android／`mp-` 小程序／`h5-` Web） |
 | `docs/media/` | 演示视频与 GIF |
+| `web/` | Web(H5) 发行产物，Cloudflare Pages 直接托管（部署说明见 `web/_cloudflare.md`） |
 | `toolchain/` | 数据处理与生成脚本（Python）＋ 提交闸门 `hooks.py` |
 | `assets/icons-gen/` | AI 生图原始 PNG 留档（生图不可复现，必须留） |
 
