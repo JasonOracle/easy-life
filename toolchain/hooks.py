@@ -21,6 +21,19 @@ AI模型：Qoder (Claude)
   扫描路径修正：源码树是 app/pages|components|stores|composables，
   不是旧文档写的 app/src/（app/src 现在只有 data/）。
   子命令：list / all / pre-commit / <单项> / install（写 .git/hooks/pre-commit，可重复执行）]
+  子命令：list / all / pre-commit / <单项> / install（写 .git/hooks/pre-commit，可重复执行）]
+
+[变更日志]
+修改时间：2026-10-14
+AI模型：WorkBuddy
+修改内容：[Cloudflare 部署前置：pre-commit 豁免新增 web/。
+  背景：Web 发行产物入库时，795 个文件里的 .js 全部命中 LOGGED_SUFFIX 被判「缺变更日志」，
+  而这些是 HBuilderX 编译器产出的部署副本（Cloudflare Pages 直接托管），手改即失效，
+  往产物里塞日志毫无意义。
+  处置：与既有 app/unpackage/、debug/shots/ 同一处置方式加豁免，闸门强度不变
+  （手写代码仍强制带日志，保护文件规则不动）。变更说明落在 commit message。
+  同批新增 toolchain/verify_web_deploy.py：部署前置校验，实测 index.html 引用形态、
+  路由模式、产物规模与探活，用于推导 Cloudflare 配置而非凭印象填写。]
 """
 
 import hashlib
@@ -299,8 +312,13 @@ def check_pre_commit():
         p = ROOT / rel
         if not p.exists() or not rel.endswith(LOGGED_SUFFIX):
             continue
-        if rel.startswith("app/unpackage/") or rel.startswith("debug/shots/"):
-            continue  # 产物与截图不要求日志
+        if rel.startswith("app/unpackage/") or rel.startswith("debug/shots/") or rel.startswith("web/"):
+            # 产物、截图与Web 发行产物不要求日志。
+            # web/ 是 HBuilderX「发行 → 网站-PC Web或手机 H5」产出的部署副本
+            # （Cloudflare Pages 直接托管，见 web/_cloudflare.md），
+            # 内含编译器生成的 .js，与 app/unpackage/ 同性质——手改即失效，
+            # 故豁免而非要求往产物里塞日志。变更说明落在 commit message。
+            continue
         if is_protected(rel):
             continue  # 脚本生成物，日志由 sources/ 侧承担
         head = p.read_text(encoding="utf-8", errors="ignore")[:4000]

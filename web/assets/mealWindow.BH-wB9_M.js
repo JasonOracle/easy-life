@@ -1,0 +1,1 @@
+const e=[{key:"breakfast",label:"早餐",startHour:5,endHour:10},{key:"lunch",label:"午餐",startHour:11,endHour:16},{key:"dinner",label:"晚餐",startHour:17,endHour:21},{key:"snack",label:"夜宵",startHour:22,endHour:4}];function r(){return(e=(new Date).getHours())>=5&&e<11?"breakfast":e>=11&&e<17?"lunch":e>=17&&e<22?"dinner":"snack";var e}export{e as M,r as c};

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 72" width="750" height="72" fill="none">
+  <!-- 后层水波 (较平缓，微透明度形成水深层次) -->
+  <path d="M0,32 C180,12 360,46 540,24 C630,14 690,26 750,30 L750,72 L0,72 Z" fill="#FFFFFF" fill-opacity="0.10"/>
+  <!-- 前层主水波 (连贯有机贝塞尔，收口于底部) -->
+  <path d="M0,42 C140,20 290,56 460,34 C580,18 670,38 750,44 L750,72 L0,72 Z" fill="#FFFFFF" fill-opacity="0.18"/>
+  <!-- 顶峰微弱折射高光线 (提升液态玻璃质感) -->
+  <path d="M0,42 C140,20 290,56 460,34 C580,18 670,38 750,44" stroke="#FFFFFF" stroke-opacity="0.45" stroke-width="1.2" stroke-linecap="round"/>
+</svg>
