@@ -24,16 +24,14 @@
   卡内水平缩进 10px＋margin-top 13px，卡片在 Banner 下方仍留 14px 白底），非叠加悬浮件
 - 进度条 1270/1800＝58.6%；柱 1-6 薄荷渐变（CSS 纯色近似）、柱 7 珊瑚渐变（近似）
 - 趋势 7 柱全标日期（模板在 `v-for="barItem in bars"` 内对每柱渲染 `.bar-date`；`bars` 源自 `food.weekTotals`，日期取每日 `fmtMD`）（2026-09-22 校准）
-- **深色模式（2026-09-21 Boss 指令第 5 项）**：根节点 `:class="{ 'page-dark': dk }"`（dk＝`settings.darkMode`），
-  Tabbar 传 `:dark="dk"`；覆盖样式全部写在 `/* #ifdef MP-WEIXIN */` 块内用后代选择器——
-  uvue 原生端不支持后代选择器，App 端适配时须改逐元素 :class。色板为薄荷深色**临时方案**
-  （底 `#0E211C`／卡 `#162924`／内嵌 `#10201B`／chip `#1E3B33`／主文字 `#EAF9F3`／强调 `#52D6AC`／
-  超标底 `#3A221C`＋字 `#FF8266`），Pencil 暂无暗色稿，待设计校准。开关在 Settings「深色模式」行。
-  **P2 收尾（2026-09-22）**：暗里头图渐变改实色 `#162924`（`.page-dark .header`，隐光晕由覆盖块处理）、
-  遮罩暗色同步 `#162924`；`syncBar()`（`uni.setNavigationBarColor` 深白/浅黑）于 onShow 调用，
-  跨页保持状态栏字色与主题一致（App 端 plus.navigator 留 TODO）。
-  验收：`.workbuddy/shots/audit/j1_profile_dark.png`（页体）＋ `j3_profile_dark_tabbar.png`（含 Tabbar 暗底）
-  ＋ `p10_profile_{dark,light}_{0,120,bottom}.png`（P2 三档浅深对照）
+- **深色模式**：⚠️ **本段原描述（根节点绑 `page-dark` 类 ＋ 覆盖样式写在 `#ifdef MP-WEIXIN` 块内用后代选择器 ＋ 薄荷深色临时色板）已全部作废**。
+  现状（2026-09-27 起）＝**全 App 逐元素随动**：本页 72 处颜色均由 `composables/useTheme.ts` 的 `theme.*` 逐元素行内`:style` 绑定下发，
+  `page-dark` 类**已从代码中彻底移除**，也不存在后代选择器覆盖块（uni-app x 原生端本就不支持后代选择器）。
+  色板来源＝`design/DesignTokens.md` §8 的「三主题 × 亮暗 = 6 档 × 20 角色」矩阵（薄荷深色**临时色板已作废**，改为三主题各自成套）。
+  Tabbar 仍由页面显式传 `:dark="dk"`（主题归属由页面决定，组件不自行读 settings）。
+  状态栏字色走 `useTheme.syncStatusBarStyle()`（**三端同一条路径**，原「App 端 plus.navigator 留 TODO」已作废 ——
+  uni-app x 无 plus.navigator 通道，见 `docs/decisions/ADR-004`）。
+  验收：`debug/shots/audit/` 下 `p10_profile_{dark,light}_*.png` 等真机截图。
 
 - **设置齿轮尺寸/位置（2026-09-28 Boss 指截图「稍微大一点，往下一点」）**：热区 `.gear-circle` 48→**56rpx**（圆角 24→28rpx）、
   图标 `.gear` 26→**32rpx**、默认 top 由 `sbH+13` 下移到 **`sbH+21`**（px）；MP 端「与胶囊垂直对齐」的常数同步 `24→28`。

@@ -13,7 +13,7 @@
 - **数据**：`stores/food.ts` 的 `ALL_FOODS`（分类 chips 去重序）、`searchFoods()`（名称/全拼/首字母
   三路匹配，拼音索引 `py` 由 `toolchain/build.py` 生成）、`vesselLabelOf()` / `vesselSizesOf()`（副行
   「一碗约 200g」拼句）
-- **素材**：`/static/icons/<catKey>/<id>.webp`（库内真实食物图标，353 张）、
+- **素材**：`/static/icons/<catKey>/<id>.webp`（库内真实食物图标，347 张）、
   `/static/common/search_icon.png`（从 Pencil `SearchIcon` 节点 @4x 导出）
 - **被谁用**：`pages/home/Home.uvue`（FAB → 本弹层 → AddFood；AddFood「更换」→ 本弹层回显）、
   `pages/records/DayDetail.uvue`（dd-add → 本弹层 → AddFood）
@@ -52,7 +52,7 @@
 
 - 搜索无结果：列表为空（稿面未定义空态，不擅自加文案）
 - 拼音数据缺失（`py` 为空）：仅名称匹配仍工作（searchFoods 内 null 防护）
-- 353 行一次性渲染：小程序端 image 懒加载未验证，如真机卡顿再上窗口化
+- 347 行一次性渲染：小程序端 image 懒加载未验证，如真机卡顿再上窗口化
 - 触觉：触觉震动已按指令全量下线，避免微信模拟器窗口剧烈抖动，待后续按需开启。
 
 ## 与设计稿的对应

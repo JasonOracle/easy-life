@@ -28,7 +28,7 @@ payload：`{foodId, amount, unit, meal, sweets, extraKcal, kcal}`。
 
 ## 设计决策
 
-- 数据核查（2026-09-21，353 条）：**sweet 甜度组仅 6 条茶饮**（珍珠奶茶/芝士奶盖茶/水果茶/柠檬茶/杨枝甘露/烧仙草）；
+- 数据核查（2026-09-21，347 条）：**sweet 甜度组仅 6 条茶饮**（珍珠奶茶/芝士奶盖茶/水果茶/柠檬茶/杨枝甘露/烧仙草）；
   咖啡 4 条（美式/拿铁/卡布奇诺/速溶）为 sugar_pack/syrup_pump 单选组，走通用 OptionTray；
   multi 加料本轮不渲染（pencil ① 无此区）
 - 甜度「10 格电量」内联实现（不拆组件）：格数映射 `SWEET_BARS{none:0,light:3,half:5,less:7,full:10}`
@@ -42,7 +42,7 @@ payload：`{foodId, amount, unit, meal, sweets, extraKcal, kcal}`。
   `@clickoverlay` 回传关闭＋`@afterleave` 兜底
 - 砝码单颗固定 33×30，小份/一份/大份=1/2/3 颗（pOYw3 钩子：只变颗数不变单体，实心素材压暗 0.85）
 - 确认钮渐变胶囊文案「添加到X餐 · N kcal」；稿上的白色食物小图标**未接**
-  （353 条食物无行图标映射规则，待 Boss 定，见 progress 遗留）
+  （347 条食物无行图标映射规则，待 Boss 定，见 progress 遗留）
 - 默认餐次按当前小时推断；「更换」钮只 emit `change` 不自行开列表（避免弹窗叠弹窗）
 - 餐次卡按稿面量取重建（2026-09-21，pencil nURQn 逐节点测量）：卡 77×96 r16、间距由
   space-between 自然成 9；名称 12px **水平居中单行**（稿面 w25 @x26，top:65.5；选中 700 纯白／未选中 500 白72%）；

@@ -23,7 +23,7 @@ playSound('success') // 操作成功
 
 ## 依赖
 
-- 本地存储 `ct_settings_v1`；被设置页「深色模式」「音效」两个 toggle 与 Profile 页（page-dark 类）消费
+- 本地存储 `ct_settings_v1`；被设置页「深色模式」「音效」两个 toggle 与 Profile 页等全App 页面消费
 - 素材在 `app/static/audio/`（click2 96ms／confirm 313ms／shake 862ms／success 1320ms），映射表 `AUDIO_FILES`
 - `App.uvue` onLaunch 延迟 1.5s 调 `warmupAudio()`
 
@@ -31,7 +31,7 @@ playSound('success') // 操作成功
 
 - 自建食物开关放这里，不在各处散落 if（AGENTS 约束）
 - 深色模式 2026-09-21 起解除恒关锁定（Boss 指令第 5 项）：`setDarkMode` 持久化；
-  个人中心＋设置两页随动（两页根节点各绑 `page-dark`），不走 `uni.setAppTheme`（App 端能力，小程序端无法强制切系统主题）（2026-09-22 校准）
+  全App 逐元素随动（7 页 8 组件均接 `composables/useTheme.ts`，早期「仅两页 ＋ `page-dark` 类」方案已废弃），不走 `uni.setAppTheme`（App 端能力，小程序端无法强制切系统主题）（2026-09-22 校准）
 - **音频层＝方案A（Boss 2026-09-28 拍板）**：曾试过「单实例 + 全局 130ms 互斥」，实测长素材
   （shake/success）起播即锁死全 App 音效窗口（连点餐次卡多次才响一次）。改为每类型独立实例后
   类型间并行；间隔只留「同类型连点保护」：click 类 130ms（96ms 素材 + 热态重建 25~39ms 实测下限）、

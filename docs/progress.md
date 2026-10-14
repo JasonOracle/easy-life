@@ -6,10 +6,10 @@
 
 ---
 
-## 当前阶段：MVP 主体已落地（5 页 / 8 组件 / 5 store / 353 条食物库），TabBar 已重构为「三 Tab 液态玻璃悬浮胶囊＋会跑的选中气泡」且**浅色态参数由 Boss 定稿收官**、Records 升为一级 Tab；余下待 App／Web 真机回归（含气泡 Worklet）与暗态染色图标等待拍板项
+## 当前阶段：MVP 主体已落地（8 路由 / 9 组件 / 6 store（5 Pinia ＋ 百科只读索引）/ 347 条食物库），TabBar 已重构为「三 Tab 液态玻璃悬浮胶囊＋会跑的选中气泡」且**浅色态参数由 Boss 定稿收官**、Records 升为一级 Tab；余下待 App／Web 真机回归（含气泡 Worklet）与暗态染色图标等待拍板项
 
 > 口径提示（2026-09-22）：历史流转中带旧计数（347 条、`app/data/`、Pixabay 图源）的过往记录已归档至 `docs/history`，当前进度板不再承载此类流水历史；
-> 现在的真值一律以本条与 `AGENTS.md` 目录结构为准：**353 条**食物、数据产物在 `app/src/data/`、图标唯一入库副本在 `app/static/icons/`。
+> 现在的真值一律以本条与 `AGENTS.md` 目录结构为准：**347 条**食物、数据产物在 `app/src/data/`、图标唯一入库副本在 `app/static/icons/`。
 
 ## 最近进度
 
@@ -107,7 +107,7 @@
   - [ ] `docs/Review.md`（评审复盘 / 决策依据）
   - [ ] `design/DesignTokens.md`（**色值唯一事实来源**）
   - [ ] `design/VisualLanguage.md`（视觉语言 v3.0）＋ `design/ScreenSpecs.md`（8 屏几何）
-  - [ ] `app/prototype/EasyLife_Protoype.html`（交互原型）
+  - [ ] `app/prototype/EasyLife_Prototype.html`（交互原型）
 - [ ] 确认**当前设计源＝Pencil**（`pencil-new.pen`，画板按页面分：Home `Yvg8R`／个人中心 `Vtp9C`／Settings `T0IUr`／最近记录 `bTPUq`／单日详情 `VEWYt`／弹层⓪ `n3dgv`／结算 `Dz3YV`＋`MU1O4`／目标滑条 `qnNST`）；
       Ardot 文件 `727289305476547` 已于 2026-09-21 废止（仅早期 8 屏规格来源，见 `design/ScreenSpecs.md`）
 - [ ] 确认现有源码清单：页面 `app/pages/**`、组件 `app/components/**`（各配同名 `.md`）、store `app/stores/*.ts`、数据产物 `app/src/data/food_library.json`（生成物，禁手写）
@@ -127,13 +127,13 @@
 - [ ] 暗色设计稿到位后**校准深色态**（现为薄荷深色临时色板；接缝与状态栏字色一并复查）
 - [ ] 营养数据**人工核对 30 条**（`toolchain/sources/nutrition_checklist.md`，进度 **0/30**；核过一条改一行「核对状态」）——这是数据可信度的唯一未过关卡
 - [ ] 人工审两份初稿：`icons_v1_visual.yaml`（器皿是否准确）＋ `icons_v1_usage.yaml`（选项归属）
-- [ ] 图标集成优化：列表**懒加载 + LRU 缓存**（现 353 张全量常驻）
+- [ ] 图标集成优化：列表**懒加载 + LRU 缓存**（现 347 张全量常驻）
 - [ ] 合规 critic loop 复评
-- [ ] 「菜品」分类**在稿面无 Tab** → 353 条里 59 条筛不到，补第 8 个 Tab 还是并类（`ScreenSpecs.md` §3/§11）
+- [ ] 「菜品」分类**在稿面无 Tab** → 347 条里 58 条筛不到，补第 8 个 Tab 还是并类（`ScreenSpecs.md` §3/§11）
 
 **B. 等 Boss 拍板（AI 不擅自决定）**
 
-- [ ] **p348–p353 六条图标重跑生图**：现为 92×92 小图（其余 512×512），且 `assets/icons-gen/` 无原始 PNG；重跑要再花 API 额度。命令＝`python -X utf8 toolchain/gen_icons.py` → `python toolchain/compress_icons.py assets/icons-gen assets/icons-final --max-size-kb 25` → `python -X utf8 toolchain/build.py`
+- [x] ~~p348–p353 六条图标重跑生图~~ → **已作废（2026-09-27）**：那六条演示行已整体摘除（353→347），不存在 92×92 小图。现存 347 张图标全部 512×512，无需重生。
 - [ ] **食物缩略图「画框托底」浅色模式**：暗黑已定（`#0A1612` recessed），浅色**原文标「需老板拍板」，至今未拍**（`docs/design/2026-09-22-food-thumb-plate/README.md` §4）
 - [ ] `toolchain/gen_tab_icons.py`（原生 tabBar 图标）**去留**：Tabbar 已定案为共享组件、不走原生 tabBar，该脚本零引用
 - [ ] `toolchain/fetch_icons.py` 真实图源分支**去留**：现方案不用 Pixabay/Pexels/Unsplash 抓图
@@ -144,7 +144,7 @@
 
 **C. 已完成（追溯用，不再列细节）**
 
-- [x] 食物库 v1.0：清单冻结 → 营养数据 → 批量生图 → 压缩 → 多源打包（现 **353 条**，产物 `app/src/data/food_library.json`）
+- [x] 食物库 v1.0：清单冻结 → 营养数据 → 批量生图 → 压缩 → 多源打包（现 **347 条**，产物 `app/src/data/food_library.json`）
 - [x] 5 页 + 8 组件 + 5 store 全链路（Home／Profile／Settings／Records／DayDetail）
 - [x] #26 Vapor、#27 page-container 弹层壳、#28 常驻导航栏、#29 TabBar 毛玻璃＋随滚动渐显（**其中 #29 的 fade 渐显已被后续「三 Tab 悬浮胶囊」批次废止**）
 - [x] TabBar 重构为**三 Tab 悬浮液态玻璃胶囊＋会跑的选中气泡**（四关键帧 CSS transition）、Records 升一级 Tab、页底预留 78、`DesignTokens.md` §7 补录（小程序端验收通过，App 端 Worklet 留 TODO）；**浅色态参数已由 Boss 定稿**＝胶囊底 60% ＋ 气泡 18% 加白 60% 1px 描边与 `0/4/12 #000 6%` 投影，暗态保持现状

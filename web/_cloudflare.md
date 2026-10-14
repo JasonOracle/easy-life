@@ -21,7 +21,7 @@
 
 # ── 为什么这样配 ──────────────────────────────────────────────────────
 # 1. 产物是标准静态站点：web/index.html + web/assets/ + web/static/，
-#    795 个文件 / 9.7MB，index.html 里引用的是根绝对路径
+#    796 个文件 / 9.7MB，index.html 里引用的是根绝对路径
 #    （/assets/xxx.js、/static/xxx.svg），Cloudflare 部署在域名根目录，正好匹配。
 # 2. 路由是 hash 模式（manifest.json → web.router.mode = "hash"），
 #    不需要任何 SPA rewrite 规则。若将来改成 history 模式，
@@ -36,6 +36,6 @@
 # 2. 清空并重建 web/：
 #    rm -rf web && mkdir -p web
 #    cp -r app/unpackage/dist/build/web/. web/
-# 3. 校验文件数一致：find web -type f | wc -l  ==  795
+# 3. 校验文件数一致：find web -type f | wc -l  ==  796
 # 4. 提交并推 master，Cloudflare 自动触发重新部署：
 #    git add web/ && git commit -m "chore(web): 更新 Web 发行产物" && git push origin master

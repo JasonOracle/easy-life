@@ -18,7 +18,7 @@
 ## 2. 挂载 Hook 安全结果
 执行 `python toolchain/hooks.py all` 扫描：
 - **`schema-version-check`**: ✅ 绿灯通过
-- **`food-data-integrity`**: ✅ 绿灯通过（353条食物库及数据流完全吻合，源码无手写）
+- **`food-data-integrity`**: ✅ 绿灯通过（347 条食物库及数据流完全吻合，源码无手写）
 - **`class-prefix-collision`**: ✅ 绿灯通过（全局类名无冲突）
 - **`pre-commit`**: ✅ 绿灯通过
 - **`end-of-session`**: ⚠️ 弱警告（因为改了 23 个源码文件，但尚未更新 progress.md，符合规则“只警告不拦”，后续提交即可无视）

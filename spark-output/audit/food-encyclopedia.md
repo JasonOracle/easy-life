@@ -156,7 +156,7 @@
 | token (角色,mode,accent) 二维表 | ✅ 机会点1直接落地 | 需新增 chip/ring/overlay-mask/icon 4组角色 |
 | accent/status 分轴 | ✅ 营养tag用accent，热量超标警示用status | 本页暂无status色使用场景，CTA确认是accent非status |
 | i18n自有TS词典 | ✅ 机会点2词条schema可直接写入 | 单位键/插值模板需在词典schema新增category |
-| ~700-800词条量级 | ⚠️ 本页新增约40-50词条 | 量级可控；需确认food_library.json 353食物名是否进词典（上一轮定案A1外部id-keyed map） |
+| ~700-800词条量级 | ⚠️ 本页新增约40-50词条 | 量级可控；需确认 food_library.json 347 食物名是否进词典（上一轮定案A1外部id-keyed map） |
 
 ## 下一步建议
 

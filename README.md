@@ -54,7 +54,7 @@ git add web/ && git commit -m "chore(web): 更新 Web 发行产物" && git push 
 
 **Cloudflare Pages 配置**：框架预设「无」/ 构建命令留空 / 构建输出目录 `/web` / 生产分支 `master`。
 
-因为产物实测为**根绝对路径引用 + hash 路由**，所以**不需要任何 SPA rewrite 规则**。产物 795 文件 / 9.7MB（其中 6.4MB 是 347 张食物图标的 WebP），已压缩、无 sourcemap。
+因为产物实测为**根绝对路径引用 + hash 路由**，所以**不需要任何 SPA rewrite 规则**。产物 796 文件 / 9.7MB（其中 6.4MB 是 347 张食物图标的 WebP），已压缩、无 sourcemap。
 
 详见 [`web/_cloudflare.md`](web/_cloudflare.md)。
 

@@ -8,8 +8,8 @@
 
 **轻律生活** — 轻量级卡路里追踪 App，帮助用户快速记录每日饮食，直观展示摄入数据。
 
-- 版本：v1.0 MVP
-- 状态：MVP 主体已落地（5 页 ＋ 8 组件 ＋ 5 store 在微信模拟器跑通，353 条食物库），处于「还原度收尾 ＋ 工程化加固」阶段
+- 版本：v1.0 MVP（对外演示物料与文档口径为 **v1.1**，2026-10-14 封版；`manifest.json` 的 versionName 仍为 1.0.0，出包前再升）
+- 状态：MVP 主体已落地并**三端跑通**（8 路由 ＋ 9 组件 ＋ 6 store ＝ 5 个 Pinia store ＋ 1 个百科只读索引，**347 条**食物库；Android 原生 / 微信小程序 / Web H5 均已验收），处于「还原度收尾 ＋ 工程化加固」阶段
 - 目标平台：uni-app x（Vue3 + TS + Pinia），本地存储，无服务器
 
 ## 技术栈
@@ -100,7 +100,7 @@
    - `docs/PRD.md`（产品需求）：作为原始业务愿景参考
    - `docs/Review.md`（评审复盘）：作为决策依据参考
    - `design/VisualLanguage.md`（视觉语言）：做设计相关任务时读取
-   - `app/prototype/EasyLife_Protoype.html`（交互原型）：做 UI/交互相关任务时读取
+   - `app/prototype/EasyLife_Prototype.html`（交互原型）：做 UI/交互相关任务时读取
 
 **⚠️ 绝对防冲突原则**：如果其他文档中的旧描述与 `progress.md` 或本文件中的最新记录发生冲突，**一律以 `progress.md` 为唯一准绳**。严禁脑补退回旧逻辑。
 
@@ -160,8 +160,10 @@
    - 评估本次开发是否改变了核心约束或架构。如果有，反向刷新 `AGENTS.md` 和 `docs/PRD.md`
 4. **Git 分支隔离**：
    - **日常备份**：提交代码到 `dev` 分支（不触发线上自动部署）
-   - **线上发布**：仅当 Boss 明确要求"部署/发布/上线"时，才将 `dev` 合并入 `main`
-   - **绝对禁止**：日常开发中直接向 `main` Push
+   - **线上发布**：仅当 Boss 明确要求"部署/发布/上线"时，才将 `dev` 合并入 `master`
+   - **绝对禁止**：日常开发中直接向 `master` Push
+   - ⚠️ **本仓库没有 `main` 分支**（勿沿用通用习惯写法）。GitHub 默认分支已是 `master`，
+     Cloudflare Pages 按默认分支拉取，故若默认分支误设为 `dev`，线上会部署开发分支。
 
 ---
 
@@ -262,7 +264,7 @@ $tok  = "<微信工具 设置→安全 里的 MCP Token>"
 
 ### 2. 设计幻觉
 - **设计基准分工（三层不得跨层取用）**：
-  - **视觉设计 / 视觉尺度取证** → 以 Pencil 设计稿 + 原型 `app/prototype/EasyLife_Protoype.html` 为准（Ardot 及其链接已于 2026-09-21 废止，不再作为参考）。稿面的作用是**取证依据**（用来核对字号、间距、色值「应当是多少」），**不是实现细节的无条件唯一真相**。
+  - **视觉设计 / 视觉尺度取证** → 以 Pencil 设计稿 + 原型 `app/prototype/EasyLife_Prototype.html` 为准（Ardot 及其链接已于 2026-09-21 废止，不再作为参考）。稿面的作用是**取证依据**（用来核对字号、间距、色值「应当是多少」），**不是实现细节的无条件唯一真相**。
   - **Typography / 字号体系** → 以 `design/DesignTokens.md` §3「Typography v2」的登记体系为准。该节以**当前代码实施事实**为登记来源，Pencil 稿面在其中只承担**字号证据**角色。
   - **布局与实现状态** → 以**当前代码实际状态 + 最近人工验收结果**为准。**Pencil 布局已确认滞后于当前代码时（2026-09-25 审计结论），不得据此反向修改代码**——不因为稿里有旧布局，就把代码回退成旧布局。
 - **不在设计稿上的元素不许加**：设计稿里没有的 tab、按钮、卡片、动效，AI 不许「顺手补上」。觉得应该加 → 先问 Boss。
@@ -406,9 +408,9 @@ app/src/
 - [x] **已完成（2026-09-23）：全工程 UTS 语法合规与抗坑加固** —— 清理所有组件中的自闭合标签（`<input></input>`, `<AddFood></AddFood>`）；修复 `GoalModal.uvue` 缺失的根视图闭合标签；修复 `PrivacyDialog.uvue` 废弃属性与不兼容伪类。
 - [x] **已完成（2026-09-22，Boss 五条拍板）：TabBar 液态玻璃重构** —— 两 Tab 通栏 → **三 Tab 悬浮胶囊＋会跑的选中气泡**（四关键帧，MP 端 CSS transition）；Records 升一级 Tab（删返回钮、入口改 `redirectTo`）；#29 的 fade 渐显**整条废弃**；页底预留 40 → **78**；6 色值＋几何入 `DesignTokens.md` §7。小程序端验收（三格换页／暗态／四关键帧逐值吻合，证据见 `docs/progress.md` 同日前端进度与 `debug/shots/tab8~13*.png`）
 - [x] **已完成（2026-09-22，Boss 定稿）：浅色态「气泡隐身」修正** —— 胶囊底 88%→**60%**、气泡加白 60% 1px 描边（折射亮边）＋ 投影 `0 4 12 rgba(0,0,0,.06)`（悬浮高度差）；暗态与 low 降级档未动。验收＝三页浅底截图 ＋ 暗态回归 `debug/shots/f_prof_dark.png`
-- [x] **已完成（2026-09-25）：暗态／多主题染色图标产出** —— `toolchain/gen_theme_variants.py` 以主绿锚点 `#58B984` 做全库同一 delta 的色相旋转，为 53 张可染色底稿各产出 `_dark`／`_ocean`／`_ocean_dark`／`_lavender`／`_lavender_dark` 五档变体（磁盘共 161 份带后缀资产，含 TabBar 三图标及其 `_sel` 态），并生成运行时白名单 `app/composables/themeAssetList.ts`（自动生成禁手改）；页面经 `themeAsset(accent, dark, src)` 查表替换，**未登记的资产原样回落底稿**（App 端引用缺失资源是静默空白图标、零报错）。语义色资产（超标橙红／删除红／火焰橙）与无彩稿按判定规则整体跳过，不做「只转一半」的破坏性改写。三主题 × 亮暗矩阵已安卓真机验收
+- [x] **已完成（2026-09-25）：暗态／多主题染色图标产出** —— `toolchain/gen_theme_variants.py` 以主绿锚点 `#58B984` 做全库同一 delta 的色相旋转，为 56 张可染色底稿各产出 `_dark`／`_ocean`／`_ocean_dark`／`_lavender`／`_lavender_dark` 五档变体（磁盘共 289 份带后缀资产，含 TabBar 三图标及其 `_sel` 态），并生成运行时白名单 `app/composables/themeAssetList.ts`（自动生成禁手改）；页面经 `themeAsset(accent, dark, src)` 查表替换，**未登记的资产原样回落底稿**（App 端引用缺失资源是静默空白图标、零报错）。语义色资产（超标橙红／删除红／火焰橙）与无彩稿按判定规则整体跳过，不做「只转一半」的破坏性改写。三主题 × 亮暗矩阵已安卓真机验收
 - [ ] **App／Web 端真机回归**：气泡动画的 **Worklet 实现**（现仅 MP 端 CSS transition，App 端阶段跳变＋TODO）、`backdrop-filter` 原生端支持度（未验，代码用 `#ifdef MP-WEIXIN` 包住）
-- [ ] **p348–p353 六条后补食物的图标是 92×92**（其余 353−6＝347 张为 512×512），且 `assets/icons-gen/` 里没有它们的原始 PNG。要提清晰度须跑 `gen_icons.py`（花生图额度）→ **等 Boss 拍板**
+- [x] ~~p348–p353 六条后补食物图标 92×92~~ → **已作废（2026-09-27，commit `c9fad64`）**：那六条本是 `add_foods.py` 为凑设计稿补的演示行（脚本自述「跑完即废」），已整体摘除→ **353 → 347，全链四源对齐**。现存 347 张图标**全部 512×512**，0 张 92×92，此待办标的物已不存在。
 - [ ] `toolchain/gen_tab_icons.py` 现无任何文档/脚本引用（疑似一次性工具）→ 去留待 Boss
 - [ ] **食物缩略图「画框托底」只做了暗黑态**（`docs/design/2026-09-22-food-thumb-plate/README.md`）：浅色态该节原文标「**需老板拍板**」，至今未拍 ⇒ 浅色**保持现状不加托底**，AI 不得自行显影 `.row-thumb` 里那句 `#EAF9F3`
 - [ ] `toolchain/debug_shot.ps1` 与 `debug/records_check.js` 内含**明文微信工具 MCP Token**（且已进 git 历史）→ 是否改环境变量待 Boss

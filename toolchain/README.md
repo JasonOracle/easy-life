@@ -4,12 +4,12 @@
 AI模型：Qoder (Claude)
 修改内容：[1. 源文件口径 5 份 → 6 份：icons_v1_visual.yaml（生图槽位）已纳入 validate.py，
               校验项由「三源 id 对齐」改为「四源 id 对齐」，并在数据流一节登记「漏校验导致绿灯放过计数漂移」这一坑;
-           2. 实测产出表按磁盘真值刷新：353 条 / 181.6KB / conf 179·163·11 / 有单个克重 196 条;
-           3. 图标目录口径改准：唯一入库副本 app/static/icons（353 张，347 张 512×512 + 6 张 92×92），
+           2. 实测产出表按磁盘真值刷新：347 条 / 181.6KB / conf 179·163·11 / 有单个克重 196 条;
+           3. 图标目录口径改准：唯一入库副本 app/static/icons（347 张，**全部 512×512**），
               assets/icons-final 已进 .gitignore 降级为可重建缓存，同步目标路径 app/src/static/icons 系错误写法已更正;
            4. 新增 D 章节登记构建闸门 hooks.py（五道闸 + install 到 .git/hooks）；脚本表补齐实际存在的脚本，
               并标注 gen_tab_icons.py 无任何引用、去留待 Boss 拍板;
-           5. C 章节引用分布表按 353 条实测重算；已知风险登记人工核对进度 0/30]
+           5. C 章节引用分布表按 347 条实测重算；已知风险登记人工核对进度 0/30]
 -->
 
 <!--
@@ -34,13 +34,13 @@ AI模型：CodeBuddy (DeepSeek-V4.1-Flash)
 
 | 流水线 | 输入 | 产物 | 消费方 |
 |---|---|---|---|
-| **A. 营养数据** | `sources/*.yaml`（6 份） | `app/src/data/food_library.json`（353 条 / 181.6KB） | App 启动加载 |
-| **B. 图标素材** | Agnes 文生图（`gen_icons.py`） | 原始 PNG `assets/icons-gen/`（347 张，入库存档）→ 压缩 `assets/icons-final/`（本地缓存，已 gitignore）→ **App 唯一入库副本 `app/static/icons/`（353 张 / 5.61MB）** | App 图片资源 |
+| **A. 营养数据** | `sources/*.yaml`（6 份） | `app/src/data/food_library.json`（347 条 / 181.6KB） | App 启动加载 |
+| **B. 图标素材** | Agnes 文生图（`gen_icons.py`） | 原始 PNG `assets/icons-gen/`（347 张，入库存档）→ 压缩 `assets/icons-final/`（本地缓存，已 gitignore）→ **App 唯一入库副本 `app/static/icons/`（347 张 / 5.61MB）** | App 图片资源 |
 | **C. 份量与选项** | `vessel_tpl.yaml` + `opts_tpl.yaml` + `icons_v1_usage.yaml` | 合并进 A 的产物（`vessel` / `opts` / `pieceWeight` 字段） | App 热量计算 |
 | **D. 构建闸门** | 源码树 + 生成物 + git 暂存区 | `hooks.py` 五道闸（见文末 D 章） | 提交/构建前拦截 |
 
 > **图标的已知缺口（2026-09-22）**：`app/static/icons/` 里 347 张是 512×512，
-> 后补的 **p348–p353 六张是 92×92 小图**（`assets/icons-gen/` 里**没有**它们的原始 PNG，
+> ⚠️ **已作废（2026-09-27）**：后补的 p348–p353 六张曾是 92×92 小图（`assets/icons-gen/` 里没有它们的原始 PNG，
 > 因为它们没跑过批量生图）。重跑这 6 张要再花 API 额度，**尚未做**。
 
 ---
@@ -51,7 +51,7 @@ AI模型：CodeBuddy (DeepSeek-V4.1-Flash)
 
 | 文件 | 内容 | 谁维护 |
 |---|---|---|
-| `sources/icons_v1.yaml` | **353 项食物清单**（id / name / cat） | 人工维护（**唯一事实来源**） |
+| `sources/icons_v1.yaml` | **347 项食物清单**（id / name / cat） | 人工维护（**唯一事实来源**） |
 | `sources/nutrition_v1.yaml` | 营养数据（cal/protein/carb/fat/unit/piece_weight/basis/confidence） | `gen_nutrition.py` 生成 + 人工核 |
 | `sources/icons_v1_usage.yaml` | 份量与选项引用（vessel_tpl / opts_tpl） | `gen_usage_spec.py` 生成 + 人工审 |
 | `sources/icons_v1_visual.yaml` | 生图槽位（container / content / toppings / state / view） | `gen_visual_spec.py` 生成 + 人工审（**2026-09-22 起纳入校验**） |
@@ -105,7 +105,7 @@ opts_tpl.yaml ────────┘
 ```
 
 > ⚠️ **为什么「四源对齐」是后补的（2026-09-22 踩坑登记）**：`icons_v1_visual.yaml`（生图槽位）此前**完全不在
-> `validate.py` 的校验范围内**，于是它停在 347 条、清单已经补到 353 条，**校验一路绿灯**，直到要重跑生图时
+> `validate.py` 的校验范围内**，于是它停在 347 条、清单已经补到 347 条，**校验一路绿灯**，直到要重跑生图时
 > 才发现这六条没有槽位。**教训：多源模式下「没被校验的源」等于「会静默漂移的源」**——
 > 新增任何一份 `sources/*.yaml` 都必须同时进 `validate.py` 的 `SOURCES`。
 > 现该闸已加：生图槽位缺条目、或残留 `gen_visual_spec.py` 的 `MISSING: true` 占位，**validate 直接红**。
@@ -114,13 +114,13 @@ opts_tpl.yaml ────────┘
 
 | 项 | 值 |
 |---|---|
-| 食物条数 | **353**（定案时 347，p348–p353 为后补六条） |
+| 食物条数 | **347**（定案时 347，p348–p353 为后补六条） |
 | 产物体积 | **181.6KB** |
 | 分类分布 | 主食 63 ｜ 菜品 59 ｜ 肉类蛋类 52 ｜ 蔬菜 60 ｜ 水果 40 ｜ 饮品 40 ｜ 零食 39 |
 | 置信度分布 | `conf=3` 179 ｜ `conf=2` 163 ｜ `conf=1` 11 |
-| 有器皿分段 | 353 条（全部） ｜ 器具模板 18 个 ｜ 选项模板 4 个 |
+| 有器皿分段 | 347 条（全部） ｜ 器具模板 18 个 ｜ 选项模板 4 个 |
 | 有选项 | 10 条 ｜ 有单个克重（`piece_weight`）**196 条** |
-| 图标 | `app/static/icons/` 353 张 / **5.61MB** / 平均 16.3KB ｜ 347 张 512×512 ＋ p348–p353 六张 92×92 |
+| 图标 | `app/static/icons/` 347 张 / **5.61MB** / 平均 16.3KB ｜ 347 张 512×512 ＋ p348–p353 六张 92×92 |
 
 ## 图标同步（打包时一并处理）
 
@@ -129,7 +129,7 @@ App 打包只会包含 `app/` 目录内的文件，所以 `assets/` 下的产物
 ```
 assets/icons-final/<catKey>/<id>.webp        ← 压缩中间产物（toolchain 侧，已进 .gitignore = 本地缓存）
         ↓  build.py 增量同步（只复制缺失或更新的）
-app/static/icons/<catKey>/<id>.webp          ← App 侧副本 = **唯一入库副本**（353 张）
+app/static/icons/<catKey>/<id>.webp          ← App 侧副本 = **唯一入库副本**（347 张）
 ```
 
 **入库分工（2026-09-22 去重定案）**：
@@ -137,7 +137,7 @@ app/static/icons/<catKey>/<id>.webp          ← App 侧副本 = **唯一入库�
 - `assets/icons-final/` — 512 WebP 压缩产物**不再入库**（与 App 副本字节全等），内容与 `app/static/icons/` 重复。重建命令：
   `python toolchain/compress_icons.py assets/icons-gen assets/icons-final --max-size-kb 25`
 - `app/static/icons/` — **唯一入库副本**，App 直接引用。新克隆机器没有 `icons-final/` 也能正常跑（`build.py` 会打印跳过提示）
-- ⚠️ **缺口**：p348–p353 六条**没有**原始 PNG（未跑批量生图），App 内目前是 **92×92 小图**（其余 512×512）；
+- ⚠️ **缺口（已消解）**：p348–p353 六条没有原始 PNG、App 内曾是 **92×92 小图**（其余 512×512）；
   重跑生图要再花 API 额度，**尚未做**
 
 **引用约定**：
@@ -392,7 +392,7 @@ AI 图**必须逐张人工检查**，重点四项：
 
 **白底问题已被文生图方案天然解决**——prompt 里直接写 `pure white background, soft drop shadow`，实测 10/10 张四角纯白。**不再需要抠图、图生图或 CSS 套底。**
 
-**体积一项已改完**：`compress_icons.py` 的 `max_size_kb` 默认已下调到 **25KB**（`--max-size-kb` 参数），降档循环终止条件同步调整，实测 353 张零超标。
+**体积一项已改完**：`compress_icons.py` 的 `max_size_kb` 默认已下调到 **25KB**（`--max-size-kb` 参数），降档循环终止条件同步调整，实测 347 张零超标。
 
 ---
 
@@ -426,11 +426,11 @@ AI 图**必须逐张人工检查**，重点四项：
 ## B.6 制作食物库图标的执行顺序（定案流程）
 
 > **执行状态（2026-09-22）**：本流程已跑完一轮，产出 347 张原始 PNG（`assets/icons-gen/`）→ 512 WebP → App 副本。
-> 下面第 1 步的「240 张 / 5000 vs 18000 条」是当时的规划口径，现已定为**每食物一张专属图**（现库 353 条 = 353 张）；
-> 后补的 p348–p353 六条**没走本流程**（无原始 PNG、App 内暂用 92×92 小图），补跑时从第 2 步起照常执行。
+> 下面第 1 步的「240 张 / 5000 vs 18000 条」是当时的规划口径，现已定为**每食物一张专属图**（现库 347 条 = 347 张）；
+> 后补的 p348–p353 六条**没走本流程**（无原始 PNG、曾用 92×92 小图）—— **该六条已于 2026-09-27 整体摘除，本流程无需补跑**从第 2 步起照常执行。
 
 1. **定食物清单**：每个食物一张专属图（现 353 条；曾规划 Top 200 专属图 + ~40 品类兜底图 ≈ 240 张，兜底方案已作废）
-   - 前置条件：~~Boss 拍板 v1.0 食物库做 **5000 条**还是 **18000 条**~~ → ✅ 已定 **347 条起步**（后补至 353 条）
+   - 前置条件：~~Boss 拍板 v1.0 食物库做 **5000 条**还是 **18000 条**~~ → ✅ 已定 **347 条起步**（后补至 347 条）
 2. **建器皿对照表**：人工维护「食物 → 标准器皿 + 视角 + 必填特征」，建议落 `toolchain/sources/icons.yaml`
 3. **人工审对照表**（审核前置）：只看器皿一列，5 秒/个。**这是唯一能挡住"铁盆当火锅"这类错误的关卡**
 4. **按模板拼 prompt**：`{器皿} + {内容物} + {逐项枚举配料} + {状态词} + {视角}` + 固定骨架
@@ -453,7 +453,7 @@ AI 图**必须逐张人工检查**，重点四项：
 |---|---|---|
 | `sources/vessel_tpl.yaml` | **计量器具模板集**（18 个器具：杯/碗/盘/个/串/包…，各带容量档位） | 人工维护 |
 | `sources/opts_tpl.yaml` | **选项模板集**（`sweet` / `topping` / `sugar_pack` / `syrup_pump`） | 人工维护 |
-| `sources/icons_v1_usage.yaml` | 353 项食物各自引用哪个器具模板、哪些选项模板 | 脚本生成（`gen_usage_spec.py`）+ 人工审 |
+| `sources/icons_v1_usage.yaml` | 347 项食物各自引用哪个器具模板、哪些选项模板 | 脚本生成（`gen_usage_spec.py`）+ 人工审 |
 
 架构依据（`FoodLibraryPlan.md` 10.2 / 10.2.1）：**模板 + 引用**，不给任何单品硬编码字段。
 食物条目不写死容量与选项，只写 `vessel_tpl: cup` / `opts_tpl: [sweet, topping]`。
@@ -491,7 +491,7 @@ AI 图**必须逐张人工检查**，重点四项：
 | 摩卡 | 给甜度选项 | 无选项（配方固定） |
 | 纯茶（绿茶/红茶/乌龙/普洱/茉莉花茶） | 给 `sweet` + `topping` | **自己泡的茶不含糖** → `mug` + 无选项；只有茶饮店现制产品（水果茶/柠檬茶）才给 `sweet` |
 
-## 当前引用分布（353 项，实测自产物 `foods` 字段）
+## 当前引用分布（347 项，实测自产物 `foods` 字段）
 
 | vessel_tpl | 数量 | | opts_tpl | 数量 |
 |---|---|---|---|---|

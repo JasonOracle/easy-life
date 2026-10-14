@@ -10,11 +10,11 @@ AI模型：Qoder (Claude)
 [变更日志]
 修改时间：2026-09-22
 AI模型：Qoder (Claude)
-修改内容：[1. §1 全局与 §3 组件清单加 midbutton 废止批注（Tabbar 中间上凸加号未采用，实际＝双 Tab 共享组件 Tabbar.uvue＋首页右上 FAB）；2. §5 与 §7 深色模式条目按现状改写（已小范围实现：仅个人中心＋设置两页随动，色板为临时方案）；3. §6.1 食物图计数滞后修正：347→353 张，注明唯一入库副本 app/static/icons/ 与其中 6 张 92×92 待重生图；4. §7「不用 emoji 占位」项图源由 Pixabay 更正为 Agnes AI 文生图]
+修改内容：[1. §1 全局与 §3 组件清单加 midbutton 废止批注（Tabbar 中间上凸加号未采用，实际＝双 Tab 共享组件 Tabbar.uvue＋首页右上 FAB）；2. §5 与 §7 深色模式条目按现状改写（已小范围实现：仅个人中心＋设置两页随动，色板为临时方案）；3. §6.1 食物图计数已再校准：353→**347 张**，注明唯一入库副本 app/static/icons/，全部 512×512；4. §7「不用 emoji 占位」项图源由 Pixabay 更正为 Agnes AI 文生图]
 -->
 
 > **本文件是唯一给设计工具用的文档。** 与 `design/VisualLanguage.md` 冲突时，以本文件为准；
-> 与其余任何文档冲突时，一律以本文件 + `app/prototype/EasyLife_Protoype.html` 为准。
+> 与其余任何文档冲突时，一律以本文件 + `app/prototype/EasyLife_Prototype.html` 为准。
 >
 > 设计工具：Figma / Pixso 均可。画板 375 × 812（iPhone X），@1x 出图，标注用 pt。
 
@@ -31,9 +31,9 @@ AI 生图的失败方式几乎都一样：**一次性要一整页 → 得到一�
 | 2 | 只建**组件**（第 3 章，一个一个建，不要一次全要） | "建一个名为 Bottle/Default 的 component" |
 | 3 | 拼页面（第 4 章，一屏一屏来） | "用已建的组件拼 Home 页，按元素树顺序" |
 | 4 | 补图标（第 6 章 SVG 清单） | 直接粘 SVG，不要让 AI 重画 |
-| 5 | 截图对照 | 打开 `app/prototype/EasyLife_Protoype.html` 逐屏截图，并排比对 |
+| 5 | 截图对照 | 打开 `app/prototype/EasyLife_Prototype.html` 逐屏截图，并排比对 |
 
-> **截图比文档准。** 第 5 步不能省——原型 HTML（`app/prototype/EasyLife_Protoype.html`）是所有页面的真源，文字描述必然有损耗。
+> **截图比文档准。** 第 5 步不能省——原型 HTML（`app/prototype/EasyLife_Prototype.html`）是所有页面的真源，文字描述必然有损耗。
 >
 > ⚠️ **色值以 `design/DesignTokens.md` 为准**（2026-09-19 从 Ardot 变量集导出）；本文件的色值已同步校正，但设计稿仍是唯一准绳。
 
@@ -189,14 +189,14 @@ AI 生图的失败方式几乎都一样：**一次性要一整页 → 得到一�
 | 新的一天 | 瓶子倒空 |
 | 首次进入 | 直接设定水位，**不晃动** |
 | 长食物名 | 单行省略，不换行 |
-| 深色模式 | **小范围测试中（2026-09-22 校准）**：仅「个人中心＋设置」两页随动（Settings 开关 → `settings.darkMode` → 页根类 `page-dark` ＋ Tabbar `:dark`），色板为薄荷深色**临时方案**（底 `#0E211C`／卡 `#162924`／强调 `#52D6AC`），**无暗色设计稿，待校准**；其余页面暂不随动 |
+| 深色模式 | **全App 随动（2026-09-27 起）**：7 个页面 ＋ 8 个组件全部接`composables/useTheme.ts`，逐元素行内 `:style` 绑定（原「仅个人中心＋设置两页」是小范围测试期口径，已废弃；`page-dark` 类已彻底移除）（Settings 开关 → `settings.darkMode` → 页根类 `page-dark` ＋ Tabbar `:dark`），色板为薄荷深色**临时方案**（底 `#0E211C`／卡 `#162924`／强调 `#52D6AC`），**无暗色设计稿，待校准**；其余页面暂不随动 |
 
 ---
 
 ## 6. 图标
 
 ### 6.1 来源
-- 食物图：**Agnes AI 文生图**（WebP，353 张**全专属**，无品类兜底复用；唯一入库副本 `app/static/icons/`。其中 p348–p353 六条现为 92×92 小图待重生图，其余为 512×512）
+- 食物图：**Agnes AI 文生图**（WebP，347 张**全专属**，无品类兜底复用；唯一入库副本 `app/static/icons/`。347 张**全部 512×512** —— 原 p348–p353 六条演示行已于 2026-09-27 整体摘除）
 - UI 图标：iconfont.cn SVG，24 viewBox / 1.8px stroke / round cap
 - **容器与状态图标（杯/碗/份/个/糖粒）：本项目自制，清单见下**
 
@@ -227,7 +227,7 @@ AI 生图的失败方式几乎都一样：**一次性要一整页 → 得到一�
 - ❌ 不用 emoji 占位（食物图等 Agnes AI 文生图，见 §6.1；头像用文字）
 - ❌ 数字不放瓶内
 - ❌ 不用纯黑文字
-- ❌ 深色模式不做**全 App 随动**（2026-09-22 校准：现仅「个人中心＋设置」两页随动测试，临时色板见 §5；首页/记录等其余页面暂不随动）
+- ✅ 深色模式已做**全 App 逐元素随动**（2026-09-27 起7 页 8 组件全覆盖；早期「不做全 App 随动」是小范围测试期口径，已作废测试，临时色板见 §5；首页/记录等其余页面暂不随动）
 - ❌ 不留任何橙色残留（历史遗留，`rgba(255,90,60)` 等已清理）
 
 ---
@@ -241,4 +241,4 @@ AI 生图的失败方式几乎都一样：**一次性要一整页 → 得到一�
 | `design/Critique_Lenny.md` | 设计审视（独特性诊断） |
 | `docs/PRD.md` / `docs/Review.md` / `docs/FoodLibraryPlan.md` / `docs/progress.md` | **不要喂给设计工具**——产品与数据文档，混进来只会稀释视觉规格 |
 
-> `EasyLife_UIDesign.md` 已不存在于仓库，原表该项作废；如需 onboarding 4 屏逻辑，请在 `app/prototype/EasyLife_Protoype.html` 中读取。
+> `EasyLife_UIDesign.md` 已不存在于仓库，原表该项作废；如需 onboarding 4 屏逻辑，请在 `app/prototype/EasyLife_Prototype.html` 中读取。

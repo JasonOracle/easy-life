@@ -4,7 +4,7 @@
 [变更日志]
 修改时间：2026-09-22
 AI模型：Qoder (Claude)
-修改内容：[首部「现行方案」表按实际状态校准：食物图标计数 347→353（p348–p353 六条后补，其中 6 张现为 92×92 小图待重生图）；产物唯一入库副本改为 app/static/icons/（assets/icons-final/ 已列入 .gitignore，仅作压缩中间产物）；补 assets/icons-gen/ 现状（347 张原始 PNG，六条后补项无原图）。正文历史方案部分未动]
+修改内容：[首部「现行方案」表按实际状态校准：食物图标计数最终为 **347**（该轮曾 347→353，2026-09-27 六条演示行摘除后回退）；产物唯一入库副本改为 app/static/icons/（assets/icons-final/ 已列入 .gitignore，仅作压缩中间产物）；补 assets/icons-gen/ 现状（347 张原始 PNG，六条后补项无原图）。正文历史方案部分未动]
 -->
 
 > ⚠️ **本方案已废止（2026-09-19），仅作决策历史保留**
@@ -16,10 +16,10 @@ AI模型：Qoder (Claude)
 > **现行方案**（以这两份为准）：
 > | 项 | 现方案 |
 > |---|---|
-> | 食物图标 | **Agnes AI 文生图**（`agnes-image-2.5-flash`），353 张**全专属图**，已完成（2026-09-22 校准：库现 353 条＝首批 347 ＋ p348–p353 六条后补；**已知待办**：这六条无原始生图 PNG，且在 App 内为 92×92 小图（其余 512×512），重跑生图需 API 额度） |
+> | 食物图标 | **Agnes AI 文生图**（`agnes-image-2.5-flash`），347 张**全专属图**，已完成（2026-09-27 校准：原 353 条中的 p348–p353 六条演示行已整体摘除，现 **347 张全部 512×512**） |
 > | 流程与 Prompt 规约 | `toolchain/README.md` B 章节 |
 > | 范围与产出规格 | `docs/FoodLibraryPlan.md`「v1.0 范围冻结」 |
-> | 产物 | **唯一入库副本** `app/static/icons/<catKey>/<id>.webp`（353 张）。`assets/icons-final/` 为压缩中间产物（与 App 副本逐文件全等），2026-09-22 起列入 `.gitignore` 不再入库；`assets/icons-gen/` 仍入库＝347 张原始 PNG + `_report.json`（p348–p353 六条无原图） |
+> | 产物 | **唯一入库副本** `app/static/icons/<catKey>/<id>.webp`（347 张）。`assets/icons-final/` 为压缩中间产物（与 App 副本逐文件全等），2026-09-22 起列入 `.gitignore` 不再入库；`assets/icons-gen/` 仍入库＝347 张原始 PNG + `_report.json` |
 > | UI 图标 | iconfont.cn SVG —— **这部分仍然有效**，见 §5/§6 |
 >
 > **实测对比**：真实照片方案白底命中率 **0/29**；AI 文生图方案白底命中率 **347/347（100%）**。
