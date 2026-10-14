@@ -1763,3 +1763,34 @@ Web 端回归：22 日 1448→1680、新行落晚餐末尾、Hero 百分比同�
 ### 待办
 - 音效 v3 仍需 Boss 戴耳机耳验。
 - 提交本轮（AGENTS.md＋README.md＋docs/screenshots/）；是否推 dev 待 Boss 当次授权。
+
+## 2026-10-14 v1.1 封版 · 小程序兼容修复 + 品牌更名
+
+### 品牌更名
+- **中文名「轻律生活」不变，英文名 CalTrack → EasyLife**。i18n 三处用户可见文案（`st.brand` / `hm.brand` / `pd.run1`）＋ 28 份文档机械替换；原型文件重命名 `CalTrack_Protoype.html` → `EasyLife_Prototype.html`（顺手修 Protoype→Prototype 拼写）。
+- **故意保留** `caltrack`：① Android 包名 `com.caltrack.kaluli`（标识符≠展示名）；② 历史记录与变更日志里的改名证据。
+
+### 小程序编译错误修复（e949d07）
+微信开发者工具报 `[pages/privacy/PrivacyDialog.json 文件内容错误] ["backgroundColor"]: "transparent" is not hexColor`。
+- **根因**：小程序 `pages.json` 只接受 hex 色值，不认 CSS 颜色关键字。
+- **修法**：`transparent` → `#00000000`（8 位 hex 全 0 即透明，同项目 `Home.uvue` navFadeGradient 先例）。
+- **排查过但无需改**：`globalStyle.navigationBarTextStyle:"black"` 属微信官方枚举（white/black），非颜色字段。**教训：不是所有非 hex 值都是错，`pages.json` 里颜色字段与枚举字段要分开看。**
+
+### 分支策略
+- `dev`＝开发分支，`master`＝主分支（当前＝v1.1 可部署版），同在提交点。
+- **GitHub 默认分支已从 dev 改为 master**（`gh repo edit --default-branch master`）—— Cloudflare Pages 拉默认分支，不改会部署错分支。
+
+### 首页视觉修复（真机像素取证）
+- 顶部半透明白带+间隙：`.hm-nav`(fixed，高度由内容撑开) 与占位层 `.header-spacer`(写死 190rpx) 不一致，多出 19px → 占位层改为按 nav 真实内容求和（`NAV_CONTENT_RPX`）。⚠️ 改 nav 字号须同步改该常量。
+- 贴纸被裁平上弧：**真根因在素材不在 CSS** —— 椭圆描边顶端切在画布边界（alpha y=0 处仅 44px 宽）→ 三张素材四周补 48px 透明留白（840x620→936x716），容器高 103rpx→107rpx 保持比例。
+- `hm-nav-fade` 改 `v-if` 门控：原生端 `opacity:0` 的层仍参与合成（同 ADR-004 同类坑）。
+
+### 演示数据（v1.1 封版）
+- `SEED_PLAN` 重造为 14 天（10/1~10/14）：红（1/4/8）橙（3/6/9）绿（其余），呈真实饮食节奏。
+- 今天（14号）仅早午餐＝702 kcal/39%，晚餐夜宵留空供录屏现场添加。
+- **方案 A 定案**（因单条食物在一人合理份量下最多约 2170 kcal，撑不起珊瑚档 >2700）。
+
+### 工具坑
+- **录屏必须设备端 nohup**：`adb shell screenrecord` 会话一断进程即被杀（只录到 5~9 秒）。正解 `adb shell "nohup screenrecord ... &"` 让父进程变 init(1)。
+- **切主题可直改存储**：`databases/DCStorage` 表 `DC_1376278592_storage` 的 `ct_settings_v1`（JSON 含 accent/darkMode）。**必须写 SQL 文件 push 后执行**，直接传 `-Command "UPDATE..."` 会被多层引号转义打爆。
+- H5 编译 `cli.exe publish --platform web` 报「appid 不存在」—— **H5 编译需 HBuilderX 登录 DCloud 账号**，CLI 环境未登录编不出来。
