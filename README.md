@@ -2,12 +2,34 @@
 
 > 一款卡路里记录 App。记完一顿饭，水位涨一截、晃两下、归于平静。
 
-**uni-app x（Vue3 + UTS/TS）· 本地存储 · 无服务器**
+**uni-app x（Vue3 + UTS/TS）· 一套代码三端运行：Android App / 微信小程序 / Web H5 · 本地存储 · 无服务器**
 
 [![演示视频](docs/media/demo_small.gif)](docs/media/demo_light.mp4)
 
-> 🎬 上图是 App 的完整操作流：**首页查看今日摄入 → 点「+」添加食物（选食物→选分量→确认，水位实时上涨）→ 日历看历史达标情况 → 个人中心看统计 → 设置切换深色模式**。
+> 🎬 上图是 Android App 的完整操作流：**首页查看今日摄入 → 点「+」添加食物（选食物→选分量→确认，水位实时上涨）→ 日历看历史达标情况 → 个人中心看统计 → 设置切换深色模式**。
 > 高清视频（100 秒 · 720×1280）见 [`docs/media/demo_light.mp4`](docs/media/demo_light.mp4)；原始高码率版本归档于 `demo.mp4`。
+
+---
+
+## 三端一览
+
+同一套 `.uvue` 源码，编译到三个目标。**主验证端＝Android**（uni-app x 原生渲染），小程序与 H5 为辅助链路。
+
+| Android App | 微信小程序 | Web H5 |
+|---|---|---|
+| ![App 首页](docs/screenshots/01_home.png) | ![小程序首页](docs/screenshots/mp-01_home.png) | ![H5 首页](docs/screenshots/h5-01_home.png) |
+| **Android 原生渲染**<br>模拟器 1440×2560<br>目标 1800 kcal | **微信小程序**<br>开发者工具 iPhone 框架<br>目标 2400 kcal | **Web H5**<br>浏览器<br>目标 1800 kcal |
+| ![App 日历](docs/screenshots/02_records.png) | ![小程序日历](docs/screenshots/mp-02_records.png) | ![H5 日历](docs/screenshots/h5-02_records.png) |
+| **日历 Tab**：达标色点（绿/橙/珊瑚） | **最近记录**：胶囊按钮按小程序规范内移避让 | **最近记录**：同一份代码，Web 端渲染 |
+
+小程序端有**独家页面**——食物百科（带营养点评与「添加到晚餐」直连）：
+
+| 小程序 · 食物百科 |
+|---|
+| ![百科](docs/screenshots/mp-03_encyclopedia.png) |
+| 热量构成环形 + 蛋白质/脂肪/碳水占比 + 营养点评 + 适宜人群/注意事项/推荐吃法 + 相关食物横滑，底部一键按当前餐次添加。 |
+
+> **三端数据各自独立**（本地存储，不跨端同步），故截图里的每日目标与当日记录不同——这是设计如此，不是 bug。
 
 ---
 
@@ -69,19 +91,20 @@
 | 层 | 技术 |
 |---|---|
 | 框架 | uni-app x（Vue3 语法，UTS/TS 编译为原生代码） |
+| 目标端 | **Android（Vapor 原生渲染）／ 微信小程序 ／ Web H5** |
 | 状态 | Pinia（6 个 store：food / settings / goal / user / device / encyclopedia） |
 | 存储 | `uni.setStorageSync` 本地存储，**无服务器** |
 | 渲染 | 原生渲染 + Canvas 2D（水瓶液体、结算环） |
-| 主题 | 三主题（薄荷 / 海洋 / 薰衣草）× 亮暗 = **6 档token 矩阵**，逐元素 `:style` 绑定 |
+| 主题 | 三主题（薄荷 / 海洋 / 薰衣草）× 亮暗 = **6 档 token 矩阵**，逐元素 `:style` 绑定 |
 | 数据线 | Python（`toolchain/`）：YAML → JSON、图标生成变体、提交闸门 |
 
 **规模**：8 条路由 / 9 组件 / 6 store / 347 条食物库 / 约 1.2 万行 `.uvue` + `.ts`。
 
 ---
 
-## 四、界面预览
+## 四、界面预览（Android 端）
 
-> 全部截图取自 **Android 模拟器 · uni-app x 原生渲染**（1440×2560 原图缩至 640 宽）。演示数据为内置种子（10/1~10/14 真实饮食节奏，日历红/橙/绿混排）。
+> 以下截图取自 **Android 模拟器 · uni-app x 原生渲染**（1440×2560 原图缩至 640 宽）。演示数据为内置种子（10/1~10/14 真实饮食节奏，日历红/橙/绿混排）。小程序与 Web 端截图见上方「三端一览」。
 
 ### 首页 · 记录流
 
@@ -183,7 +206,7 @@ python toolchain\hooks.py install         # 新机器必跑
 | `design/DesignTokens.md` | ★ 色值 / 字号 / 圆角唯一事实来源 |
 | `docs/decisions/` | 架构决策记录 ADR（TabBar 玻璃胶囊 / 渲染红线 / 调试坑位等 5 份） |
 | `docs/总结uniappx项目的坑与经验.md` | uni-app x 踩坑实录，按「症状→根因→解法→落点」组织 |
-| `docs/screenshots/` | README 用的界面截图 |
+| `docs/screenshots/` | README 用的界面截图（`01_`~`18_` Android／`mp-` 小程序／`h5-` Web） |
 | `docs/media/` | 演示视频与 GIF |
 | `toolchain/` | 数据处理与生成脚本（Python）＋ 提交闸门 `hooks.py` |
 | `assets/icons-gen/` | AI 生图原始 PNG 留档（生图不可复现，必须留） |

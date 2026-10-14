@@ -1794,3 +1794,28 @@ Web 端回归：22 日 1448→1680、新行落晚餐末尾、Hero 百分比同�
 - **录屏必须设备端 nohup**：`adb shell screenrecord` 会话一断进程即被杀（只录到 5~9 秒）。正解 `adb shell "nohup screenrecord ... &"` 让父进程变 init(1)。
 - **切主题可直改存储**：`databases/DCStorage` 表 `DC_1376278592_storage` 的 `ct_settings_v1`（JSON 含 accent/darkMode）。**必须写 SQL 文件 push 后执行**，直接传 `-Command "UPDATE..."` 会被多层引号转义打爆。
 - H5 编译 `cli.exe publish --platform web` 报「appid 不存在」—— **H5 编译需 HBuilderX 登录 DCloud 账号**，CLI 环境未登录编不出来。
+
+## 2026-10-14 三端截图补齐（微信小程序 + Web H5）
+
+Boss 提供 5 张截图，已入库 `docs/screenshots/` 并裁掉模拟器外框统一 480 宽：
+- `mp-01_home.png` / `mp-02_records.png` / `mp-03_encyclopedia.png`（微信小程序，开发者工具 iPhone 框架）
+- `h5-01_home.png` / `h5-02_records.png`（Web H5，浏览器）
+
+### README 改动（201→224 行）
+- 顶部新增「**三端一览**」表：Android / 小程序 / Web 三列并排，各含首页+日历两行；小程序独有「食物百科」单列。
+- 技术栈表补「目标端」行；界面预览章标题改为「（Android 端）」并注明另两端见上方。
+
+### 观察到的三端差异（**均为设计如此，非缺陷**）
+| 项 | Android | 小程序 | Web H5 |
+|---|---|---|---|
+| 每日目标 | 1800 kcal | 2400 kcal | 1800 kcal |
+| 当日记录 | 小米粥/卤肉饭（702） | 鱼香肉丝/扬州炒饭（1151） | 同Android 但进度不同 |
+- 三端**本地存储各自独立、不跨端同步**，故数据不同。
+
+### 三端截图暴露的实现差异
+- **小程序端胶囊按钮内移**：右上「···⊕」按微信规范避让，未像 App 那样贴屏幕右缘。
+- **H5 端容器高度自适应**：首页在浏览器里按内容伸缩（夜宵卡片露出更多），App 端固定视口比例。
+
+### Cloudflare 部署（方案 A，待Boss 操作）
+- 需Boss 在 HBuilderX GUI 里「发行 → Web-H5」编译一次（**必须先登录 DCloud 账号**，CLI 编不出来）。
+- 产物落地后：拷入仓库 `web/` → Cloudflare「框架预设=无 / 构建命令留空 / 构建输出目录=/web」。
