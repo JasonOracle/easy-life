@@ -6,7 +6,7 @@
 // [变更日志] 2026-09-24: 新增水瓶液体 Canvas 2D 渲染组件——非响应式引擎（useLiquid）逐帧 step+draw，@ready 主通道 + onMounted setTimeout 兜底（App 端 @ready 首挂可能不触发）
 // [变更日志] 2026-09-26: 新增 CAVITY_PATH/traceCavityPath 与 glassFill prop——draw() 改为 save()→clip() 到瓶内腔真实轮廓→玻璃底 fillRect→…→restore()；.bl-canvas 高 236→242rpx、scaleY 分母 236→242（1 设计单位仍=1rpx，水位映射不变）。消除 .bottle-cavity 矩形在瓶肩两侧各 50.5rpx 的楔形侧漏（方案 C）
 import { ref, watch, onMounted, onUnmounted } from 'vue'
-import { LiquidEngine, ColorMode } from '../composables/useLiquid'
+import { LiquidEngine, ColorMode, getSharedEngine } from '../composables/useLiquid'
 
 const props = defineProps<{
   ratio: number
@@ -17,6 +17,7 @@ const props = defineProps<{
 }>()
 
 let engine: LiquidEngine | null = null
+let sharedEngineRef: LiquidEngine | null = null
 let ctx: any | null = null
 let cvW = 0
 let cvH = 0
@@ -114,21 +115,26 @@ onMounted(() => {
 })
 
 function initEngine(): void {
-  engine = new LiquidEngine()
-  engine.setRatio(props.ratio)
-  engine.startIntro()
+  const isFirstMount = sharedEngineRef == null
+  engine = getSharedEngine(props.ratio)
+  sharedEngineRef = engine
   lastTime = Date.now()
   scheduleFrame()
 
   // Intro settle after 600ms, then enable idle after 400ms more
-  introDelayTimer = setTimeout(() => {
-    if (engine != null) {
-      engine.finishIntro()
-      setTimeout(() => {
-        if (engine != null) engine.enableIdle()
-      }, 400)
-    }
-  }, 600)
+  // 只在首次挂载跑：复用实例时 introSettled 已为 true，再跑会把 currentRatio 打回 0.06 造成水位重新爬升
+  if (isFirstMount) {
+    introDelayTimer = setTimeout(() => {
+      if (engine != null) {
+        engine.finishIntro()
+        setTimeout(() => {
+          if (engine != null) engine.enableIdle()
+        }, 400)
+      }
+    }, 600)
+  } else {
+    engine.finishIntro()
+  }
 }
 
 function scheduleFrame(): void {
@@ -471,6 +477,9 @@ watch(() => props.ratio, (val) => {
 onUnmounted(() => {
   if (rafId != null) cancelAnimationFrame(rafId)
   if (introDelayTimer != null) clearTimeout(introDelayTimer)
+  // 只解除本组件对单例的引用；引擎实例本身保留在模块级，供下次挂载复用（跨 tabBar 保活水位）
+  sharedEngineRef = null
+  engine = null
 })
 
 const BUBBLE_DRIFT_AMP = 3.0

@@ -37,28 +37,23 @@
 		"defaultAppTheme": "light",
 		"distribute": {
 			"package": "com.caltrack.kaluli",
-			"minSdkVersion": 21,
+			"minSdkVersion": 23,
 			"targetSdkVersion": 32,
 			"abiFilters": [
 				"arm64-v8a"
 			],
 			"modules": {},
 			"icons": {
-				"hdpi": "D:/User/Downloads/Gemini_Generated_Image_xqqzslxqqzslxqqz (1) (1).png",
-				"xhdpi": "D:/User/Downloads/Gemini_Generated_Image_xqqzslxqqzslxqqz (1) (1).png",
-				"xxhdpi": "D:/User/Downloads/Gemini_Generated_Image_xqqzslxqqzslxqqz (1) (1).png",
-				"xxxhdpi": "D:/User/Downloads/Gemini_Generated_Image_xqqzslxqqzslxqqz (1) (1).png"
+				"hdpi": "src/brand/icons/icon_hdpi.png",
+				"xhdpi": "src/brand/icons/icon_xhdpi.png",
+				"xxhdpi": "src/brand/icons/icon_xxhdpi.png",
+				"xxxhdpi": "src/brand/icons/icon_xxxhdpi.png"
 			},
 			"splashScreens": {
 				"default": {
-					"xhdpi": "D:/User/Downloads/Gemini_Generated_Image_2wa49f2wa49f2wa4.png",
-					"xxhdpi": "D:/User/Downloads/Gemini_Generated_Image_2wa49f2wa49f2wa4.png",
-					"xxxhdpi": "D:/User/Downloads/Gemini_Generated_Image_2wa49f2wa49f2wa4.png"
-				},
-				"brand": {
-					"xhdpi": "D:/User/Downloads/Gemini_Generated_Image_xqqzslxqqzslxqqz (1) (1).png",
-					"xxhdpi": "D:/User/Downloads/Gemini_Generated_Image_xqqzslxqqzslxqqz (1) (1).png",
-					"xxxhdpi": "D:/User/Downloads/Gemini_Generated_Image_xqqzslxqqzslxqqz (1) (1).png"
+					"xhdpi": "src/brand/splash/splash_xhdpi.png",
+					"xxhdpi": "src/brand/splash/splash_xxhdpi.png",
+					"xxxhdpi": "src/brand/splash/splash_xxxhdpi.png"
 				}
 			}
 		},

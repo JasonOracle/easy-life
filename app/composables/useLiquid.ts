@@ -1,5 +1,27 @@
 // [变更日志] 2026-09-24: 新增液体物理引擎——双模强迫阻尼振荡器（M1/M2）+ 气泡/粒子池，四态（idle/tap/longpress/pour），非响应式设计由调用方逐帧驱动
 // [变更日志] 2026-09-26: CAVITY_H 注释校准（取值未变）——canvas 实高已改 242rpx 以覆盖瓶底，引擎坐标系仍为 236
+// [变更日志] 2026-10-15: 新增 getSharedEngine()——引擎实例提到模块级跨页复用。tabBar 用 uni.redirectTo 切换（关闭当前页+新建目标页），
+//   BottleLiquid 每次挂载都 new LiquidEngine() + startIntro()（把 currentRatio 强制归 0.06），切回首页时水位就会重新爬升，
+//   表现为「重新加载、卡一下」。单例复用后第二次起只 setRatio()——setRatio 内部在 introSettled 为 true 时直接置终值，
+//   水位瞬间到位，且弹簧相位/气泡池/粒子池一并保留。首次冷启动仍走 startIntro()（安静开场的设计意图不变）。
+let sharedEngine: LiquidEngine | null = null
+
+/** 跨页复用的引擎单例。首次调用走完整 intro（水位从 6% 缓升），其后只更新目标水位。 */
+export function getSharedEngine(ratio: number): LiquidEngine {
+  if (sharedEngine == null) {
+    sharedEngine = new LiquidEngine()
+    sharedEngine.setRatio(ratio)
+    sharedEngine.startIntro()
+  } else {
+    sharedEngine.setRatio(ratio)
+  }
+  return sharedEngine
+}
+
+/** 仅测试用：丢弃单例，让下次 getSharedEngine() 重新走 intro。 */
+export function resetSharedEngine(): void {
+  sharedEngine = null
+}
 // Liquid physics engine: dual-mode forced damped oscillator + bubble/particle pool
 // Non-reactive by design (per nonreactive-engine pattern); caller drives step() per frame.
 

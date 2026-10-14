@@ -22,7 +22,7 @@
     <scroll-view v-if="food != null" class="ec-body" direction="vertical" :show-scrollbar="false">
       <!-- Hero：图 + 名 + 徽章 + 热量 + 宏量标签 -->
       <view class="ec-hero" :style="{ backgroundColor: theme.card }">
-        <view class="ec-hero-art" :style="{ backgroundColor: theme.cardSoft }">
+        <view class="ec-hero-art">
           <image class="ec-hero-img" :src="heroImg" mode="aspectFit"></image>
         </view>
         <view class="ec-hero-info">
@@ -557,6 +557,7 @@ onLoad((options: OnLoadOptions) => {
 .ec-hero-img {
   width: 176rpx;
   height: 176rpx;
+  border-radius: 32rpx;
 }
 .ec-hero-info {
   flex: 1;

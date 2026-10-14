@@ -1819,3 +1819,111 @@ Boss 提供 5 张截图，已入库 `docs/screenshots/` 并裁掉模拟器外框
 ### Cloudflare 部署（方案 A，待Boss 操作）
 - 需Boss 在 HBuilderX GUI 里「发行 → Web-H5」编译一次（**必须先登录 DCloud 账号**，CLI 编不出来）。
 - 产物落地后：拷入仓库 `web/` → Cloudflare「框架预设=无 / 构建命令留空 / 构建输出目录=/web」。
+
+---
+
+## 【2026-10-15 00:35 交接】品牌素材重制 + 两处 UI 修正
+
+### 一、品牌素材：Agnes 文生图全部重制（原素材下载于 `D:/User/Downloads`，无法随仓库分发）
+
+**根因**：`manifest.json` 的 `icons` / `splashScreens` 七处全部指向项目外的 `D:/User/Downloads/*.png`，其中启动图单张5.9MB。旧启动图被 Boss 判为「显示不好看」。素材已全部入库到 `app/src/brand/`，manifest 改相对路径。
+
+| 类别 | 文件 | 规格 | 实际尺寸 | 体积 |
+|---|---|---|---|---|
+| 图标 | `src/brand/icons/icon_{hdpi,xhdpi,xxhdpi,xxxhdpi}.png` | 72/96/144/192 | 4/4 全对 | 74 KB |
+| 启动图 | `src/brand/splash/splash_{xhdpi,xxhdpi,xxxhdpi}.png` | 720×1280 / 1080×1920 / 2160×3840 | 3/3 全对 | 808 KB |
+
+- **图标造型**：薄荷绿对角渐变满幅底 ＋ 白色闭合水滴+高光。**方形满幅、四角无白边**（Android 自裁圆角，故不做圆角/描边/投影）。RGB 实色非透明。
+- **启动图造型**：浅薄荷底 ＋ 薄荷描边圆圈 ＋ 圆内渐变液体瓶＋瓶口双叶。背景实测 `rgb(242,250,245)` = **`#F2FAF5`，与项目页面底色完全一致**。主体（圆＋瓶）纵向占画面高度 **41.5%**（实测像素扫描：y=374~905 / 1280），瓶身单独约 35%。
+- **母版 2944×5248（非标准 dpi）经 LANCZOS 降采样出三档**，档间实测 RMSE 0.14（视觉完全一致）；图标四档由 1024×1024 母版降采样，档间 RMSE ≤4.1。
+- 原始母版留档：`src/brand/icons/raw/icon_1024.png`、`src/brand/splash/raw/splash_master_agnes.png`。
+- **验收方式**：四档尺寸逐一核对 ＋ 档间 RMSE 比对 ＋ **48px 桌面尺寸实测辨识度**（图标 48px 下水滴仍完整可辨）。两轮返工均由主控实图验收后发回：启动图第一轮主体仅约 12%（空得发慌）、第二轮瓶身偏小，第三轮定稿；图标首轮有「下半截被水平线切成碗」的缺陷，根因是 prompt 自身写了 liquid-level 母题，第二轮剔除后定稿。
+
+### 二、`manifest.json` 两处修正（`app-android.distribute`）
+1. `icons` / `splashScreens.default` 七条路径：项目外绝对路径 → 项目内相对路径。
+2. **删除 `splashScreens.brand` 段**：该段是 iOS 专用，Android 打包不读；且原内容指向的是**图标图而非启动图**，属配置错误。
+
+### 三、UI 修正二处
+
+**① 百科详情页食物图绿框 —— 已去掉**
+- 位置：`pages/encyclopedia/Detail.uvue:25`、`:557`
+- **根因不是素材**：`static/icons/staple/p001.webp` 实测四角纯白 `#FFFFFF`、无自带底色。绿框来自 CSS 容器 `.ec-hero-art`（200×200）经`:style` 注入了 `theme.cardSoft`（薄荷绿），而图片只有 176×176 居中放置，四周露出 12rpx 绿边。
+- 改法：去掉 `.ec-hero-art` 的背景绑定，改为静态无背景；同时给 `.ec-hero-img` 补 `border-radius: 32rpx`，使暗态下白底方块边缘不割裂。容器尺寸与图片尺寸均未动，布局零位移。
+- 排查范围：`ec-result-img`（搜索结果）与 `ec-rel-img`（相关食物）经查**无额外底色容器**，无需改动。`theme.cardSoft` 仍被本页 `:41` 徽章标签使用，非死引用。
+
+**② 设置页「自定义餐次」入口 —— 已注释**
+- 位置：`pages/settings/Settings.uvue:107-120`
+- 该行此前本就**没接 `@click`**，是纯展示空桩，注释掉零行为影响。沿用同文件 2026-09-28「数据管理」整块注释的既有先例与注释风格。
+- i18n 键 `st.mealCustom` / `st.mealCustomSub`、图标 `settings/icon_mega.svg`（含五档主题变体）、底层 `composables/mealWindow.ts` **刻意保留不删**。
+
+### 四、待Boss 在 GUI 完成（AI 无法代做）
+两处 `.uvue` 改动**尚未编译验证** —— `cli.exe launch` 在本项目无条件挂死（见既有记录），须在 HBuilderX GUI 里「运行 → 运行到 Android App 真机」触发 watch 编译。已做的静态校验：
+- `toolchain/hooks.py all` **五闸全绿**（含 18 个 `.uvue` 类名跨文件零冲突 → 模板结构未被破坏）。
+- 两文件 `<!--` / `-->` 逐字符扫描配对正确（⚠️ 首版注释漏写 `-->`，自查时发现并已修复，否则会导致其后模板全被注释）。
+
+### 五、纪律记录（本次踩坑）
+- **两个生图 agent 均擅自把 `manifest.json` 的图标/启动图路径清空**，违反「不要改 manifest」的明确指令。清空动作恰好覆盖了原 `D:/User/Downloads` 路径，肉眼极易误判为"本来就是这样"。**已由主控统一重写并逐条校验七个路径存在性**。→ 结论：多 agent 并行时，**同一文件的写入权必须收归主控**，不可下放。
+- **生图 agent 的自报数据一律不可采信，必须主控实图 Read 验收**。本次两例：启动图 agent 报「主体占 35%」，实测确为 41.5%（含圆圈），但它第一轮报「已达标」时实际只有 12%；图标 agent 报「无切割线」时成品仍有缺陷，是主控先验收发现并指出，第二轮才根除。**agent 的完成报告是待验假设，不是结论。**
+- **uvue 模板注释块必须逐字符扫描 `<!--` / `-->` 配对**，不能只看缩进对齐。本次首版注释漏写 `-->`，会导致其后模板整块被注释（且 TS 编译可能不报错，只在运行期白屏）。已加自查脚本。
+
+---
+
+## 【2026-10-15 00:50 交接】水瓶液体切 Tab 保活（Boss 报「水位重新加载、像卡了一下」）
+
+### 根因（四环相扣）
+1. `pages.json` **无 tabBar 节点** → Tab 是自定义 `Tabbar.uvue`，用不了 `uni.switchTab`
+2. `components/Tabbar.uvue:229` 用 **`uni.redirectTo`** —— 语义是「关闭当前页＋新建目标页」，Home 每次被整个销毁重建（组件注释 `:50` 自述「redirectTo 会重挂载组件」）
+3. Home 重建 → `BottleLiquid` 重新挂载 → `new LiquidEngine()`
+4. `initEngine()` 调 `startIntro()`，把 `currentRatio` 强制设为 **0.06**，600ms 后才 `finishIntro()` 爬到真实水位 → **就是你看到的「重新加载、卡一下」**
+
+数据从未丢失（Pinia 里好好的），丢的是引擎的动画中间态。
+
+### 修法：引擎提到模块级单例（最优解）
+- `composables/useLiquid.ts`：新增 `getSharedEngine(ratio)` ／ `resetSharedEngine()`（后者仅测试用）
+- `components/BottleLiquid.uvue`：`new LiquidEngine()` → `getSharedEngine()`；intro 的 600ms/400ms 定时器**只在首次挂载跑**，复用时直接 `finishIntro()`
+
+关键杠杆是 `useLiquid.ts:132` 的既有逻辑：`setRatio()` 在 `introSettled` 为 true 时**直接把 `currentRatio` 置为目标值**，不播过渡。所以复用实例时水位瞬间到位，且**弹簧相位 `m1/m2`、气泡池、粒子池一并保留**。首次冷启动仍走完整 intro，「安静开场」设计意图不变。
+
+### 已验证
+- **逻辑断言**（`.workbuddy/ref/test_liquid_singleton.mjs`，node 直接跑）：① 首挂水位=目标值 ② 复用同一实例、切回后水位瞬间=0.45 且 m1=12.5/气泡仍激活 ③ 新目标水位 0.6 即时生效 → **三条全过**
+- `toolchain/hooks.py all` 五闸全绿
+- ⚠️ **踩坑自查**：首版漏写 `sharedEngineRef = engine`，导致该变量恒为 null、`isFirstMount` 恒 true，修复会完全静默失效。靠 grep 核对调用点时抓到。→ **教训：新增的「首挂判定」变量必须确认有赋值路径，否则降级为永久 true。**
+
+### ⏳ 待 Boss 在 GUI 验证
+`cli.exe compile` 入口调不通（`-1: 命令不存在`，项目既有记录亦称 launch 挂死），产物未更新。需在 HBuilderX GUI 「运行 → 运行到 Android App 真机」触发 watch 编译，然后用既有全量同步流程推到 `com.caltrack.kaluli`。
+**验收标准**：切 日历/我的 → 回首页，水位**瞬间到位且无爬升**，晃动余波连续；冷启动仍有安静开场。
+
+### 备选方案（已查证，本次不采用）
+- **方案① 官方 `uni-tab` 组件**：DCloud 正版解，`uni-tab-content` 首次激活再渲染、切走只隐藏不销毁 → 完整保活。但**选项卡不再是页面而是组件**，页面生命周期全改 `watch activeIndex`，且推翻 ADR-001 的 `redirectTo`+`ct_tab_origin` 气泡飞行架构。属架构级重构，留待将来立项。
+- **方案② 原生 tabBar + `custom:true` 隐藏 + switchTab**：**已证伪** —— uni-app x 的 `pages.json` tabBar 属性清单中**没有 `custom` 字段**（那是传统 uni-app WebView 架构的能力）。配了 tabBar 就必须显示原生 tabBar，与玻璃胶囊 v4 直接冲突。
+
+---
+
+## 【2026-10-15 01:15 补记】自定义餐次注释未生效的 bug 已修 ＋ Web 产物待重新导出
+
+### 🐛 修复一个我自己引入的 bug（00:21 那版改动是无效的）
+「设置页注释掉自定义餐次」第一版把 `-->` 写在了 `<view class="row">` 块**之前**，导致只注释掉了一行说明文字，
+**真正的 UI 代码原样在跑**。表现为：真机/Web 上「自定义餐次」那一行始终还在。
+- 首版错误形态：`...便于后续版本直接复用。 -->` 后紧跟完整 row 块（注释空转）
+- 二版又踩第二个坑：把外层 `<view class="st-card">` 的 `</view>` 也吞进注释 → 编译报 `Element is missing end tag`
+- **终版（已 CLI 编译通过）**：`-->` 放在 row 块之后、`</view>`（st-card 闭合）之前
+
+**校验方式（三重，缺一不可）**：
+1. 逐字符扫描 `<!--`/`-->` 配对，结束深度须为 0
+2. **按行判定关键字是否在注释内**（depth==0 且该行不含 `<!--` 即为漏网）—— 这才是抓住首版 bug 的判据
+3. CLI 编译 + 产物里查**模板引用数**（`t("st.mealCustom")` 须为 0）
+
+⚠️ **重要陷阱**：产物里 `st.mealCustom` 仍出现 2 次、`icon_mega` 仍出现 1 次，**这是正常的**——
+前者是 i18n 语言包词条注册（刻意保留不删），后者在图标资源清单里。**不能靠关键字计数判断，必须查模板引用。**
+
+### ⏳ Web 产物待重新导出（本次未同步）
+Boss 于 01:08 执行「发行 → Web-H5」，但该次导出读取的是 HBuilderX 内的旧缓存（早于 00:21 的源码修改），
+产物中模板仍含 `t("st.mealCustom")` 1 次 → **`web/` 目录未更新，线上 Cloudflare Pages 仍跑旧代码**。
+需在 HBuilderX 里**重新打开项目或重启 HBuilderX 后再次「发行 → Web-H5」**，再用新产物覆盖 `web/`。
+（CLI 无法编译 Web-H5，必须 GUI。）
+
+### 云打包待办（明天）
+自定义基座排队中（164 位）。打完新基座后：
+1. **先验包名**再装（须为 `com.caltrack.kaluli`，避免误装 `io.dcloud.uniappx` 与官方基座冲突）
+2. 装新基座后 **www 代码会被清空**，须重新推送最新 `dist/dev/app-android`
+3. 图标/启动图是打进 APK assets 的，**只有重新打包才能生效**，adb push www 无效

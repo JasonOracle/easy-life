@@ -104,6 +104,10 @@
         </view>
         <image class="chev" :src="asset('home/chev_right.svg')" mode="aspectFit"></image>
       </view>
+      <!-- [变更日志] 2026-10-15: 【1.0 不做】「自定义餐次」入口整块注释掉（Boss：「设置里面的自定义餐饮先注释掉」）。
+         该行此前本来就没接 @click，与上方「每日热量目标」可点击行不同，是纯展示空桩，注释掉不影响任何行为。
+         餐次窗口的底层能力仍在 composables/mealWindow.ts，与 i18n 键 st.mealCustom / st.mealCustomSub
+         及图标 settings/icon_mega.svg（含五档主题变体）**刻意保留不删**，便于后续版本直接复用。
       <view class="row">
         <view class="chip" :style="{ backgroundColor: theme.chip }">
           <image class="chip-icon" :src="asset('settings/icon_mega.svg')" mode="aspectFit"></image>
@@ -114,6 +118,7 @@
         </view>
         <image class="chev" :src="asset('home/chev_right.svg')" mode="aspectFit"></image>
       </view>
+      -->
     </view>
 
     <!-- [变更日志] 2026-09-28: 【1.0 不做】「数据管理」模块整块注释掉（老板：「先把设置的数据管理模块
