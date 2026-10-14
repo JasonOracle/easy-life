@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "CalTrack 食物库数据格式 v1.0",
+  "__changelog": "[变更日志] 2026-10-14：title 字段品牌名 CalTrack → EasyLife（中文产品名「轻律生活」不变）。仅为文案更名，schema 结构、required 字段、约束一律未动。",
+  "title": "EasyLife 食物库数据格式 v1.0",
   "description": "单一事实来源。App 启动时校验 schemaVersion，不匹配直接报错。",
 
   "type": "object",

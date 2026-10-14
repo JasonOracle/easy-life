@@ -19,7 +19,7 @@ AI模型：Qoder (Claude)
 修改内容：[1. 头部说明补充：设计稿导出实为 9 张（8 屏命名图＋一张 A 方案首页备选），清单仍覆盖 01-08 八屏；2. §0 TabbarWrap 与 §10「加号上凸」行加 midbutton 方案废止批注（实际＝双 Tab 共享组件 Tabbar.uvue＋首页右上 FAB）；3. §3/§11 食物库计数滞后修正：347 条/58 条菜品→353 条/59 条菜品；4. §2/§5 弹窗遮罩处补现状批注（弹层壳已迁移为微信原生 page-container）]
 -->
 
-> **来源**：Ardot 设计文件「CalTrack 高保真 UI」`fileId 727289305476547`，由 `batch_read`（readDepth 3）逐屏提取。
+> **来源**：Ardot 设计文件「EasyLife 高保真 UI」`fileId 727289305476547`，由 `batch_read`（readDepth 3）逐屏提取。
 > **用途**：开发时照此写样式，不必反复回设计稿。
 > **优先级**：几何/间距/层级 **以本文件为准**（设计稿实测值）；**色值以 `design/DesignTokens.md` 为准**（变量集）。
 > **单位**：设计稿为 375×812 @1x，全工程采用 uni-app 默认 750rpx 规范（1px = 2rpx 换算），物理细线（如 1px/1.5px/2.5px 边框）保留 px。
@@ -275,7 +275,7 @@ SettingsContent: gap 14  padding 8 18 18 18
 │      fill #fff（不透明）  stroke #F5D5C8  r 20
 │      drop 0 4 14  rgba(224,99,60,.08)
 └─ Footer (gap 3)
-    ├─ FooterText : 「CalTrack v1.0.0」11px Inter Medium --ct-label-3
+    ├─ FooterText : 「EasyLife v1.0.0」11px Inter Medium --ct-label-3
     └─ FooterSub  : 「所有数据仅保存在本机」10.5px Regular #C2D4CC
 ```
 

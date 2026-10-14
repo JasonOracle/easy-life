@@ -341,100 +341,101 @@ interface SeedItem { id: string; amount: number; meal: string; hour: number }
 type SeedDay = SeedItem[]
 
 const SEED_PLAN: SeedDay[] = [
-  /* 6 天前 达标（≈1447 kcal）：粥蛋奶早 / 米饭套餐午 / 牛肉面晚 / 酸奶加餐 */
+  /* 10/1｜珊瑚 3288 kcal 183% */
   [
-    { id: 'p013', amount: 300, meal: 'breakfast', hour: 7.5 },
-    { id: 'p143', amount: 50, meal: 'breakfast', hour: 7.5 },
-    { id: 'p284', amount: 250, meal: 'breakfast', hour: 7.5 },
-    { id: 'p001', amount: 200, meal: 'lunch', hour: 12.2 },
-    { id: 'p065', amount: 120, meal: 'lunch', hour: 12.2 },
-    { id: 'p089', amount: 150, meal: 'lunch', hour: 12.2 },
-    { id: 'p030', amount: 300, meal: 'dinner', hour: 18.4 },
-    { id: 'p095', amount: 100, meal: 'dinner', hour: 18.4 },
-    { id: 'p156', amount: 100, meal: 'dinner', hour: 18.4 },
-    { id: 'p230', amount: 180, meal: 'snack', hour: 15.5 },
+    { id: 'p032', amount: 280, meal: 'breakfast', hour: 7.5 }, { id: 'p007', amount: 300, meal: 'breakfast', hour: 7.5 }, { id: 'p070', amount: 160, meal: 'breakfast', hour: 7.5 },
+    { id: 'p089', amount: 150, meal: 'lunch', hour: 12.2 }, { id: 'p270', amount: 450, meal: 'lunch', hour: 12.2 },
+    { id: 'p032', amount: 320, meal: 'dinner', hour: 18.3 }, { id: 'p070', amount: 170, meal: 'dinner', hour: 18.3 },
+    { id: 'p270', amount: 450, meal: 'snack', hour: 15.4 }, { id: 'p319', amount: 90, meal: 'snack', hour: 15.4 },
   ],
-  /* 5 天前 达标（≈1458 kcal）：粥+南瓜+蛋早 / 四样荤素午 / 砂锅晚 / 草莓+豆浆加餐 */
+  /* 10/2｜绿 910 kcal 51% */
   [
-    { id: 'p011', amount: 250, meal: 'breakfast', hour: 7.8 },
-    { id: 'p020', amount: 120, meal: 'breakfast', hour: 7.8 },
-    { id: 'p143', amount: 50, meal: 'breakfast', hour: 7.8 },
-    { id: 'p001', amount: 150, meal: 'lunch', hour: 12.4 },
-    { id: 'p062', amount: 150, meal: 'lunch', hour: 12.4 },
-    { id: 'p090', amount: 150, meal: 'lunch', hour: 12.4 },
-    { id: 'p113', amount: 200, meal: 'lunch', hour: 12.4 },
-    { id: 'p080', amount: 300, meal: 'dinner', hour: 18.2 },
-    { id: 'p057', amount: 150, meal: 'dinner', hour: 18.2 },
-    { id: 'p197', amount: 100, meal: 'dinner', hour: 18.2 },
-    { id: 'p238', amount: 150, meal: 'snack', hour: 15.2 },
-    { id: 'p284', amount: 200, meal: 'snack', hour: 15.2 },
+    { id: 'p013', amount: 300, meal: 'breakfast', hour: 7.5 }, { id: 'p143', amount: 50, meal: 'breakfast', hour: 7.5 }, { id: 'p284', amount: 220, meal: 'breakfast', hour: 7.5 },
+    { id: 'p001', amount: 150, meal: 'lunch', hour: 12.2 }, { id: 'p089', amount: 150, meal: 'lunch', hour: 12.2 },
+    { id: 'p080', amount: 150, meal: 'dinner', hour: 18.3 }, { id: 'p230', amount: 150, meal: 'dinner', hour: 18.3 },
+    { id: 'p230', amount: 100, meal: 'snack', hour: 15.4 },
   ],
-  /* 4 天前 接近上限（≈1739 kcal）：卷饼+酸奶早 / 面食午 / 香菜牛肉晚 / 奶+坚果加餐 */
+  /* 10/3｜琥珀 2081 kcal 116% */
   [
-    { id: 'p045', amount: 150, meal: 'breakfast', hour: 7.6 },
-    { id: 'p286', amount: 300, meal: 'breakfast', hour: 7.6 },
-    { id: 'p143', amount: 50, meal: 'breakfast', hour: 7.6 },
-    { id: 'p002', amount: 250, meal: 'lunch', hour: 12.3 },
-    { id: 'p091', amount: 150, meal: 'lunch', hour: 12.3 },
-    { id: 'p073', amount: 200, meal: 'dinner', hour: 18.5 },
-    { id: 'p001', amount: 250, meal: 'dinner', hour: 18.5 },
-    { id: 'p186', amount: 100, meal: 'dinner', hour: 18.5 },
-    { id: 'p285', amount: 150, meal: 'snack', hour: 15.6 },
-    { id: 'p231', amount: 120, meal: 'snack', hour: 15.6 },
+    { id: 'p047', amount: 200, meal: 'breakfast', hour: 7.5 }, { id: 'p284', amount: 250, meal: 'breakfast', hour: 7.5 },
+    { id: 'p005', amount: 350, meal: 'lunch', hour: 12.2 }, { id: 'p089', amount: 160, meal: 'lunch', hour: 12.2 },
+    { id: 'p032', amount: 300, meal: 'dinner', hour: 18.3 }, { id: 'p065', amount: 160, meal: 'dinner', hour: 18.3 },
+    { id: 'p270', amount: 420, meal: 'snack', hour: 15.4 },
   ],
-  /* 3 天前 超标（≈1972 kcal）：馒头+豆浆早 / 盖饭午 / 烧烤晚 / 奶茶+饼干加餐 */
+  /* 10/4｜珊瑚 2894 kcal 161% */
   [
-    { id: 'p021', amount: 150, meal: 'breakfast', hour: 8.1 },
-    { id: 'p284', amount: 200, meal: 'breakfast', hour: 8.1 },
-    { id: 'p007', amount: 350, meal: 'lunch', hour: 12.5 },
-    { id: 'p096', amount: 100, meal: 'lunch', hour: 12.5 },
-    { id: 'p070', amount: 150, meal: 'dinner', hour: 18.6 },
-    { id: 'p001', amount: 150, meal: 'dinner', hour: 18.6 },
-    { id: 'p088', amount: 150, meal: 'dinner', hour: 18.6 },
-    { id: 'p270', amount: 400, meal: 'snack', hour: 15.3 },
-    { id: 'p232', amount: 150, meal: 'snack', hour: 15.3 },
+    { id: 'p021', amount: 230, meal: 'breakfast', hour: 7.5 }, { id: 'p284', amount: 250, meal: 'breakfast', hour: 7.5 },
+    { id: 'p007', amount: 320, meal: 'lunch', hour: 12.2 }, { id: 'p089', amount: 130, meal: 'lunch', hour: 12.2 },
+    { id: 'p070', amount: 200, meal: 'dinner', hour: 18.3 }, { id: 'p032', amount: 240, meal: 'dinner', hour: 18.3 },
+    { id: 'p319', amount: 110, meal: 'snack', hour: 15.4 }, { id: 'p270', amount: 400, meal: 'snack', hour: 15.4 },
   ],
-  /* 2 天前 略超（≈1889 kcal）：花卷+蛋+酸奶早 / 炸酱面午 / 鸡汤晚 / 奶茶加餐 */
+  /* 10/5｜绿 954 kcal 53% */
   [
-    { id: 'p019', amount: 100, meal: 'breakfast', hour: 8.2 },
-    { id: 'p143', amount: 50, meal: 'breakfast', hour: 8.2 },
-    { id: 'p286', amount: 300, meal: 'breakfast', hour: 8.2 },
-    { id: 'p032', amount: 350, meal: 'lunch', hour: 12.4 },
-    { id: 'p095', amount: 150, meal: 'lunch', hour: 12.4 },
-    { id: 'p071', amount: 200, meal: 'dinner', hour: 18.3 },
-    { id: 'p001', amount: 250, meal: 'dinner', hour: 18.3 },
-    { id: 'p176', amount: 100, meal: 'dinner', hour: 18.3 },
-    { id: 'p270', amount: 300, meal: 'snack', hour: 15.4 },
-    { id: 'p231', amount: 120, meal: 'snack', hour: 15.4 },
+    { id: 'p013', amount: 300, meal: 'breakfast', hour: 7.5 }, { id: 'p143', amount: 50, meal: 'breakfast', hour: 7.5 }, { id: 'p284', amount: 220, meal: 'breakfast', hour: 7.5 },
+    { id: 'p001', amount: 150, meal: 'lunch', hour: 12.2 }, { id: 'p089', amount: 150, meal: 'lunch', hour: 12.2 },
+    { id: 'p080', amount: 150, meal: 'dinner', hour: 18.3 }, { id: 'p230', amount: 150, meal: 'dinner', hour: 18.3 },
+    { id: 'p284', amount: 150, meal: 'snack', hour: 15.4 },
   ],
-  /* 昨天 严重超标（≈2533 kcal）：油条早 / 米饭+卤蛋午 / 糖醋里脊晚 / 巧克力+坚果加餐 */
+  /* 10/6｜绿 1427 kcal 79% */
   [
-    { id: 'p047', amount: 150, meal: 'breakfast', hour: 8.0 },
-    { id: 'p143', amount: 100, meal: 'breakfast', hour: 8.0 },
-    { id: 'p284', amount: 250, meal: 'breakfast', hour: 8.0 },
-    { id: 'p001', amount: 250, meal: 'lunch', hour: 12.3 },
-    { id: 'p079', amount: 200, meal: 'lunch', hour: 12.3 },
-    { id: 'p089', amount: 150, meal: 'lunch', hour: 12.3 },
-    { id: 'p005', amount: 300, meal: 'dinner', hour: 18.6 },
-    { id: 'p090', amount: 150, meal: 'dinner', hour: 18.6 },
-    { id: 'p319', amount: 60, meal: 'snack', hour: 15.5 },
-    { id: 'p231', amount: 120, meal: 'snack', hour: 15.5 },
+    { id: 'p045', amount: 200, meal: 'breakfast', hour: 7.5 }, { id: 'p286', amount: 250, meal: 'breakfast', hour: 7.5 },
+    { id: 'p032', amount: 300, meal: 'lunch', hour: 12.2 }, { id: 'p089', amount: 150, meal: 'lunch', hour: 12.2 },
+    { id: 'p065', amount: 160, meal: 'dinner', hour: 18.3 }, { id: 'p117', amount: 130, meal: 'dinner', hour: 18.3 },
+    { id: 'p270', amount: 430, meal: 'snack', hour: 15.4 },
   ],
-  /* 今天 达标（≈1626 kcal）：粥蛋奶早 / 米饭+回锅肉+时蔬+汤午 / 沙拉+虾+山药晚 / 酸奶+奶加餐 */
+  /* 10/7｜绿 932 kcal 52% */
   [
-    { id: 'p013', amount: 300, meal: 'breakfast', hour: 7.5 },
-    { id: 'p143', amount: 100, meal: 'breakfast', hour: 7.5 },
-    { id: 'p284', amount: 230, meal: 'breakfast', hour: 7.5 },
-    { id: 'p001', amount: 160, meal: 'lunch', hour: 12.2 },
-    { id: 'p067', amount: 120, meal: 'lunch', hour: 12.2 },
-    { id: 'p089', amount: 100, meal: 'lunch', hour: 12.2 },
-    { id: 'p112', amount: 200, meal: 'lunch', hour: 12.2 },
-    { id: 'p117', amount: 200, meal: 'dinner', hour: 18.3 },
-    { id: 'p134', amount: 120, meal: 'dinner', hour: 18.3 },
-    { id: 'p059', amount: 150, meal: 'dinner', hour: 18.3 },
-    { id: 'p060', amount: 100, meal: 'dinner', hour: 18.3 },
-    { id: 'p230', amount: 150, meal: 'snack', hour: 15.4 },
-    { id: 'p285', amount: 100, meal: 'snack', hour: 15.4 },
+    { id: 'p013', amount: 300, meal: 'breakfast', hour: 7.5 }, { id: 'p143', amount: 50, meal: 'breakfast', hour: 7.5 }, { id: 'p284', amount: 220, meal: 'breakfast', hour: 7.5 },
+    { id: 'p001', amount: 160, meal: 'lunch', hour: 12.2 }, { id: 'p089', amount: 150, meal: 'lunch', hour: 12.2 },
+    { id: 'p080', amount: 160, meal: 'dinner', hour: 18.3 }, { id: 'p230', amount: 150, meal: 'dinner', hour: 18.3 },
+    { id: 'p230', amount: 100, meal: 'snack', hour: 15.4 },
+  ],
+  /* 10/8｜珊瑚 2939 kcal 163% */
+  [
+    { id: 'p047', amount: 200, meal: 'breakfast', hour: 7.5 }, { id: 'p284', amount: 230, meal: 'breakfast', hour: 7.5 },
+    { id: 'p007', amount: 310, meal: 'lunch', hour: 12.2 }, { id: 'p089', amount: 110, meal: 'lunch', hour: 12.2 },
+    { id: 'p070', amount: 200, meal: 'dinner', hour: 18.3 }, { id: 'p032', amount: 230, meal: 'dinner', hour: 18.3 },
+    { id: 'p319', amount: 130, meal: 'snack', hour: 15.4 }, { id: 'p270', amount: 360, meal: 'snack', hour: 15.4 },
+  ],
+  /* 10/9｜绿 1518 kcal 84% */
+  [
+    { id: 'p021', amount: 220, meal: 'breakfast', hour: 7.5 }, { id: 'p286', amount: 250, meal: 'breakfast', hour: 7.5 },
+    { id: 'p032', amount: 300, meal: 'lunch', hour: 12.2 }, { id: 'p089', amount: 130, meal: 'lunch', hour: 12.2 },
+    { id: 'p065', amount: 160, meal: 'dinner', hour: 18.3 }, { id: 'p117', amount: 130, meal: 'dinner', hour: 18.3 },
+    { id: 'p270', amount: 400, meal: 'snack', hour: 15.4 },
+  ],
+  /* 10/10｜绿 988 kcal 55% */
+  [
+    { id: 'p013', amount: 300, meal: 'breakfast', hour: 7.5 }, { id: 'p143', amount: 50, meal: 'breakfast', hour: 7.5 }, { id: 'p284', amount: 220, meal: 'breakfast', hour: 7.5 },
+    { id: 'p001', amount: 150, meal: 'lunch', hour: 12.2 }, { id: 'p117', amount: 200, meal: 'lunch', hour: 12.2 },
+    { id: 'p080', amount: 160, meal: 'dinner', hour: 18.3 }, { id: 'p230', amount: 150, meal: 'dinner', hour: 18.3 },
+    { id: 'p284', amount: 150, meal: 'snack', hour: 15.4 },
+  ],
+  /* 10/11｜琥珀 2497 kcal 139% */
+  [
+    { id: 'p021', amount: 250, meal: 'breakfast', hour: 7.5 }, { id: 'p284', amount: 230, meal: 'breakfast', hour: 7.5 },
+    { id: 'p007', amount: 340, meal: 'lunch', hour: 12.2 }, { id: 'p089', amount: 110, meal: 'lunch', hour: 12.2 },
+    { id: 'p070', amount: 230, meal: 'dinner', hour: 18.3 }, { id: 'p032', amount: 250, meal: 'dinner', hour: 18.3 },
+    { id: 'p270', amount: 520, meal: 'snack', hour: 15.4 },
+  ],
+  /* 10/12｜绿 1606 kcal 89% */
+  [
+    { id: 'p045', amount: 200, meal: 'breakfast', hour: 7.5 }, { id: 'p286', amount: 250, meal: 'breakfast', hour: 7.5 },
+    { id: 'p005', amount: 350, meal: 'lunch', hour: 12.2 }, { id: 'p089', amount: 130, meal: 'lunch', hour: 12.2 },
+    { id: 'p067', amount: 180, meal: 'dinner', hour: 18.3 }, { id: 'p117', amount: 130, meal: 'dinner', hour: 18.3 },
+    { id: 'p270', amount: 420, meal: 'snack', hour: 15.4 },
+  ],
+  /* 10/13｜绿 932 kcal 52% */
+  [
+    { id: 'p013', amount: 300, meal: 'breakfast', hour: 7.5 }, { id: 'p143', amount: 50, meal: 'breakfast', hour: 7.5 }, { id: 'p284', amount: 220, meal: 'breakfast', hour: 7.5 },
+    { id: 'p001', amount: 160, meal: 'lunch', hour: 12.2 }, { id: 'p089', amount: 150, meal: 'lunch', hour: 12.2 },
+    { id: 'p080', amount: 160, meal: 'dinner', hour: 18.3 }, { id: 'p230', amount: 150, meal: 'dinner', hour: 18.3 },
+    { id: 'p230', amount: 100, meal: 'snack', hour: 15.4 },
+  ],
+  /* 10/14 今天｜绿 702 kcal 39% */
+  [
+    { id: 'p013', amount: 400, meal: 'breakfast', hour: 7.5 },
+    { id: 'p007', amount: 300, meal: 'lunch', hour: 12.2 },
   ],
 ]
 
@@ -468,12 +469,17 @@ export function dayRange(key: string): number[] {
   return [start, start + 24 * 60 * 60 * 1000]
 }
 
-/** 按 SEED_PLAN 生成 7 天记录（ts 落在对应日期的对应餐点时刻） */
+/** 按 SEED_PLAN 生成记录（ts 落在对应日期的对应餐点时刻）。
+    日期锚定＝SEED_PLAN 末项＝今天，倒推 span-1 天为首项；只保留与今天同月的日期，
+    使日历当月可见范围内即是一整月的色点，月初不留空白。
+    若距 1 号不足 span 天，仅生成已过天数对应的项。 */
 function seedEntries(): FoodEntry[] {
   const out: FoodEntry[] = []
   const now = new Date()
-  for (let d = 0; d < SEED_PLAN.length; d++) {
-    const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (SEED_PLAN.length - 1 - d))
+  const span = SEED_PLAN.length
+  for (let d = 0; d < span; d++) {
+    const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (span - 1 - d))
+    if (day.getMonth() !== now.getMonth()) continue // 跨月项不生成
     for (const item of SEED_PLAN[d]) {
       const food = getFoodById(item.id)
       if (food == null) continue

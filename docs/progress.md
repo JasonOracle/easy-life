@@ -107,7 +107,7 @@
   - [ ] `docs/Review.md`（评审复盘 / 决策依据）
   - [ ] `design/DesignTokens.md`（**色值唯一事实来源**）
   - [ ] `design/VisualLanguage.md`（视觉语言 v3.0）＋ `design/ScreenSpecs.md`（8 屏几何）
-  - [ ] `app/prototype/CalTrack_Protoype.html`（交互原型）
+  - [ ] `app/prototype/EasyLife_Protoype.html`（交互原型）
 - [ ] 确认**当前设计源＝Pencil**（`pencil-new.pen`，画板按页面分：Home `Yvg8R`／个人中心 `Vtp9C`／Settings `T0IUr`／最近记录 `bTPUq`／单日详情 `VEWYt`／弹层⓪ `n3dgv`／结算 `Dz3YV`＋`MU1O4`／目标滑条 `qnNST`）；
       Ardot 文件 `727289305476547` 已于 2026-09-21 废止（仅早期 8 屏规格来源，见 `design/ScreenSpecs.md`）
 - [ ] 确认现有源码清单：页面 `app/pages/**`、组件 `app/components/**`（各配同名 `.md`）、store `app/stores/*.ts`、数据产物 `app/src/data/food_library.json`（生成物，禁手写）

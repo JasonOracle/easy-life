@@ -35,7 +35,7 @@ $shotjs = "d:\project\other-porject\kaluli\debug\shot.js"
 Add-Type -Namespace W -Name U -MemberDefinition '[DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int c); [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr a, int x, int y, int cx, int cy, uint f);'
 
 function Find-MpWindow {
-  $p = Get-Process | Where-Object { $_.MainWindowHandle -ne 0 -and $_.MainWindowTitle -match 'CalTrack|mp-weixin' } | Select-Object -First 1
+  $p = Get-Process | Where-Object { $_.MainWindowHandle -ne 0 -and $_.MainWindowTitle -match 'EasyLife|mp-weixin' } | Select-Object -First 1
   if ($p) { return $p.MainWindowHandle }
   return [IntPtr]::Zero
 }

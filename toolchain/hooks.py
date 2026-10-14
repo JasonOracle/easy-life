@@ -356,7 +356,7 @@ def install_hook():
     target = hooks_dir / "pre-commit"
     body = (
         "#!/bin/sh\n"
-        "# CalTrack 提交前守门（由 python toolchain/hooks.py install 生成，重跑即更新）\n"
+        "# EasyLife 提交前守门（由 python toolchain/hooks.py install 生成，重跑即更新）\n"
         "# 跑全部五道闸：schema / 食物数据 / 类名冲突 / 变更日志+保护文件 / 收口提醒（后者只警告）\n"
         "repo=$(git rev-parse --show-toplevel)\n"
         # git hook 跑在 Git-for-Windows 的 sh 里，管道是 UTF-8；不显式指定则 Python 按本地码页

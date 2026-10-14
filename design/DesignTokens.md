@@ -58,13 +58,13 @@
   [变更日志]
   修改时间：2026-09-19
   AI模型：CodeBuddy (GLM)
-  修改内容：[首版：由 Ardot 变量集 CalTrack 经 export_variables 提取，11 色 + 3 圆角 + 5 字号，
+  修改内容：[首版：由 Ardot 变量集 EasyLife 经 export_variables 提取，11 色 + 3 圆角 + 5 字号，
     并附「与旧文档差异清单」§6（此前 AGENTS／VisualLanguage 手抄色值普遍差 1）]
 -->
 
-# CalTrack 设计 Token（唯一事实来源）
+# EasyLife 设计 Token（唯一事实来源）
 
-> **来源**：Ardot 设计文件「CalTrack 高保真 UI」（fileId `727289305476547`）的变量集 `CalTrack`（Light 模式）
+> **来源**：Ardot 设计文件「EasyLife 高保真 UI」（fileId `727289305476547`）的变量集 `EasyLife`（Light 模式）
 > **提取方式**：Ardot MCP `export_variables` / `fetch_variables`　｜　**提取时间**：2026-09-19
 >
 > ⚠️ **为什么必须有这份文件**：`AGENTS.md` 与 `design/VisualLanguage.md` 里的色值是**手抄的，普遍差 1 甚至数值不同**
@@ -394,24 +394,24 @@ slate 墨（稿面新意图）vs 绿墨（现全 App `#0A4F3D`/`#0F4F3D99`/`#0F4
 /* export_variables format=css colorFormat=hex6 numberUnit=px 的原始输出
    —— 注意 hex6 会丢 alpha，故 label-2/label-3/glass-bg 在此输出中不准，以上文 §1 为准 */
 :root {
-  --CalTrack-mint-e1: #7DEBC7;
-  --CalTrack-mint-e2: #1FBF8F;
-  --CalTrack-mint-e3: #0D9C73;
-  --CalTrack-mint-deep: #0A7A5C;
-  --CalTrack-bg: #F2FAF5;
-  --CalTrack-label-1: #0A4F3D;
-  --CalTrack-label-2: #0F4F3D;   /* 实际 60% 透明 */
-  --CalTrack-label-3: #0F4F3D;   /* 实际 34% 透明 */
-  --CalTrack-coral: #FF9E7D;
-  --CalTrack-amber: #E8B54D;
-  --CalTrack-glass-bg: #FFFFFF;  /* 实际 74% 透明 */
-  --CalTrack-radius-card: 20px;
-  --CalTrack-radius-chip: 18px;
-  --CalTrack-radius-sheet: 34px;
-  --CalTrack-type-hero: 46px;
-  --CalTrack-type-title: 17px;
-  --CalTrack-type-section: 15.5px;
-  --CalTrack-type-body: 13.5px;
-  --CalTrack-type-caption: 12px;
+  --EasyLife-mint-e1: #7DEBC7;
+  --EasyLife-mint-e2: #1FBF8F;
+  --EasyLife-mint-e3: #0D9C73;
+  --EasyLife-mint-deep: #0A7A5C;
+  --EasyLife-bg: #F2FAF5;
+  --EasyLife-label-1: #0A4F3D;
+  --EasyLife-label-2: #0F4F3D;   /* 实际 60% 透明 */
+  --EasyLife-label-3: #0F4F3D;   /* 实际 34% 透明 */
+  --EasyLife-coral: #FF9E7D;
+  --EasyLife-amber: #E8B54D;
+  --EasyLife-glass-bg: #FFFFFF;  /* 实际 74% 透明 */
+  --EasyLife-radius-card: 20px;
+  --EasyLife-radius-chip: 18px;
+  --EasyLife-radius-sheet: 34px;
+  --EasyLife-type-hero: 46px;
+  --EasyLife-type-title: 17px;
+  --EasyLife-type-section: 15.5px;
+  --EasyLife-type-body: 13.5px;
+  --EasyLife-type-caption: 12px;
 }
 ```

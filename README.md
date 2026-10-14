@@ -1,106 +1,202 @@
-# CalTrack — 卡路里管理 App
+# 轻律生活 · EasyLife
 
-轻量级卡路里追踪 App，快速记录饮食，直观展示摄入数据。
+> 一款卡路里记录 App。记完一顿饭，水位涨一截、晃两下、归于平静。
 
-## 当前状态
+**uni-app x（Vue3 + UTS/TS）· 本地存储 · 无服务器**
 
-**MVP 主体已落地**：8 条路由（首页／日历／我的 三 Tab ＋ 单日详情／设置／食物百科／隐私弹窗 ＋ 开发期探针页）＋ 9 组件 ＋ 6 个 store 模块（5 个 Pinia 总线 ＋ 百科只读索引），353 条食物库＋353 条百科伴生数据内置，弹层为页面内自绘浮层（蒙层＋阶段类补间，已不用 `page-container`），TabBar＝三 Tab 悬浮液态玻璃胶囊（首页／日历／我的，选中气泡会飞行；「最近记录」已升为一级 Tab）。**表现层已完成系统化**：三主题色（薄荷／海洋／薰衣草）× 亮暗双模式＝6 档全 App 逐元素 token 随动，界面文案中英双语（177 组词条，设置页即点即换），首页水瓶为 Canvas 2D 实时物理液体。当前阶段＝还原度收尾 ＋ 工程化加固（提交闸门 `toolchain/hooks.py` 已上岗）。动态进度与接手清单见 **`docs/progress.md`**（最高事实来源）。
+[![演示视频](docs/media/demo_small.gif)](docs/media/demo_light.mp4)
 
-> **验证主端＝Android 真机／模拟器（uni-app x 原生渲染）**，微信开发者工具为辅助链路。App 端改动验收前必须跑完整 `cli.exe launch app-android`（差量编译不重编视图层字节码＝假绿源）。
+> 🎬 上图是 App 的完整操作流：**首页查看今日摄入 → 点「+」添加食物（选食物→选分量→确认，水位实时上涨）→ 日历看历史达标情况 → 个人中心看统计 → 设置切换深色模式**。
+> 高清视频（100 秒 · 720×1280）见 [`docs/media/demo_light.mp4`](docs/media/demo_light.mp4)；原始高码率版本归档于 `demo.mp4`。
 
-## 技术栈
+---
 
-uni-app x（Vue3 语法 ＋ UTS/TS 编译为原生）＋ Pinia，本地存储，无服务器；数据处理与素材生成线为 `toolchain/` Python。
+## 一、为什么要做这个 App
 
-## 视觉方向
+两个动机叠在一起：
 
-薄荷液滴（Mint Drop）—— 记完一顿饭，水位涨一截、晃两下、归于平静。主题色为薄荷／海洋／薰衣草三档，各随亮暗两态，但「液滴」的物理质感与卡片体系不随主题改变。
+**控制每天的卡路里摄入。** 我自己需要一款工具记录每天吃了多少、离目标还有多远。市面上的记录 App 要么太重（要注册、要联网、订阅制），要么太轻（只有一个数字，没有反馈感）。我想做的是**打开就能记、记完就能看到反馈**的轻量工具 —— 全部数据存在本机，不联网、不注册、卸载即清空。
 
-## 界面预览
+**顺便完整地学一遍「如何用 AI 设计出一款 App」。** 这个项目同时是我的 AI 协作练习：从需求文档 → 设计资产 → 原型 → 高保真设计图 → 代码实现 → 真机验收，全链路走一遍，把 AI 在设计环节能干什么、不能干什么搞清楚。
 
-> 全部截图取自 **Android 模拟器 / uni-app x 原生渲染**（1280×2772 原图缩至 640 宽），演示数据为内置 7 天种子阶梯（4 天达标／3 天超标）。原图归档于 `debug/shots/full/`（`debug/` 已 gitignore）。
+### 设计目标
 
-### 首页与记录流
+记饮食最容易放弃的原因是「反馈太抽象」——你只知道多了 300 大卡，不知道这相当于多少。所以核心设计决策是：**用水瓶做进度反馈**。
+
+| 目标 | 设计解法 |
+|---|---|
+| 一眼看出今天吃得怎么样 | 首页巨型水瓶，水位＝摄入占比，晃动物理反馈 |
+| 超标要有感知但不被劝退 | 三档色（绿 / 琥珀 `#E8B54D` / 珊瑚 `#FF9E7D`），**不用红色** |
+| 记一笔要快 | 首页「+」→ 搜索/分类 → 选分量 → 确认，**4 次点击完成** |
+| 数据要可信 | 347 条食物内置、营养成分齐全、每餐自动归档 |
+
+---
+
+## 二、项目怎么落地的（工作流）
+
+这个项目最想记录的不是结果，而是**过程**——从零到能跑在真机上的完整链路：
+
+```
+① 产品文档（PRD）
+      ↓
+② 设计资产（DesignTokens：色值 / 字号 / 圆角 / 三主题 × 亮暗矩阵）
+      ↓
+③ 交互原型（app/prototype/ HTML 可点击原型）
+      ↓
+④ AI 生图 → 高保真设计图（ChatGPT 出视觉稿 → 导入 Pencil 精修）
+      ↓
+⑤ 代码实现（WorkBuddy 通过 MCP 连微信开发者工具，生成接近 1.0 的版本）
+      ↓
+⑥ 真机验收（开安卓模拟器跑起来，查漏补缺）
+      ↓
+⑦ 视觉微调（发现真机字太小 → rpx + px 逐页调）
+```
+
+### 几个关键的实践点
+
+**设计先行。** `design/DesignTokens.md` 是色值、字号、圆角的唯一事实来源，代码里的任何颜色都要能对应到它。这避免了「页面之间慢慢长成两套设计系统」。
+
+**AI 出图有随机性，所以资产要留档。** 食物图标是 AI 生的，但 `assets/icons-gen/` 保留了原始 PNG 入库——因为生图不可复现，不留档就补不回来。
+
+**真机是唯一标准。** 设计稿上 15px 的字看着舒服，真机上就是小。第五、六步的价值就在于：「发现很多地方字太小 → 用 rpx + px 对每个页面做微调」这个迭代，只有真机能暴露。
+
+**文档即上下文。** 项目的踩坑记录比代码还厚（`docs/decisions/` 五份 ADR、`docs/总结uniappx项目的坑与经验.md`），因为 uni-app x App 端有一批「Web 上能写、原生上静默失效」的坑，值得被记住。
+
+---
+
+## 三、技术栈
+
+| 层 | 技术 |
+|---|---|
+| 框架 | uni-app x（Vue3 语法，UTS/TS 编译为原生代码） |
+| 状态 | Pinia（6 个 store：food / settings / goal / user / device / encyclopedia） |
+| 存储 | `uni.setStorageSync` 本地存储，**无服务器** |
+| 渲染 | 原生渲染 + Canvas 2D（水瓶液体、结算环） |
+| 主题 | 三主题（薄荷 / 海洋 / 薰衣草）× 亮暗 = **6 档token 矩阵**，逐元素 `:style` 绑定 |
+| 数据线 | Python（`toolchain/`）：YAML → JSON、图标生成变体、提交闸门 |
+
+**规模**：8 条路由 / 9 组件 / 6 store / 347 条食物库 / 约 1.2 万行 `.uvue` + `.ts`。
+
+---
+
+## 四、界面预览
+
+> 全部截图取自 **Android 模拟器 · uni-app x 原生渲染**（1440×2560 原图缩至 640 宽）。演示数据为内置种子（10/1~10/14 真实饮食节奏，日历红/橙/绿混排）。
+
+### 首页 · 记录流
 
 | | |
 |---|---|
-| ![首页](docs/screenshots/01_home.png) | ![首页超标态](docs/screenshots/05_home_over.png) |
-| **首页（达标态）**：还能吃 172 kcal、水瓶液体停在肩线 80% 上限内、三大宏量、今日餐次时间轴、三 Tab 悬浮玻璃胶囊。 | **首页（超标态）**：液体与贴纸整体转琥珀色（非红），文案随档位换成「今天很棒 再坚持一下」，Hero 转「已超标 60 kcal」。 |
-| ![日历](docs/screenshots/06_records.png) | ![单日详情](docs/screenshots/07_daydetail.png) |
-| **日历 Tab**：月历每日带达标色点（绿＝达标／橙＝超标），下方为选中日概览＋三餐摄入＋主要食物（点卡片进百科）。 | **单日详情**：热量环卡＋营养分布＋按餐次分组的记录流水；行长按弹「删除这条记录」。 |
+| ![首页](docs/screenshots/01_home.png) | ![添加后水位上涨](docs/screenshots/16_home_after_add.png) |
+| **首页**：巨型水瓶水位＝今日摄入占比，还能吃 1098 kcal，三大宏量营养素。今天记录了早餐和午餐，还剩晚餐和夜宵。 | **添加食物后**：水位实时上涨、剩余热量同步减少——这是 App 最核心的反馈闭环。 |
 
-### 添加食物（单弹层两步，无二次冷启动）
+### 三主题 × 亮暗 = 6 档
 
-| | | |
+同一页面，换主题不只是换主色——图标、贴纸、液体渐变、玻璃胶囊**一并随动**。
+
+| 薄荷 Mint | 海洋 Ocean | 薰衣草 Lavender |
 |---|---|---|
-| ![食物列表](docs/screenshots/02_picker_list.png) | ![分量与餐次](docs/screenshots/03_picker_detail.png) | ![结算徽章](docs/screenshots/04_settle_badge.png) |
-| **列表步**：搜索支持拼音／别名，分类 chip 横滑，353 条内置食物带缩略图与「每 100g／一碗约」双口径。 | **分量步**：点选后原地切步（不销毁重建），器具三档图示＋餐次四卡（按餐窗自动预选），底部胶囊实时算出 kcal。 | **结算徽章**：Canvas 2D 环形＋本次 kcal 数字滚动＋「今日 x／目标」与餐次落位提示；App 端走 fill-only 路径出圆头环。 |
+| ![薄荷](docs/screenshots/01_home.png) | ![海洋](docs/screenshots/17_theme_ocean.png) | ![薰衣草](docs/screenshots/18_theme_lavender.png) |
 
-### 百科 · 我的 · 设置
+亮暗对比（左：亮态 / 右：暗态）：
 
-| | | |
+| 首页 · 亮态 | 首页 · 暗态 |
+|---|---|
+| ![亮](docs/screenshots/01_home.png) | ![暗](docs/screenshots/06_home_dark.png) |
+| 薄荷绿 `#7DEBC7→#1FBF8F` 渐变瓶、白色玻璃 TabBar 胶囊 | 深墨绿瓶身、胶囊转深色玻璃、贴纸与刻度同步降亮度 |
+
+### 添加食物（单弹层两步，4 次点击完成）
+
+| 食物列表 | 分量与餐次 |
+|---|---|
+| ![列表](docs/screenshots/11_picker_list.png) | ![分量](docs/screenshots/12_picker_detail.png) |
+| 347 条内置食物，搜索支持拼音/别名，分类 chip 横滑，缩略图 +「每 100g / 一碗约」双口径热量。 | 器具三档图示 + 餐次四卡（按当前时间自动预选），底部实时算 kcal。**点选后原地切步，不销毁重建**。 |
+
+### 其余页面
+
+| 日历 | 个人中心 | 设置 |
 |---|---|---|
-| ![食物百科](docs/screenshots/11_encyclopedia.png) | ![我的](docs/screenshots/08_profile.png) | ![设置](docs/screenshots/09_settings.png) |
-| **食物百科**：热量＋标签＋主要营养成分占比＋营养点评／适宜人群／注意事项／推荐吃法＋相关食物横滑，底部一键按当前餐次添加。 | **我的**：今日热量三格、达标 banner、本周概览 7 点、热量趋势柱状（超标日用珊瑚色而非红）。 | **设置**：深色模式／音效／用餐提醒（即将上线占位）／主题切换／语言切换 ＋ 目标管理；底部明示「所有数据仅保存在本机」，无联网与账号。 |
+| ![日历](docs/screenshots/02_records.png) | ![我的](docs/screenshots/03_profile.png) | ![设置](docs/screenshots/04_settings.png) |
+| 月历每日带达标色点（绿/橙/珊瑚），下方是选中日三餐摄入 + 主要食物。 | 今日热量三格、本周概览7 点、热量趋势柱状图（超标日用珊瑚色）。 | 深色模式 / 音效 / 用餐提醒 / 主题 / 语言（177 组中英词条）+ 目标管理。底部明示「数据仅存本机」。 |
 
-### 目标弹窗与主题
+---
 
-| | | |
+## 五、核心实现
+
+### 水瓶液体（Canvas 2D 物理引擎）
+
+首页水瓶不是图片，是**实时渲染的物理模拟**：
+
+- 双模强迫阻尼振荡器（M1: cos(πu)，T=460ms，ζ=0.14；M2: sin(4πu+φ)，0.955 衰减，dt 归一化）
+- 34 段表面路径 + 气泡池 8 + 粒子池 12
+- 点击瓶身注入扰动，晃动两下后归于平静
+- **首次进入不晃动**（安静开场）
+
+代码在 `composables/useLiquid.ts` + `components/BottleLiquid.uvue`。
+
+### 主题系统（6 档token 矩阵）
+
+三主题 × 亮暗 = 20 个角色 token（`paletteFor()` 查表）。关键决策：**不用 CSS 变量**，改为逐元素行内 `:style` 绑定——因为 uni-app x 原生端没有可靠的层叠与 CSS 变量通道。
+
+### 三档色规则（唯一权威）
+
+`stores/goal.ts` 的 `getCalorieStatus(已摄入, 目标)` 是全App 进度 UI 的唯一判据：
+
+| 占比 | 状态 | 色值 |
 |---|---|---|
-| ![每日热量目标](docs/screenshots/10_goal_modal.png) | ![主题切换](docs/screenshots/16_theme_sheet.png) | ![海洋暗态](docs/screenshots/17_settings_ocean_dark.png) |
-| **每日热量目标**：步进圆钮＋滑杆＋五档快速选择（1200／1500／1800／2100／2400），确认后全 App 环与色档随动。 | **主题切换**：薄荷／海洋／薰衣草三档，各随亮暗＝6 档 token 矩阵，图标走生成线产出的染色变体。 | **海洋·暗态**：换主题不只换主色——图标、贴纸、液体渐变、玻璃胶囊一并随动（逐元素 `:style` 绑定，原生端无 CSS 变量通道）。 |
+| ≤ 100% | 达标 | 该档主题 accent（薄荷绿） |
+| 100~150% | 超标 | 琥珀 `#E8B54D` |
+| > 150% | 严重超标 | 珊瑚 `#FF9E7D` |
 
-暗态另见 [`13_home_dark.png`](docs/screenshots/13_home_dark.png)／[`14_records_dark.png`](docs/screenshots/14_records_dark.png)／[`15_profile_dark.png`](docs/screenshots/15_profile_dark.png)／[`12_settings_dark.png`](docs/screenshots/12_settings_dark.png)。
-（隐私授权弹窗仅在首次启动出现，需清存储复现，未入图。）
+**超标不用红色**——红色是报错色，珊瑚既有警示感又不劝退。
 
-## 快速上手
+### 设备能力分档
+
+检测机型/芯片后分high / mid / low 三档，低档自动关闭触觉反馈、液体波纹、毛玻璃。检测逻辑在 `composables/useDeviceCapability.ts`。
+
+---
+
+## 六、快速上手
 
 ```powershell
-python toolchain\validate.py              # 六份源文件一致性校验
-python toolchain\build.py                 # 合并 → app/src/data/ ＋ 同步图标
-python toolchain\build_encyclopedia.py    # 食物库 + 元数据 → 百科伴生表（353 条）
-python toolchain\gen_theme_variants.py    # SVG 底稿 → ocean/lavender 变体 + 白名单
-python toolchain\hooks.py all             # 跑五道闸门
-python toolchain\hooks.py install         # 新机器必跑：把闸门装进 .git/hooks
-node debug\shot.js out.png                # 微信模拟器后台截图（需工具已开自动化端口）
+# 数据线
+python toolchain\validate.py              # 源文件一致性校验
+python toolchain\build.py                 # YAML → app/src/data/*.json
+python toolchain\gen_theme_variants.py    # SVG 底稿 → 主题变体
+python toolchain\hooks.py all             # 跑五道提交闸门
+python toolchain\hooks.py install         # 新机器必跑
+
+# App 编译（HBuilderX 图形模式，uni-app x 无独立 CLI 构建入口）
+& "D:\soft\HBuilderX\cli.exe" launch app-android --project <项目路径>\app
 ```
 
-App 编译在 HBuilderX 图形模式里跑（uni-app x 无独立 npm 构建入口）；**验收主端是安卓真机／模拟器**，无头编译与截图取证：
+> ⚠️ 差量编译不会重编视图层字节码＝假绿。改了模板/样式后必须跑一次完整 `launch`，并核对 `bytes/` 的 mtime。
 
-```powershell
-& "D:\soft\HBuilderX\cli.exe" launch app-android --project "D:\project\other-porject\kaluli\app"
-# 差量编译不重编视图层字节码＝假绿；改模板/样式后必须跑一次完整 launch，并核对 bytes/ 的 mtime
-```
+---
 
-## 目录结构
-
-详见 **`project-map.md`**（AI 专用结构事实：组件合同、存储键、路由表、类名前缀、平台坑位）。
+## 七、目录结构
 
 | 路径 | 说明 |
 |---|---|
-| `AGENTS.md` | 项目静态宪法（规则／约束／踩坑定案），新会话先读 progress.md 再读它 |
-| `docs/progress.md` | 动态进度追踪（最高动态事实来源） |
-| `docs/PRD.md` | 产品需求文档 |
-| `docs/Review.md` | 评审复盘 |
-| `docs/decisions/` | 架构决策记录 ADR-001（TabBar 玻璃胶囊）／002（page-container 迁移）／003（调试链路坑位）／004（uni-app x 渲染红线） |
-| `design/DesignTokens.md` | ★ 色值／圆角／字号唯一事实来源（§7 玻璃面几何；§8 三主题×亮暗 20 角色 token 矩阵） |
-| `design/VisualLanguage.md` | 视觉语言（薄荷液滴） |
-| `app/` | 前端（uni-app x 项目根：`pages/`＋`components/`＋`stores/`＋`composables/`＋`static/`） |
-| `app/src/data/` | 生成物，严禁手写：`food_library.json`（353 条，`build.py`）＋ `food_encyclopedia.json`（353 条伴生档案，`build_encyclopedia.py`） |
-| `app/static/` | 分域素材：`icons/`（食物 512px WebP，生图线产出）＋ `encyclopedia/`／`home/`／`goal/`／`meals/`／`profile/`／`records/`／`settings/`／`settle/`／`vessels/`／`common/`／`audio/`；带 `_ocean`／`_lavender`／`_dark` 后缀者是主题线生成物 |
-| `toolchain/` | 数据处理与生成脚本（Python，不进 App 包）：`build.py`／`build_encyclopedia.py`／`gen_theme_variants.py`／`gen_icons.py`／`compress_icons.py` ＋ 提交闸门 `hooks.py` |
-| `debug/` | 零窗口调试脚本（automator 后台截图／探针／取数据） |
-| `assets/icons-gen/` | 生图原始 PNG（入库留档，AI 生图有随机性不可复现） |
+| `app/` | uni-app x 项目根（`pages/` + `components/` + `stores/` + `composables/` + `static/`） |
+| `app/src/data/` | 生成物，严禁手写：`food_library.json` + `food_encyclopedia.json` |
+| `design/DesignTokens.md` | ★ 色值 / 字号 / 圆角唯一事实来源 |
+| `docs/decisions/` | 架构决策记录 ADR（TabBar 玻璃胶囊 / 渲染红线 / 调试坑位等 5 份） |
+| `docs/总结uniappx项目的坑与经验.md` | uni-app x 踩坑实录，按「症状→根因→解法→落点」组织 |
+| `docs/screenshots/` | README 用的界面截图 |
+| `docs/media/` | 演示视频与 GIF |
+| `toolchain/` | 数据处理与生成脚本（Python）＋ 提交闸门 `hooks.py` |
+| `assets/icons-gen/` | AI 生图原始 PNG 留档（生图不可复现，必须留） |
 
-## 当前待办
+更多结构事实见 [`project-map.md`](project-map.md)。
 
-- [ ] **App／Web 端真机回归**：气泡动画的 Worklet 实现（现仅 MP 端 CSS transition，App 端阶段跳变＋TODO）、`backdrop-filter` 原生端支持度（未验，代码用 `#ifdef MP-WEIXIN` 包住）
-- [ ] **p348–p353 六条后补食物的图标是 92×92**（其余 347 张为 512×512），且 `assets/icons-gen/` 里没有它们的原始 PNG。要提清晰度须跑 `gen_icons.py`（花生图额度）→ **等 Boss 拍板**
-- [ ] `toolchain/gen_tab_icons.py` 现无任何文档/脚本引用（疑似一次性工具）→ 去留待 Boss
-- [ ] **食物缩略图「画框托底」只做了暗黑态**：浅色态该节原文标「**需老板拍板**」，至今未拍 ⇒ 浅色**保持现状不加托底**，AI 不得自行显影 `.row-thumb` 里那句 `#EAF9F3`
-- [ ] `toolchain/debug_shot.ps1` 与 `debug/records_check.js` 内含**明文微信工具 MCP Token**（且已进 git 历史）→ 是否改环境变量待 Boss
-- [ ] 营养数据人工核对 **0/30**（`toolchain/sources/nutrition_checklist.md`），当前数值＝AI 初稿＋脚本配平，未经权威来源确认
-- [ ] 新克隆的机器须跑一次 `python toolchain/hooks.py install`（`.git/hooks` 不随仓库分发）
-- [ ] 合规 critic loop 复评
+---
 
-> 完整待办清单（含历史决策、接手检查清单）见 `docs/progress.md`。
+## 八、已知待办
+
+- [ ]营养数据人工核对（当前为AI 初稿 + 脚本配平，未经权威来源逐项确认）
+- [ ] 气泡飞行动画的 Worklet 实现（现仅小程序端 CSS transition，App 端为阶段跳变）
+- [ ] `backdrop-filter` 原生端支持度未验（代码已用 `#ifdef MP-WEIXIN` 包住小程序分支）
+- [ ] 「数据管理 / 备份」功能（1.0 暂不做，见 `docs/plan-2026-09-28-records-nav-and-backup.md`）
+
+> 完整进度与决策历史见 [`docs/progress.md`](docs/progress.md)。

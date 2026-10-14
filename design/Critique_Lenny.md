@@ -1,7 +1,7 @@
-# CalTrack 设计审视 —— 对照《How to turn your AI into a world-class designer》
+# EasyLife 设计审视 —— 对照《How to turn your AI into a world-class designer》
 
 > 来源：Lenny's Newsletter，2026-09-01，作者 Anshu Chimala（Apple R&D 设计与工程负责人 12 年）
-> 审视对象：CalTrack 视觉语言 v2.0（`CalTrack_VisualLanguage.md`）+ 原型 v13
+> 审视对象：EasyLife 视觉语言 v2.0（`EasyLife_VisualLanguage.md`）+ 原型 v13
 > 日期：2026-09-19
 
 ---
@@ -57,7 +57,7 @@ critic 评估：这个设计在追求什么美学 → 顶级设计工作室会�
 
 ---
 
-## 二、用这把尺子量 CalTrack
+## 二、用这把尺子量 EasyLife
 
 ### 🔴 致命伤：我们做的是"最高级的平庸"
 
@@ -73,7 +73,7 @@ critic 评估：这个设计在追求什么美学 → 顶级设计工作室会�
 | 语义色 | `#0A84FF` `#30D158` `#FF9F0A` `#FF453A` | **iOS System Colors 原值** |
 | 机身 | 54px 圆角 + 灵动岛 | **iPhone** |
 
-**整套视觉语言 100% 由 Apple 的既有资产构成，没有一个字节属于 CalTrack。**
+**整套视觉语言 100% 由 Apple 的既有资产构成，没有一个字节属于 EasyLife。**
 
 这正是文章说的"design-by-committee"——只不过我们委员会的品味很好。它精致、它高级、它每个参数都对，但它是**完全可预测的**：任何一个熟练设计师拿到"做个高级感健康 App"的 brief，都会得到这一份。
 
@@ -86,9 +86,9 @@ critic 评估：这个设计在追求什么美学 → 顶级设计工作室会�
 
 ### 🔴 第二伤：没有情感北极星（Emotional North Star）
 
-翻遍 `CalTrack_VisualLanguage.md` 12 个章节，全是参数：色值、圆角、时长、曲线、阴影层级、字距。
+翻遍 `EasyLife_VisualLanguage.md` 12 个章节，全是参数：色值、圆角、时长、曲线、阴影层级、字距。
 
-**唯独没有一句话回答：用户打开 CalTrack 的那一刻，应该感觉到什么？**
+**唯独没有一句话回答：用户打开 EasyLife 的那一刻，应该感觉到什么？**
 
 我们的"五支柱"（材质/光影/深度/动效/克制）**全是手段，没有一个是目标**。结果是——每个局部都精致，整体没有性格。
 
@@ -99,7 +99,7 @@ critic 评估：这个设计在追求什么美学 → 顶级设计工作室会�
 | # | 问题 | 文章会怎么说 |
 |---|---|---|
 | 3 | **跳过了 Discover** —— 用户说"要苹果拟物高级感"，我给了一个方向就执行 | Technique 2 要求先列**大量**方向广而不深。我们把发散权交给了默认偏好 |
-| 4 | **critic loop 不合规** —— 之前的 `CalTrack_Review.md` 是我读着源码评审自己 | 文章明确要求 **fresh context + 只给截图**。看代码会被实现细节锚定（"这个已经做了，将就一下"），失去陌生眼光 |
+| 4 | **critic loop 不合规** —— 之前的 `EasyLife_Review.md` 是我读着源码评审自己 | 文章明确要求 **fresh context + 只给截图**。看代码会被实现细节锚定（"这个已经做了，将就一下"），失去陌生眼光 |
 | 5 | **emoji 占位未解决** —— 我们自己文档的反面清单第一条就是"❌ emoji 当正式图标" | Deliver 阶段没完成。这是最典型的 sloppy rough edge |
 | 6 | **动效零验证** —— 14 类反馈全是 CSS 描述，没有一个"看着感觉对不对" | Technique 5：用视频生成验证动效。动效是最需要眼见为实的东西 |
 | 7 | **"克制" 这条支柱与文章冲突** —— "只有主行动点用能量色，其余全灰阶" | 安全、正确、也无聊。文章要求"delight with memorable, unexpected choices"，我们缺一个**意外** |

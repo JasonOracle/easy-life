@@ -42,7 +42,7 @@
 ## 与设计稿的对应
 
 - 文案全对稿：深色模式／用餐提醒＋即将上线／每日热量目标1800／自定义餐次／导出·备份到本地／
-  导入·从文件恢复／所有数据仅保存在本机／清空所有数据／轻律生活 CalTrack／v1.0.0
+  导入·从文件恢复／所有数据仅保存在本机／清空所有数据／轻律生活 EasyLife／v1.0.0
 - 头图几何逐节点对齐 T0IUr（换算 `top_app = designY − 27 + sbH`）；验收截图
   `.workbuddy/shots/audit/k5_settings_header.png` 对照稿面导出 `T0IUr.png`
 - 不一致：稿面光晕/弧为矢量椭圆，实现用 border-radius:50% ＋ radial-gradient 近似，边缘衰减略异

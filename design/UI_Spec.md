@@ -1,4 +1,4 @@
-# CalTrack UI 交付规格 · For Figma / Pixso
+# EasyLife UI 交付规格 · For Figma / Pixso
 
 <!--
 [变更日志]
@@ -14,7 +14,7 @@ AI模型：Qoder (Claude)
 -->
 
 > **本文件是唯一给设计工具用的文档。** 与 `design/VisualLanguage.md` 冲突时，以本文件为准；
-> 与其余任何文档冲突时，一律以本文件 + `app/prototype/CalTrack_Protoype.html` 为准。
+> 与其余任何文档冲突时，一律以本文件 + `app/prototype/EasyLife_Protoype.html` 为准。
 >
 > 设计工具：Figma / Pixso 均可。画板 375 × 812（iPhone X），@1x 出图，标注用 pt。
 
@@ -31,9 +31,9 @@ AI 生图的失败方式几乎都一样：**一次性要一整页 → 得到一�
 | 2 | 只建**组件**（第 3 章，一个一个建，不要一次全要） | "建一个名为 Bottle/Default 的 component" |
 | 3 | 拼页面（第 4 章，一屏一屏来） | "用已建的组件拼 Home 页，按元素树顺序" |
 | 4 | 补图标（第 6 章 SVG 清单） | 直接粘 SVG，不要让 AI 重画 |
-| 5 | 截图对照 | 打开 `app/prototype/CalTrack_Protoype.html` 逐屏截图，并排比对 |
+| 5 | 截图对照 | 打开 `app/prototype/EasyLife_Protoype.html` 逐屏截图，并排比对 |
 
-> **截图比文档准。** 第 5 步不能省——原型 HTML（`app/prototype/CalTrack_Protoype.html`）是所有页面的真源，文字描述必然有损耗。
+> **截图比文档准。** 第 5 步不能省——原型 HTML（`app/prototype/EasyLife_Protoype.html`）是所有页面的真源，文字描述必然有损耗。
 >
 > ⚠️ **色值以 `design/DesignTokens.md` 为准**（2026-09-19 从 Ardot 变量集导出）；本文件的色值已同步校正，但设计稿仍是唯一准绳。
 
@@ -241,4 +241,4 @@ AI 生图的失败方式几乎都一样：**一次性要一整页 → 得到一�
 | `design/Critique_Lenny.md` | 设计审视（独特性诊断） |
 | `docs/PRD.md` / `docs/Review.md` / `docs/FoodLibraryPlan.md` / `docs/progress.md` | **不要喂给设计工具**——产品与数据文档，混进来只会稀释视觉规格 |
 
-> `CalTrack_UIDesign.md` 已不存在于仓库，原表该项作废；如需 onboarding 4 屏逻辑，请在 `app/prototype/CalTrack_Protoype.html` 中读取。
+> `EasyLife_UIDesign.md` 已不存在于仓库，原表该项作废；如需 onboarding 4 屏逻辑，请在 `app/prototype/EasyLife_Protoype.html` 中读取。

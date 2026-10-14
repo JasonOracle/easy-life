@@ -20,11 +20,12 @@
         </view>
       </view>
     </view>
-    <!-- A3 滚动门控渐变遮罩：fixed 悬浮在 .hm-nav 底缘之下（top=headerSpacerH=sbH+190rpx，实测=nav 底缘 373px），
+    <!-- A3 滚动门控渐变遮罩：fixed 悬浮在 .hm-nav 底缘之下（top 与占位层同源=headerSpacerH），
          z44 低于 nav 45、高于文档流 hero；theme.bg→透明 150rpx。
-         让 hero 内容滑入固定层下方时平滑消隐，替代生硬平切。rest 态 opacity=0（首屏零影响），
-         pointer-events:none 不挡瓶组/goal-pill 点击，也不影响标题/日期/FAB -->
-    <view class="hm-nav-fade" :style="{ top: headerSpacerH, opacity: heroFade, backgroundImage: navFadeGradient }"></view>
+         让 hero 内容滑入固定层下方时平滑消隐，替代生硬平切。
+         rest 态 opacity=0；且 v-if 在未滚动时直接不渲染该层（原生端 opacity=0 的层仍参与合成，
+         会与导航栏底色叠出一条半透明白带）。pointer-events:none 不挡瓶组/goal-pill 点击 -->
+    <view v-if="heroFade > 0" class="hm-nav-fade" :style="{ top: headerSpacerH, opacity: heroFade, backgroundImage: navFadeGradient }"></view>
 
     <!-- 顶栏文档流占位层（为常驻导航栏腾出充足空间，确保日期完全外露不被切） -->
     <view class="header-spacer" :style="{ height: headerSpacerH }"></view>
@@ -179,8 +180,12 @@ try {
   winW = 375
 }
 
-// 顶栏占位高度：原生端 :style 不接受 rpx+px 跨单位 calc，按 750 稿宽在 UTS 侧折算为 px
-const headerSpacerH = (190 / 750 * winW + sbH) + 'px'
+// 顶栏占位高度：原生端 :style 不接受 rpx+px 跨单位 calc，按 750 稿宽在 UTS 侧折算为 px。
+// 必须与 .hm-nav 的真实高度一致（fixed 层高度由内容决定），否则文档流占位会多留/少留一条缝，
+// 表现为导航栏与 Hero 之间出现半透明白带 + 顶部间隙。
+// 构成：nav-inner marginTop 12rpx + title 48rpx + subtitle(8rpx margin + 31rpx 行高) + dateRow(14rpx margin + 28rpx 高 + 12rpx margin-bottom) + 自身 paddingTop(sbH)
+const NAV_CONTENT_RPX = 12 + 48 + 8 + 31 + 14 + 28 + 12
+const headerSpacerH = (NAV_CONTENT_RPX / 750 * winW + sbH) + 'px'
 
 // TabBar 随滚动渐显（#29）已于 2026-09-22 随液态玻璃胶囊重构整体废弃：新胶囊恒常可见，
 // 本页无其他滚动阈值需求（#28 定案的常驻标题块 .hm-nav 无阈值）。
@@ -731,9 +736,11 @@ const meals = computed<Meal[]>(() =>
 .hm-sticker {
   position: absolute;
   left: 582rpx;
-  top: 8rpx;
+  /* 素材 936x716（比例1.3073，已内置 48px 透明留白，椭圆描边不再切画布边）。
+     容器比例须与素材一致，否则 aspectFit 会留空边。top24rpx 为呼吸位。 */
+  top: 24rpx;
   width: 140rpx;
-  height: 103rpx;
+  height: 107rpx;
   pointer-events: none;
 }
 .hero-text {

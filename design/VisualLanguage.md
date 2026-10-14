@@ -1,4 +1,4 @@
-# CalTrack 视觉语言 v3.0 —— 薄荷液滴 / Mint Drop
+# EasyLife 视觉语言 v3.0 —— 薄荷液滴 / Mint Drop
 
 <!--
 [变更日志]
@@ -8,7 +8,7 @@ AI模型：Qoder (Claude)
 -->
 
 > 定位：**审美即卖点**。好看 + 好看的交互，是这个产品在同类卡路里 App 里唯一能拉开差距的地方。
-> 版本：v3.0（2026-09-19）｜配套原型：`CalTrack_Protoype.html`
+> 版本：v3.0（2026-09-19）｜配套原型：`EasyLife_Protoype.html`
 > 上一版：v2.0「现代 Apple 材质主义」——已废止，见 §0
 >
 > ⚠️ **本文件所有色值已于 2026-09-19 按 Ardot 设计稿校正**（Boss 裁定「以 ardot 设计稿为准」）。
@@ -22,7 +22,7 @@ AI模型：Qoder (Claude)
 
 v2.0 做了一套完整的「Apple 材质主义」：Apple Watch Move 环配色、visionOS 光学玻璃、Apple 标准弹簧曲线、iOS System Colors 原值。
 
-**问题：它 100% 由 Apple 的既有资产构成，没有一个字节属于 CalTrack。**
+**问题：它 100% 由 Apple 的既有资产构成，没有一个字节属于 EasyLife。**
 
 这是"最高级的平庸"——精致、每个参数都对、但完全可预测。更致命的是战略层面：Apple 自己就有健康 App 和活动环，我们等于主动站进巨人的影子，而且是在它的主场。
 
@@ -30,7 +30,7 @@ v2.0 做了一套完整的「Apple 材质主义」：Apple Watch Move 环配色�
 
 > 参考：Anshu Chimala（Apple R&D 设计负责人 12 年）——
 > "Great design starts with feeling and aims to create an emotional response."
-> 详见 `CalTrack_DesignCritique_Lenny.md`
+> 详见 `EasyLife_DesignCritique_Lenny.md`
 
 ---
 

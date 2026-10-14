@@ -54,3 +54,8 @@ debug/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# ── 签名凭据（含明文密码，禁入库）─────────────────────────────────────
+app-info/
+*.jks
+*.keystore

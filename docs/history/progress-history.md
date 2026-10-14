@@ -492,7 +492,7 @@
   - 删除旧资源目录：`app/src/`（旧版重复源码+图标副本）、`app/data/`（food_library.json 生成物副本，toolchain 仍可再产出）、`app/static/`（旧图标）
   - 保留：`manifest.json`（含 appid/wx appid，新建项目无法再生）、`pages.json`、`App.uvue`、`main.uts`、`pages/home/Home.uvue` + 配对 `Home.md`、`prototype/` 原型
   - 入口瘦身：`main.uts` 去掉 Pinia 挂载、`App.uvue` 去掉 device store 初始化；`pages.json` 只留 Home 单页
-  - Home.uvue 为纯占位：薄荷底 `#F2FAF5` + 标题「CalTrack / 手脚架已就绪」
+  - Home.uvue 为纯占位：薄荷底 `#F2FAF5` + 标题「EasyLife / 手脚架已就绪」
 - **验证**：HBuilderX 热重载 → automator 后台截图确认（`.workbuddy/shots/scaffold_home.png`），页面正常渲染、路由 `pages/home/Home`
 - **后续**：业务按设计稿（Ardot 727289305476547）逐步重建；食物数据等需要时从 `toolchain/build.py` 重新产出，严禁手写
 - **同会话附带**：Cline MCP 新增 `pencil`（Pen 本地）、`ardot-remote`（云端 http）、`cloudbase`（npx）、`ardot`（本地 http，后改 disabled:true）、`pen-dev`（npx pen.dev mcp，端口 3000）；全局技能目录 `~/.claude/skills` 安装 5 个新技能（ai-worldclass-design / agent-design-figma / grill-me / fluid-interaction-expert / design-taste-plus）
@@ -638,14 +638,14 @@
 - **同时校正 `design/UI_Spec.md`**（13 处色值，此前遗漏）+ 两份文档里**过时的图标方案**：
   - `VisualLanguage.md` §10：食物图来源 `Pixabay 真实照片` → **Agnes AI 文生图**；§10.1「复用风险」改写为「v1.0 已消解（347 条 = 347 张专属图，不做品类兜底复用）」
   - `VisualLanguage.md` §11 体积：`180×30KB ≈ 5.4MB` → `347×16.5KB ≈ 5.6MB`；§12 落地清单勾掉「emoji → Pixabay 真实食物图」
-  - `UI_Spec.md` §6.1：食物图来源同步；§8 参考文档表改为实际文件名（`CalTrack_UIDesign.md` 已不存在于仓库）
-  - 修正 4 处旧文件名引用（`CalTrack_VisualLanguage.md` → `design/VisualLanguage.md`、原型路径补全为 `app/prototype/CalTrack_Protoype.html`）
+  - `UI_Spec.md` §6.1：食物图来源同步；§8 参考文档表改为实际文件名（`EasyLife_UIDesign.md` 已不存在于仓库）
+  - 修正 4 处旧文件名引用（`EasyLife_VisualLanguage.md` → `design/VisualLanguage.md`、原型路径补全为 `app/prototype/EasyLife_Protoype.html`）
 - ✅ 至此 `design/` 下三份文档（`DesignTokens.md` / `VisualLanguage.md` / `UI_Spec.md`）**色值与图标方案全部对齐**，无残留旧值
 - 📌 **踩坑记录**：并行发出的多个 `replace_in_file` 若指向**同一文件**，会互相覆盖写回结果（本次导致 9 处替换静默丢失，工具仍报成功）；同一文件的批量修改必须**串行**，或用脚本一次性完成
 
 ### 2026-09-19 — 建立设计 Token 唯一事实来源（Ardot 对接）
-- 连通 Ardot MCP（本地 `127.0.0.1:50501`），读到设计文件「**CalTrack 高保真 UI**」（fileId `727289305476547`，权限 `readwrite`）
-- `export_variables` / `fetch_variables` 拉出变量集 `CalTrack`（Light 模式）：**11 色 + 3 圆角 + 5 字号**
+- 连通 Ardot MCP（本地 `127.0.0.1:50501`），读到设计文件「**EasyLife 高保真 UI**」（fileId `727289305476547`，权限 `readwrite`）
+- `export_variables` / `fetch_variables` 拉出变量集 `EasyLife`（Light 模式）：**11 色 + 3 圆角 + 5 字号**
 - 产出 **`design/DesignTokens.md`** 作为唯一事实来源，并附「与旧文档的差异清单」
 - ⚠️ **发现文档与设计稿的色值系统性不一致**（手抄误差 ±1）：
   | 项 | 旧文档 | **设计稿实际（准）** |

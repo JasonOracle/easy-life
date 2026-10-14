@@ -254,7 +254,7 @@ class IconFetcher:
                     url,
                     headers={
                         "Authorization": PEXELS_API_KEY,
-                        "User-Agent": "CalTrack/1.0"
+                        "User-Agent": "EasyLife/1.0"
                     }
                 )
                 with urllib.request.urlopen(req, timeout=10) as resp:

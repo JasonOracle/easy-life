@@ -1,6 +1,6 @@
 # 微信开发者工具 CLI 完整参考（本项目实测版）
 
-> **定位**：微信开发者工具命令行的完整清单 + 本项目（`kaluli` / CalTrack）实测经验。
+> **定位**：微信开发者工具命令行的完整清单 + 本项目（`kaluli` / EasyLife）实测经验。
 > 基于**本机实际版本 `2.02.2609162`** 逐个 `-h` 验证（2026-09-19），与官方文档比对后合并。
 > 本机路径：`D:\soft\微信web开发者工具\cli.bat`（下文 `$cli` 代指）。
 > 官方文档：developers.weixin.qq.com/miniprogram/dev/devtools/cli.html

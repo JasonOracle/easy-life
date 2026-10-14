@@ -1,9 +1,10 @@
 {
-	"name": "情律健康",
+	"name": "轻律生活",
 	"appid": "__UNI__F70225F",
 	"description": "轻量级卡路里追踪 App",
 	"versionName": "1.0.0",
 	"versionCode": 100,
+	"__changelog": "[变更日志] 2026-10-14 v1.1：① app-android.distribute 新增 package=com.caltrack.kaluli —— 原字段缺失会静默落回 DCloud 调试基座包名 io.dcloud.uniappx（属官方基座资产，且与调试期已装的标准基座冲突）；包名一经出包发布不可再改。② name 由「情律健康」订正为「轻律生活」。③ 品牌英文名 CalTrack → EasyLife（见 app/composables/i18n.ts 三处文案）。",
 	"uni-app-x": {
 		"flex-direction": "column",
 		"vapor": true,
@@ -26,7 +27,7 @@
 		}
 	},
 	"web": {
-		"title": "CalTrack",
+		"title": "轻律生活",
 		"router": {
 			"mode": "hash",
 			"base": "/"
@@ -35,6 +36,7 @@
 	"app-android": {
 		"defaultAppTheme": "light",
 		"distribute": {
+			"package": "com.caltrack.kaluli",
 			"minSdkVersion": 21,
 			"targetSdkVersion": 32,
 			"abiFilters": [
